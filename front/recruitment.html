@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recrutamento e Seleção - Sistema RH</title>
+  <link rel="stylesheet" href="public/styles/global.css">
+  <link rel="stylesheet" href="public/styles/dashboard.css">
+  <link rel="stylesheet" href="public/styles/recruitment.css">
+</head>
+<body>
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <svg width="32" height="32" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="48" height="48" rx="8" fill="#FFFFFF"/>
+          <path d="M24 12C17.373 12 12 17.373 12 24C12 30.627 17.373 36 24 36C30.627 36 36 30.627 36 24C36 17.373 30.627 12 24 12ZM24 20C25.657 20 27 21.343 27 23C27 24.657 25.657 26 24 26C22.343 26 21 24.657 21 23C21 21.343 22.343 20 24 20ZM24 33.2C20.8 33.2 17.988 31.53 16.4 29C16.44 26.4 21.6 25 24 25C26.392 25 31.56 26.4 31.6 29C30.012 31.53 27.2 33.2 24 33.2Z" fill="#0066CC"/>
+        </svg>
+        <span>Sistema RH</span>
+      </div>
+      <button class="sidebar-toggle" id="sidebarToggle">☰</button>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="dashboard.html" class="nav-item">
+        <span class="nav-text">Dashboard</span>
+      </a>
+      
+      <div class="nav-section">Gestão de Pessoas</div>
+      <a href="employees.html" class="nav-item">
+        <span class="nav-text">Funcionários</span>
+      </a>
+      <a href="organizational-chart.html" class="nav-item">
+        <span class="nav-text">Organograma</span>
+      </a>
+      
+      <div class="nav-section">Recursos Humanos</div>
+      <a href="recruitment.html" class="nav-item active">
+        <span class="nav-text">Recrutamento</span>
+      </a>
+      <a href="performance.html" class="nav-item">
+        <span class="nav-text">Avaliação</span>
+      </a>
+      <a href="training.html" class="nav-item">
+        <span class="nav-text">Treinamentos</span>
+      </a>
+      
+      <div class="nav-section">Departamento Pessoal</div>
+      <a href="payroll.html" class="nav-item">
+        <span class="nav-text">Folha de Pagamento</span>
+      </a>
+      <a href="vacation.html" class="nav-item">
+        <span class="nav-text">Férias</span>
+      </a>
+      <a href="timesheet.html" class="nav-item">
+        <span class="nav-text">Ponto</span>
+      </a>
+      
+      <div class="nav-section">Administração</div>
+      <a href="reports.html" class="nav-item">
+        <span class="nav-text">Relatórios</span>
+      </a>
+      <a href="settings.html" class="nav-item">
+        <span class="nav-text">Configurações</span>
+      </a>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <h1>Recrutamento e Seleção</h1>
+      </div>
+      <div class="topbar-right">
+        <div class="user-menu">
+          <button class="user-button" id="userMenuButton">
+            <span class="user-avatar">U</span>
+            <span class="user-name" id="userName">Usuário</span>
+            <span class="user-arrow">▼</span>
+          </button>
+          <div class="user-dropdown" id="userDropdown">
+            <div class="user-info">
+              <strong id="userFullName">Nome do Usuário</strong>
+              <small id="userProfile">Perfil</small>
+            </div>
+            <hr>
+            <a href="#" class="dropdown-item">Meu Perfil</a>
+            <a href="#" class="dropdown-item">Configurações</a>
+            <hr>
+            <a href="#" class="dropdown-item" id="logoutButton">Sair</a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Content Area -->
+    <div class="content-area">
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon" style="background-color: rgba(52, 58, 64, 0.1);">
+            <span style="color: var(--gray-800);">■</span>
+          </div>
+          <div class="stat-content">
+            <h3>Vagas Abertas</h3>
+            <p class="stat-value">12</p>
+            <small class="stat-change neutral">3 publicadas hoje</small>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon" style="background-color: rgba(108, 117, 125, 0.1);">
+            <span style="color: var(--gray-700);">●</span>
+          </div>
+          <div class="stat-content">
+            <h3>Candidatos</h3>
+            <p class="stat-value">156</p>
+            <small class="stat-change positive">+23 esta semana</small>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon" style="background-color: rgba(108, 117, 125, 0.1);">
+            <span style="color: var(--gray-700);">✓</span>
+          </div>
+          <div class="stat-content">
+            <h3>Em Processo</h3>
+            <p class="stat-value">48</p>
+            <small class="stat-change neutral">12 em entrevista</small>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon" style="background-color: rgba(108, 117, 125, 0.1);">
+            <span style="color: var(--gray-700);">▪</span>
+          </div>
+          <div class="stat-content">
+            <h3>Tempo Médio</h3>
+            <p class="stat-value">18 dias</p>
+            <small class="stat-change positive">-3 dias vs. mês passado</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Toolbar -->
+      <div class="page-toolbar">
+        <div class="toolbar-left">
+          <button class="btn btn-secondary active" onclick="showTab('vacancies')">Vagas</button>
+          <button class="btn btn-secondary" onclick="showTab('candidates')">Candidatos</button>
+        </div>
+        <div class="toolbar-right">
+          <button class="btn btn-primary" id="addVacancyBtn">+ Nova Vaga</button>
+        </div>
+      </div>
+
+      <!-- Vacancies Tab -->
+      <div class="tab-panel active" id="vacanciesTab">
+        <div class="vacancies-grid">
+          <div class="vacancy-card">
+            <div class="vacancy-header">
+              <div>
+                <h3>Desenvolvedor Full Stack Sênior</h3>
+                <p class="vacancy-meta">Tecnologia • CLT • Presencial</p>
+              </div>
+              <span class="badge badge-success">Aberta</span>
+            </div>
+            <div class="vacancy-body">
+              <p>Profissional experiente em React, Node.js e bancos de dados SQL/NoSQL para atuar em projetos de alta complexidade.</p>
+              <div class="vacancy-requirements">
+                <span class="requirement-tag">React</span>
+                <span class="requirement-tag">Node.js</span>
+                <span class="requirement-tag">PostgreSQL</span>
+                <span class="requirement-tag">5+ anos</span>
+              </div>
+            </div>
+            <div class="vacancy-footer">
+              <div class="vacancy-stats">
+                <span>42 candidatos</span>
+                <span>8 em processo</span>
+              </div>
+              <div class="vacancy-actions">
+                <button class="btn btn-secondary btn-sm" onclick="viewVacancy(1)">Ver Detalhes</button>
+                <button class="btn btn-primary btn-sm" onclick="manageCandidates(1)">Candidatos</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="vacancy-card">
+            <div class="vacancy-header">
+              <div>
+                <h3>Analista de RH Pleno</h3>
+                <p class="vacancy-meta">Recursos Humanos • CLT • Híbrido</p>
+              </div>
+              <span class="badge badge-success">Aberta</span>
+            </div>
+            <div class="vacancy-body">
+              <p>Responsável por recrutamento, onboarding e desenvolvimento de políticas de gestão de pessoas.</p>
+              <div class="vacancy-requirements">
+                <span class="requirement-tag">Recrutamento</span>
+                <span class="requirement-tag">Onboarding</span>
+                <span class="requirement-tag">3+ anos</span>
+              </div>
+            </div>
+            <div class="vacancy-footer">
+              <div class="vacancy-stats">
+                <span>28 candidatos</span>
+                <span>5 em processo</span>
+              </div>
+              <div class="vacancy-actions">
+                <button class="btn btn-secondary btn-sm" onclick="viewVacancy(2)">Ver Detalhes</button>
+                <button class="btn btn-primary btn-sm" onclick="manageCandidates(2)">Candidatos</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="vacancy-card">
+            <div class="vacancy-header">
+              <div>
+                <h3>Gerente de Projetos</h3>
+                <p class="vacancy-meta">Tecnologia • CLT • Híbrido</p>
+              </div>
+              <span class="badge badge-warning">Em Avaliação</span>
+            </div>
+            <div class="vacancy-body">
+              <p>Liderar equipes ágeis, gerenciar stakeholders e garantir entrega de projetos com qualidade e no prazo.</p>
+              <div class="vacancy-requirements">
+                <span class="requirement-tag">Scrum</span>
+                <span class="requirement-tag">Liderança</span>
+                <span class="requirement-tag">7+ anos</span>
+              </div>
+            </div>
+            <div class="vacancy-footer">
+              <div class="vacancy-stats">
+                <span>15 candidatos</span>
+                <span>3 finalistas</span>
+              </div>
+              <div class="vacancy-actions">
+                <button class="btn btn-secondary btn-sm" onclick="viewVacancy(3)">Ver Detalhes</button>
+                <button class="btn btn-primary btn-sm" onclick="manageCandidates(3)">Candidatos</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="vacancy-card">
+            <div class="vacancy-header">
+              <div>
+                <h3>Designer UX/UI</h3>
+                <p class="vacancy-meta">Design • PJ • Remoto</p>
+              </div>
+              <span class="badge badge-success">Aberta</span>
+            </div>
+            <div class="vacancy-body">
+              <p>Criar experiências digitais excepcionais, com foco em usabilidade, acessibilidade e design systems.</p>
+              <div class="vacancy-requirements">
+                <span class="requirement-tag">Figma</span>
+                <span class="requirement-tag">UI/UX</span>
+                <span class="requirement-tag">3+ anos</span>
+              </div>
+            </div>
+            <div class="vacancy-footer">
+              <div class="vacancy-stats">
+                <span>36 candidatos</span>
+                <span>6 em processo</span>
+              </div>
+              <div class="vacancy-actions">
+                <button class="btn btn-secondary btn-sm" onclick="viewVacancy(4)">Ver Detalhes</button>
+                <button class="btn btn-primary btn-sm" onclick="manageCandidates(4)">Candidatos</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Candidates Tab -->
+      <div class="tab-panel" id="candidatesTab">
+        <div class="card">
+          <div class="candidates-filters">
+            <input type="text" class="form-input" placeholder="Buscar candidatos...">
+            <select class="form-select">
+              <option value="">Todas as vagas</option>
+              <option value="1">Desenvolvedor Full Stack</option>
+              <option value="2">Analista de RH</option>
+              <option value="3">Gerente de Projetos</option>
+            </select>
+            <select class="form-select">
+              <option value="">Todos os status</option>
+              <option value="new">Novo</option>
+              <option value="screening">Triagem</option>
+              <option value="interview">Entrevista</option>
+              <option value="approved">Aprovado</option>
+              <option value="rejected">Reprovado</option>
+            </select>
+          </div>
+
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Candidato</th>
+                <th>Vaga</th>
+                <th>Data de Aplicação</th>
+                <th>Etapa</th>
+                <th>Avaliação</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <div class="candidate-info">
+                    <strong>Lucas Mendes</strong>
+                    <small>lucas.mendes@email.com</small>
+                  </div>
+                </td>
+                <td>Desenvolvedor Full Stack</td>
+                <td>15/01/2026</td>
+                <td><span class="badge badge-warning">Entrevista</span></td>
+                <td>
+                  <div class="rating">⭐⭐⭐⭐☆</div>
+                </td>
+                <td>
+                  <div class="table-actions">
+                    <button class="btn-icon" title="Ver Perfil">👁️</button>
+                    <button class="btn-icon" title="Agendar">📅</button>
+                    <button class="btn-icon" title="Mensagem">💬</button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="candidate-info">
+                    <strong>Juliana Alves</strong>
+                    <small>juliana.alves@email.com</small>
+                  </div>
+                </td>
+                <td>Analista de RH</td>
+                <td>12/01/2026</td>
+                <td><span class="badge badge-info">Triagem</span></td>
+                <td>
+                  <div class="rating">⭐⭐⭐☆☆</div>
+                </td>
+                <td>
+                  <div class="table-actions">
+                    <button class="btn-icon" title="Ver Perfil">👁️</button>
+                    <button class="btn-icon" title="Agendar">📅</button>
+                    <button class="btn-icon" title="Mensagem">💬</button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="candidate-info">
+                    <strong>Roberto Pinto</strong>
+                    <small>roberto.pinto@email.com</small>
+                  </div>
+                </td>
+                <td>Gerente de Projetos</td>
+                <td>08/01/2026</td>
+                <td><span class="badge badge-success">Aprovado</span></td>
+                <td>
+                  <div class="rating">⭐⭐⭐⭐⭐</div>
+                </td>
+                <td>
+                  <div class="table-actions">
+                    <button class="btn-icon" title="Ver Perfil">👁️</button>
+                    <button class="btn-icon" title="Agendar">📅</button>
+                    <button class="btn-icon" title="Mensagem">💬</button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: New Vacancy -->
+  <div class="modal-overlay" id="vacancyModal">
+    <div class="modal-content modal-large">
+      <div class="modal-header">
+        <h2>Nova Vaga</h2>
+        <button class="modal-close" id="closeModal">&times;</button>
+      </div>
+      <form id="vacancyForm">
+        <div class="form-group">
+          <label class="form-label">Título da Vaga *</label>
+          <input type="text" name="title" class="form-input" required>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Departamento *</label>
+            <select name="department" class="form-select" required>
+              <option value="">Selecione</option>
+              <option value="tech">Tecnologia</option>
+              <option value="hr">Recursos Humanos</option>
+              <option value="finance">Financeiro</option>
+              <option value="sales">Vendas</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Tipo de Contrato *</label>
+            <select name="contractType" class="form-select" required>
+              <option value="">Selecione</option>
+              <option value="clt">CLT</option>
+              <option value="pj">PJ</option>
+              <option value="intern">Estágio</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Modelo de Trabalho *</label>
+            <select name="workModel" class="form-select" required>
+              <option value="">Selecione</option>
+              <option value="onsite">Presencial</option>
+              <option value="remote">Remoto</option>
+              <option value="hybrid">Híbrido</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Faixa Salarial</label>
+            <input type="text" name="salaryRange" class="form-input" placeholder="Ex: R$ 5.000 - R$ 8.000">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Vagas Disponíveis</label>
+            <input type="number" name="openings" class="form-input" value="1" min="1">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Descrição da Vaga *</label>
+          <textarea name="description" class="form-textarea" rows="4" required></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Requisitos</label>
+          <textarea name="requirements" class="form-textarea" rows="4" placeholder="Liste os requisitos necessários..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Benefícios</label>
+          <textarea name="benefits" class="form-textarea" rows="3" placeholder="Liste os benefícios oferecidos..."></textarea>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeVacancyModal()">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Publicar Vaga</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="public/scripts/auth.js"></script>
+  <script src="public/scripts/dashboard.js"></script>
+  <script src="public/scripts/recruitment.js"></script>
+</body>
+</html>

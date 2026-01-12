@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Organograma - Sistema RH</title>
+  <link rel="stylesheet" href="public/styles/global.css">
+  <link rel="stylesheet" href="public/styles/dashboard.css">
+  <link rel="stylesheet" href="public/styles/orgchart.css">
+</head>
+<body>
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <svg width="32" height="32" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="48" height="48" rx="8" fill="#FFFFFF"/>
+          <path d="M24 12C17.373 12 12 17.373 12 24C12 30.627 17.373 36 24 36C30.627 36 36 30.627 36 24C36 17.373 30.627 12 24 12ZM24 20C25.657 20 27 21.343 27 23C27 24.657 25.657 26 24 26C22.343 26 21 24.657 21 23C21 21.343 22.343 20 24 20ZM24 33.2C20.8 33.2 17.988 31.53 16.4 29C16.44 26.4 21.6 25 24 25C26.392 25 31.56 26.4 31.6 29C30.012 31.53 27.2 33.2 24 33.2Z" fill="#0066CC"/>
+        </svg>
+        <span>Sistema RH</span>
+      </div>
+      <button class="sidebar-toggle" id="sidebarToggle">☰</button>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="dashboard.html" class="nav-item">
+        <span class="nav-text">Dashboard</span>
+      </a>
+      
+      <div class="nav-section">Gestão de Pessoas</div>
+      <a href="employees.html" class="nav-item">
+        <span class="nav-text">Funcionários</span>
+      </a>
+      <a href="organizational-chart.html" class="nav-item active">
+        <span class="nav-text">Organograma</span>
+      </a>
+      
+      <div class="nav-section">Recursos Humanos</div>
+      <a href="recruitment.html" class="nav-item">
+        <span class="nav-text">Recrutamento</span>
+      </a>
+      <a href="performance.html" class="nav-item">
+        <span class="nav-text">Avaliação</span>
+      </a>
+      <a href="training.html" class="nav-item">
+        <span class="nav-text">Treinamentos</span>
+      </a>
+      
+      <div class="nav-section">Departamento Pessoal</div>
+      <a href="payroll.html" class="nav-item">
+        <span class="nav-text">Folha de Pagamento</span>
+      </a>
+      <a href="vacation.html" class="nav-item">
+        <span class="nav-text">Férias</span>
+      </a>
+      <a href="timesheet.html" class="nav-item">
+        <span class="nav-text">Ponto</span>
+      </a>
+      
+      <div class="nav-section">Administração</div>
+      <a href="reports.html" class="nav-item">
+        <span class="nav-text">Relatórios</span>
+      </a>
+      <a href="settings.html" class="nav-item">
+        <span class="nav-text">Configurações</span>
+      </a>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <h1>Organograma</h1>
+      </div>
+      <div class="topbar-right">
+        <div class="user-menu">
+          <button class="user-button" id="userMenuButton">
+            <span class="user-avatar">U</span>
+            <span class="user-name" id="userName">Usuário</span>
+            <span class="user-arrow">▼</span>
+          </button>
+          <div class="user-dropdown" id="userDropdown">
+            <div class="user-info">
+              <strong id="userFullName">Nome do Usuário</strong>
+              <small id="userProfile">Perfil</small>
+            </div>
+            <hr>
+            <a href="#" class="dropdown-item">Meu Perfil</a>
+            <a href="#" class="dropdown-item">Configurações</a>
+            <hr>
+            <a href="#" class="dropdown-item" id="logoutButton">Sair</a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Content Area -->
+    <div class="content-area">
+      <div class="card">
+        <div class="orgchart-container">
+          <!-- CEO Level -->
+          <div class="org-level level-1">
+            <div class="org-node ceo">
+              <div class="node-avatar">RC</div>
+              <div class="node-info">
+                <strong>Roberto Carlos</strong>
+                <span>CEO</span>
+                <small>Direção Executiva</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- Directors Level -->
+          <div class="org-level level-2">
+            <div class="org-node director">
+              <div class="node-avatar">MS</div>
+              <div class="node-info">
+                <strong>Maria Silva</strong>
+                <span>Diretora de TI</span>
+                <small>Tecnologia</small>
+              </div>
+            </div>
+
+            <div class="org-node director">
+              <div class="node-avatar">JS</div>
+              <div class="node-info">
+                <strong>João Santos</strong>
+                <span>Diretor Financeiro</span>
+                <small>Financeiro</small>
+              </div>
+            </div>
+
+            <div class="org-node director">
+              <div class="node-avatar">AC</div>
+              <div class="node-info">
+                <strong>Ana Costa</strong>
+                <span>Diretora de RH</span>
+                <small>Recursos Humanos</small>
+              </div>
+            </div>
+
+            <div class="org-node director">
+              <div class="node-avatar">PL</div>
+              <div class="node-info">
+                <strong>Paulo Lima</strong>
+                <span>Diretor Comercial</span>
+                <small>Vendas e Marketing</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- Managers Level -->
+          <div class="org-level level-3">
+            <!-- Tech Team -->
+            <div class="org-department">
+              <div class="org-node manager">
+                <div class="node-avatar">CF</div>
+                <div class="node-info">
+                  <strong>Carlos Ferreira</strong>
+                  <span>Gerente de Desenvolvimento</span>
+                  <small>5 subordinados</small>
+                </div>
+              </div>
+
+              <div class="org-node manager">
+                <div class="node-avatar">LM</div>
+                <div class="node-info">
+                  <strong>Lucia Martins</strong>
+                  <span>Gerente de Infraestrutura</span>
+                  <small>3 subordinados</small>
+                </div>
+              </div>
+            </div>
+
+            <!-- Finance Team -->
+            <div class="org-department">
+              <div class="org-node manager">
+                <div class="node-avatar">RS</div>
+                <div class="node-info">
+                  <strong>Ricardo Sousa</strong>
+                  <span>Gerente Contábil</span>
+                  <small>4 subordinados</small>
+                </div>
+              </div>
+            </div>
+
+            <!-- HR Team -->
+            <div class="org-department">
+              <div class="org-node manager">
+                <div class="node-avatar">FC</div>
+                <div class="node-info">
+                  <strong>Fernanda Cruz</strong>
+                  <span>Gerente de DP</span>
+                  <small>3 subordinados</small>
+                </div>
+              </div>
+
+              <div class="org-node manager">
+                <div class="node-avatar">MO</div>
+                <div class="node-info">
+                  <strong>Marcos Oliveira</strong>
+                  <span>Gerente de T&D</span>
+                  <small>2 subordinados</small>
+                </div>
+              </div>
+            </div>
+
+            <!-- Sales Team -->
+            <div class="org-department">
+              <div class="org-node manager">
+                <div class="node-avatar">BP</div>
+                <div class="node-info">
+                  <strong>Beatriz Pinto</strong>
+                  <span>Gerente de Vendas</span>
+                  <small>8 subordinados</small>
+                </div>
+              </div>
+
+              <div class="org-node manager">
+                <div class="node-avatar">TA</div>
+                <div class="node-info">
+                  <strong>Thiago Alves</strong>
+                  <span>Gerente de Marketing</span>
+                  <small>4 subordinados</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Department Summary -->
+      <div class="department-summary">
+        <div class="summary-card">
+          <h3>Distribuição por Departamento</h3>
+          <div class="summary-list">
+            <div class="summary-item">
+              <div class="summary-label">
+                <span class="dept-color tech"></span>
+                Tecnologia
+              </div>
+              <span class="summary-value">45 colaboradores</span>
+            </div>
+            <div class="summary-item">
+              <div class="summary-label">
+                <span class="dept-color finance"></span>
+                Financeiro
+              </div>
+              <span class="summary-value">18 colaboradores</span>
+            </div>
+            <div class="summary-item">
+              <div class="summary-label">
+                <span class="dept-color hr"></span>
+                Recursos Humanos
+              </div>
+              <span class="summary-value">12 colaboradores</span>
+            </div>
+            <div class="summary-item">
+              <div class="summary-label">
+                <span class="dept-color sales"></span>
+                Comercial
+              </div>
+              <span class="summary-value">38 colaboradores</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="public/scripts/auth.js"></script>
+  <script src="public/scripts/dashboard.js"></script>
+</body>
+</html>

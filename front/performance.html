@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Avaliação de Desempenho - Sistema RH</title>
+  <link rel="stylesheet" href="public/styles/global.css">
+  <link rel="stylesheet" href="public/styles/dashboard.css">
+  <link rel="stylesheet" href="public/styles/performance.css">
+</head>
+<body>
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <svg width="32" height="32" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="48" height="48" rx="8" fill="#FFFFFF"/>
+          <path d="M24 12C17.373 12 12 17.373 12 24C12 30.627 17.373 36 24 36C30.627 36 36 30.627 36 24C36 17.373 30.627 12 24 12ZM24 20C25.657 20 27 21.343 27 23C27 24.657 25.657 26 24 26C22.343 26 21 24.657 21 23C21 21.343 22.343 20 24 20ZM24 33.2C20.8 33.2 17.988 31.53 16.4 29C16.44 26.4 21.6 25 24 25C26.392 25 31.56 26.4 31.6 29C30.012 31.53 27.2 33.2 24 33.2Z" fill="#0066CC"/>
+        </svg>
+        <span>Sistema RH</span>
+      </div>
+      <button class="sidebar-toggle" id="sidebarToggle">☰</button>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="dashboard.html" class="nav-item">
+        <span class="nav-text">Dashboard</span>
+      </a>
+      
+      <div class="nav-section">Gestão de Pessoas</div>
+      <a href="employees.html" class="nav-item">
+        <span class="nav-text">Funcionários</span>
+      </a>
+      <a href="organizational-chart.html" class="nav-item">
+        <span class="nav-text">Organograma</span>
+      </a>
+      
+      <div class="nav-section">Recursos Humanos</div>
+      <a href="recruitment.html" class="nav-item">
+        <span class="nav-text">Recrutamento</span>
+      </a>
+      <a href="performance.html" class="nav-item active">
+        <span class="nav-text">Avaliação</span>
+      </a>
+      <a href="training.html" class="nav-item">
+        <span class="nav-text">Treinamentos</span>
+      </a>
+      
+      <div class="nav-section">Departamento Pessoal</div>
+      <a href="payroll.html" class="nav-item">
+        <span class="nav-text">Folha de Pagamento</span>
+      </a>
+      <a href="vacation.html" class="nav-item">
+        <span class="nav-text">Férias</span>
+      </a>
+      <a href="timesheet.html" class="nav-item">
+        <span class="nav-text">Ponto</span>
+      </a>
+      
+      <div class="nav-section">Administração</div>
+      <a href="reports.html" class="nav-item">
+        <span class="nav-text">Relatórios</span>
+      </a>
+      <a href="settings.html" class="nav-item">
+        <span class="nav-text">Configurações</span>
+      </a>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <h1>Avaliação de Desempenho</h1>
+      </div>
+      <div class="topbar-right">
+        <div class="user-menu">
+          <button class="user-button" id="userMenuButton">
+            <span class="user-avatar">U</span>
+            <span class="user-name" id="userName">Usuário</span>
+            <span class="user-arrow">▼</span>
+          </button>
+          <div class="user-dropdown" id="userDropdown">
+            <div class="user-info">
+              <strong id="userFullName">Nome do Usuário</strong>
+              <small id="userProfile">Perfil</small>
+            </div>
+            <hr>
+            <a href="#" class="dropdown-item">Meu Perfil</a>
+            <a href="#" class="dropdown-item">Configurações</a>
+            <hr>
+            <a href="#" class="dropdown-item" id="logoutButton">Sair</a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Content Area -->
+    <div class="content-area">
+      <!-- Toolbar -->
+      <div class="page-toolbar">
+        <div class="toolbar-left">
+          <button class="btn btn-secondary active">Ciclos de Avaliação</button>
+          <button class="btn btn-secondary">Avaliações Pendentes</button>
+        </div>
+        <div class="toolbar-right">
+          <button class="btn btn-primary" id="newCycleBtn">+ Novo Ciclo</button>
+        </div>
+      </div>
+
+      <!-- Evaluation Cycles -->
+      <div class="cycles-grid">
+        <div class="cycle-card active-cycle">
+          <div class="cycle-header">
+            <div>
+              <h3>Avaliação Q1 2026</h3>
+              <p>Janeiro - Março 2026</p>
+            </div>
+            <span class="badge badge-warning">Em Andamento</span>
+          </div>
+          <div class="cycle-progress">
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: 65%;"></div>
+            </div>
+            <span class="progress-label">65% concluídas</span>
+          </div>
+          <div class="cycle-stats">
+            <div class="cycle-stat">
+              <strong>156</strong>
+              <span>Total de Avaliações</span>
+            </div>
+            <div class="cycle-stat">
+              <strong>102</strong>
+              <span>Concluídas</span>
+            </div>
+            <div class="cycle-stat">
+              <strong>54</strong>
+              <span>Pendentes</span>
+            </div>
+          </div>
+          <div class="cycle-actions">
+            <button class="btn btn-secondary btn-sm">Ver Detalhes</button>
+            <button class="btn btn-primary btn-sm">Gerenciar</button>
+          </div>
+        </div>
+
+        <div class="cycle-card">
+          <div class="cycle-header">
+            <div>
+              <h3>Avaliação Anual 2025</h3>
+              <p>Dezembro 2025</p>
+            </div>
+            <span class="badge badge-success">Concluída</span>
+          </div>
+          <div class="cycle-progress">
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: 100%;"></div>
+            </div>
+            <span class="progress-label">100% concluídas</span>
+          </div>
+          <div class="cycle-stats">
+            <div class="cycle-stat">
+              <strong>142</strong>
+              <span>Total de Avaliações</span>
+            </div>
+            <div class="cycle-stat">
+              <strong>4.2</strong>
+              <span>Média Geral</span>
+            </div>
+            <div class="cycle-stat">
+              <strong>98%</strong>
+              <span>Participação</span>
+            </div>
+          </div>
+          <div class="cycle-actions">
+            <button class="btn btn-secondary btn-sm">Ver Resultados</button>
+            <button class="btn btn-secondary btn-sm">Relatório</button>
+          </div>
+        </div>
+
+        <div class="cycle-card">
+          <div class="cycle-header">
+            <div>
+              <h3>Feedback 360° - Nov 2025</h3>
+              <p>Novembro 2025</p>
+            </div>
+            <span class="badge badge-success">Concluída</span>
+          </div>
+          <div class="cycle-progress">
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: 100%;"></div>
+            </div>
+            <span class="progress-label">100% concluídas</span>
+          </div>
+          <div class="cycle-stats">
+            <div class="cycle-stat">
+              <strong>85</strong>
+              <span>Participantes</span>
+            </div>
+            <div class="cycle-stat">
+              <strong>4.5</strong>
+              <span>Média Geral</span>
+            </div>
+            <div class="cycle-stat">
+              <strong>420</strong>
+              <span>Feedbacks</span>
+            </div>
+          </div>
+          <div class="cycle-actions">
+            <button class="btn btn-secondary btn-sm">Ver Resultados</button>
+            <button class="btn btn-secondary btn-sm">Relatório</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pending Evaluations -->
+      <div class="section-header">
+        <h2>Avaliações Pendentes</h2>
+      </div>
+
+      <div class="card">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Funcionário</th>
+              <th>Cargo</th>
+              <th>Departamento</th>
+              <th>Ciclo</th>
+              <th>Tipo</th>
+              <th>Prazo</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <div class="employee-cell">
+                  <div class="employee-avatar-sm">JP</div>
+                  <strong>João Pedro Silva</strong>
+                </div>
+              </td>
+              <td>Desenvolvedor Sênior</td>
+              <td>Tecnologia</td>
+              <td>Q1 2026</td>
+              <td><span class="badge badge-info">Autoavaliação</span></td>
+              <td>5 dias</td>
+              <td>
+                <button class="btn btn-primary btn-sm">Avaliar</button>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div class="employee-cell">
+                  <div class="employee-avatar-sm">MS</div>
+                  <strong>Maria Santos</strong>
+                </div>
+              </td>
+              <td>Analista de RH</td>
+              <td>Recursos Humanos</td>
+              <td>Q1 2026</td>
+              <td><span class="badge badge-warning">Avaliação do Gestor</span></td>
+              <td>3 dias</td>
+              <td>
+                <button class="btn btn-primary btn-sm">Avaliar</button>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div class="employee-cell">
+                  <div class="employee-avatar-sm">PC</div>
+                  <strong>Pedro Costa</strong>
+                </div>
+              </td>
+              <td>Designer UX/UI</td>
+              <td>Tecnologia</td>
+              <td>Q1 2026</td>
+              <td><span class="badge badge-info">Autoavaliação</span></td>
+              <td>7 dias</td>
+              <td>
+                <button class="btn btn-primary btn-sm">Avaliar</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script src="public/scripts/auth.js"></script>
+  <script src="public/scripts/dashboard.js"></script>
+</body>
+</html>

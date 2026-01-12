@@ -1,0 +1,132 @@
+/* Training Grid */
+.training-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: var(--spacing-6);
+}
+
+.training-card {
+  background: var(--primary-white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--gray-200);
+  overflow: hidden;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.training-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.training-badge {
+  position: absolute;
+  top: var(--spacing-4);
+  right: var(--spacing-4);
+  padding: var(--spacing-1) var(--spacing-3);
+  border-radius: var(--radius-xl);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--primary-white);
+  text-transform: uppercase;
+}
+
+.training-badge.online {
+  background: var(--primary-blue);
+}
+
+.training-badge.presential {
+  background: var(--success-green);
+}
+
+.training-badge.hybrid {
+  background: var(--warning-orange);
+}
+
+.training-header {
+  padding: var(--spacing-6) var(--spacing-5) var(--spacing-4);
+}
+
+.training-header h3 {
+  margin: 0 0 var(--spacing-2) 0;
+  color: var(--gray-800);
+  font-size: var(--font-size-lg);
+  padding-right: 80px;
+}
+
+.training-category {
+  display: inline-block;
+  padding: var(--spacing-1) var(--spacing-3);
+  background: var(--gray-100);
+  color: var(--gray-700);
+  border-radius: var(--radius-xl);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+}
+
+.training-body {
+  padding: 0 var(--spacing-5) var(--spacing-5);
+}
+
+.training-body p {
+  margin: 0 0 var(--spacing-4) 0;
+  color: var(--gray-700);
+  line-height: 1.6;
+}
+
+.training-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-3);
+  margin-bottom: var(--spacing-4);
+  font-size: var(--font-size-sm);
+  color: var(--gray-600);
+}
+
+.training-instructor {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-3);
+  background: var(--gray-50);
+  border-radius: var(--radius-md);
+}
+
+.instructor-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--primary-blue);
+  color: var(--primary-white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.training-instructor strong {
+  display: block;
+  color: var(--gray-800);
+  font-size: var(--font-size-sm);
+}
+
+.training-instructor small {
+  display: block;
+  color: var(--gray-600);
+  font-size: var(--font-size-xs);
+}
+
+.training-footer {
+  padding: var(--spacing-4) var(--spacing-5);
+  border-top: 1px solid var(--gray-200);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .training-grid {
+    grid-template-columns: 1fr;
+  }
+}

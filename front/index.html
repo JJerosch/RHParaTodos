@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema RH - Login</title>
+  <link rel="stylesheet" href="public/styles/global.css">
+  <link rel="stylesheet" href="public/styles/login.css">
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-card">
+      <div class="login-header">
+        <div class="logo">
+          <!-- Logo atualizada com cor cinza escuro -->
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="48" height="48" rx="8" fill="#2c3e50"/>
+            <path d="M24 12C17.373 12 12 17.373 12 24C12 30.627 17.373 36 24 36C30.627 36 36 30.627 36 24C36 17.373 30.627 12 24 12ZM24 20C25.657 20 27 21.343 27 23C27 24.657 25.657 26 24 26C22.343 26 21 24.657 21 23C21 21.343 22.343 20 24 20ZM24 33.2C20.8 33.2 17.988 31.53 16.4 29C16.44 26.4 21.6 25 24 25C26.392 25 31.56 26.4 31.6 29C30.012 31.53 27.2 33.2 24 33.2Z" fill="white"/>
+          </svg>
+        </div>
+        <h1>Sistema de RH</h1>
+        <p>Gestão de Recursos Humanos e Departamento de Pagamentos</p>
+      </div>
+
+      <div id="alertContainer"></div>
+
+      <form id="loginForm" class="login-form">
+        <div class="form-group">
+          <label for="username" class="form-label">Usuário</label>
+          <input 
+            type="text" 
+            id="username" 
+            name="username" 
+            class="form-input" 
+            placeholder="Digite seu usuário"
+            required
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="password" class="form-label">Senha</label>
+          <input 
+            type="password" 
+            id="password" 
+            name="password" 
+            class="form-input" 
+            placeholder="Digite sua senha"
+            required
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="profile" class="form-label">Perfil de Acesso</label>
+          <select id="profile" name="profile" class="form-select" required>
+            <option value="">Selecione um perfil</option>
+            <option value="admin">Administrador do Sistema</option>
+            <option value="rh-chefe">Chefe de RH</option>
+            <option value="rh-assistente">Assistente de RH</option>
+            <option value="dp-chefe">Chefe do DP</option>
+            <option value="dp-assistente">Assistente do DP</option>
+          </select>
+        </div>
+
+        <div class="form-options">
+          <label class="checkbox-label">
+            <input type="checkbox" name="remember">
+            <span>Lembrar-me</span>
+          </label>
+          <a href="#" class="forgot-password">Esqueceu a senha?</a>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block">
+          Entrar no Sistema
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script src="public/scripts/auth.js"></script>
+  <script src="public/scripts/login.js"></script>
+</body>
+</html>

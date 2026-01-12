@@ -1,0 +1,92 @@
+/* Timesheet specific styles */
+
+.time-input-group {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.time-input {
+  width: 80px;
+  padding: 0.5rem;
+  border: 1px solid var(--border-gray);
+  border-radius: 6px;
+  font-size: 14px;
+  text-align: center;
+}
+
+.time-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.time-status.on-time {
+  background-color: rgba(40, 167, 69, 0.1);
+  color: var(--success-green);
+}
+
+.time-status.late {
+  background-color: rgba(255, 193, 7, 0.1);
+  color: var(--warning-orange);
+}
+
+.time-status.early-leave {
+  background-color: rgba(220, 53, 69, 0.1);
+  color: var(--error-red);
+}
+
+.timesheet-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.summary-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.summary-label {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.summary-value {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.clock-widget {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  background: linear-gradient(135deg, var(--primary-blue), #0052a3);
+  color: white;
+  padding: 1.5rem;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 102, 204, 0.3);
+  z-index: 100;
+}
+
+.clock-time {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.clock-date {
+  font-size: 14px;
+  opacity: 0.9;
+}

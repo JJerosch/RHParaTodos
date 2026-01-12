@@ -1,0 +1,65 @@
+/* Period Header */
+.period-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-6);
+  background: var(--primary-white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: var(--spacing-6);
+  flex-wrap: wrap;
+  gap: var(--spacing-4);
+}
+
+.period-info {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-4);
+}
+
+.period-info h2 {
+  margin: 0;
+  color: var(--gray-800);
+  font-size: var(--font-size-2xl);
+}
+
+.period-actions {
+  display: flex;
+  gap: var(--spacing-3);
+}
+
+/* Table Styles */
+.positive {
+  color: var(--success-green);
+  font-weight: 500;
+}
+
+.negative {
+  color: var(--error-red);
+  font-weight: 500;
+}
+
+.warning-row {
+  background-color: rgba(255, 193, 7, 0.05);
+}
+
+.warning-row:hover {
+  background-color: rgba(255, 193, 7, 0.1) !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .period-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .period-actions {
+    flex-direction: column;
+  }
+
+  .period-actions button {
+    width: 100%;
+  }
+}
