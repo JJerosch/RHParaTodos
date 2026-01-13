@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cargos - Sistema RH</title>
+  <link rel="stylesheet" href="public/styles/global.css">
+  <link rel="stylesheet" href="public/styles/dashboard.css">
+  <link rel="stylesheet" href="public/styles/components.css">
+</head>
+<body>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <svg width="32" height="32" viewBox="0 0 48 48" fill="none"><rect width="48" height="48" rx="8" fill="#FFF"/><path d="M24 12C17.373 12 12 17.373 12 24C12 30.627 17.373 36 24 36C30.627 36 36 30.627 36 24C36 17.373 30.627 12 24 12ZM24 20C25.657 20 27 21.343 27 23C27 24.657 25.657 26 24 26C22.343 26 21 24.657 21 23C21 21.343 22.343 20 24 20ZM24 33.2C20.8 33.2 17.988 31.53 16.4 29C16.44 26.4 21.6 25 24 25C26.392 25 31.56 26.4 31.6 29C30.012 31.53 27.2 33.2 24 33.2Z" fill="#2c3e50"/></svg>
+        <span>Sistema RH</span>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="dashboard.html" class="nav-item"><span class="nav-text">Dashboard</span></a>
+      <div class="nav-section">Gestão de Pessoas</div>
+      <a href="employees.html" class="nav-item"><span class="nav-text">Funcionários</span></a>
+      <a href="departments.html" class="nav-item"><span class="nav-text">Departamentos</span></a>
+      <a href="positions.html" class="nav-item active"><span class="nav-text">Cargos</span></a>
+      <div class="nav-section">Recursos Humanos</div>
+      <a href="recruitment.html" class="nav-item"><span class="nav-text">Recrutamento</span></a>
+      <a href="training.html" class="nav-item"><span class="nav-text">Treinamentos</span></a>
+      <a href="performance.html" class="nav-item"><span class="nav-text">Avaliações</span></a>
+      <div class="nav-section">Departamento Pessoal</div>
+      <a href="payroll.html" class="nav-item"><span class="nav-text">Folha de Pagamento</span></a>
+      <a href="benefits.html" class="nav-item"><span class="nav-text">Benefícios</span></a>
+      <a href="vacation.html" class="nav-item"><span class="nav-text">Férias</span></a>
+      <a href="timesheet.html" class="nav-item"><span class="nav-text">Ponto</span></a>
+      <div class="nav-section">Administração</div>
+      <a href="reports.html" class="nav-item"><span class="nav-text">Relatórios</span></a>
+      <a href="settings.html" class="nav-item"><span class="nav-text">Configurações</span></a>
+    </nav>
+  </aside>
+
+  <div class="main-content">
+    <header class="topbar">
+      <div class="topbar-left"><h1>Cargos</h1></div>
+      <div class="topbar-right">
+        <div class="user-menu">
+          <button class="user-button" id="userMenuButton"><span class="user-avatar" id="userAvatar">U</span><span class="user-name" id="userName">Usuário</span></button>
+          <div class="user-dropdown" id="userDropdown">
+            <a href="#" class="dropdown-item" id="logoutButton">Sair</a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="content-area">
+      <div class="page-header">
+        <div>
+          <h2 class="page-title">Gestão de Cargos</h2>
+          <p class="page-subtitle">Defina cargos e faixas salariais</p>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-primary" onclick="openModal()">+ Novo Cargo</button>
+        </div>
+      </div>
+
+      <div class="filters-bar">
+        <div class="search-box">
+          <input type="text" id="search" placeholder="Buscar cargo..." onkeyup="filter()">
+        </div>
+        <div class="filter-group">
+          <label>Departamento:</label>
+          <select id="filterDept" onchange="filter()">
+            <option value="">Todos</option>
+            <option value="Tecnologia">Tecnologia</option>
+            <option value="RH">RH</option>
+            <option value="Financeiro">Financeiro</option>
+            <option value="Comercial">Comercial</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>Nível:</label>
+          <select id="filterLevel" onchange="filter()">
+            <option value="">Todos</option>
+            <option value="Junior">Junior</option>
+            <option value="Pleno">Pleno</option>
+            <option value="Senior">Senior</option>
+            <option value="Gestão">Gestão</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table class="data-table" id="dataTable">
+          <thead>
+            <tr>
+              <th>Cargo</th>
+              <th>Departamento</th>
+              <th>Nível</th>
+              <th class="hide-mobile">Faixa Salarial</th>
+              <th class="hide-mobile">Ocupantes</th>
+              <th>Status</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="modal">
+    <div class="modal-dialog modal-md">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modalTitle">Novo Cargo</h3>
+        <button class="modal-close" onclick="Modal.close('modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="form">
+          <input type="hidden" name="id">
+          <div class="form-row form-row-2">
+            <div class="form-group">
+              <label class="form-label">Título do Cargo *</label>
+              <input type="text" class="form-input" name="titulo" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Departamento *</label>
+              <select class="form-select" name="departamento" required>
+                <option value="">Selecione</option>
+                <option value="Tecnologia">Tecnologia</option>
+                <option value="RH">RH</option>
+                <option value="Financeiro">Financeiro</option>
+                <option value="Comercial">Comercial</option>
+                <option value="Operações">Operações</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row form-row-3">
+            <div class="form-group">
+              <label class="form-label">Nível</label>
+              <select class="form-select" name="nivel">
+                <option value="Junior">Junior</option>
+                <option value="Pleno">Pleno</option>
+                <option value="Senior">Senior</option>
+                <option value="Gestão">Gestão</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Salário Mínimo</label>
+              <input type="text" class="form-input" name="salario_minimo" data-mask="currency">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Salário Máximo</label>
+              <input type="text" class="form-input" name="salario_maximo" data-mask="currency">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Descrição</label>
+            <textarea class="form-input" name="descricao" rows="3"></textarea>
+          </div>
+          <div class="form-group">
+            <label class="checkbox-label"><input type="checkbox" name="ativo" checked><span>Cargo Ativo</span></label>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="Modal.close('modal')">Cancelar</button>
+        <button class="btn btn-primary" onclick="save()">Salvar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="public/scripts/auth.js"></script>
+  <script src="public/scripts/components.js"></script>
+  <script>
+    let data = [
+      { id: 1, titulo: "Desenvolvedor Backend", departamento: "Tecnologia", nivel: "Senior", salario_minimo: 10000, salario_maximo: 15000, ocupantes: 8, ativo: true },
+      { id: 2, titulo: "Desenvolvedor Frontend", departamento: "Tecnologia", nivel: "Pleno", salario_minimo: 7000, salario_maximo: 11000, ocupantes: 6, ativo: true },
+      { id: 3, titulo: "Analista de RH", departamento: "RH", nivel: "Pleno", salario_minimo: 5000, salario_maximo: 8000, ocupantes: 4, ativo: true },
+      { id: 4, titulo: "Gerente Financeiro", departamento: "Financeiro", nivel: "Gestão", salario_minimo: 15000, salario_maximo: 22000, ocupantes: 2, ativo: true },
+      { id: 5, titulo: "Vendedor", departamento: "Comercial", nivel: "Junior", salario_minimo: 3000, salario_maximo: 5000, ocupantes: 15, ativo: true },
+      { id: 6, titulo: "Tech Lead", departamento: "Tecnologia", nivel: "Gestão", salario_minimo: 18000, salario_maximo: 25000, ocupantes: 3, ativo: true }
+    ];
+    let filtered = [...data];
+    let currentId = null;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      if (!Auth.requireAuth()) return;
+      initUI();
+      render();
+      Mask.initAll();
+    });
+
+    function initUI() {
+      const user = Auth.getCurrentUser();
+      document.getElementById("userName").textContent = user?.email?.split("@")[0] || "Usuário";
+      document.getElementById("userAvatar").textContent = (user?.email || "U")[0].toUpperCase();
+      document.getElementById("userMenuButton").onclick = () => document.getElementById("userDropdown").classList.toggle("active");
+      document.getElementById("logoutButton").onclick = (e) => { e.preventDefault(); Auth.logout(); };
+    }
+
+    function filter() {
+      const search = document.getElementById("search").value.toLowerCase();
+      const dept = document.getElementById("filterDept").value;
+      const level = document.getElementById("filterLevel").value;
+      
+      filtered = data.filter(item => 
+        (!search || item.titulo.toLowerCase().includes(search)) &&
+        (!dept || item.departamento === dept) &&
+        (!level || item.nivel === level)
+      );
+      render();
+    }
+
+    function render() {
+      document.getElementById("tableBody").innerHTML = filtered.map(item => `
+        <tr>
+          <td><strong>${item.titulo}</strong></td>
+          <td>${item.departamento}</td>
+          <td><span class="badge badge-info">${item.nivel}</span></td>
+          <td class="hide-mobile">${formatCurrency(item.salario_minimo)} - ${formatCurrency(item.salario_maximo)}</td>
+          <td class="hide-mobile">${item.ocupantes}</td>
+          <td><span class="badge ${item.ativo ? 'badge-success' : 'badge-danger'}">${item.ativo ? 'Ativo' : 'Inativo'}</span></td>
+          <td>
+            <div class="cell-actions">
+              <button class="btn-icon edit" onclick="edit(${item.id})">✏️</button>
+              <button class="btn-icon delete" onclick="remove(${item.id})">🗑️</button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function openModal(id = null) {
+      currentId = id;
+      document.getElementById("form").reset();
+      document.getElementById("modalTitle").textContent = id ? "Editar Cargo" : "Novo Cargo";
+      if (id) {
+        const item = data.find(d => d.id === id);
+        if (item) Form.populate('form', item);
+      }
+      Modal.open('modal');
+      Mask.initAll();
+    }
+
+    function edit(id) { openModal(id); }
+
+    function save() {
+      const formData = Form.serialize('form');
+      if (!formData.titulo || !formData.departamento) {
+        Toast.error('Preencha os campos obrigatórios');
+        return;
+      }
+      
+      if (currentId) {
+        const idx = data.findIndex(d => d.id === currentId);
+        if (idx > -1) data[idx] = { ...data[idx], ...formData };
+        Toast.success('Cargo atualizado!');
+      } else {
+        data.push({ id: Date.now(), ...formData, ocupantes: 0, ativo: true });
+        Toast.success('Cargo criado!');
+      }
+      
+      Modal.close('modal');
+      filter();
+    }
+
+    function remove(id) {
+      Confirm.show('Excluir este cargo?', () => {
+        data = data.filter(d => d.id !== id);
+        Toast.success('Cargo excluído!');
+        filter();
+      });
+    }
+
+    function formatCurrency(val) {
+      return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val || 0);
+    }
+  </script>
+</body>
+</html>

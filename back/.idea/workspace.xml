@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="dd08f522-46f0-47c0-976b-86e90f7951da" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/../front/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../front/dashboard.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../front/employees.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../front/index.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../front/organizational-chart.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../front/package.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../front/payroll.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../front/performance.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../front/public/scripts/auth.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../front/public/scripts/dashboard.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../front/public/scripts/employees.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../front/public/scripts/login.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../front/public/scripts/payroll.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../front/public/scripts/recruitment.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../front/public/scripts/reports.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../front/public/scripts/settings.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../front/public/scripts/timesheet.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../front/public/scripts/vacation.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../front/public/styles/dashboard.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../front/public/styles/employees.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../front/public/styles/global.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../front/public/styles/login.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../front/public/styles/orgchart.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../front/public/styles/payroll.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../front/public/styles/performance.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../front/public/styles/recruitment.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../front/public/styles/reports.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../front/public/styles/settings.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../front/public/styles/timesheet.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../front/public/styles/training.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../front/public/styles/vacation.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../front/recruitment.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../front/reports.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../front/settings.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../front/timesheet.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../front/training.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../front/vacation.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../rhparatodos/.gitattributes" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../rhparatodos/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../rhparatodos/.mvn/wrapper/maven-wrapper.properties" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../rhparatodos/mvnw" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../rhparatodos/mvnw.cmd" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../rhparatodos/pom.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../rhparatodos/src/main/java/sistema/rhparatodos/RhparatodosApplication.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../rhparatodos/src/main/resources/application.properties" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../rhparatodos/src/test/java/sistema/rhparatodos/RhparatodosApplicationTests.java" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;JJerosch&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/JJerosch/RHParaTodos.git&quot;,
+    &quot;accountId&quot;: &quot;49a6bc8e-bb5f-43bd-a04c-3395d94f54a5&quot;
+  }
+}</component>
+  <component name="MavenImportPreferences">
+    <option name="generalSettings">
+      <MavenGeneralSettings>
+        <option name="mavenHomeTypeForPersistence" value="WRAPPER" />
+      </MavenGeneralSettings>
+    </option>
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 5
+}</component>
+  <component name="ProjectId" id="37tbINYakCQOi7RZvUPLJrB7oc6" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "main",
+    "ignore.virus.scanning.warn.message": "true",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "C:/RHParaTodos/back"
+  }
+}]]></component>
+  <component name="RunManager">
+    <configuration default="true" type="JetRunConfigurationType">
+      <module name="back" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="KotlinStandaloneScriptRunConfigurationType">
+      <module name="back" />
+      <option name="filePath" />
+      <method v="2" />
+    </configuration>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="dd08f522-46f0-47c0-976b-86e90f7951da" name="Changes" comment="" />
+      <created>1767725234605</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1767725234605</updated>
+    </task>
+    <servers />
+  </component>
+</project>
