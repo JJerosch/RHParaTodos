@@ -10,7 +10,11 @@
 </head>
 <body>
   <aside class="sidebar" id="sidebar">
-    <div class="sidebar-header"><div class="logo"><svg width="32" height="32" viewBox="0 0 48 48" fill="none"><rect width="48" height="48" rx="8" fill="#FFF"/><path d="M24 12C17.373 12 12 17.373 12 24C12 30.627 17.373 36 24 36C30.627 36 36 30.627 36 24C36 17.373 30.627 12 24 12ZM24 20C25.657 20 27 21.343 27 23C27 24.657 25.657 26 24 26C22.343 26 21 24.657 21 23C21 21.343 22.343 20 24 20ZM24 33.2C20.8 33.2 17.988 31.53 16.4 29C16.44 26.4 21.6 25 24 25C26.392 25 31.56 26.4 31.6 29C30.012 31.53 27.2 33.2 24 33.2Z" fill="#2c3e50"/></svg><span>Sistema RH</span></div></div>
+    <div class="sidebar-header">
+      <div class="logo">
+        <img src="/front/public/assets/gruporhpaint.png" alt="logo_menu_lateral" height="60">
+      </div>
+    </div>
     <nav class="sidebar-nav">
       <a href="dashboard.html" class="nav-item"><span class="nav-text">Dashboard</span></a>
       <div class="nav-section">Gestão de Pessoas</div>
@@ -40,10 +44,10 @@
 
     <div class="content-area">
       <div class="stats-row">
-        <div class="stat-box"><div class="stat-box-icon" style="background: rgba(44, 62, 80, 0.1);">🎁</div><div class="stat-box-value">6</div><div class="stat-box-label">Tipos de Benefícios</div></div>
-        <div class="stat-box"><div class="stat-box-icon" style="background: rgba(39, 174, 96, 0.1);">👥</div><div class="stat-box-value">248</div><div class="stat-box-label">Beneficiários</div></div>
-        <div class="stat-box"><div class="stat-box-icon" style="background: rgba(243, 156, 18, 0.1);">💰</div><div class="stat-box-value">R$ 185K</div><div class="stat-box-label">Custo Mensal</div></div>
-        <div class="stat-box"><div class="stat-box-icon" style="background: rgba(231, 76, 60, 0.1);">📊</div><div class="stat-box-value">R$ 745</div><div class="stat-box-label">Custo/Funcionário</div></div>
+        <div class="stat-box"><div class="stat-box-icon" style="background: rgba(44, 62, 80, 0.1);"><img src="/front/public/assets/gift (2).png" alt="iconefuncionarios"></div><div class="stat-box-value">6</div><div class="stat-box-label">Tipos de Benefícios</div></div>
+        <div class="stat-box"><div class="stat-box-icon" style="background: rgba(39, 174, 96, 0.1);"><img src="/front/public/assets/users (1).png" alt="iconefuncionarios"></div><div class="stat-box-value">248</div><div class="stat-box-label">Beneficiários</div></div>
+        <div class="stat-box"><div class="stat-box-icon" style="background: rgba(243, 156, 18, 0.1);"><img src="/front/public/assets/banknote (1).png" alt="iconefuncionarios"></div><div class="stat-box-value">R$ 185K</div><div class="stat-box-label">Custo Mensal</div></div>
+        <div class="stat-box"><div class="stat-box-icon" style="background: rgba(231, 76, 60, 0.1);"><img src="/front/public/assets/chart-column (1).png" alt="iconefuncionarios"></div><div class="stat-box-value">R$ 745</div><div class="stat-box-label">Custo/Funcionário</div></div>
       </div>
 
       <div class="page-header">
@@ -80,12 +84,12 @@
   <script src="public/scripts/components.js"></script>
   <script>
     const benefits = [
-      { id: 1, nome: "Vale Refeição", descricao: "Cartão para refeições diárias", valor: 800, beneficiarios: 235, icon: "🍽️", ativo: true },
-      { id: 2, nome: "Vale Transporte", descricao: "Auxílio para deslocamento", valor: 300, beneficiarios: 180, icon: "🚌", ativo: true },
-      { id: 3, nome: "Plano de Saúde", descricao: "Assistência médica completa", valor: 650, beneficiarios: 248, icon: "🏥", ativo: true },
-      { id: 4, nome: "Plano Odontológico", descricao: "Cobertura odontológica", valor: 80, beneficiarios: 220, icon: "🦷", ativo: true },
-      { id: 5, nome: "Seguro de Vida", descricao: "Proteção para família", valor: 50, beneficiarios: 248, icon: "🛡️", ativo: true },
-      { id: 6, nome: "Gympass", descricao: "Acesso a academias parceiras", valor: 100, beneficiarios: 85, icon: "🏋️", ativo: true }
+      { id: 1, nome: "Vale Refeição", descricao: "Cartão para refeições diárias", valor: 800, beneficiarios: 235,  ativo: true },
+      { id: 2, nome: "Vale Transporte", descricao: "Auxílio para deslocamento", valor: 300, beneficiarios: 180, ativo: true },
+      { id: 3, nome: "Plano de Saúde", descricao: "Assistência médica completa", valor: 650, beneficiarios: 248, ativo: true },
+      { id: 4, nome: "Plano Odontológico", descricao: "Cobertura odontológica", valor: 80, beneficiarios: 220, ativo: true },
+      { id: 5, nome: "Seguro de Vida", descricao: "Proteção para família", valor: 50, beneficiarios: 248, ativo: true },
+      { id: 6, nome: "Gympass", descricao: "Acesso a academias parceiras", valor: 100, beneficiarios: 85, ativo: true }
     ];
     let currentId = null;
 
@@ -106,10 +110,9 @@
       document.getElementById("benefitsGrid").innerHTML = benefits.map(b => `
         <div class="benefit-card">
           <div class="benefit-header">
-            <div class="benefit-icon">${b.icon}</div>
             <div class="cell-actions">
-              <button class="btn-icon edit" onclick="edit(${b.id})">✏️</button>
-              <button class="btn-icon delete" onclick="remove(${b.id})">🗑️</button>
+              <button class="btn-icon edit" onclick="edit(${b.id})"><img src="/front/public/assets/pencil (1).png" alt="iconefuncionarios"></button>
+              <button class="btn-icon delete" onclick="remove(${b.id})"><img src="/front/public/assets/trash-2 (1).png" alt="iconefuncionarios"></button>
             </div>
           </div>
           <h3 class="benefit-name">${b.nome}</h3>

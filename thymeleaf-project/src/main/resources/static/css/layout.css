@@ -1,0 +1,219 @@
+/* ===========================================
+   LAYOUT CSS - Estrutura Principal
+   =========================================== */
+
+/* ===== APP CONTAINER ===== */
+.app-container {
+    display: flex;
+    min-height: 100vh;
+    background-color: var(--color-bg);
+}
+
+/* ===== MAIN WRAPPER ===== */
+.main-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    margin-left: var(--sidebar-width);
+    min-height: 100vh;
+    transition: margin-left var(--transition-base);
+}
+
+.sidebar-collapsed .main-wrapper {
+    margin-left: var(--sidebar-collapsed-width);
+}
+
+/* ===== MAIN CONTENT ===== */
+.main-content {
+    flex: 1;
+    padding: var(--spacing-6);
+    padding-top: calc(var(--topbar-height) + var(--spacing-6));
+    max-width: var(--content-max-width);
+    width: 100%;
+    margin: 0 auto;
+}
+
+/* ===== PAGE HEADER ===== */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--spacing-4);
+    margin-bottom: var(--spacing-6);
+    flex-wrap: wrap;
+}
+
+.page-header-content {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-4);
+}
+
+.page-title {
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text);
+    margin: 0;
+}
+
+.page-subtitle {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    margin: var(--spacing-1) 0 0 0;
+}
+
+.page-header-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-3);
+}
+
+.back-btn {
+    padding: var(--spacing-2);
+    border-radius: var(--radius-lg);
+}
+
+/* ===== GRIDS ===== */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: var(--spacing-4);
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-6);
+    margin-top: var(--spacing-6);
+}
+
+.dashboard-chart {
+    grid-column: span 1;
+}
+
+.dashboard-activities {
+    grid-column: span 2;
+}
+
+/* ===== FORM GRID ===== */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--spacing-4) var(--spacing-6);
+}
+
+.form-group--full {
+    grid-column: 1 / -1;
+}
+
+.form-group--lg {
+    grid-column: span 2;
+}
+
+.form-group--sm {
+    max-width: 150px;
+}
+
+/* ===== FILTER GRID ===== */
+.filter-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-4);
+}
+
+.filter-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--spacing-3);
+    margin-top: var(--spacing-4);
+    padding-top: var(--spacing-4);
+    border-top: 1px solid var(--color-border);
+}
+
+/* ===== FORM PAGE ===== */
+.form-page {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-6);
+}
+
+.form-section {
+    margin-bottom: 0;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--spacing-3);
+    padding: var(--spacing-4);
+    background-color: var(--color-bg-alt);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
+    position: sticky;
+    bottom: var(--spacing-4);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1200px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .dashboard-chart,
+    .dashboard-activities {
+        grid-column: span 1;
+    }
+}
+
+@media (max-width: 1024px) {
+    .main-wrapper {
+        margin-left: 0;
+    }
+    
+    .sidebar-collapsed .main-wrapper {
+        margin-left: 0;
+    }
+    
+    .main-content {
+        padding: var(--spacing-4);
+        padding-top: calc(var(--topbar-height) + var(--spacing-4));
+    }
+}
+
+@media (max-width: 768px) {
+    .page-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .page-header-actions {
+        justify-content: flex-start;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .form-group--lg,
+    .form-group--sm {
+        grid-column: span 1;
+        max-width: none;
+    }
+    
+    .filter-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .form-actions {
+        position: static;
+        flex-direction: column;
+    }
+    
+    .form-actions .btn {
+        width: 100%;
+    }
+}

@@ -355,7 +355,7 @@ function renderTable() {
       <tr>
         <td colspan="7">
           <div class="empty-state">
-            <div class="empty-state-icon">👥</div>
+            <div class="empty-state-icon"><img src="/front/public/assets/users (1).png" alt="iconefuncionarios"></div>
             <h3 class="empty-state-title">Nenhum funcionário encontrado</h3>
             <p class="empty-state-text">Tente ajustar os filtros ou adicione um novo funcionário.</p>
           </div>
@@ -381,9 +381,9 @@ function renderTable() {
         <td><span class="badge ${getStatusClass(emp.status)}">${getStatusLabel(emp.status)}</span></td>
         <td>
           <div class="cell-actions">
-            <button class="btn-icon view" onclick="viewEmployee(${emp.id})" title="Visualizar">👁️</button>
-            <button class="btn-icon edit" onclick="editEmployee(${emp.id})" title="Editar">✏️</button>
-            <button class="btn-icon delete" onclick="deleteEmployee(${emp.id})" title="Excluir">🗑️</button>
+            <button class="btn-icon view" onclick="viewEmployee(${emp.id})" title="Visualizar"><img src="/front/public/assets/eye.png" alt="iconefuncionarios"></button>
+            <button class="btn-icon edit" onclick="editEmployee(${emp.id})" title="Editar"><img src="/front/public/assets/pencil (1).png" alt="iconefuncionarios"></button>
+            <button class="btn-icon delete" onclick="deleteEmployee(${emp.id})" title="Excluir"><img src="/front/public/assets/trash-2 (1).png" alt="iconefuncionarios"></button>
           </div>
         </td>
       </tr>

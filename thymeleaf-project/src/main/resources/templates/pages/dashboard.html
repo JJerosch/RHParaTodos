@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: html(~{::head/content()}, ~{::main-content})}">
+<head>
+    <title>Dashboard - Sistema RH</title>
+</head>
+<body>
+
+<th:block th:fragment="main-content">
+    
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="page-header-content">
+            <h1 class="page-title">Dashboard</h1>
+            <p class="page-subtitle">Bem-vindo de volta, <span th:text="${currentUser.nome}">Usuário</span>!</p>
+        </div>
+        <div class="page-header-actions">
+            <button type="button" class="btn btn--secondary" id="refreshData">
+                <img th:src="@{/images/icons/refresh.png}" alt="" class="icon btn-icon">
+                <span>Atualizar</span>
+            </button>
+            <a th:href="@{/relatorios}" class="btn btn--primary">
+                <img th:src="@{/images/icons/download.png}" alt="" class="icon btn-icon">
+                <span>Exportar Relatório</span>
+            </a>
+        </div>
+    </div>
+    
+    <!-- Stats Cards -->
+    <section class="stats-section">
+        <div class="stats-grid">
+            
+            <!-- Total Funcionários -->
+            <div class="stat-card stat-card--primary">
+                <div class="stat-card-icon">
+                    <img th:src="@{/images/icons/employees.png}" alt="" class="icon icon-lg">
+                </div>
+                <div class="stat-card-content">
+                    <span class="stat-card-title">Total de Funcionários</span>
+                    <span class="stat-card-value" th:text="${stats.totalFuncionarios}">0</span>
+                    <div class="stat-card-trend trend--up" th:if="${stats.funcionariosTrend > 0}">
+                        <img th:src="@{/images/icons/trend-up.png}" alt="" class="icon icon-xs">
+                        <span th:text="${stats.funcionariosTrend + '%'}">+5%</span>
+                        <span class="trend-period">este mês</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Departamentos -->
+            <div class="stat-card stat-card--info">
+                <div class="stat-card-icon">
+                    <img th:src="@{/images/icons/departments.png}" alt="" class="icon icon-lg">
+                </div>
+                <div class="stat-card-content">
+                    <span class="stat-card-title">Departamentos</span>
+                    <span class="stat-card-value" th:text="${stats.totalDepartamentos}">0</span>
+                    <div class="stat-card-info">
+                        <span th:text="${stats.departamentosAtivos + ' ativos'}">8 ativos</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Folha Mensal -->
+            <div class="stat-card stat-card--success">
+                <div class="stat-card-icon">
+                    <img th:src="@{/images/icons/money.png}" alt="" class="icon icon-lg">
+                </div>
+                <div class="stat-card-content">
+                    <span class="stat-card-title">Folha Mensal</span>
+                    <span class="stat-card-value" th:text="${#numbers.formatCurrency(stats.folhaMensal)}">R$ 0,00</span>
+                    <div class="stat-card-trend trend--down" th:if="${stats.folhaTrend < 0}">
+                        <img th:src="@{/images/icons/trend-down.png}" alt="" class="icon icon-xs">
+                        <span th:text="${stats.folhaTrend + '%'}">-2%</span>
+                        <span class="trend-period">vs. mês anterior</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Férias Pendentes -->
+            <div class="stat-card stat-card--warning">
+                <div class="stat-card-icon">
+                    <img th:src="@{/images/icons/vacation.png}" alt="" class="icon icon-lg">
+                </div>
+                <div class="stat-card-content">
+                    <span class="stat-card-title">Férias Pendentes</span>
+                    <span class="stat-card-value" th:text="${stats.feriasPendentes}">0</span>
+                    <div class="stat-card-info">
+                        <span th:text="${stats.feriasProximoMes + ' próximo mês'}">3 próximo mês</span>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </section>
+    
+    <!-- Main Content Grid -->
+    <div class="dashboard-grid">
+        
+        <!-- Gráfico de Funcionários por Departamento -->
+        <section class="card dashboard-chart">
+            <div class="card-header">
+                <div class="card-title-wrapper">
+                    <img th:src="@{/images/icons/chart-pie.png}" alt="" class="icon card-icon">
+                    <h2 class="card-title">Funcionários por Departamento</h2>
+                </div>
+                <div class="card-actions">
+                    <div class="dropdown">
+                        <button type="button" class="btn btn--icon" data-dropdown-toggle="chartPeriod">
+                            <img th:src="@{/images/icons/more-vertical.png}" alt="" class="icon">
+                        </button>
+                        <div class="dropdown-menu" id="chartPeriod">
+                            <a href="#" class="dropdown-item" data-period="month">Este Mês</a>
+                            <a href="#" class="dropdown-item" data-period="quarter">Este Trimestre</a>
+                            <a href="#" class="dropdown-item" data-period="year">Este Ano</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="departmentChart"></canvas>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Gráfico de Evolução Salarial -->
+        <section class="card dashboard-chart">
+            <div class="card-header">
+                <div class="card-title-wrapper">
+                    <img th:src="@{/images/icons/chart-line.png}" alt="" class="icon card-icon">
+                    <h2 class="card-title">Evolução da Folha de Pagamento</h2>
+                </div>
+                <div class="card-actions">
+                    <select class="form-select form-select--sm" id="chartYearSelect">
+                        <option th:each="year : ${years}" th:value="${year}" th:text="${year}"
+                                th:selected="${year == currentYear}">2024</option>
+                    </select>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="payrollChart"></canvas>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Últimas Admissões -->
+        <section class="card">
+            <div class="card-header">
+                <div class="card-title-wrapper">
+                    <img th:src="@{/images/icons/user-plus.png}" alt="" class="icon card-icon">
+                    <h2 class="card-title">Últimas Admissões</h2>
+                </div>
+                <a th:href="@{/funcionarios}" class="card-link">
+                    Ver todos
+                    <img th:src="@{/images/icons/arrow-right.png}" alt="" class="icon icon-sm">
+                </a>
+            </div>
+            <div class="card-body card-body--no-padding">
+                <ul class="list-users" th:if="${ultimasAdmissoes != null && !ultimasAdmissoes.empty}">
+                    <li th:each="func : ${ultimasAdmissoes}" class="list-users-item">
+                        <div class="user-info">
+                            <div class="avatar">
+                                <img th:src="${func.fotoUrl} ?: @{/images/icons/default-avatar.png}" 
+                                     th:alt="${func.nome}" 
+                                     class="avatar-img">
+                            </div>
+                            <div class="user-details">
+                                <span class="user-name" th:text="${func.nome}">Nome do Funcionário</span>
+                                <span class="user-role" th:text="${func.cargo.nome}">Cargo</span>
+                            </div>
+                        </div>
+                        <div class="user-meta">
+                            <span class="user-department" th:text="${func.departamento.nome}">Departamento</span>
+                            <span class="user-date" th:text="${#temporals.format(func.dataAdmissao, 'dd/MM/yyyy')}">01/01/2024</span>
+                        </div>
+                    </li>
+                </ul>
+                <div class="empty-state empty-state--sm" th:if="${ultimasAdmissoes == null || ultimasAdmissoes.empty}">
+                    <img th:src="@{/images/icons/users.png}" alt="" class="icon icon-lg">
+                    <p>Nenhuma admissão recente</p>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Aniversariantes do Mês -->
+        <section class="card">
+            <div class="card-header">
+                <div class="card-title-wrapper">
+                    <img th:src="@{/images/icons/cake.png}" alt="" class="icon card-icon">
+                    <h2 class="card-title">Aniversariantes do Mês</h2>
+                </div>
+                <span class="badge badge--primary" th:text="${aniversariantes.size() + ' pessoas'}">5 pessoas</span>
+            </div>
+            <div class="card-body card-body--no-padding">
+                <ul class="list-birthdays" th:if="${aniversariantes != null && !aniversariantes.empty}">
+                    <li th:each="func : ${aniversariantes}" class="list-birthdays-item">
+                        <div class="avatar avatar--sm">
+                            <img th:src="${func.fotoUrl} ?: @{/images/icons/default-avatar.png}" 
+                                 th:alt="${func.nome}" 
+                                 class="avatar-img">
+                        </div>
+                        <div class="birthday-info">
+                            <span class="birthday-name" th:text="${func.nome}">Nome</span>
+                            <span class="birthday-date" th:text="${#temporals.format(func.dataNascimento, 'dd/MM')}">15/01</span>
+                        </div>
+                        <div class="birthday-department" th:text="${func.departamento.nome}">TI</div>
+                    </li>
+                </ul>
+                <div class="empty-state empty-state--sm" th:if="${aniversariantes == null || aniversariantes.empty}">
+                    <img th:src="@{/images/icons/cake.png}" alt="" class="icon icon-lg">
+                    <p>Nenhum aniversariante este mês</p>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Atividades Recentes -->
+        <section class="card dashboard-activities">
+            <div class="card-header">
+                <div class="card-title-wrapper">
+                    <img th:src="@{/images/icons/activity.png}" alt="" class="icon card-icon">
+                    <h2 class="card-title">Atividades Recentes</h2>
+                </div>
+                <a th:href="@{/atividades}" class="card-link">
+                    Ver histórico
+                    <img th:src="@{/images/icons/arrow-right.png}" alt="" class="icon icon-sm">
+                </a>
+            </div>
+            <div class="card-body">
+                <ul class="activity-list" th:if="${atividades != null && !atividades.empty}">
+                    <li th:each="atividade : ${atividades}" class="activity-item">
+                        <div class="activity-icon" th:classappend="'activity-icon--' + ${atividade.tipo}">
+                            <img th:src="@{'/images/icons/' + ${atividade.icone} + '.png'}" alt="" class="icon">
+                        </div>
+                        <div class="activity-content">
+                            <p class="activity-text">
+                                <strong th:text="${atividade.usuario}">Usuário</strong>
+                                <span th:text="${atividade.descricao}">realizou uma ação</span>
+                            </p>
+                            <span class="activity-time" th:text="${atividade.tempoRelativo}">Há 5 minutos</span>
+                        </div>
+                    </li>
+                </ul>
+                <div class="empty-state empty-state--sm" th:if="${atividades == null || atividades.empty}">
+                    <img th:src="@{/images/icons/activity.png}" alt="" class="icon icon-lg">
+                    <p>Nenhuma atividade recente</p>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Tarefas Pendentes -->
+        <section class="card">
+            <div class="card-header">
+                <div class="card-title-wrapper">
+                    <img th:src="@{/images/icons/clipboard-list.png}" alt="" class="icon card-icon">
+                    <h2 class="card-title">Tarefas Pendentes</h2>
+                </div>
+                <button type="button" class="btn btn--icon" id="addTask" title="Adicionar tarefa">
+                    <img th:src="@{/images/icons/plus.png}" alt="" class="icon">
+                </button>
+            </div>
+            <div class="card-body card-body--no-padding">
+                <ul class="task-list" th:if="${tarefas != null && !tarefas.empty}">
+                    <li th:each="tarefa : ${tarefas}" class="task-item" th:classappend="${tarefa.concluida} ? 'completed' : ''">
+                        <div class="task-check">
+                            <input type="checkbox" 
+                                   th:id="'task-' + ${tarefa.id}"
+                                   th:checked="${tarefa.concluida}"
+                                   class="task-checkbox"
+                                   th:data-task-id="${tarefa.id}">
+                            <label th:for="'task-' + ${tarefa.id}" class="task-checkbox-label"></label>
+                        </div>
+                        <div class="task-content">
+                            <span class="task-title" th:text="${tarefa.titulo}">Título da tarefa</span>
+                            <span class="task-due" th:classappend="${tarefa.atrasada} ? 'overdue' : ''">
+                                <img th:src="@{/images/icons/clock.png}" alt="" class="icon icon-xs">
+                                <span th:text="${#temporals.format(tarefa.dataLimite, 'dd/MM')}">15/01</span>
+                            </span>
+                        </div>
+                        <span class="badge" th:classappend="'badge--' + ${tarefa.prioridade}" th:text="${tarefa.prioridadeLabel}">Alta</span>
+                    </li>
+                </ul>
+                <div class="empty-state empty-state--sm" th:if="${tarefas == null || tarefas.empty}">
+                    <img th:src="@{/images/icons/check-circle.png}" alt="" class="icon icon-lg">
+                    <p>Nenhuma tarefa pendente</p>
+                </div>
+            </div>
+        </section>
+        
+    </div>
+    
+</th:block>
+
+</body>
+</html>

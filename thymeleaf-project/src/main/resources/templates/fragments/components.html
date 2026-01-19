@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<!-- ==================== CARDS ==================== -->
+
+<!-- Card Estatístico -->
+<th:block th:fragment="statCard(title, value, icon, trend, trendValue, color)">
+    <div class="stat-card" th:classappend="'stat-card--' + ${color}">
+        <div class="stat-card-icon">
+            <img th:src="@{'/images/icons/' + ${icon} + '.png'}" alt="" class="icon icon-lg">
+        </div>
+        <div class="stat-card-content">
+            <span class="stat-card-title" th:text="${title}">Título</span>
+            <span class="stat-card-value" th:text="${value}">0</span>
+            <div class="stat-card-trend" th:if="${trend}" th:classappend="'trend--' + ${trend}">
+                <img th:src="@{'/images/icons/trend-' + ${trend} + '.png'}" alt="" class="icon icon-xs">
+                <span th:text="${trendValue}">+5%</span>
+            </div>
+        </div>
+    </div>
+</th:block>
+
+<!-- Card Simples -->
+<th:block th:fragment="card(title, icon)">
+    <div class="card">
+        <div class="card-header" th:if="${title}">
+            <div class="card-title-wrapper">
+                <img th:if="${icon}" th:src="@{'/images/icons/' + ${icon} + '.png'}" alt="" class="icon card-icon">
+                <h3 class="card-title" th:text="${title}">Título do Card</h3>
+            </div>
+            <div class="card-actions">
+                <th:block th:replace="${cardActions} ?: ~{}"></th:block>
+            </div>
+        </div>
+        <div class="card-body">
+            <th:block th:replace="${cardContent}"></th:block>
+        </div>
+        <div class="card-footer" th:if="${cardFooter}">
+            <th:block th:replace="${cardFooter}"></th:block>
+        </div>
+    </div>
+</th:block>
+
+<!-- ==================== TABELAS ==================== -->
+
+<!-- Tabela com Paginação -->
+<th:block th:fragment="dataTable(tableId, columns)">
+    <div class="table-container">
+        <div class="table-header">
+            <div class="table-search">
+                <img th:src="@{/images/icons/search.png}" alt="" class="icon">
+                <input type="search" 
+                       class="table-search-input" 
+                       placeholder="Buscar na tabela..."
+                       th:data-table="${tableId}">
+            </div>
+            <div class="table-actions">
+                <th:block th:replace="${tableActions} ?: ~{}"></th:block>
+            </div>
+        </div>
+        
+        <div class="table-responsive">
+            <table class="data-table" th:id="${tableId}">
+                <thead>
+                    <tr>
+                        <th th:each="col : ${columns}" 
+                            th:class="${col.sortable} ? 'sortable' : ''"
+                            th:data-sort="${col.field}"
+                            th:text="${col.label}">Coluna</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <th:block th:replace="${tableBody}"></th:block>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="table-footer">
+            <div class="table-info">
+                <span>Mostrando </span>
+                <span th:text="${pagination.start}">1</span>
+                <span> a </span>
+                <span th:text="${pagination.end}">10</span>
+                <span> de </span>
+                <span th:text="${pagination.total}">100</span>
+                <span> registros</span>
+            </div>
+            <th:block th:replace="~{fragments/components :: pagination(${pagination})}"></th:block>
+        </div>
+    </div>
+</th:block>
+
+<!-- Paginação -->
+<th:block th:fragment="pagination(pagination)">
+    <nav class="pagination" aria-label="Paginação">
+        <ul class="pagination-list">
+            <!-- Primeira página -->
+            <li class="pagination-item" th:classappend="${pagination.currentPage == 1} ? 'disabled' : ''">
+                <a th:href="@{${pagination.baseUrl}(page=1)}" class="pagination-link" aria-label="Primeira página">
+                    <img th:src="@{/images/icons/chevrons-left.png}" alt="" class="icon icon-sm">
+                </a>
+            </li>
+            
+            <!-- Página anterior -->
+            <li class="pagination-item" th:classappend="${pagination.currentPage == 1} ? 'disabled' : ''">
+                <a th:href="@{${pagination.baseUrl}(page=${pagination.currentPage - 1})}" 
+                   class="pagination-link" 
+                   aria-label="Página anterior">
+                    <img th:src="@{/images/icons/chevron-left.png}" alt="" class="icon icon-sm">
+                </a>
+            </li>
+            
+            <!-- Números das páginas -->
+            <th:block th:each="page : ${pagination.pages}">
+                <li class="pagination-item" th:classappend="${page == pagination.currentPage} ? 'active' : ''">
+                    <a th:href="@{${pagination.baseUrl}(page=${page})}" 
+                       class="pagination-link"
+                       th:text="${page}">1</a>
+                </li>
+            </th:block>
+            
+            <!-- Próxima página -->
+            <li class="pagination-item" th:classappend="${pagination.currentPage == pagination.totalPages} ? 'disabled' : ''">
+                <a th:href="@{${pagination.baseUrl}(page=${pagination.currentPage + 1})}" 
+                   class="pagination-link" 
+                   aria-label="Próxima página">
+                    <img th:src="@{/images/icons/chevron-right.png}" alt="" class="icon icon-sm">
+                </a>
+            </li>
+            
+            <!-- Última página -->
+            <li class="pagination-item" th:classappend="${pagination.currentPage == pagination.totalPages} ? 'disabled' : ''">
+                <a th:href="@{${pagination.baseUrl}(page=${pagination.totalPages})}" 
+                   class="pagination-link" 
+                   aria-label="Última página">
+                    <img th:src="@{/images/icons/chevrons-right.png}" alt="" class="icon icon-sm">
+                </a>
+            </li>
+        </ul>
+    </nav>
+</th:block>
+
+<!-- ==================== BOTÕES ==================== -->
+
+<!-- Botão com Ícone -->
+<th:block th:fragment="button(type, variant, icon, text, attrs)">
+    <button th:type="${type} ?: 'button'" 
+            class="btn"
+            th:classappend="'btn--' + ${variant}"
+            th:attr="${attrs}">
+        <img th:if="${icon}" th:src="@{'/images/icons/' + ${icon} + '.png'}" alt="" class="icon btn-icon">
+        <span th:if="${text}" th:text="${text}">Botão</span>
+    </button>
+</th:block>
+
+<!-- Link como Botão -->
+<th:block th:fragment="buttonLink(href, variant, icon, text)">
+    <a th:href="${href}" 
+       class="btn"
+       th:classappend="'btn--' + ${variant}">
+        <img th:if="${icon}" th:src="@{'/images/icons/' + ${icon} + '.png'}" alt="" class="icon btn-icon">
+        <span th:if="${text}" th:text="${text}">Botão</span>
+    </a>
+</th:block>
+
+<!-- Grupo de Ações -->
+<th:block th:fragment="actionGroup(actions)">
+    <div class="action-group">
+        <th:block th:each="action : ${actions}">
+            <button th:if="${action.type == 'button'}"
+                    type="button"
+                    class="action-btn"
+                    th:classappend="${action.variant} ? 'action-btn--' + ${action.variant} : ''"
+                    th:title="${action.title}"
+                    th:data-action="${action.action}"
+                    th:data-id="${action.id}">
+                <img th:src="@{'/images/icons/' + ${action.icon} + '.png'}" alt="" class="icon">
+            </button>
+            <a th:if="${action.type == 'link'}"
+               th:href="${action.href}"
+               class="action-btn"
+               th:classappend="${action.variant} ? 'action-btn--' + ${action.variant} : ''"
+               th:title="${action.title}">
+                <img th:src="@{'/images/icons/' + ${action.icon} + '.png'}" alt="" class="icon">
+            </a>
+        </th:block>
+    </div>
+</th:block>
+
+<!-- ==================== FORMULÁRIOS ==================== -->
+
+<!-- Campo de Input -->
+<th:block th:fragment="inputField(field)">
+    <div class="form-group" th:classappend="${#fields.hasErrors(field.name)} ? 'has-error' : ''">
+        <label th:for="${field.id}" class="form-label">
+            <span th:text="${field.label}">Label</span>
+            <span th:if="${field.required}" class="required-mark">*</span>
+        </label>
+        <div class="input-wrapper">
+            <img th:if="${field.icon}" 
+                 th:src="@{'/images/icons/' + ${field.icon} + '.png'}" 
+                 alt="" 
+                 class="icon input-icon">
+            <input th:type="${field.type} ?: 'text'"
+                   th:id="${field.id}"
+                   th:name="${field.name}"
+                   th:value="${field.value}"
+                   th:placeholder="${field.placeholder}"
+                   th:required="${field.required}"
+                   th:disabled="${field.disabled}"
+                   th:readonly="${field.readonly}"
+                   th:class="'form-input' + (${field.icon} ? ' has-icon' : '')"
+                   th:attr="data-mask=${field.mask}">
+            <button th:if="${field.type == 'password'}" 
+                    type="button" 
+                    class="password-toggle"
+                    aria-label="Mostrar/ocultar senha">
+                <img th:src="@{/images/icons/eye.png}" alt="" class="icon icon-show">
+                <img th:src="@{/images/icons/eye-off.png}" alt="" class="icon icon-hide">
+            </button>
+        </div>
+        <span th:if="${field.hint}" class="form-hint" th:text="${field.hint}">Dica</span>
+        <span th:if="${#fields.hasErrors(field.name)}" 
+              class="form-error" 
+              th:errors="*{__${field.name}__}">Erro</span>
+    </div>
+</th:block>
+
+<!-- Campo Select -->
+<th:block th:fragment="selectField(field, options)">
+    <div class="form-group" th:classappend="${#fields.hasErrors(field.name)} ? 'has-error' : ''">
+        <label th:for="${field.id}" class="form-label">
+            <span th:text="${field.label}">Label</span>
+            <span th:if="${field.required}" class="required-mark">*</span>
+        </label>
+        <div class="select-wrapper">
+            <img th:if="${field.icon}" 
+                 th:src="@{'/images/icons/' + ${field.icon} + '.png'}" 
+                 alt="" 
+                 class="icon select-icon">
+            <select th:id="${field.id}"
+                    th:name="${field.name}"
+                    th:required="${field.required}"
+                    th:disabled="${field.disabled}"
+                    th:class="'form-select' + (${field.icon} ? ' has-icon' : '')">
+                <option value="" th:if="${field.placeholder}" th:text="${field.placeholder}">Selecione...</option>
+                <option th:each="opt : ${options}"
+                        th:value="${opt.value}"
+                        th:text="${opt.label}"
+                        th:selected="${opt.value == field.value}">Opção</option>
+            </select>
+            <img th:src="@{/images/icons/chevron-down.png}" alt="" class="icon select-arrow">
+        </div>
+        <span th:if="${field.hint}" class="form-hint" th:text="${field.hint}">Dica</span>
+        <span th:if="${#fields.hasErrors(field.name)}" 
+              class="form-error" 
+              th:errors="*{__${field.name}__}">Erro</span>
+    </div>
+</th:block>
+
+<!-- Campo Textarea -->
+<th:block th:fragment="textareaField(field)">
+    <div class="form-group" th:classappend="${#fields.hasErrors(field.name)} ? 'has-error' : ''">
+        <label th:for="${field.id}" class="form-label">
+            <span th:text="${field.label}">Label</span>
+            <span th:if="${field.required}" class="required-mark">*</span>
+        </label>
+        <textarea th:id="${field.id}"
+                  th:name="${field.name}"
+                  th:placeholder="${field.placeholder}"
+                  th:required="${field.required}"
+                  th:disabled="${field.disabled}"
+                  th:readonly="${field.readonly}"
+                  th:rows="${field.rows} ?: 4"
+                  class="form-textarea"
+                  th:text="${field.value}"></textarea>
+        <span th:if="${field.hint}" class="form-hint" th:text="${field.hint}">Dica</span>
+        <span th:if="${#fields.hasErrors(field.name)}" 
+              class="form-error" 
+              th:errors="*{__${field.name}__}">Erro</span>
+    </div>
+</th:block>
+
+<!-- Checkbox -->
+<th:block th:fragment="checkbox(field)">
+    <div class="form-check">
+        <input type="checkbox"
+               th:id="${field.id}"
+               th:name="${field.name}"
+               th:checked="${field.checked}"
+               th:disabled="${field.disabled}"
+               class="form-check-input">
+        <label th:for="${field.id}" class="form-check-label" th:text="${field.label}">Label</label>
+    </div>
+</th:block>
+
+<!-- Radio Group -->
+<th:block th:fragment="radioGroup(field, options)">
+    <div class="form-group">
+        <span class="form-label" th:text="${field.label}">Label</span>
+        <div class="radio-group" th:classappend="${field.inline} ? 'radio-group--inline' : ''">
+            <div th:each="opt : ${options}" class="form-radio">
+                <input type="radio"
+                       th:id="${field.id + '-' + opt.value}"
+                       th:name="${field.name}"
+                       th:value="${opt.value}"
+                       th:checked="${opt.value == field.value}"
+                       th:disabled="${field.disabled}"
+                       class="form-radio-input">
+                <label th:for="${field.id + '-' + opt.value}" class="form-radio-label" th:text="${opt.label}">Opção</label>
+            </div>
+        </div>
+    </div>
+</th:block>
+
+<!-- ==================== ALERTAS ==================== -->
+
+<!-- Alert -->
+<th:block th:fragment="alert(type, message, dismissible)">
+    <div class="alert" th:classappend="'alert--' + ${type}" role="alert">
+        <img th:src="@{'/images/icons/alert-' + ${type} + '.png'}" alt="" class="icon alert-icon">
+        <div class="alert-content">
+            <span class="alert-message" th:text="${message}">Mensagem do alerta</span>
+        </div>
+        <button th:if="${dismissible}" type="button" class="alert-close" aria-label="Fechar">
+            <img th:src="@{/images/icons/x.png}" alt="" class="icon">
+        </button>
+    </div>
+</th:block>
+
+<!-- ==================== BADGES E STATUS ==================== -->
+
+<!-- Badge -->
+<th:block th:fragment="badge(text, variant, icon)">
+    <span class="badge" th:classappend="'badge--' + ${variant}">
+        <img th:if="${icon}" th:src="@{'/images/icons/' + ${icon} + '.png'}" alt="" class="icon icon-xs">
+        <span th:text="${text}">Badge</span>
+    </span>
+</th:block>
+
+<!-- Status -->
+<th:block th:fragment="status(status, label)">
+    <span class="status" th:classappend="'status--' + ${status}">
+        <span class="status-dot"></span>
+        <span class="status-label" th:text="${label}">Status</span>
+    </span>
+</th:block>
+
+<!-- ==================== AVATAR ==================== -->
+
+<!-- Avatar -->
+<th:block th:fragment="avatar(src, alt, size, status)">
+    <div class="avatar" th:classappend="${size} ? 'avatar--' + ${size} : ''">
+        <img th:src="${src} ?: @{/images/icons/default-avatar.png}" th:alt="${alt}" class="avatar-img">
+        <span th:if="${status}" class="avatar-status" th:classappend="'avatar-status--' + ${status}"></span>
+    </div>
+</th:block>
+
+<!-- Avatar com Info -->
+<th:block th:fragment="avatarWithInfo(user, size)">
+    <div class="avatar-info">
+        <div class="avatar" th:classappend="${size} ? 'avatar--' + ${size} : ''">
+            <img th:src="${user.avatarUrl} ?: @{/images/icons/default-avatar.png}" 
+                 th:alt="${user.nome}" 
+                 class="avatar-img">
+        </div>
+        <div class="avatar-details">
+            <span class="avatar-name" th:text="${user.nome}">Nome</span>
+            <span class="avatar-role" th:text="${user.cargo}">Cargo</span>
+        </div>
+    </div>
+</th:block>
+
+<!-- ==================== EMPTY STATE ==================== -->
+
+<!-- Estado Vazio -->
+<th:block th:fragment="emptyState(icon, title, description, actionText, actionUrl)">
+    <div class="empty-state">
+        <div class="empty-state-icon">
+            <img th:src="@{'/images/icons/' + ${icon} + '.png'}" alt="" class="icon icon-xl">
+        </div>
+        <h3 class="empty-state-title" th:text="${title}">Nenhum dado encontrado</h3>
+        <p class="empty-state-description" th:text="${description}">Descrição do estado vazio</p>
+        <a th:if="${actionUrl}" th:href="${actionUrl}" class="btn btn--primary">
+            <img th:src="@{/images/icons/plus.png}" alt="" class="icon btn-icon">
+            <span th:text="${actionText}">Adicionar</span>
+        </a>
+    </div>
+</th:block>
+
+<!-- ==================== LOADING ==================== -->
+
+<!-- Spinner -->
+<th:block th:fragment="spinner(size)">
+    <div class="spinner" th:classappend="${size} ? 'spinner--' + ${size} : ''">
+        <img th:src="@{/images/icons/spinner.png}" alt="Carregando..." class="spinner-icon">
+    </div>
+</th:block>
+
+<!-- Loading Overlay -->
+<th:block th:fragment="loadingOverlay">
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <img th:src="@{/images/icons/spinner.png}" alt="" class="spinner-icon spinner-icon--lg">
+            <span class="loading-text">Carregando...</span>
+        </div>
+    </div>
+</th:block>
+
+</html>

@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: html(~{::head/content()}, ~{::main-content})}">
+<head>
+    <title>Funcionários - Sistema RH</title>
+</head>
+<body>
+
+<th:block th:fragment="main-content">
+    
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="page-header-content">
+            <h1 class="page-title">Funcionários</h1>
+            <p class="page-subtitle">Gerencie os funcionários da empresa</p>
+        </div>
+        <div class="page-header-actions">
+            <button type="button" class="btn btn--secondary" id="exportBtn">
+                <img th:src="@{/images/icons/download.png}" alt="" class="icon btn-icon">
+                <span>Exportar</span>
+            </button>
+            <a th:href="@{/funcionarios/novo}" class="btn btn--primary">
+                <img th:src="@{/images/icons/user-plus.png}" alt="" class="icon btn-icon">
+                <span>Novo Funcionário</span>
+            </a>
+        </div>
+    </div>
+    
+    <!-- Filtros -->
+    <section class="card filter-card">
+        <div class="card-body">
+            <form th:action="@{/funcionarios}" method="get" class="filter-form">
+                <div class="filter-grid">
+                    
+                    <!-- Busca -->
+                    <div class="form-group">
+                        <label for="search" class="form-label">Buscar</label>
+                        <div class="input-wrapper">
+                            <img th:src="@{/images/icons/search.png}" alt="" class="icon input-icon">
+                            <input type="search" 
+                                   id="search" 
+                                   name="search" 
+                                   th:value="${filtro.search}"
+                                   class="form-input has-icon" 
+                                   placeholder="Nome, CPF, matrícula...">
+                        </div>
+                    </div>
+                    
+                    <!-- Departamento -->
+                    <div class="form-group">
+                        <label for="departamento" class="form-label">Departamento</label>
+                        <div class="select-wrapper">
+                            <select id="departamento" name="departamentoId" class="form-select">
+                                <option value="">Todos</option>
+                                <option th:each="dep : ${departamentos}"
+                                        th:value="${dep.id}"
+                                        th:text="${dep.nome}"
+                                        th:selected="${dep.id == filtro.departamentoId}">Departamento</option>
+                            </select>
+                            <img th:src="@{/images/icons/chevron-down.png}" alt="" class="icon select-arrow">
+                        </div>
+                    </div>
+                    
+                    <!-- Cargo -->
+                    <div class="form-group">
+                        <label for="cargo" class="form-label">Cargo</label>
+                        <div class="select-wrapper">
+                            <select id="cargo" name="cargoId" class="form-select">
+                                <option value="">Todos</option>
+                                <option th:each="cargo : ${cargos}"
+                                        th:value="${cargo.id}"
+                                        th:text="${cargo.nome}"
+                                        th:selected="${cargo.id == filtro.cargoId}">Cargo</option>
+                            </select>
+                            <img th:src="@{/images/icons/chevron-down.png}" alt="" class="icon select-arrow">
+                        </div>
+                    </div>
+                    
+                    <!-- Status -->
+                    <div class="form-group">
+                        <label for="status" class="form-label">Status</label>
+                        <div class="select-wrapper">
+                            <select id="status" name="status" class="form-select">
+                                <option value="">Todos</option>
+                                <option value="ATIVO" th:selected="${filtro.status == 'ATIVO'}">Ativo</option>
+                                <option value="INATIVO" th:selected="${filtro.status == 'INATIVO'}">Inativo</option>
+                                <option value="FERIAS" th:selected="${filtro.status == 'FERIAS'}">Em Férias</option>
+                                <option value="AFASTADO" th:selected="${filtro.status == 'AFASTADO'}">Afastado</option>
+                            </select>
+                            <img th:src="@{/images/icons/chevron-down.png}" alt="" class="icon select-arrow">
+                        </div>
+                    </div>
+                    
+                </div>
+                
+                <div class="filter-actions">
+                    <a th:href="@{/funcionarios}" class="btn btn--secondary">
+                        <img th:src="@{/images/icons/x.png}" alt="" class="icon btn-icon">
+                        <span>Limpar</span>
+                    </a>
+                    <button type="submit" class="btn btn--primary">
+                        <img th:src="@{/images/icons/filter.png}" alt="" class="icon btn-icon">
+                        <span>Filtrar</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </section>
+    
+    <!-- Tabela de Funcionários -->
+    <section class="card">
+        <div class="card-body card-body--no-padding">
+            <div class="table-responsive">
+                <table class="data-table" id="funcionariosTable">
+                    <thead>
+                        <tr>
+                            <th class="sortable" data-sort="nome">
+                                <span>Funcionário</span>
+                                <img th:src="@{/images/icons/sort.png}" alt="" class="icon icon-xs sort-icon">
+                            </th>
+                            <th class="sortable" data-sort="matricula">
+                                <span>Matrícula</span>
+                                <img th:src="@{/images/icons/sort.png}" alt="" class="icon icon-xs sort-icon">
+                            </th>
+                            <th class="sortable" data-sort="departamento">
+                                <span>Departamento</span>
+                                <img th:src="@{/images/icons/sort.png}" alt="" class="icon icon-xs sort-icon">
+                            </th>
+                            <th class="sortable" data-sort="cargo">
+                                <span>Cargo</span>
+                                <img th:src="@{/images/icons/sort.png}" alt="" class="icon icon-xs sort-icon">
+                            </th>
+                            <th class="sortable" data-sort="dataAdmissao">
+                                <span>Data Admissão</span>
+                                <img th:src="@{/images/icons/sort.png}" alt="" class="icon icon-xs sort-icon">
+                            </th>
+                            <th>Status</th>
+                            <th class="col-actions">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="func : ${funcionarios.content}" th:data-id="${func.id}">
+                            <!-- Funcionário -->
+                            <td>
+                                <div class="table-user">
+                                    <div class="avatar avatar--sm">
+                                        <img th:src="${func.fotoUrl} ?: @{/images/icons/default-avatar.png}" 
+                                             th:alt="${func.nome}" 
+                                             class="avatar-img">
+                                    </div>
+                                    <div class="table-user-info">
+                                        <span class="table-user-name" th:text="${func.nome}">Nome do Funcionário</span>
+                                        <span class="table-user-email" th:text="${func.email}">email@empresa.com</span>
+                                    </div>
+                                </div>
+                            </td>
+                            
+                            <!-- Matrícula -->
+                            <td>
+                                <span class="table-code" th:text="${func.matricula}">00001</span>
+                            </td>
+                            
+                            <!-- Departamento -->
+                            <td>
+                                <div class="table-department">
+                                    <img th:src="@{/images/icons/building.png}" alt="" class="icon icon-sm">
+                                    <span th:text="${func.departamento.nome}">Departamento</span>
+                                </div>
+                            </td>
+                            
+                            <!-- Cargo -->
+                            <td th:text="${func.cargo.nome}">Cargo</td>
+                            
+                            <!-- Data Admissão -->
+                            <td th:text="${#temporals.format(func.dataAdmissao, 'dd/MM/yyyy')}">01/01/2024</td>
+                            
+                            <!-- Status -->
+                            <td>
+                                <span class="status" th:classappend="'status--' + ${func.status.toLowerCase()}">
+                                    <span class="status-dot"></span>
+                                    <span class="status-label" th:text="${func.statusLabel}">Ativo</span>
+                                </span>
+                            </td>
+                            
+                            <!-- Ações -->
+                            <td>
+                                <div class="action-group">
+                                    <a th:href="@{/funcionarios/{id}(id=${func.id})}" 
+                                       class="action-btn" 
+                                       title="Visualizar">
+                                        <img th:src="@{/images/icons/eye.png}" alt="Visualizar" class="icon">
+                                    </a>
+                                    <a th:href="@{/funcionarios/{id}/editar(id=${func.id})}" 
+                                       class="action-btn" 
+                                       title="Editar">
+                                        <img th:src="@{/images/icons/edit.png}" alt="Editar" class="icon">
+                                    </a>
+                                    <button type="button" 
+                                            class="action-btn action-btn--danger" 
+                                            title="Excluir"
+                                            data-action="delete"
+                                            th:data-id="${func.id}"
+                                            th:data-name="${func.nome}">
+                                        <img th:src="@{/images/icons/trash.png}" alt="Excluir" class="icon">
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Empty State -->
+            <div class="empty-state" th:if="${funcionarios.content.empty}">
+                <div class="empty-state-icon">
+                    <img th:src="@{/images/icons/users.png}" alt="" class="icon icon-xl">
+                </div>
+                <h3 class="empty-state-title">Nenhum funcionário encontrado</h3>
+                <p class="empty-state-description">
+                    Não encontramos funcionários com os filtros selecionados.
+                </p>
+                <a th:href="@{/funcionarios/novo}" class="btn btn--primary">
+                    <img th:src="@{/images/icons/user-plus.png}" alt="" class="icon btn-icon">
+                    <span>Adicionar Funcionário</span>
+                </a>
+            </div>
+        </div>
+        
+        <!-- Paginação -->
+        <div class="card-footer" th:if="${!funcionarios.content.empty}">
+            <div class="table-info">
+                <span>Mostrando </span>
+                <strong th:text="${funcionarios.number * funcionarios.size + 1}">1</strong>
+                <span> a </span>
+                <strong th:text="${funcionarios.number * funcionarios.size + funcionarios.numberOfElements}">10</strong>
+                <span> de </span>
+                <strong th:text="${funcionarios.totalElements}">100</strong>
+                <span> funcionários</span>
+            </div>
+            
+            <nav class="pagination" aria-label="Paginação" th:if="${funcionarios.totalPages > 1}">
+                <ul class="pagination-list">
+                    <!-- Primeira -->
+                    <li class="pagination-item" th:classappend="${funcionarios.first} ? 'disabled' : ''">
+                        <a th:href="@{/funcionarios(page=0, ${filtroParams})}" class="pagination-link" aria-label="Primeira">
+                            <img th:src="@{/images/icons/chevrons-left.png}" alt="" class="icon icon-sm">
+                        </a>
+                    </li>
+                    
+                    <!-- Anterior -->
+                    <li class="pagination-item" th:classappend="${funcionarios.first} ? 'disabled' : ''">
+                        <a th:href="@{/funcionarios(page=${funcionarios.number - 1}, ${filtroParams})}" class="pagination-link" aria-label="Anterior">
+                            <img th:src="@{/images/icons/chevron-left.png}" alt="" class="icon icon-sm">
+                        </a>
+                    </li>
+                    
+                    <!-- Páginas -->
+                    <th:block th:each="i : ${#numbers.sequence(paginacao.inicio, paginacao.fim)}">
+                        <li class="pagination-item" th:classappend="${i == funcionarios.number} ? 'active' : ''">
+                            <a th:href="@{/funcionarios(page=${i}, ${filtroParams})}" 
+                               class="pagination-link"
+                               th:text="${i + 1}">1</a>
+                        </li>
+                    </th:block>
+                    
+                    <!-- Próxima -->
+                    <li class="pagination-item" th:classappend="${funcionarios.last} ? 'disabled' : ''">
+                        <a th:href="@{/funcionarios(page=${funcionarios.number + 1}, ${filtroParams})}" class="pagination-link" aria-label="Próxima">
+                            <img th:src="@{/images/icons/chevron-right.png}" alt="" class="icon icon-sm">
+                        </a>
+                    </li>
+                    
+                    <!-- Última -->
+                    <li class="pagination-item" th:classappend="${funcionarios.last} ? 'disabled' : ''">
+                        <a th:href="@{/funcionarios(page=${funcionarios.totalPages - 1}, ${filtroParams})}" class="pagination-link" aria-label="Última">
+                            <img th:src="@{/images/icons/chevrons-right.png}" alt="" class="icon icon-sm">
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </section>
+    
+    <!-- Modal de Exclusão -->
+    <th:block th:replace="~{fragments/modals :: deleteModal}"></th:block>
+    
+</th:block>
+
+</body>
+</html>

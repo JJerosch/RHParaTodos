@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+<head>
+    <title th:text="${departamento.id != null} ? 'Editar Departamento' : 'Novo Departamento'">Novo Departamento - Sistema RH</title>
+</head>
+<body>
+    <div th:replace="~{layout/base :: layout(~{::content})}">
+        <th:block th:fragment="content">
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="page-header-content">
+                    <a th:href="@{/departamentos}" class="btn btn--ghost back-btn" title="Voltar">
+                        <img th:src="@{/images/icons/arrow-left.png}" alt="" class="icon">
+                    </a>
+                    <div>
+                        <h1 class="page-title" th:text="${departamento.id != null} ? 'Editar Departamento' : 'Novo Departamento'">
+                            Novo Departamento
+                        </h1>
+                        <p class="page-subtitle" th:if="${departamento.id != null}" th:text="${departamento.nome}">
+                            Tecnologia da Informação
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form -->
+            <form th:action="${departamento.id != null} ? @{/departamentos/{id}(id=${departamento.id})} : @{/departamentos}"
+                  th:object="${departamento}"
+                  method="post"
+                  class="form-page"
+                  data-validate>
+                
+                <input type="hidden" name="_csrf" th:value="${_csrf.token}">
+                <input type="hidden" th:if="${departamento.id != null}" name="_method" value="PUT">
+
+                <!-- Basic Info Section -->
+                <div class="card form-section">
+                    <div class="card-header">
+                        <div class="card-title-wrapper">
+                            <img th:src="@{/images/icons/building.png}" alt="" class="icon card-icon">
+                            <h2 class="card-title">Informações do Departamento</h2>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-grid">
+                            <!-- Nome -->
+                            <div class="form-group form-group--lg">
+                                <label for="nome" class="form-label">
+                                    Nome do Departamento
+                                    <span class="required-mark">*</span>
+                                </label>
+                                <input type="text" 
+                                       id="nome" 
+                                       th:field="*{nome}"
+                                       class="form-input"
+                                       th:classappend="${#fields.hasErrors('nome')} ? 'is-invalid'"
+                                       placeholder="Ex: Tecnologia da Informação"
+                                       required
+                                       maxlength="100">
+                                <span class="form-error" th:if="${#fields.hasErrors('nome')}" th:errors="*{nome}">
+                                    Erro no campo
+                                </span>
+                            </div>
+                            
+                            <!-- Sigla -->
+                            <div class="form-group">
+                                <label for="sigla" class="form-label">Sigla</label>
+                                <input type="text" 
+                                       id="sigla" 
+                                       th:field="*{sigla}"
+                                       class="form-input"
+                                       placeholder="Ex: TI"
+                                       maxlength="10">
+                            </div>
+                            
+                            <!-- Gestor -->
+                            <div class="form-group">
+                                <label for="gestorId" class="form-label">Gestor</label>
+                                <div class="select-wrapper">
+                                    <img th:src="@{/images/icons/user.png}" alt="" class="icon select-icon">
+                                    <select id="gestorId" 
+                                            th:field="*{gestorId}"
+                                            class="form-select has-icon">
+                                        <option value="">Selecione um gestor</option>
+                                        <option th:each="func : ${funcionarios}" 
+                                                th:value="${func.id}" 
+                                                th:text="${func.nome}">
+                                            João Silva
+                                        </option>
+                                    </select>
+                                    <img th:src="@{/images/icons/chevron-down.png}" alt="" class="icon select-arrow">
+                                </div>
+                            </div>
+                            
+                            <!-- Centro de Custo -->
+                            <div class="form-group">
+                                <label for="centroCusto" class="form-label">Centro de Custo</label>
+                                <input type="text" 
+                                       id="centroCusto" 
+                                       th:field="*{centroCusto}"
+                                       class="form-input"
+                                       placeholder="Ex: CC-001"
+                                       maxlength="20">
+                            </div>
+                            
+                            <!-- Departamento Pai -->
+                            <div class="form-group">
+                                <label for="departamentoPaiId" class="form-label">Departamento Superior</label>
+                                <div class="select-wrapper">
+                                    <img th:src="@{/images/icons/building.png}" alt="" class="icon select-icon">
+                                    <select id="departamentoPaiId" 
+                                            th:field="*{departamentoPaiId}"
+                                            class="form-select has-icon">
+                                        <option value="">Nenhum (Departamento Raiz)</option>
+                                        <option th:each="dept : ${departamentosPai}" 
+                                                th:value="${dept.id}" 
+                                                th:text="${dept.nome}"
+                                                th:if="${departamento.id == null or dept.id != departamento.id}">
+                                            Diretoria
+                                        </option>
+                                    </select>
+                                    <img th:src="@{/images/icons/chevron-down.png}" alt="" class="icon select-arrow">
+                                </div>
+                            </div>
+                            
+                            <!-- Status -->
+                            <div class="form-group">
+                                <label for="ativo" class="form-label">Status</label>
+                                <div class="select-wrapper">
+                                    <select id="ativo" 
+                                            th:field="*{ativo}"
+                                            class="form-select">
+                                        <option value="true">Ativo</option>
+                                        <option value="false">Inativo</option>
+                                    </select>
+                                    <img th:src="@{/images/icons/chevron-down.png}" alt="" class="icon select-arrow">
+                                </div>
+                            </div>
+                            
+                            <!-- Descrição -->
+                            <div class="form-group form-group--full">
+                                <label for="descricao" class="form-label">Descrição</label>
+                                <textarea id="descricao" 
+                                          th:field="*{descricao}"
+                                          class="form-textarea"
+                                          placeholder="Descreva as responsabilidades e atribuições do departamento..."
+                                          rows="4"
+                                          maxlength="500"></textarea>
+                                <span class="form-hint">Máximo de 500 caracteres</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact Info Section -->
+                <div class="card form-section">
+                    <div class="card-header">
+                        <div class="card-title-wrapper">
+                            <img th:src="@{/images/icons/phone.png}" alt="" class="icon card-icon">
+                            <h2 class="card-title">Contato</h2>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-grid">
+                            <!-- Email -->
+                            <div class="form-group">
+                                <label for="email" class="form-label">E-mail do Departamento</label>
+                                <div class="input-wrapper">
+                                    <img th:src="@{/images/icons/mail.png}" alt="" class="icon input-icon">
+                                    <input type="email" 
+                                           id="email" 
+                                           th:field="*{email}"
+                                           class="form-input has-icon"
+                                           placeholder="departamento@empresa.com">
+                                </div>
+                            </div>
+                            
+                            <!-- Telefone -->
+                            <div class="form-group">
+                                <label for="telefone" class="form-label">Ramal/Telefone</label>
+                                <div class="input-wrapper">
+                                    <img th:src="@{/images/icons/phone.png}" alt="" class="icon input-icon">
+                                    <input type="text" 
+                                           id="telefone" 
+                                           th:field="*{telefone}"
+                                           class="form-input has-icon"
+                                           placeholder="(00) 0000-0000"
+                                           data-mask="phone">
+                                </div>
+                            </div>
+                            
+                            <!-- Localização -->
+                            <div class="form-group">
+                                <label for="localizacao" class="form-label">Localização/Sala</label>
+                                <div class="input-wrapper">
+                                    <img th:src="@{/images/icons/map-pin.png}" alt="" class="icon input-icon">
+                                    <input type="text" 
+                                           id="localizacao" 
+                                           th:field="*{localizacao}"
+                                           class="form-input has-icon"
+                                           placeholder="Ex: Prédio A, 3º andar, Sala 301">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="form-actions">
+                    <a th:href="@{/departamentos}" class="btn btn--secondary">
+                        <img th:src="@{/images/icons/x.png}" alt="" class="icon btn-icon">
+                        <span>Cancelar</span>
+                    </a>
+                    <button type="submit" class="btn btn--primary">
+                        <img th:src="@{/images/icons/save.png}" alt="" class="icon btn-icon">
+                        <span th:text="${departamento.id != null} ? 'Salvar Alterações' : 'Cadastrar Departamento'">
+                            Cadastrar Departamento
+                        </span>
+                    </button>
+                </div>
+            </form>
+        </th:block>
+    </div>
+</body>
+</html>

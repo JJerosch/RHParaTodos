@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<!-- Fragment: Sidebar completa -->
+<aside th:fragment="sidebar" class="sidebar" id="sidebar">
+    
+    <!-- Logo/Brand -->
+    <div class="sidebar-header">
+        <a th:href="@{/dashboard}" class="brand-link">
+            <img th:src="@{/images/icons/logo.png}" alt="Logo" class="brand-logo">
+            <span class="brand-text">Sistema RH</span>
+        </a>
+        <button type="button" class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle Sidebar">
+            <img th:src="@{/images/icons/menu-toggle.png}" alt="" class="icon icon-toggle">
+        </button>
+    </div>
+    
+    <!-- Navigation -->
+    <nav class="sidebar-nav">
+        <ul class="nav-list">
+            
+            <!-- Dashboard -->
+            <li class="nav-item" th:classappend="${activePage == 'dashboard'} ? 'active' : ''">
+                <a th:href="@{/dashboard}" class="nav-link">
+                    <span class="nav-icon">
+                        <img th:src="@{/images/icons/dashboard.png}" alt="" class="icon">
+                    </span>
+                    <span class="nav-text">Dashboard</span>
+                </a>
+            </li>
+            
+            <!-- Funcionários -->
+            <li class="nav-item has-submenu" th:classappend="${activePage == 'funcionarios'} ? 'active' : ''">
+                <a href="#" class="nav-link submenu-toggle">
+                    <span class="nav-icon">
+                        <img th:src="@{/images/icons/employees.png}" alt="" class="icon">
+                    </span>
+                    <span class="nav-text">Funcionários</span>
+                    <span class="nav-arrow">
+                        <img th:src="@{/images/icons/arrow-down.png}" alt="" class="icon icon-arrow">
+                    </span>
+                </a>
+                <ul class="submenu">
+                    <li class="submenu-item" th:classappend="${activeSubPage == 'lista-funcionarios'} ? 'active' : ''">
+                        <a th:href="@{/funcionarios}" class="submenu-link">
+                            <span class="submenu-icon">
+                                <img th:src="@{/images/icons/list.png}" alt="" class="icon icon-sm">
+                            </span>
+                            <span class="submenu-text">Lista de Funcionários</span>
+                        </a>
+                    </li>
+                    <li class="submenu-item" th:classappend="${activeSubPage == 'novo-funcionario'} ? 'active' : ''">
+                        <a th:href="@{/funcionarios/novo}" class="submenu-link">
+                            <span class="submenu-icon">
+                                <img th:src="@{/images/icons/add-user.png}" alt="" class="icon icon-sm">
+                            </span>
+                            <span class="submenu-text">Novo Funcionário</span>
+                        </a>
+                    </li>
+                    <li class="submenu-item" th:classappend="${activeSubPage == 'organograma'} ? 'active' : ''">
+                        <a th:href="@{/funcionarios/organograma}" class="submenu-link">
+                            <span class="submenu-icon">
+                                <img th:src="@{/images/icons/org-chart.png}" alt="" class="icon icon-sm">
+                            </span>
+                            <span class="submenu-text">Organograma</span>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+            
+            <!-- Departamentos -->
+            <li class="nav-item has-submenu" th:classappend="${activePage == 'departamentos'} ? 'active' : ''">
+                <a href="#" class="nav-link submenu-toggle">
+                    <span class="nav-icon">
+                        <img th:src="@{/images/icons/departments.png}" alt="" class="icon">
+                    </span>
+                    <span class="nav-text">Departamentos</span>
+                    <span class="nav-arrow">
+                        <img th:src="@{/images/icons/arrow-down.png}" alt="" class="icon icon-arrow">
+                    </span>
+                </a>
+                <ul class="submenu">
+                    <li class="submenu-item" th:classappend="${activeSubPage == 'lista-departamentos'} ? 'active' : ''">
+                        <a th:href="@{/departamentos}" class="submenu-link">
+                            <span class="submenu-icon">
+                                <img th:src="@{/images/icons/list.png}" alt="" class="icon icon-sm">
+                            </span>
+                            <span class="submenu-text">Lista de Departamentos</span>
+                        </a>
+                    </li>
+                    <li class="submenu-item" th:classappend="${activeSubPage == 'novo-departamento'} ? 'active' : ''">
+                        <a th:href="@{/departamentos/novo}" class="submenu-link">
+                            <span class="submenu-icon">
+                                <img th:src="@{/images/icons/add-folder.png}" alt="" class="icon icon-sm">
+                            </span>
+                            <span class="submenu-text">Novo Departamento</span>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+            
+            <!-- Cargos -->
+            <li class="nav-item has-submenu" th:classappend="${activePage == 'cargos'} ? 'active' : ''">
+                <a href="#" class="nav-link submenu-toggle">
+                    <span class="nav-icon">
+                        <img th:src="@{/images/icons/positions.png}" alt="" class="icon">
+                    </span>
+                    <span class="nav-text">Cargos</span>
+                    <span class="nav-arrow">
+                        <img th:src="@{/images/icons/arrow-down.png}" alt="" class="icon icon-arrow">
+                    </span>
+                </a>
+                <ul class="submenu">
+                    <li class="submenu-item" th:classappend="${activeSubPage == 'lista-cargos'} ? 'active' : ''">
+                        <a th:href="@{/cargos}" class="submenu-link">
+                            <span class="submenu-icon">
+                                <img th:src="@{/images/icons/list.png}" alt="" class="icon icon-sm">
+                            </span>
+                            <span class="submenu-text">Lista de Cargos</span>
+                        </a>
+                    </li>
+                    <li class="submenu-item" th:classappend="${activeSubPage == 'novo-cargo'} ? 'active' : ''">
+                        <a th:href="@{/cargos/novo}" class="submenu-link">
+                            <span class="submenu-icon">
+                                <img th:src="@{/images/icons/add-badge.png}" alt="" class="icon icon-sm">
+                            </span>
+                            <span class="submenu-text">Novo Cargo</span>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+            
+            <!-- Folha de Pagamento -->
+            <li class="nav-item has-submenu" th:classappend="${activePage == 'folha'} ? 'active' : ''">
+                <a href="#" class="nav-link submenu-toggle">
+                    <span class="nav-icon">
+                        <img th:src="@{/images/icons/payroll.png}" alt="" class="icon">
+                    </span>
+                    <span class="nav-text">Folha de Pagamento</span>
+                    <span class="nav-arrow">
+                        <img th:src="@{/images/icons/arrow-down.png}" alt="" class="icon icon-arrow">
+                    </span>
+                </a>
+                <ul class="submenu">
+                    <li class="submenu-item" th:classappend="${activeSubPage == 'folha-mensal'} ? 'active' : ''">
+                        <a th:href="@{/folha}" class="submenu-link">
+                            <span class="submenu-icon">
+                                <img th:src="@{/images/icons/calendar.png}" alt="" class="icon icon-sm">
+                            </span>
+                            <span class="submenu-text">Folha Mensal</span>
+                        </a>
+                    </li>
+                    <li class="submenu-item" th:classappend="${activeSubPage == 'holerites'} ? 'active' : ''">
+                        <a th:href="@{/folha/holerites}" class="submenu-link">
+                            <span class="submenu-icon">
+                                <img th:src="@{/images/icons/receipt.png}" alt="" class="icon icon-sm">
+                            </span>
+                            <span class="submenu-text">Holerites</span>
+                        </a>
+                    </li>
+                    <li class="submenu-item" th:classappend="${activeSubPage == 'beneficios'} ? 'active' : ''">
+                        <a th:href="@{/folha/beneficios}" class="submenu-link">
+                            <span class="submenu-icon">
+                                <img th:src="@{/images/icons/benefits.png}" alt="" class="icon icon-sm">
+                            </span>
+                            <span class="submenu-text">Benefícios</span>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+            
+            <!-- Ponto -->
+            <li class="nav-item has-submenu" th:classappend="${activePage == 'ponto'} ? 'active' : ''">
+                <a href="#" class="nav-link submenu-toggle">
+                    <span class="nav-icon">
+                        <img th:src="@{/images/icons/time-clock.png}" alt="" class="icon">
+                    </span>
+                    <span class="nav-text">Ponto</span>
+                    <span class="nav-arrow">
+                        <img th:src="@{/images/icons/arrow-down.png}" alt="" class="icon icon-arrow">
+                    </span>
+                </a>
+                <ul class="submenu">
+                    <li class="submenu-item" th:classappend="${activeSubPage == 'registros-ponto'} ? 'active' : ''">
+                        <a th:href="@{/ponto}" class="submenu-link">
+                            <span class="submenu-icon">
+                                <img th:src="@{/images/icons/clock.png}" alt="" class="icon icon-sm">
+                            </span>
+                            <span class="submenu-text">Registros de Ponto</span>
+                        </a>
+                    </li>
+                    <li class="submenu-item" th:classappend="${activeSubPage == 'banco-horas'} ? 'active' : ''">
+                        <a th:href="@{/ponto/banco-horas}" class="submenu-link">
+                            <span class="submenu-icon">
+                                <img th:src="@{/images/icons/hourglass.png}" alt="" class="icon icon-sm">
+                            </span>
+                            <span class="submenu-text">Banco de Horas</span>
+                        </a>
+                    </li>
+                    <li class="submenu-item" th:classappend="${activeSubPage == 'justificativas'} ? 'active' : ''">
+                        <a th:href="@{/ponto/justificativas}" class="submenu-link">
+                            <span class="submenu-icon">
+                                <img th:src="@{/images/icons/document-edit.png}" alt="" class="icon icon-sm">
+                            </span>
+                            <span class="submenu-text">Justificativas</span>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+            
+            <!-- Férias -->
+            <li class="nav-item has-submenu" th:classappend="${activePage == 'ferias'} ? 'active' : ''">
+                <a href="#" class="nav-link submenu-toggle">
+                    <span class="nav-icon">
+                        <img th:src="@{/images/icons/vacation.png}" alt="" class="icon">
+                    </span>
+                    <span class="nav-text">Férias</span>
+                    <span class="nav-arrow">
+                        <img th:src="@{/images/icons/arrow-down.png}" alt="" class="icon icon-arrow">
+                    </span>
+                </a>
+                <ul class="submenu">
+                    <li class="submenu-item" th:classappend="${activeSubPage == 'calendario-ferias'} ? 'active' : ''">
+                        <a th:href="@{/ferias}" class="submenu-link">
+                            <span class="submenu-icon">
+                                <img th:src="@{/images/icons/calendar-check.png}" alt="" class="icon icon-sm">
+                            </span>
+                            <span class="submenu-text">Calendário de Férias</span>
+                        </a>
+                    </li>
+                    <li class="submenu-item" th:classappend="${activeSubPage == 'solicitacoes-ferias'} ? 'active' : ''">
+                        <a th:href="@{/ferias/solicitacoes}" class="submenu-link">
+                            <span class="submenu-icon">
+                                <img th:src="@{/images/icons/request.png}" alt="" class="icon icon-sm">
+                            </span>
+                            <span class="submenu-text">Solicitações</span>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+            
+            <!-- Relatórios -->
+            <li class="nav-item has-submenu" th:classappend="${activePage == 'relatorios'} ? 'active' : ''">
+                <a href="#" class="nav-link submenu-toggle">
+                    <span class="nav-icon">
+                        <img th:src="@{/images/icons/reports.png}" alt="" class="icon">
+                    </span>
+                    <span class="nav-text">Relatórios</span>
+                    <span class="nav-arrow">
+                        <img th:src="@{/images/icons/arrow-down.png}" alt="" class="icon icon-arrow">
+                    </span>
+                </a>
+                <ul class="submenu">
+                    <li class="submenu-item" th:classappend="${activeSubPage == 'relatorio-funcionarios'} ? 'active' : ''">
+                        <a th:href="@{/relatorios/funcionarios}" class="submenu-link">
+                            <span class="submenu-icon">
+                                <img th:src="@{/images/icons/chart-bar.png}" alt="" class="icon icon-sm">
+                            </span>
+                            <span class="submenu-text">Funcionários</span>
+                        </a>
+                    </li>
+                    <li class="submenu-item" th:classappend="${activeSubPage == 'relatorio-folha'} ? 'active' : ''">
+                        <a th:href="@{/relatorios/folha}" class="submenu-link">
+                            <span class="submenu-icon">
+                                <img th:src="@{/images/icons/chart-line.png}" alt="" class="icon icon-sm">
+                            </span>
+                            <span class="submenu-text">Folha de Pagamento</span>
+                        </a>
+                    </li>
+                    <li class="submenu-item" th:classappend="${activeSubPage == 'relatorio-ponto'} ? 'active' : ''">
+                        <a th:href="@{/relatorios/ponto}" class="submenu-link">
+                            <span class="submenu-icon">
+                                <img th:src="@{/images/icons/chart-pie.png}" alt="" class="icon icon-sm">
+                            </span>
+                            <span class="submenu-text">Ponto</span>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+            
+            <!-- Configurações -->
+            <li class="nav-item" th:classappend="${activePage == 'configuracoes'} ? 'active' : ''">
+                <a th:href="@{/configuracoes}" class="nav-link">
+                    <span class="nav-icon">
+                        <img th:src="@{/images/icons/settings.png}" alt="" class="icon">
+                    </span>
+                    <span class="nav-text">Configurações</span>
+                </a>
+            </li>
+            
+        </ul>
+    </nav>
+    
+    <!-- Sidebar Footer -->
+    <div class="sidebar-footer">
+        <div class="user-info">
+            <div class="user-avatar">
+                <img th:src="${currentUser.avatarUrl} ?: @{/images/icons/default-avatar.png}" 
+                     th:alt="${currentUser.nome}" class="avatar-img">
+            </div>
+            <div class="user-details">
+                <span class="user-name" th:text="${currentUser.nome}">Nome do Usuário</span>
+                <span class="user-role" th:text="${currentUser.cargo}">Cargo</span>
+            </div>
+        </div>
+        <a th:href="@{/logout}" class="logout-btn" title="Sair">
+            <img th:src="@{/images/icons/logout.png}" alt="Sair" class="icon">
+        </a>
+    </div>
+</aside>
+
+<!-- Fragment: Menu Item simples -->
+<th:block th:fragment="menuItem(href, icon, text, active)">
+    <li class="nav-item" th:classappend="${active} ? 'active' : ''">
+        <a th:href="${href}" class="nav-link">
+            <span class="nav-icon">
+                <img th:src="@{'/images/icons/' + ${icon} + '.png'}" alt="" class="icon">
+            </span>
+            <span class="nav-text" th:text="${text}">Menu Item</span>
+        </a>
+    </li>
+</th:block>
+
+<!-- Fragment: Menu Item com submenu -->
+<th:block th:fragment="menuItemWithSubmenu(icon, text, active, submenuItems)">
+    <li class="nav-item has-submenu" th:classappend="${active} ? 'active' : ''">
+        <a href="#" class="nav-link submenu-toggle">
+            <span class="nav-icon">
+                <img th:src="@{'/images/icons/' + ${icon} + '.png'}" alt="" class="icon">
+            </span>
+            <span class="nav-text" th:text="${text}">Menu Item</span>
+            <span class="nav-arrow">
+                <img th:src="@{/images/icons/arrow-down.png}" alt="" class="icon icon-arrow">
+            </span>
+        </a>
+        <ul class="submenu">
+            <th:block th:each="item : ${submenuItems}">
+                <li class="submenu-item" th:classappend="${item.active} ? 'active' : ''">
+                    <a th:href="${item.href}" class="submenu-link">
+                        <span class="submenu-icon">
+                            <img th:src="@{'/images/icons/' + ${item.icon} + '.png'}" alt="" class="icon icon-sm">
+                        </span>
+                        <span class="submenu-text" th:text="${item.text}">Submenu Item</span>
+                    </a>
+                </li>
+            </th:block>
+        </ul>
+    </li>
+</th:block>
+
+</html>

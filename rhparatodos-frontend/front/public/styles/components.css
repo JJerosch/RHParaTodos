@@ -63,7 +63,7 @@
 }
 
 .search-box::before {
-  content: "🔍";
+  content: url("/front/public/assets/search.png");
   position: absolute;
   left: 12px;
   top: 50%;

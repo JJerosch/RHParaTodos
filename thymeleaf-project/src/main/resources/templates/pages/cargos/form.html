@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+<head>
+    <title th:text="${cargo.id != null} ? 'Editar Cargo' : 'Novo Cargo'">Novo Cargo - Sistema RH</title>
+</head>
+<body>
+    <div th:replace="~{layout/base :: layout(~{::content})}">
+        <th:block th:fragment="content">
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="page-header-content">
+                    <a th:href="@{/cargos}" class="btn btn--ghost back-btn" title="Voltar">
+                        <img th:src="@{/images/icons/arrow-left.png}" alt="" class="icon">
+                    </a>
+                    <div>
+                        <h1 class="page-title" th:text="${cargo.id != null} ? 'Editar Cargo' : 'Novo Cargo'">
+                            Novo Cargo
+                        </h1>
+                        <p class="page-subtitle" th:if="${cargo.id != null}" th:text="${cargo.nome}">
+                            Desenvolvedor Full Stack
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form -->
+            <form th:action="${cargo.id != null} ? @{/cargos/{id}(id=${cargo.id})} : @{/cargos}"
+                  th:object="${cargo}"
+                  method="post"
+                  class="form-page"
+                  data-validate>
+                
+                <input type="hidden" name="_csrf" th:value="${_csrf.token}">
+                <input type="hidden" th:if="${cargo.id != null}" name="_method" value="PUT">
+
+                <!-- Basic Info Section -->
+                <div class="card form-section">
+                    <div class="card-header">
+                        <div class="card-title-wrapper">
+                            <img th:src="@{/images/icons/briefcase.png}" alt="" class="icon card-icon">
+                            <h2 class="card-title">Informações do Cargo</h2>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-grid">
+                            <!-- Nome -->
+                            <div class="form-group form-group--lg">
+                                <label for="nome" class="form-label">
+                                    Nome do Cargo
+                                    <span class="required-mark">*</span>
+                                </label>
+                                <input type="text" 
+                                       id="nome" 
+                                       th:field="*{nome}"
+                                       class="form-input"
+                                       th:classappend="${#fields.hasErrors('nome')} ? 'is-invalid'"
+                                       placeholder="Ex: Desenvolvedor Full Stack"
+                                       required
+                                       maxlength="100">
+                                <span class="form-error" th:if="${#fields.hasErrors('nome')}" th:errors="*{nome}">
+                                    Erro no campo
+                                </span>
+                            </div>
+                            
+                            <!-- CBO -->
+                            <div class="form-group">
+                                <label for="cbo" class="form-label">CBO (Código Brasileiro de Ocupações)</label>
+                                <input type="text" 
+                                       id="cbo" 
+                                       th:field="*{cbo}"
+                                       class="form-input"
+                                       placeholder="Ex: 2124-05"
+                                       maxlength="10">
+                                <span class="form-hint">Código para eSocial</span>
+                            </div>
+                            
+                            <!-- Departamento -->
+                            <div class="form-group">
+                                <label for="departamentoId" class="form-label">
+                                    Departamento
+                                    <span class="required-mark">*</span>
+                                </label>
+                                <div class="select-wrapper">
+                                    <img th:src="@{/images/icons/building.png}" alt="" class="icon select-icon">
+                                    <select id="departamentoId" 
+                                            th:field="*{departamentoId}"
+                                            class="form-select has-icon"
+                                            th:classappend="${#fields.hasErrors('departamentoId')} ? 'is-invalid'"
+                                            required>
+                                        <option value="">Selecione um departamento</option>
+                                        <option th:each="dept : ${departamentos}" 
+                                                th:value="${dept.id}" 
+                                                th:text="${dept.nome}">
+                                            Tecnologia
+                                        </option>
+                                    </select>
+                                    <img th:src="@{/images/icons/chevron-down.png}" alt="" class="icon select-arrow">
+                                </div>
+                                <span class="form-error" th:if="${#fields.hasErrors('departamentoId')}" th:errors="*{departamentoId}">
+                                    Erro no campo
+                                </span>
+                            </div>
+                            
+                            <!-- Nível -->
+                            <div class="form-group">
+                                <label for="nivel" class="form-label">
+                                    Nível
+                                    <span class="required-mark">*</span>
+                                </label>
+                                <div class="select-wrapper">
+                                    <select id="nivel" 
+                                            th:field="*{nivel}"
+                                            class="form-select"
+                                            required>
+                                        <option value="">Selecione o nível</option>
+                                        <option value="ESTAGIARIO">Estagiário</option>
+                                        <option value="TRAINEE">Trainee</option>
+                                        <option value="JUNIOR">Júnior</option>
+                                        <option value="PLENO">Pleno</option>
+                                        <option value="SENIOR">Sênior</option>
+                                        <option value="ESPECIALISTA">Especialista</option>
+                                        <option value="COORDENADOR">Coordenador</option>
+                                        <option value="GERENTE">Gerente</option>
+                                        <option value="DIRETOR">Diretor</option>
+                                    </select>
+                                    <img th:src="@{/images/icons/chevron-down.png}" alt="" class="icon select-arrow">
+                                </div>
+                            </div>
+                            
+                            <!-- Status -->
+                            <div class="form-group">
+                                <label for="ativo" class="form-label">Status</label>
+                                <div class="select-wrapper">
+                                    <select id="ativo" 
+                                            th:field="*{ativo}"
+                                            class="form-select">
+                                        <option value="true">Ativo</option>
+                                        <option value="false">Inativo</option>
+                                    </select>
+                                    <img th:src="@{/images/icons/chevron-down.png}" alt="" class="icon select-arrow">
+                                </div>
+                            </div>
+                            
+                            <!-- Descrição -->
+                            <div class="form-group form-group--full">
+                                <label for="descricao" class="form-label">Descrição do Cargo</label>
+                                <textarea id="descricao" 
+                                          th:field="*{descricao}"
+                                          class="form-textarea"
+                                          placeholder="Descreva as responsabilidades e atividades do cargo..."
+                                          rows="4"
+                                          maxlength="1000"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Salary Section -->
+                <div class="card form-section">
+                    <div class="card-header">
+                        <div class="card-title-wrapper">
+                            <img th:src="@{/images/icons/dollar-sign.png}" alt="" class="icon card-icon">
+                            <h2 class="card-title">Faixa Salarial</h2>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-grid">
+                            <!-- Salário Mínimo -->
+                            <div class="form-group">
+                                <label for="salarioMinimo" class="form-label">
+                                    Salário Mínimo
+                                    <span class="required-mark">*</span>
+                                </label>
+                                <div class="input-wrapper">
+                                    <span class="input-prefix">R$</span>
+                                    <input type="text" 
+                                           id="salarioMinimo" 
+                                           th:field="*{salarioMinimo}"
+                                           class="form-input has-prefix"
+                                           placeholder="0,00"
+                                           data-mask="currency"
+                                           required>
+                                </div>
+                            </div>
+                            
+                            <!-- Salário Máximo -->
+                            <div class="form-group">
+                                <label for="salarioMaximo" class="form-label">
+                                    Salário Máximo
+                                    <span class="required-mark">*</span>
+                                </label>
+                                <div class="input-wrapper">
+                                    <span class="input-prefix">R$</span>
+                                    <input type="text" 
+                                           id="salarioMaximo" 
+                                           th:field="*{salarioMaximo}"
+                                           class="form-input has-prefix"
+                                           placeholder="0,00"
+                                           data-mask="currency"
+                                           required>
+                                </div>
+                            </div>
+                            
+                            <!-- Carga Horária -->
+                            <div class="form-group">
+                                <label for="cargaHoraria" class="form-label">Carga Horária Semanal</label>
+                                <div class="input-wrapper">
+                                    <input type="number" 
+                                           id="cargaHoraria" 
+                                           th:field="*{cargaHoraria}"
+                                           class="form-input"
+                                           placeholder="44"
+                                           min="1"
+                                           max="44">
+                                </div>
+                                <span class="form-hint">Horas por semana</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Requirements Section -->
+                <div class="card form-section">
+                    <div class="card-header">
+                        <div class="card-title-wrapper">
+                            <img th:src="@{/images/icons/graduation-cap.png}" alt="" class="icon card-icon">
+                            <h2 class="card-title">Requisitos</h2>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-grid">
+                            <!-- Escolaridade -->
+                            <div class="form-group">
+                                <label for="escolaridadeMinima" class="form-label">Escolaridade Mínima</label>
+                                <div class="select-wrapper">
+                                    <select id="escolaridadeMinima" 
+                                            th:field="*{escolaridadeMinima}"
+                                            class="form-select">
+                                        <option value="">Não especificado</option>
+                                        <option value="FUNDAMENTAL">Ensino Fundamental</option>
+                                        <option value="MEDIO">Ensino Médio</option>
+                                        <option value="TECNICO">Técnico</option>
+                                        <option value="SUPERIOR">Superior</option>
+                                        <option value="POS_GRADUACAO">Pós-graduação</option>
+                                        <option value="MESTRADO">Mestrado</option>
+                                        <option value="DOUTORADO">Doutorado</option>
+                                    </select>
+                                    <img th:src="@{/images/icons/chevron-down.png}" alt="" class="icon select-arrow">
+                                </div>
+                            </div>
+                            
+                            <!-- Experiência -->
+                            <div class="form-group">
+                                <label for="experienciaMinima" class="form-label">Experiência Mínima (anos)</label>
+                                <input type="number" 
+                                       id="experienciaMinima" 
+                                       th:field="*{experienciaMinima}"
+                                       class="form-input"
+                                       placeholder="0"
+                                       min="0"
+                                       max="50">
+                            </div>
+                            
+                            <!-- Requisitos Detalhados -->
+                            <div class="form-group form-group--full">
+                                <label for="requisitos" class="form-label">Requisitos e Qualificações</label>
+                                <textarea id="requisitos" 
+                                          th:field="*{requisitos}"
+                                          class="form-textarea"
+                                          placeholder="Liste os requisitos técnicos, habilidades e certificações necessárias..."
+                                          rows="4"
+                                          maxlength="2000"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="form-actions">
+                    <a th:href="@{/cargos}" class="btn btn--secondary">
+                        <img th:src="@{/images/icons/x.png}" alt="" class="icon btn-icon">
+                        <span>Cancelar</span>
+                    </a>
+                    <button type="submit" class="btn btn--primary">
+                        <img th:src="@{/images/icons/save.png}" alt="" class="icon btn-icon">
+                        <span th:text="${cargo.id != null} ? 'Salvar Alterações' : 'Cadastrar Cargo'">
+                            Cadastrar Cargo
+                        </span>
+                    </button>
+                </div>
+            </form>
+        </th:block>
+    </div>
+</body>
+</html>

@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<!-- ==================== MODAIS ==================== -->
+
+<!-- Modal Base -->
+<th:block th:fragment="modal(id, title, size)">
+    <div class="modal" th:id="${id}" role="dialog" aria-modal="true" th:aria-labelledby="${id + '-title'}">
+        <div class="modal-backdrop" data-modal-close></div>
+        <div class="modal-dialog" th:classappend="${size} ? 'modal-dialog--' + ${size} : ''">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title" th:id="${id + '-title'}" th:text="${title}">Título do Modal</h2>
+                    <button type="button" class="modal-close" data-modal-close aria-label="Fechar">
+                        <img th:src="@{/images/icons/x.png}" alt="" class="icon">
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <th:block th:replace="${modalBody}"></th:block>
+                </div>
+                <div class="modal-footer" th:if="${modalFooter}">
+                    <th:block th:replace="${modalFooter}"></th:block>
+                </div>
+            </div>
+        </div>
+    </div>
+</th:block>
+
+<!-- Modal de Confirmação -->
+<th:block th:fragment="confirmModal(id, title, message, confirmText, confirmVariant)">
+    <div class="modal modal-confirm" th:id="${id}" role="alertdialog" aria-modal="true">
+        <div class="modal-backdrop" data-modal-close></div>
+        <div class="modal-dialog modal-dialog--sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="modal-icon modal-icon--warning">
+                        <img th:src="@{/images/icons/alert-triangle.png}" alt="" class="icon icon-lg">
+                    </div>
+                    <h2 class="modal-title" th:text="${title}">Confirmar ação</h2>
+                    <button type="button" class="modal-close" data-modal-close aria-label="Fechar">
+                        <img th:src="@{/images/icons/x.png}" alt="" class="icon">
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p class="modal-message" th:text="${message}">Tem certeza que deseja continuar?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn--secondary" data-modal-close>
+                        Cancelar
+                    </button>
+                    <button type="button" 
+                            class="btn"
+                            th:classappend="'btn--' + (${confirmVariant} ?: 'danger')"
+                            data-modal-confirm>
+                        <span th:text="${confirmText} ?: 'Confirmar'">Confirmar</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</th:block>
+
+<!-- Modal de Exclusão -->
+<th:block th:fragment="deleteModal">
+    <div class="modal modal-delete" id="deleteModal" role="alertdialog" aria-modal="true">
+        <div class="modal-backdrop" data-modal-close></div>
+        <div class="modal-dialog modal-dialog--sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="modal-icon modal-icon--danger">
+                        <img th:src="@{/images/icons/trash.png}" alt="" class="icon icon-lg">
+                    </div>
+                    <h2 class="modal-title">Excluir Registro</h2>
+                    <button type="button" class="modal-close" data-modal-close aria-label="Fechar">
+                        <img th:src="@{/images/icons/x.png}" alt="" class="icon">
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p class="modal-message">
+                        Tem certeza que deseja excluir <strong id="deleteItemName">este item</strong>?
+                    </p>
+                    <p class="modal-warning">
+                        <img th:src="@{/images/icons/alert-circle.png}" alt="" class="icon icon-sm">
+                        Esta ação não pode ser desfeita.
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn--secondary" data-modal-close>
+                        Cancelar
+                    </button>
+                    <form id="deleteForm" method="post">
+                        <input type="hidden" name="_method" value="DELETE">
+                        <input type="hidden" name="_csrf" th:value="${_csrf.token}">
+                        <button type="submit" class="btn btn--danger">
+                            <img th:src="@{/images/icons/trash.png}" alt="" class="icon btn-icon">
+                            <span>Excluir</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</th:block>
+
+<!-- Modal de Sucesso -->
+<th:block th:fragment="successModal(id, title, message)">
+    <div class="modal modal-success" th:id="${id}" role="dialog" aria-modal="true">
+        <div class="modal-backdrop" data-modal-close></div>
+        <div class="modal-dialog modal-dialog--sm">
+            <div class="modal-content">
+                <div class="modal-header modal-header--center">
+                    <div class="modal-icon modal-icon--success">
+                        <img th:src="@{/images/icons/check-circle.png}" alt="" class="icon icon-xl">
+                    </div>
+                </div>
+                <div class="modal-body modal-body--center">
+                    <h2 class="modal-title" th:text="${title}">Sucesso!</h2>
+                    <p class="modal-message" th:text="${message}">Operação realizada com sucesso.</p>
+                </div>
+                <div class="modal-footer modal-footer--center">
+                    <button type="button" class="btn btn--primary" data-modal-close>
+                        OK
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</th:block>
+
+<!-- Modal de Erro -->
+<th:block th:fragment="errorModal(id, title, message)">
+    <div class="modal modal-error" th:id="${id}" role="alertdialog" aria-modal="true">
+        <div class="modal-backdrop" data-modal-close></div>
+        <div class="modal-dialog modal-dialog--sm">
+            <div class="modal-content">
+                <div class="modal-header modal-header--center">
+                    <div class="modal-icon modal-icon--error">
+                        <img th:src="@{/images/icons/x-circle.png}" alt="" class="icon icon-xl">
+                    </div>
+                </div>
+                <div class="modal-body modal-body--center">
+                    <h2 class="modal-title" th:text="${title}">Erro!</h2>
+                    <p class="modal-message" th:text="${message}">Ocorreu um erro ao processar sua solicitação.</p>
+                </div>
+                <div class="modal-footer modal-footer--center">
+                    <button type="button" class="btn btn--primary" data-modal-close>
+                        Fechar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</th:block>
+
+<!-- Modal de Formulário -->
+<th:block th:fragment="formModal(id, title, formAction, formMethod, size)">
+    <div class="modal modal-form" th:id="${id}" role="dialog" aria-modal="true">
+        <div class="modal-backdrop" data-modal-close></div>
+        <div class="modal-dialog" th:classappend="${size} ? 'modal-dialog--' + ${size} : ''">
+            <form th:action="${formAction}" 
+                  th:method="${formMethod} ?: 'post'" 
+                  class="modal-content"
+                  th:object="${formObject}">
+                <input type="hidden" name="_csrf" th:value="${_csrf.token}">
+                
+                <div class="modal-header">
+                    <h2 class="modal-title" th:text="${title}">Título do Formulário</h2>
+                    <button type="button" class="modal-close" data-modal-close aria-label="Fechar">
+                        <img th:src="@{/images/icons/x.png}" alt="" class="icon">
+                    </button>
+                </div>
+                
+                <div class="modal-body">
+                    <th:block th:replace="${formFields}"></th:block>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn btn--secondary" data-modal-close>
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn btn--primary">
+                        <img th:src="@{/images/icons/save.png}" alt="" class="icon btn-icon">
+                        <span>Salvar</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</th:block>
+
+<!-- Modal de Visualização (Detalhes) -->
+<th:block th:fragment="viewModal(id, title, size)">
+    <div class="modal modal-view" th:id="${id}" role="dialog" aria-modal="true">
+        <div class="modal-backdrop" data-modal-close></div>
+        <div class="modal-dialog" th:classappend="${size} ? 'modal-dialog--' + ${size} : 'modal-dialog--lg'">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title" th:text="${title}">Detalhes</h2>
+                    <button type="button" class="modal-close" data-modal-close aria-label="Fechar">
+                        <img th:src="@{/images/icons/x.png}" alt="" class="icon">
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <th:block th:replace="${viewContent}"></th:block>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn--secondary" data-modal-close>
+                        Fechar
+                    </button>
+                    <th:block th:replace="${viewActions} ?: ~{}"></th:block>
+                </div>
+            </div>
+        </div>
+    </div>
+</th:block>
+
+<!-- Modal de Imagem/Preview -->
+<th:block th:fragment="imageModal">
+    <div class="modal modal-image" id="imageModal" role="dialog" aria-modal="true">
+        <div class="modal-backdrop" data-modal-close></div>
+        <div class="modal-dialog modal-dialog--full">
+            <div class="modal-content">
+                <button type="button" class="modal-close modal-close--outside" data-modal-close aria-label="Fechar">
+                    <img th:src="@{/images/icons/x.png}" alt="" class="icon">
+                </button>
+                <div class="modal-body">
+                    <img id="previewImage" src="" alt="Preview" class="preview-image">
+                </div>
+                <div class="modal-footer modal-footer--center">
+                    <span id="imageCaption" class="image-caption"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</th:block>
+
+</html>
