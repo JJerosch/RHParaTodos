@@ -16,7 +16,6 @@
         <img src="/front/public/assets/gruporhpaint.png" alt="logo_menu_lateral" height="60">
       </div>
     </div>
-
     <nav class="sidebar-nav">
       <a href="dashboard.html" class="nav-item"><span class="nav-text">Dashboard</span></a>
       <div class="nav-section">Gestão de Pessoas</div>
@@ -69,28 +68,28 @@
       <div class="stats-row">
         <div class="stat-box">
           <div class="stat-box-header">
-            <div class="stat-box-icon" style="background: rgba(44, 62, 80, 0.1); color: var(--primary-dark);">🏢</div>
+            <div class="stat-box-icon" style="background: rgba(44, 62, 80, 0.1); color: var(--primary-dark);"><img src="/front/public/assets/building-2.png" alt="icone_departamentos"></div>
           </div>
           <div class="stat-box-value" id="statTotal">0</div>
           <div class="stat-box-label">Total de Departamentos</div>
         </div>
         <div class="stat-box">
           <div class="stat-box-header">
-            <div class="stat-box-icon" style="background: rgba(39, 174, 96, 0.1); color: var(--success-green);">✓</div>
+            <div class="stat-box-icon" style="background: rgba(39, 174, 96, 0.1); color: var(--success-green);"><img src="/front/public/assets/check (1).png" alt="icone_departamentos_ativos"></div>
           </div>
           <div class="stat-box-value" id="statAtivos">0</div>
           <div class="stat-box-label">Ativos</div>
         </div>
         <div class="stat-box">
           <div class="stat-box-header">
-            <div class="stat-box-icon" style="background: rgba(243, 156, 18, 0.1); color: var(--warning-orange);">👥</div>
+            <div class="stat-box-icon" style="background: rgba(243, 156, 18, 0.1); color: var(--warning-orange);"><img src="/front/public/assets/users (1).png" alt="icone_total_funcionarios"></div>
           </div>
           <div class="stat-box-value" id="statFuncionarios">0</div>
           <div class="stat-box-label">Total de Funcionários</div>
         </div>
         <div class="stat-box">
           <div class="stat-box-header">
-            <div class="stat-box-icon" style="background: rgba(93, 109, 126, 0.1); color: var(--info-gray);">📊</div>
+            <div class="stat-box-icon" style="background: rgba(93, 109, 126, 0.1); color: var(--info-gray);"><img src="/front/public/assets/scale.png" alt="icone_media_departamento"></div>
           </div>
           <div class="stat-box-value" id="statMedia">0</div>
           <div class="stat-box-label">Média por Departamento</div>
@@ -282,15 +281,13 @@
     
     function renderDepartments() {
       const grid = document.getElementById("departmentsGrid");
-      const icons = ['💻', '👥', '💰', '📈', '⚙️', '⚖️', '🎯', '📦'];
       
       grid.innerHTML = departments.map((dept, i) => `
         <div class="department-card">
           <div class="department-header">
-            <div class="department-icon">${icons[i % icons.length]}</div>
             <div class="department-actions">
-              <button class="btn-icon edit" onclick="editDepartment(${dept.id})" title="Editar">✏️</button>
-              <button class="btn-icon delete" onclick="deleteDepartment(${dept.id})" title="Excluir">🗑️</button>
+              <button class="btn-icon edit" onclick="editDepartment(${dept.id})" title="Editar"><img src="/front/public/assets/pencil (1).png" alt="icone_editar_departamento"></button>
+              <button class="btn-icon delete" onclick="deleteDepartment(${dept.id})" title="Excluir"><img src="/front/public/assets/trash-2 (1).png" alt="icone_excluir_departamento"></button>
             </div>
           </div>
           <h3 class="department-name">${dept.nome}</h3>
