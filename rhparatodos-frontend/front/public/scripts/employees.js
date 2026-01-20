@@ -260,6 +260,15 @@ function initSidebar() {
   mobileBtn?.addEventListener("click", () => {
     sidebar.classList.toggle("mobile-open");
   });
+
+  // Fechar sidebar quando clicar fora dele em mobile
+  document.addEventListener("click", (e) => {
+    if (window.innerWidth <= 768) {
+      if (!e.target.closest(".sidebar") && !e.target.closest(".mobile-menu-btn")) {
+        sidebar.classList.remove("mobile-open");
+      }
+    }
+  });
 }
 
 // Inicializar tabs
