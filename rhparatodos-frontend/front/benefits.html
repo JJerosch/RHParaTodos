@@ -38,8 +38,30 @@
 
   <div class="main-content">
     <header class="topbar">
-      <div class="topbar-left"><h1>Benefícios</h1></div>
-      <div class="topbar-right"><div class="user-menu"><button class="user-button" id="userMenuButton"><span class="user-avatar" id="userAvatar">U</span><span class="user-name" id="userName">Usuário</span></button><div class="user-dropdown" id="userDropdown"><a href="#" class="dropdown-item" id="logoutButton">Sair</a></div></div></div>
+      <div class="topbar-left">
+        <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
+        <h1>Benefícios</h1>
+      </div>
+      <div class="topbar-right">
+        <div class="user-menu">
+          <button class="user-button" id="userMenuButton">
+            <span class="user-avatar" id="userAvatar">U</span>
+            <span class="user-name" id="userName">Usuário</span>
+            <span class="user-arrow">▼</span>
+          </button>
+          <div class="user-dropdown" id="userDropdown">
+            <div class="user-info">
+              <strong id="userFullName">Nome do Usuário</strong>
+              <small id="userProfile">Perfil</small>
+            </div>
+            <hr>
+            <a href="#" class="dropdown-item">Meu Perfil</a>
+            <a href="settings.html" class="dropdown-item">Configurações</a>
+            <hr>
+            <a href="#" class="dropdown-item" id="logoutButton">Sair</a>
+          </div>
+        </div>
+      </div>
     </header>
 
     <div class="content-area">
@@ -93,17 +115,59 @@
     ];
     let currentId = null;
 
-    document.addEventListener("DOMContentLoaded", () => {
+    document.addEventListener('DOMContentLoaded', () => {
       if (!Auth.requireAuth()) return;
-      initUI(); render(); Mask.initAll();
+      
+      // Inicializar interface
+      initUserMenu();
+      initSidebar();
+      render();
+      Mask.initAll();
     });
 
-    function initUI() {
+    function initUserMenu() {
       const user = Auth.getCurrentUser();
-      document.getElementById("userName").textContent = user?.email?.split("@")[0] || "Usuário";
-      document.getElementById("userAvatar").textContent = (user?.email || "U")[0].toUpperCase();
-      document.getElementById("userMenuButton").onclick = () => document.getElementById("userDropdown").classList.toggle("active");
-      document.getElementById("logoutButton").onclick = (e) => { e.preventDefault(); Auth.logout(); };
+      if (user) {
+        const firstName = (user.email || user.username).split('@')[0].split('.')[0];
+        const capitalizedName = firstName.charAt(0).toUpperCase() + firstName.slice(1);
+        
+        document.getElementById('userName').textContent = capitalizedName;
+        document.getElementById('userFullName').textContent = user.email || user.username;
+        document.getElementById('userProfile').textContent = user.profileName || user.profile;
+        document.getElementById('userAvatar').textContent = capitalizedName[0].toUpperCase();
+      }
+
+      document.getElementById('userMenuButton').addEventListener('click', () => {
+        document.getElementById('userDropdown').classList.toggle('active');
+      });
+
+      document.getElementById('logoutButton').addEventListener('click', (e) => {
+        e.preventDefault();
+        Auth.logout();
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('.user-menu')) {
+          document.getElementById('userDropdown').classList.remove('active');
+        }
+      });
+    }
+
+    function initSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const mobileBtn = document.getElementById('mobileMenuBtn');
+
+      mobileBtn?.addEventListener('click', () => {
+        sidebar.classList.toggle('mobile-open');
+      });
+
+      document.addEventListener('click', (e) => {
+        if (window.innerWidth <= 768) {
+          if (!e.target.closest('.sidebar') && !e.target.closest('.mobile-menu-btn')) {
+            sidebar.classList.remove('mobile-open');
+          }
+        }
+      });
     }
 
     function render() {
@@ -138,5 +202,6 @@
     function remove(id) { Confirm.show('Excluir este benefício?', () => { const idx = benefits.findIndex(b => b.id === id); if (idx > -1) benefits.splice(idx, 1); Toast.success('Benefício excluído!'); render(); }); }
     function formatCurrency(val) { return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val || 0); }
   </script>
+  <script src="/front/public/scripts/dashboard.js"></script>
 </body>
 </html>

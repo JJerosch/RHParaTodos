@@ -16,45 +16,97 @@
       </div>
     </div>
     <nav class="sidebar-nav">
-      <a href="dashboard.html" class="nav-item"><span class="nav-text">Dashboard</span></a>
+      <a href="dashboard.html" class="nav-item active">
+        <span class="nav-text">Dashboard</span>
+      </a>
+      
       <div class="nav-section">Gestão de Pessoas</div>
-      <a href="employees.html" class="nav-item"><span class="nav-text">Funcionários</span></a>
-      <a href="departments.html" class="nav-item"><span class="nav-text">Departamentos</span></a>
-      <a href="positions.html" class="nav-item"><span class="nav-text">Cargos</span></a>
+      <a href="employees.html" class="nav-item">
+        <span class="nav-text">Funcionários</span>
+      </a>
+      <a href="departments.html" class="nav-item">
+        <span class="nav-text">Departamentos</span>
+      </a>
+      <a href="positions.html" class="nav-item">
+        <span class="nav-text">Cargos</span>
+      </a>
+      
       <div class="nav-section">Recursos Humanos</div>
-      <a href="recruitment.html" class="nav-item"><span class="nav-text">Recrutamento</span></a>
-      <a href="training.html" class="nav-item"><span class="nav-text">Treinamentos</span></a>
-      <a href="performance.html" class="nav-item"><span class="nav-text">Avaliações</span></a>
+      <a href="recruitment.html" class="nav-item">
+        <span class="nav-text">Recrutamento</span>
+      </a>
+      <a href="training.html" class="nav-item">
+        <span class="nav-text">Treinamentos</span>
+      </a>
+      <a href="performance.html" class="nav-item">
+        <span class="nav-text">Avaliações</span>
+      </a>
+      
       <div class="nav-section">Departamento Pessoal</div>
-      <a href="payroll.html" class="nav-item"><span class="nav-text">Folha de Pagamento</span></a>
-      <a href="benefits.html" class="nav-item"><span class="nav-text">Benefícios</span></a>
-      <a href="vacation.html" class="nav-item active"><span class="nav-text">Férias</span></a>
-      <a href="timesheet.html" class="nav-item"><span class="nav-text">Ponto</span></a>
+      <a href="payroll.html" class="nav-item">
+        <span class="nav-text">Folha de Pagamento</span>
+      </a>
+      <a href="benefits.html" class="nav-item">
+        <span class="nav-text">Benefícios</span>
+      </a>
+      <a href="vacation.html" class="nav-item active">
+        <span class="nav-text">Férias</span>
+      </a>
+      <a href="timesheet.html" class="nav-item">
+        <span class="nav-text">Ponto</span>
+      </a>
+      
       <div class="nav-section">Administração</div>
-      <a href="reports.html" class="nav-item"><span class="nav-text">Relatórios</span></a>
-      <a href="settings.html" class="nav-item"><span class="nav-text">Configurações</span></a>
+      <a href="reports.html" class="nav-item">
+        <span class="nav-text">Relatórios</span>
+      </a>
+      <a href="settings.html" class="nav-item">
+        <span class="nav-text">Configurações</span>
+      </a>
     </nav>
   </aside>
 
+
   <div class="main-content">
     <header class="topbar">
-      <div class="topbar-left"><h1>Gestão de Férias</h1></div>
-      <div class="topbar-right"><div class="user-menu"><button class="user-button" id="userMenuButton"><span class="user-avatar" id="userAvatar">U</span><span class="user-name" id="userName">Usuário</span></button><div class="user-dropdown" id="userDropdown"><a href="#" class="dropdown-item" id="logoutButton">Sair</a></div></div></div>
+      <div class="topbar-left">
+        <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
+        <h1>Gestão de Férias</h1>
+      </div>
+      <div class="topbar-right">
+        <div class="user-menu">
+          <button class="user-button" id="userMenuButton">
+            <span class="user-avatar" id="userAvatar">U</span>
+            <span class="user-name" id="userName">Usuário</span>
+            <span class="user-arrow">▼</span>
+          </button>
+          <div class="user-dropdown" id="userDropdown">
+            <div class="user-info">
+              <strong id="userFullName">Nome do Usuário</strong>
+              <small id="userProfile">Perfil</small>
+            </div>
+            <hr>
+            <a href="#" class="dropdown-item">Meu Perfil</a>
+            <a href="settings.html" class="dropdown-item">Configurações</a>
+            <hr>
+            <a href="#" class="dropdown-item" id="logoutButton">Sair</a>
+          </div>
+        </div>
+      </div>
     </header>
 
     <div class="content-area">
       <div class="stats-row">
-        <div class="stat-box"><div class="stat-box-icon" style="background: rgba(39, 174, 96, 0.1); color: var(--success-green);">✓</div><div class="stat-box-value" id="statAprovadas">8</div><div class="stat-box-label">Férias Aprovadas</div></div>
-        <div class="stat-box"><div class="stat-box-icon" style="background: rgba(243, 156, 18, 0.1); color: var(--warning-orange);">⏳</div><div class="stat-box-value" id="statPendentes">5</div><div class="stat-box-label">Pendentes</div></div>
-        <div class="stat-box"><div class="stat-box-icon" style="background: rgba(44, 62, 80, 0.1); color: var(--primary-dark);">🏖️</div><div class="stat-box-value" id="statEmFerias">3</div><div class="stat-box-label">Em Férias Agora</div></div>
-        <div class="stat-box"><div class="stat-box-icon" style="background: rgba(231, 76, 60, 0.1); color: var(--error-red);">⚠️</div><div class="stat-box-value" id="statVencidas">12</div><div class="stat-box-label">Férias Vencidas</div></div>
+        <div class="stat-box"><div class="stat-box-icon" style="background: rgba(39, 174, 96, 0.1); color: var(--success-green);"><img src="/front/public/assets/check (1).png" alt="icone_ferias_aprovadas"></div><div class="stat-box-value" id="statAprovadas">8</div><div class="stat-box-label">Férias Aprovadas</div></div>
+        <div class="stat-box"><div class="stat-box-icon" style="background: rgba(243, 156, 18, 0.1); color: var(--warning-orange);"><img src="/front/public/assets/hourglass.png" alt="icone_pendentes"></div><div class="stat-box-value" id="statPendentes">5</div><div class="stat-box-label">Pendentes</div></div>
+        <div class="stat-box"><div class="stat-box-icon" style="background: rgba(44, 62, 80, 0.1); color: var(--primary-dark);"><img src="/front/public/assets/tree-palm (1).png" alt="icone_em_ferias"></div><div class="stat-box-value" id="statEmFerias">3</div><div class="stat-box-label">Em Férias Agora</div></div>
+        <div class="stat-box"><div class="stat-box-icon" style="background: rgba(231, 76, 60, 0.1); color: var(--error-red);"><img src="/front/public/assets/triangle-alert.png" alt="icone_ferias_vencidas"></div><div class="stat-box-value" id="statVencidas">12</div><div class="stat-box-label">Férias Vencidas</div></div>
       </div>
 
       <div class="page-header">
         <div><h2 class="page-title">Solicitações de Férias</h2><p class="page-subtitle">Gerencie as solicitações e programações de férias</p></div>
         <div class="page-actions">
-          <button class="btn btn-secondary" onclick="showCalendar()">📅 Calendário</button>
-          <button class="btn btn-primary" onclick="openModal()">+ Nova Solicitação</button>
+          <button class="btn btn-primary" onclick="openModal()"><img src="/front/public/assets/plus.png" alt="icone_nova_solicitacao"> Nova Solicitação</button>
         </div>
       </div>
 
@@ -191,7 +243,10 @@
 
     document.addEventListener("DOMContentLoaded", () => {
       if (!Auth.requireAuth()) return;
-      initUI(); initTabs(); render();
+      initUI();
+      initSidebar();
+      initTabs();
+      render();
     });
 
     function initUI() {
@@ -200,6 +255,23 @@
       document.getElementById("userAvatar").textContent = (user?.email || "U")[0].toUpperCase();
       document.getElementById("userMenuButton").onclick = () => document.getElementById("userDropdown").classList.toggle("active");
       document.getElementById("logoutButton").onclick = (e) => { e.preventDefault(); Auth.logout(); };
+    }
+
+    function initSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const mobileBtn = document.getElementById('mobileMenuBtn');
+
+      mobileBtn?.addEventListener('click', () => {
+        sidebar.classList.toggle('mobile-open');
+      });
+
+      document.addEventListener('click', (e) => {
+        if (window.innerWidth <= 768) {
+          if (!e.target.closest('.sidebar') && !e.target.closest('.mobile-menu-btn')) {
+            sidebar.classList.remove('mobile-open');
+          }
+        }
+      });
     }
 
     function initTabs() {
@@ -224,9 +296,9 @@
           <td>
             <div class="cell-actions">
               ${s.status === 'PENDENTE' ? `
-                <button class="btn-icon" onclick="approve(${s.id})" title="Aprovar" style="color: var(--success-green);">✓</button>
-                <button class="btn-icon" onclick="reject(${s.id})" title="Rejeitar" style="color: var(--error-red);">✕</button>
-              ` : `<button class="btn-icon view" onclick="viewDetails(${s.id})">👁️</button>`}
+                <button class="btn-icon" onclick="approve(${s.id})" title="Aprovar" style="color: var(--success-green);"><img src="/front/public/assets/check (1).png" alt="icone_aprovar"></button>
+                <button class="btn-icon" onclick="reject(${s.id})" title="Rejeitar" style="color: var(--error-red);"><img src="/front/public/assets/x.png" alt="icone_rejeitar"></button>
+              ` : `<button class="btn-icon view" onclick="viewDetails(${s.id})"><img src="/front/public/assets/eye.png" alt="icone_ver_detalhes"></button>`}
             </div>
           </td>
         </tr>

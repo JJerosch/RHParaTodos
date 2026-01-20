@@ -32,30 +32,83 @@
       </div>
     </div>
     <nav class="sidebar-nav">
-      <a href="dashboard.html" class="nav-item"><span class="nav-text">Dashboard</span></a>
+      <a href="dashboard.html" class="nav-item">
+        <span class="nav-text">Dashboard</span>
+      </a>
+      
       <div class="nav-section">Gestão de Pessoas</div>
-      <a href="employees.html" class="nav-item"><span class="nav-text">Funcionários</span></a>
-      <a href="departments.html" class="nav-item"><span class="nav-text">Departamentos</span></a>
-      <a href="positions.html" class="nav-item"><span class="nav-text">Cargos</span></a>
+      <a href="employees.html" class="nav-item">
+        <span class="nav-text">Funcionários</span>
+      </a>
+      <a href="departments.html" class="nav-item">
+        <span class="nav-text">Departamentos</span>
+      </a>
+      <a href="positions.html" class="nav-item">
+        <span class="nav-text">Cargos</span>
+      </a>
+      
       <div class="nav-section">Recursos Humanos</div>
-      <a href="recruitment.html" class="nav-item"><span class="nav-text">Recrutamento</span></a>
-      <a href="training.html" class="nav-item active"><span class="nav-text">Treinamentos</span></a>
-      <a href="performance.html" class="nav-item"><span class="nav-text">Avaliações</span></a>
+      <a href="recruitment.html" class="nav-item">
+        <span class="nav-text">Recrutamento</span>
+      </a>
+      <a href="training.html" class="nav-item active">
+        <span class="nav-text">Treinamentos</span>
+      </a>
+      <a href="performance.html" class="nav-item">
+        <span class="nav-text">Avaliações</span>
+      </a>
+      
       <div class="nav-section">Departamento Pessoal</div>
-      <a href="payroll.html" class="nav-item"><span class="nav-text">Folha de Pagamento</span></a>
-      <a href="benefits.html" class="nav-item"><span class="nav-text">Benefícios</span></a>
-      <a href="vacation.html" class="nav-item"><span class="nav-text">Férias</span></a>
-      <a href="timesheet.html" class="nav-item"><span class="nav-text">Ponto</span></a>
+      <a href="payroll.html" class="nav-item">
+        <span class="nav-text">Folha de Pagamento</span>
+      </a>
+      <a href="benefits.html" class="nav-item">
+        <span class="nav-text">Benefícios</span>
+      </a>
+      <a href="vacation.html" class="nav-item">
+        <span class="nav-text">Férias</span>
+      </a>
+      <a href="timesheet.html" class="nav-item">
+        <span class="nav-text">Ponto</span>
+      </a>
+      
       <div class="nav-section">Administração</div>
-      <a href="reports.html" class="nav-item"><span class="nav-text">Relatórios</span></a>
-      <a href="settings.html" class="nav-item"><span class="nav-text">Configurações</span></a>
+      <a href="reports.html" class="nav-item">
+        <span class="nav-text">Relatórios</span>
+      </a>
+      <a href="settings.html" class="nav-item">
+        <span class="nav-text">Configurações</span>
+      </a>
     </nav>
   </aside>
 
+
   <div class="main-content">
     <header class="topbar">
-      <div class="topbar-left"><h1>Treinamentos</h1></div>
-      <div class="topbar-right"><div class="user-menu"><button class="user-button" id="userMenuButton"><span class="user-avatar" id="userAvatar">U</span><span class="user-name" id="userName">Usuário</span></button><div class="user-dropdown" id="userDropdown"><a href="#" class="dropdown-item" id="logoutButton">Sair</a></div></div></div>
+      <div class="topbar-left">
+        <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
+        <h1>Treinamentos</h1>
+      </div>
+      <div class="topbar-right">
+        <div class="user-menu">
+          <button class="user-button" id="userMenuButton">
+            <span class="user-avatar" id="userAvatar">U</span>
+            <span class="user-name" id="userName">Usuário</span>
+            <span class="user-arrow">▼</span>
+          </button>
+          <div class="user-dropdown" id="userDropdown">
+            <div class="user-info">
+              <strong id="userFullName">Nome do Usuário</strong>
+              <small id="userProfile">Perfil</small>
+            </div>
+            <hr>
+            <a href="#" class="dropdown-item">Meu Perfil</a>
+            <a href="settings.html" class="dropdown-item">Configurações</a>
+            <hr>
+            <a href="#" class="dropdown-item" id="logoutButton">Sair</a>
+          </div>
+        </div>
+      </div>
     </header>
 
     <div class="content-area">
@@ -154,7 +207,9 @@
 
     document.addEventListener("DOMContentLoaded", () => {
       if (!Auth.requireAuth()) return;
-      initUI(); render();
+      initUI();
+      initSidebar();
+      render();
     });
 
     function initUI() {
@@ -163,6 +218,23 @@
       document.getElementById("userAvatar").textContent = (user?.email || "U")[0].toUpperCase();
       document.getElementById("userMenuButton").onclick = () => document.getElementById("userDropdown").classList.toggle("active");
       document.getElementById("logoutButton").onclick = (e) => { e.preventDefault(); Auth.logout(); };
+    }
+
+    function initSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const mobileBtn = document.getElementById('mobileMenuBtn');
+
+      mobileBtn?.addEventListener('click', () => {
+        sidebar.classList.toggle('mobile-open');
+      });
+
+      document.addEventListener('click', (e) => {
+        if (window.innerWidth <= 768) {
+          if (!e.target.closest('.sidebar') && !e.target.closest('.mobile-menu-btn')) {
+            sidebar.classList.remove('mobile-open');
+          }
+        }
+      });
     }
 
     function showTab(tab) {

@@ -55,8 +55,30 @@
 
   <div class="main-content">
     <header class="topbar">
-      <div class="topbar-left"><h1>Controle de Ponto</h1></div>
-      <div class="topbar-right"><div class="user-menu"><button class="user-button" id="userMenuButton"><span class="user-avatar" id="userAvatar">U</span><span class="user-name" id="userName">Usuário</span></button><div class="user-dropdown" id="userDropdown"><a href="#" class="dropdown-item" id="logoutButton">Sair</a></div></div></div>
+      <div class="topbar-left">
+        <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
+        <h1>Controle de Ponto</h1>
+      </div>
+      <div class="topbar-right">
+        <div class="user-menu">
+          <button class="user-button" id="userMenuButton">
+            <span class="user-avatar" id="userAvatar">U</span>
+            <span class="user-name" id="userName">Usuário</span>
+            <span class="user-arrow">▼</span>
+          </button>
+          <div class="user-dropdown" id="userDropdown">
+            <div class="user-info">
+              <strong id="userFullName">Nome do Usuário</strong>
+              <small id="userProfile">Perfil</small>
+            </div>
+            <hr>
+            <a href="#" class="dropdown-item">Meu Perfil</a>
+            <a href="settings.html" class="dropdown-item">Configurações</a>
+            <hr>
+            <a href="#" class="dropdown-item" id="logoutButton">Sair</a>
+          </div>
+        </div>
+      </div>
     </header>
 
     <div class="content-area">
@@ -242,6 +264,7 @@
     document.addEventListener("DOMContentLoaded", () => {
       if (!Auth.requireAuth()) return;
       initUI();
+      initSidebar();
       updateClock();
       setInterval(updateClock, 1000);
     });
@@ -252,6 +275,23 @@
       document.getElementById("userAvatar").textContent = (user?.email || "U")[0].toUpperCase();
       document.getElementById("userMenuButton").onclick = () => document.getElementById("userDropdown").classList.toggle("active");
       document.getElementById("logoutButton").onclick = (e) => { e.preventDefault(); Auth.logout(); };
+    }
+
+    function initSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const mobileBtn = document.getElementById('mobileMenuBtn');
+
+      mobileBtn?.addEventListener('click', () => {
+        sidebar.classList.toggle('mobile-open');
+      });
+
+      document.addEventListener('click', (e) => {
+        if (window.innerWidth <= 768) {
+          if (!e.target.closest('.sidebar') && !e.target.closest('.mobile-menu-btn')) {
+            sidebar.classList.remove('mobile-open');
+          }
+        }
+      });
     }
 
     function updateClock() {
