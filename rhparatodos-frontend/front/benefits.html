@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +9,7 @@
   <link rel="stylesheet" href="public/styles/dashboard.css">
   <link rel="stylesheet" href="public/styles/components.css">
 </head>
+
 <body>
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
@@ -66,14 +68,37 @@
 
     <div class="content-area">
       <div class="stats-row">
-        <div class="stat-box"><div class="stat-box-icon" style="background: rgba(44, 62, 80, 0.1);"><img src="/front/public/assets/gift (2).png" alt="icone_tipos_beneficios"></div><div class="stat-box-value">6</div><div class="stat-box-label">Tipos de Benefícios</div></div>
-        <div class="stat-box"><div class="stat-box-icon" style="background: rgba(39, 174, 96, 0.1);"><img src="/front/public/assets/users (1).png" alt="icone_beneficiarios"></div><div class="stat-box-value">248</div><div class="stat-box-label">Beneficiários</div></div>
-        <div class="stat-box"><div class="stat-box-icon" style="background: rgba(243, 156, 18, 0.1);"><img src="/front/public/assets/banknote (1).png" alt="icone_custo_mensal"></div><div class="stat-box-value">R$ 185K</div><div class="stat-box-label">Custo Mensal</div></div>
-        <div class="stat-box"><div class="stat-box-icon" style="background: rgba(231, 76, 60, 0.1);"><img src="/front/public/assets/chart-column (1).png" alt="icone_custo_funcionario"></div><div class="stat-box-value">R$ 745</div><div class="stat-box-label">Custo/Funcionário</div></div>
+        <div class="stat-box">
+          <div class="stat-box-icon" style="background: rgba(44, 62, 80, 0.1);"><img
+              src="/front/public/assets/gift (2).png" alt="icone_tipos_beneficios"></div>
+          <div class="stat-box-value">6</div>
+          <div class="stat-box-label">Tipos de Benefícios</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-box-icon" style="background: rgba(39, 174, 96, 0.1);"><img
+              src="/front/public/assets/users (1).png" alt="icone_beneficiarios"></div>
+          <div class="stat-box-value">248</div>
+          <div class="stat-box-label">Beneficiários</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-box-icon" style="background: rgba(243, 156, 18, 0.1);"><img
+              src="/front/public/assets/banknote (1).png" alt="icone_custo_mensal"></div>
+          <div class="stat-box-value">R$ 185K</div>
+          <div class="stat-box-label">Custo Mensal</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-box-icon" style="background: rgba(231, 76, 60, 0.1);"><img
+              src="/front/public/assets/chart-column (1).png" alt="icone_custo_funcionario"></div>
+          <div class="stat-box-value">R$ 745</div>
+          <div class="stat-box-label">Custo/Funcionário</div>
+        </div>
       </div>
 
       <div class="page-header">
-        <div><h2 class="page-title">Gestão de Benefícios</h2><p class="page-subtitle">Configure e gerencie os benefícios oferecidos</p></div>
+        <div>
+          <h2 class="page-title">Gestão de Benefícios</h2>
+          <p class="page-subtitle">Configure e gerencie os benefícios oferecidos</p>
+        </div>
         <div class="page-actions"><button class="btn btn-primary" onclick="openModal()">+ Novo Benefício</button></div>
       </div>
 
@@ -83,30 +108,94 @@
 
   <div class="modal" id="modal">
     <div class="modal-dialog modal-md">
-      <div class="modal-header"><h3 class="modal-title" id="modalTitle">Novo Benefício</h3><button class="modal-close" onclick="Modal.close('modal')">&times;</button></div>
+      <div class="modal-header">
+        <h3 class="modal-title" id="modalTitle">Novo Benefício</h3><button class="modal-close"
+          onclick="Modal.close('modal')">&times;</button>
+      </div>
       <div class="modal-body">
         <form id="form">
           <input type="hidden" name="id">
-          <div class="form-group"><label class="form-label">Nome do Benefício *</label><input type="text" class="form-input" name="nome" required></div>
-          <div class="form-group"><label class="form-label">Descrição</label><textarea class="form-input" name="descricao" rows="2"></textarea></div>
+          <div class="form-group"><label class="form-label">Nome do Benefício *</label><input type="text"
+              class="form-input" name="nome" required></div>
+          <div class="form-group"><label class="form-label">Descrição</label><textarea class="form-input"
+              name="descricao" rows="2"></textarea></div>
           <div class="form-row form-row-2">
-            <div class="form-group"><label class="form-label">Valor Padrão</label><input type="text" class="form-input" name="valor" data-mask="currency"></div>
-            <div class="form-group"><label class="form-label">Desconto em Folha?</label><select class="form-select" name="desconto"><option value="true">Sim</option><option value="false">Não</option></select></div>
+            <div class="form-group"><label class="form-label">Valor Padrão</label><input type="text" class="form-input"
+                name="valor" data-mask="currency"></div>
+            <div class="form-group"><label class="form-label">Desconto em Folha?</label><select class="form-select"
+                name="desconto">
+                <option value="true">Sim</option>
+                <option value="false">Não</option>
+              </select></div>
           </div>
-          <div class="form-group"><label class="checkbox-label"><input type="checkbox" name="ativo" checked><span>Benefício Ativo</span></label></div>
+          <div class="form-group"><label class="checkbox-label"><input type="checkbox" name="ativo"
+                checked><span>Benefício Ativo</span></label></div>
         </form>
       </div>
-      <div class="modal-footer"><button class="btn btn-secondary" onclick="Modal.close('modal')">Cancelar</button><button class="btn btn-primary" onclick="save()">Salvar</button></div>
+      <div class="modal-footer"><button class="btn btn-secondary"
+          onclick="Modal.close('modal')">Cancelar</button><button class="btn btn-primary"
+          onclick="save()">Salvar</button></div>
     </div>
   </div>
 
-  <style>.departments-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:var(--spacing-4)}.benefit-card{background:white;border-radius:var(--radius-lg);padding:var(--spacing-5);box-shadow:var(--shadow-sm);border:1px solid var(--gray-200)}.benefit-header{display:flex;justify-content:space-between;margin-bottom:var(--spacing-3)}.benefit-icon{width:48px;height:48px;background:var(--gray-100);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;font-size:24px}.benefit-name{font-size:var(--font-size-lg);font-weight:600;margin-bottom:var(--spacing-1)}.benefit-desc{font-size:var(--font-size-sm);color:var(--gray-500);margin-bottom:var(--spacing-3)}.benefit-stats{display:flex;justify-content:space-between;padding-top:var(--spacing-3);border-top:1px solid var(--gray-100);font-size:var(--font-size-sm)}</style>
+  <style>
+    .departments-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: var(--spacing-4)
+    }
+
+    .benefit-card {
+      background: white;
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-5);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--gray-200)
+    }
+
+    .benefit-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: var(--spacing-3)
+    }
+
+    .benefit-icon {
+      width: 48px;
+      height: 48px;
+      background: var(--gray-100);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px
+    }
+
+    .benefit-name {
+      font-size: var(--font-size-lg);
+      font-weight: 600;
+      margin-bottom: var(--spacing-1)
+    }
+
+    .benefit-desc {
+      font-size: var(--font-size-sm);
+      color: var(--gray-500);
+      margin-bottom: var(--spacing-3)
+    }
+
+    .benefit-stats {
+      display: flex;
+      justify-content: space-between;
+      padding-top: var(--spacing-3);
+      border-top: 1px solid var(--gray-100);
+      font-size: var(--font-size-sm)
+    }
+  </style>
 
   <script src="public/scripts/auth.js"></script>
   <script src="public/scripts/components.js"></script>
   <script>
     const benefits = [
-      { id: 1, nome: "Vale Refeição", descricao: "Cartão para refeições diárias", valor: 800, beneficiarios: 235,  ativo: true },
+      { id: 1, nome: "Vale Refeição", descricao: "Cartão para refeições diárias", valor: 800, beneficiarios: 235, ativo: true },
       { id: 2, nome: "Vale Transporte", descricao: "Auxílio para deslocamento", valor: 300, beneficiarios: 180, ativo: true },
       { id: 3, nome: "Plano de Saúde", descricao: "Assistência médica completa", valor: 650, beneficiarios: 248, ativo: true },
       { id: 4, nome: "Plano Odontológico", descricao: "Cobertura odontológica", valor: 80, beneficiarios: 220, ativo: true },
@@ -117,7 +206,7 @@
 
     document.addEventListener('DOMContentLoaded', () => {
       if (!Auth.requireAuth()) return;
-      
+
       // Inicializar interface
       initUserMenu();
       initSidebar();
@@ -130,7 +219,7 @@
       if (user) {
         const firstName = (user.email || user.username).split('@')[0].split('.')[0];
         const capitalizedName = firstName.charAt(0).toUpperCase() + firstName.slice(1);
-        
+
         document.getElementById('userName').textContent = capitalizedName;
         document.getElementById('userFullName').textContent = user.email || user.username;
         document.getElementById('userProfile').textContent = user.profileName || user.profile;
@@ -204,4 +293,5 @@
   </script>
   <script src="/front/public/scripts/dashboard.js"></script>
 </body>
+
 </html>

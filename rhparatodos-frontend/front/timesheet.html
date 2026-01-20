@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,23 +9,108 @@
   <link rel="stylesheet" href="public/styles/dashboard.css">
   <link rel="stylesheet" href="public/styles/components.css">
   <style>
-    .timesheet-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: var(--spacing-4); margin-bottom: var(--spacing-6); }
-    .time-card { background: white; border-radius: var(--radius-lg); padding: var(--spacing-5); box-shadow: var(--shadow-sm); border: 1px solid var(--gray-200); text-align: center; }
-    .time-card-icon { font-size: 32px; margin-bottom: var(--spacing-2); }
-    .time-card-value { font-size: var(--font-size-3xl); font-weight: 700; color: var(--primary-dark); }
-    .time-card-label { font-size: var(--font-size-sm); color: var(--gray-500); }
-    .punch-btn { padding: var(--spacing-6); font-size: var(--font-size-xl); }
-    .punch-btn.active { animation: pulse 2s infinite; }
-    @keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(39, 174, 96, 0.4); } 50% { box-shadow: 0 0 0 15px rgba(39, 174, 96, 0); } }
-    .timeline { position: relative; padding-left: 30px; }
-    .timeline::before { content: ''; position: absolute; left: 10px; top: 0; bottom: 0; width: 2px; background: var(--gray-200); }
-    .timeline-item { position: relative; padding-bottom: var(--spacing-4); }
-    .timeline-item::before { content: ''; position: absolute; left: -24px; top: 4px; width: 12px; height: 12px; border-radius: 50%; background: var(--primary-dark); border: 2px solid white; }
-    .timeline-item.entrada::before { background: var(--success-green); }
-    .timeline-item.saida::before { background: var(--error-red); }
-    .current-time { font-size: var(--font-size-3xl); font-weight: 700; color: var(--primary-dark); font-family: monospace; }
+    .timesheet-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: var(--spacing-4);
+      margin-bottom: var(--spacing-6);
+    }
+
+    .time-card {
+      background: white;
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-5);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--gray-200);
+      text-align: center;
+    }
+
+    .time-card-icon {
+      font-size: 32px;
+      margin-bottom: var(--spacing-2);
+    }
+
+    .time-card-value {
+      font-size: var(--font-size-3xl);
+      font-weight: 700;
+      color: var(--primary-dark);
+    }
+
+    .time-card-label {
+      font-size: var(--font-size-sm);
+      color: var(--gray-500);
+    }
+
+    .punch-btn {
+      padding: var(--spacing-6);
+      font-size: var(--font-size-xl);
+    }
+
+    .punch-btn.active {
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        box-shadow: 0 0 0 0 rgba(39, 174, 96, 0.4);
+      }
+
+      50% {
+        box-shadow: 0 0 0 15px rgba(39, 174, 96, 0);
+      }
+    }
+
+    .timeline {
+      position: relative;
+      padding-left: 30px;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 10px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: var(--gray-200);
+    }
+
+    .timeline-item {
+      position: relative;
+      padding-bottom: var(--spacing-4);
+    }
+
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -24px;
+      top: 4px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--primary-dark);
+      border: 2px solid white;
+    }
+
+    .timeline-item.entrada::before {
+      background: var(--success-green);
+    }
+
+    .timeline-item.saida::before {
+      background: var(--error-red);
+    }
+
+    .current-time {
+      font-size: var(--font-size-3xl);
+      font-weight: 700;
+      color: var(--primary-dark);
+      font-family: monospace;
+    }
   </style>
 </head>
+
 <body>
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
@@ -86,8 +172,9 @@
       <div class="card" style="margin-bottom: var(--spacing-6); text-align: center;">
         <p style="color: var(--gray-500); margin-bottom: var(--spacing-2);">Horário atual</p>
         <div class="current-time" id="currentTime">00:00:00</div>
-        <p style="color: var(--gray-500); margin: var(--spacing-2) 0 var(--spacing-6);" id="currentDate">Segunda-feira, 12 de Janeiro de 2026</p>
-        
+        <p style="color: var(--gray-500); margin: var(--spacing-2) 0 var(--spacing-6);" id="currentDate">Segunda-feira,
+          12 de Janeiro de 2026</p>
+
         <div style="display: flex; justify-content: center; gap: var(--spacing-4); flex-wrap: wrap;">
           <button class="btn btn-success punch-btn" id="btnEntrada" onclick="registerPunch('ENTRADA')">
             ▶ Registrar Entrada
@@ -144,7 +231,8 @@
 
         <!-- Histórico da Semana -->
         <div class="card">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-4);">
+          <div
+            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-4);">
             <h3>Histórico da Semana</h3>
             <button class="btn btn-secondary btn-sm" onclick="showFullHistory()">Ver Completo</button>
           </div>
@@ -207,7 +295,8 @@
 
       <!-- Ajustes Pendentes (para gestores) -->
       <div class="card" style="margin-top: var(--spacing-6);">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-4);">
+        <div
+          style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-4);">
           <h3>Solicitações de Ajuste</h3>
           <button class="btn btn-primary btn-sm" onclick="requestAdjustment()">+ Solicitar Ajuste</button>
         </div>
@@ -240,18 +329,33 @@
   <!-- Modal Ajuste -->
   <div class="modal" id="adjustmentModal">
     <div class="modal-dialog modal-md">
-      <div class="modal-header"><h3 class="modal-title">Solicitar Ajuste de Ponto</h3><button class="modal-close" onclick="Modal.close('adjustmentModal')">&times;</button></div>
+      <div class="modal-header">
+        <h3 class="modal-title">Solicitar Ajuste de Ponto</h3><button class="modal-close"
+          onclick="Modal.close('adjustmentModal')">&times;</button>
+      </div>
       <div class="modal-body">
         <form id="adjustmentForm">
           <div class="form-row form-row-2">
-            <div class="form-group"><label class="form-label">Data *</label><input type="date" class="form-input" name="data" required></div>
-            <div class="form-group"><label class="form-label">Tipo *</label><select class="form-select" name="tipo" required><option value="">Selecione</option><option value="ENTRADA">Entrada</option><option value="SAIDA_ALMOCO">Saída Almoço</option><option value="RETORNO_ALMOCO">Retorno Almoço</option><option value="SAIDA">Saída</option></select></div>
+            <div class="form-group"><label class="form-label">Data *</label><input type="date" class="form-input"
+                name="data" required></div>
+            <div class="form-group"><label class="form-label">Tipo *</label><select class="form-select" name="tipo"
+                required>
+                <option value="">Selecione</option>
+                <option value="ENTRADA">Entrada</option>
+                <option value="SAIDA_ALMOCO">Saída Almoço</option>
+                <option value="RETORNO_ALMOCO">Retorno Almoço</option>
+                <option value="SAIDA">Saída</option>
+              </select></div>
           </div>
-          <div class="form-group"><label class="form-label">Horário *</label><input type="time" class="form-input" name="horario" required></div>
-          <div class="form-group"><label class="form-label">Justificativa *</label><textarea class="form-input" name="justificativa" rows="3" required></textarea></div>
+          <div class="form-group"><label class="form-label">Horário *</label><input type="time" class="form-input"
+              name="horario" required></div>
+          <div class="form-group"><label class="form-label">Justificativa *</label><textarea class="form-input"
+              name="justificativa" rows="3" required></textarea></div>
         </form>
       </div>
-      <div class="modal-footer"><button class="btn btn-secondary" onclick="Modal.close('adjustmentModal')">Cancelar</button><button class="btn btn-primary" onclick="submitAdjustment()">Enviar Solicitação</button></div>
+      <div class="modal-footer"><button class="btn btn-secondary"
+          onclick="Modal.close('adjustmentModal')">Cancelar</button><button class="btn btn-primary"
+          onclick="submitAdjustment()">Enviar Solicitação</button></div>
     </div>
   </div>
 
@@ -298,7 +402,7 @@
       const now = new Date();
       document.getElementById("currentTime").textContent = now.toLocaleTimeString('pt-BR');
       document.getElementById("currentDate").textContent = now.toLocaleDateString('pt-BR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-      
+
       if (isWorking && startTime) {
         const diff = now - startTime;
         const hours = Math.floor(diff / 3600000);
@@ -310,7 +414,7 @@
     function registerPunch(type) {
       const now = new Date();
       const timeStr = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-      
+
       if (type === 'ENTRADA') {
         isWorking = true;
         startTime = now;
@@ -318,7 +422,7 @@
         document.getElementById("btnSaida").disabled = false;
         document.getElementById("btnEntrada").classList.remove('active');
         document.getElementById("btnSaida").classList.add('active');
-        
+
         addTimelineEntry(timeStr, 'Entrada', 'entrada');
         Toast.success(`Entrada registrada às ${timeStr}`);
       } else {
@@ -326,7 +430,7 @@
         document.getElementById("btnEntrada").disabled = false;
         document.getElementById("btnSaida").disabled = true;
         document.getElementById("btnSaida").classList.remove('active');
-        
+
         addTimelineEntry(timeStr, 'Saída', 'saida');
         Toast.success(`Saída registrada às ${timeStr}`);
       }
@@ -345,4 +449,5 @@
     function showFullHistory() { Toast.info('Redirecionando para histórico completo...'); }
   </script>
 </body>
+
 </html>

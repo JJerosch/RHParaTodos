@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,18 +9,19 @@
   <link rel="stylesheet" href="public/styles/dashboard.css">
   <link rel="stylesheet" href="public/styles/components.css">
 </head>
+
 <body>
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
       <div class="logo">
-        <img src="/front/public/assets/gruporhpaint.png" alt="logo_menu_lateral" height="60">  
+        <img src="/front/public/assets/gruporhpaint.png" alt="logo_menu_lateral" height="60">
       </div>
     </div>
     <nav class="sidebar-nav">
       <a href="dashboard.html" class="nav-item">
         <span class="nav-text">Dashboard</span>
       </a>
-      
+
       <div class="nav-section">Gestão de Pessoas</div>
       <a href="employees.html" class="nav-item">
         <span class="nav-text">Funcionários</span>
@@ -30,7 +32,7 @@
       <a href="positions.html" class="nav-item">
         <span class="nav-text">Cargos</span>
       </a>
-      
+
       <div class="nav-section">Recursos Humanos</div>
       <a href="recruitment.html" class="nav-item">
         <span class="nav-text">Recrutamento</span>
@@ -41,7 +43,7 @@
       <a href="performance.html" class="nav-item">
         <span class="nav-text">Avaliações</span>
       </a>
-      
+
       <div class="nav-section">Departamento Pessoal</div>
       <a href="payroll.html" class="nav-item">
         <span class="nav-text">Folha de Pagamento</span>
@@ -55,7 +57,7 @@
       <a href="timesheet.html" class="nav-item">
         <span class="nav-text">Ponto</span>
       </a>
-      
+
       <div class="nav-section">Administração</div>
       <a href="reports.html" class="nav-item">
         <span class="nav-text">Relatórios</span>
@@ -97,7 +99,10 @@
 
     <div class="content-area">
       <div class="page-header">
-        <div><h2 class="page-title">Configurações do Sistema</h2><p class="page-subtitle">Gerencie as configurações gerais e preferências</p></div>
+        <div>
+          <h2 class="page-title">Configurações do Sistema</h2>
+          <p class="page-subtitle">Gerencie as configurações gerais e preferências</p>
+        </div>
       </div>
 
       <div class="settings-container">
@@ -154,7 +159,8 @@
               </div>
               <div class="form-group">
                 <label class="form-label">Endereço</label>
-                <input type="text" class="form-input" name="endereco" value="Av. Paulista, 1000 - Bela Vista, São Paulo - SP">
+                <input type="text" class="form-input" name="endereco"
+                  value="Av. Paulista, 1000 - Bela Vista, São Paulo - SP">
               </div>
               <div class="form-row form-row-2">
                 <div class="form-group">
@@ -178,7 +184,13 @@
             </div>
             <table class="data-table">
               <thead>
-                <tr><th>Usuário</th><th>Perfil</th><th>Status</th><th>Último Acesso</th><th>Ações</th></tr>
+                <tr>
+                  <th>Usuário</th>
+                  <th>Perfil</th>
+                  <th>Status</th>
+                  <th>Último Acesso</th>
+                  <th>Ações</th>
+                </tr>
               </thead>
               <tbody id="usersTableBody"></tbody>
             </table>
@@ -191,21 +203,29 @@
               <div class="form-section">
                 <h4 class="form-section-title">Email</h4>
                 <div class="checkbox-group">
-                  <label class="checkbox-label"><input type="checkbox" name="email_ferias" checked><span>Notificar sobre férias vencendo</span></label>
-                  <label class="checkbox-label"><input type="checkbox" name="email_aniversarios" checked><span>Lembrete de aniversários</span></label>
-                  <label class="checkbox-label"><input type="checkbox" name="email_avaliacoes" checked><span>Avaliações pendentes</span></label>
-                  <label class="checkbox-label"><input type="checkbox" name="email_folha"><span>Fechamento da folha</span></label>
+                  <label class="checkbox-label"><input type="checkbox" name="email_ferias" checked><span>Notificar sobre
+                      férias vencendo</span></label>
+                  <label class="checkbox-label"><input type="checkbox" name="email_aniversarios" checked><span>Lembrete
+                      de aniversários</span></label>
+                  <label class="checkbox-label"><input type="checkbox" name="email_avaliacoes" checked><span>Avaliações
+                      pendentes</span></label>
+                  <label class="checkbox-label"><input type="checkbox" name="email_folha"><span>Fechamento da
+                      folha</span></label>
                 </div>
               </div>
               <div class="form-section">
                 <h4 class="form-section-title">Sistema</h4>
                 <div class="checkbox-group">
-                  <label class="checkbox-label"><input type="checkbox" name="sys_aprovacoes" checked><span>Solicitações pendentes de aprovação</span></label>
-                  <label class="checkbox-label"><input type="checkbox" name="sys_documentos"><span>Documentos vencendo</span></label>
-                  <label class="checkbox-label"><input type="checkbox" name="sys_ponto" checked><span>Irregularidades de ponto</span></label>
+                  <label class="checkbox-label"><input type="checkbox" name="sys_aprovacoes" checked><span>Solicitações
+                      pendentes de aprovação</span></label>
+                  <label class="checkbox-label"><input type="checkbox" name="sys_documentos"><span>Documentos
+                      vencendo</span></label>
+                  <label class="checkbox-label"><input type="checkbox" name="sys_ponto" checked><span>Irregularidades de
+                      ponto</span></label>
                 </div>
               </div>
-              <button type="button" class="btn btn-primary" onclick="saveSettings('notificacoes')">Salvar Preferências</button>
+              <button type="button" class="btn btn-primary" onclick="saveSettings('notificacoes')">Salvar
+                Preferências</button>
             </form>
           </div>
 
@@ -252,7 +272,8 @@
                   </div>
                 </div>
               </div>
-              <button type="button" class="btn btn-primary" onclick="saveSettings('folha')">Salvar Configurações</button>
+              <button type="button" class="btn btn-primary" onclick="saveSettings('folha')">Salvar
+                Configurações</button>
             </form>
           </div>
 
@@ -316,23 +337,30 @@
                   </div>
                 </div>
                 <div class="checkbox-group">
-                  <label class="checkbox-label"><input type="checkbox" name="senha_maiuscula" checked><span>Exigir letra maiúscula</span></label>
-                  <label class="checkbox-label"><input type="checkbox" name="senha_numero" checked><span>Exigir número</span></label>
-                  <label class="checkbox-label"><input type="checkbox" name="senha_especial" checked><span>Exigir caractere especial</span></label>
+                  <label class="checkbox-label"><input type="checkbox" name="senha_maiuscula" checked><span>Exigir letra
+                      maiúscula</span></label>
+                  <label class="checkbox-label"><input type="checkbox" name="senha_numero" checked><span>Exigir
+                      número</span></label>
+                  <label class="checkbox-label"><input type="checkbox" name="senha_especial" checked><span>Exigir
+                      caractere especial</span></label>
                 </div>
               </div>
               <div class="form-section">
                 <h4 class="form-section-title">Autenticação</h4>
                 <div class="checkbox-group">
-                  <label class="checkbox-label"><input type="checkbox" name="2fa"><span>Habilitar autenticação de dois fatores (2FA)</span></label>
-                  <label class="checkbox-label"><input type="checkbox" name="sessao_unica" checked><span>Permitir apenas uma sessão por usuário</span></label>
+                  <label class="checkbox-label"><input type="checkbox" name="2fa"><span>Habilitar autenticação de dois
+                      fatores (2FA)</span></label>
+                  <label class="checkbox-label"><input type="checkbox" name="sessao_unica" checked><span>Permitir apenas
+                      uma sessão por usuário</span></label>
                 </div>
                 <div class="form-group" style="margin-top: var(--spacing-4);">
                   <label class="form-label">Timeout de Sessão (minutos)</label>
-                  <input type="number" class="form-input" name="timeout" value="30" min="5" max="120" style="max-width: 150px;">
+                  <input type="number" class="form-input" name="timeout" value="30" min="5" max="120"
+                    style="max-width: 150px;">
                 </div>
               </div>
-              <button type="button" class="btn btn-primary" onclick="saveSettings('seguranca')">Salvar Configurações</button>
+              <button type="button" class="btn btn-primary" onclick="saveSettings('seguranca')">Salvar
+                Configurações</button>
             </form>
           </div>
 
@@ -364,7 +392,8 @@
               </div>
               <div class="form-group">
                 <label class="form-label">Retenção (dias)</label>
-                <input type="number" class="form-input" name="backup_retencao" value="30" min="7" max="365" style="max-width: 150px;">
+                <input type="number" class="form-input" name="backup_retencao" value="30" min="7" max="365"
+                  style="max-width: 150px;">
               </div>
             </div>
             <div class="page-actions">
@@ -380,11 +409,16 @@
   <!-- Modal Usuário -->
   <div class="modal" id="userModal">
     <div class="modal-dialog modal-md">
-      <div class="modal-header"><h3 class="modal-title">Novo Usuário</h3><button class="modal-close" onclick="Modal.close('userModal')">&times;</button></div>
+      <div class="modal-header">
+        <h3 class="modal-title">Novo Usuário</h3><button class="modal-close"
+          onclick="Modal.close('userModal')">&times;</button>
+      </div>
       <div class="modal-body">
         <form id="userForm">
-          <div class="form-group"><label class="form-label">Nome Completo</label><input type="text" class="form-input" name="nome" required></div>
-          <div class="form-group"><label class="form-label">Email</label><input type="email" class="form-input" name="email" required></div>
+          <div class="form-group"><label class="form-label">Nome Completo</label><input type="text" class="form-input"
+              name="nome" required></div>
+          <div class="form-group"><label class="form-label">Email</label><input type="email" class="form-input"
+              name="email" required></div>
           <div class="form-group">
             <label class="form-label">Perfil</label>
             <select class="form-select" name="perfil" required>
@@ -396,30 +430,118 @@
               <option value="DP_ASSISTENTE">DP - Assistente</option>
             </select>
           </div>
-          <div class="form-group"><label class="checkbox-label"><input type="checkbox" name="ativo" checked><span>Usuário Ativo</span></label></div>
+          <div class="form-group"><label class="checkbox-label"><input type="checkbox" name="ativo"
+                checked><span>Usuário Ativo</span></label></div>
         </form>
       </div>
-      <div class="modal-footer"><button class="btn btn-secondary" onclick="Modal.close('userModal')">Cancelar</button><button class="btn btn-primary" onclick="saveUser()">Salvar</button></div>
+      <div class="modal-footer"><button class="btn btn-secondary"
+          onclick="Modal.close('userModal')">Cancelar</button><button class="btn btn-primary"
+          onclick="saveUser()">Salvar</button></div>
     </div>
   </div>
 
   <style>
-    .settings-container { display: grid; grid-template-columns: 250px 1fr; gap: var(--spacing-6); }
-    .settings-nav { background: white; border-radius: var(--radius-lg); padding: var(--spacing-4); box-shadow: var(--shadow-sm); height: fit-content; position: sticky; top: var(--spacing-4); }
-    .settings-nav-item { display: flex; align-items: center; gap: var(--spacing-3); padding: var(--spacing-3); border-radius: var(--radius-md); color: var(--gray-600); text-decoration: none; transition: all 0.2s; margin-bottom: var(--spacing-1); }
-    .settings-nav-item:hover { background: var(--gray-50); color: var(--gray-800); }
-    .settings-nav-item.active { background: var(--primary-dark); color: white; }
-    .settings-content { background: white; border-radius: var(--radius-lg); padding: var(--spacing-6); box-shadow: var(--shadow-sm); }
-    .settings-section { display: none; }
-    .settings-section.active { display: block; }
-    .settings-section h3 { margin-bottom: var(--spacing-6); padding-bottom: var(--spacing-3); border-bottom: 2px solid var(--gray-200); }
-    .integrations-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: var(--spacing-4); }
-    .integration-card { display: flex; align-items: center; gap: var(--spacing-4); padding: var(--spacing-4); border: 1px solid var(--gray-200); border-radius: var(--radius-md); }
-    .integration-icon { font-size: 32px; }
-    .integration-info { flex: 1; }
-    .integration-info h4 { margin: 0 0 var(--spacing-1); }
-    .integration-info p { margin: 0; font-size: var(--font-size-sm); color: var(--gray-500); }
-    @media (max-width: 768px) { .settings-container { grid-template-columns: 1fr; } .settings-nav { position: static; } }
+    .settings-container {
+      display: grid;
+      grid-template-columns: 250px 1fr;
+      gap: var(--spacing-6);
+    }
+
+    .settings-nav {
+      background: white;
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-4);
+      box-shadow: var(--shadow-sm);
+      height: fit-content;
+      position: sticky;
+      top: var(--spacing-4);
+    }
+
+    .settings-nav-item {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-3);
+      padding: var(--spacing-3);
+      border-radius: var(--radius-md);
+      color: var(--gray-600);
+      text-decoration: none;
+      transition: all 0.2s;
+      margin-bottom: var(--spacing-1);
+    }
+
+    .settings-nav-item:hover {
+      background: var(--gray-50);
+      color: var(--gray-800);
+    }
+
+    .settings-nav-item.active {
+      background: var(--primary-dark);
+      color: white;
+    }
+
+    .settings-content {
+      background: white;
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-6);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .settings-section {
+      display: none;
+    }
+
+    .settings-section.active {
+      display: block;
+    }
+
+    .settings-section h3 {
+      margin-bottom: var(--spacing-6);
+      padding-bottom: var(--spacing-3);
+      border-bottom: 2px solid var(--gray-200);
+    }
+
+    .integrations-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: var(--spacing-4);
+    }
+
+    .integration-card {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-4);
+      padding: var(--spacing-4);
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius-md);
+    }
+
+    .integration-icon {
+      font-size: 32px;
+    }
+
+    .integration-info {
+      flex: 1;
+    }
+
+    .integration-info h4 {
+      margin: 0 0 var(--spacing-1);
+    }
+
+    .integration-info p {
+      margin: 0;
+      font-size: var(--font-size-sm);
+      color: var(--gray-500);
+    }
+
+    @media (max-width: 768px) {
+      .settings-container {
+        grid-template-columns: 1fr;
+      }
+
+      .settings-nav {
+        position: static;
+      }
+    }
   </style>
 
   <script src="public/scripts/auth.js"></script>
@@ -478,7 +600,7 @@
         <tr>
           <td>
             <div class="cell-avatar">
-              <div class="avatar">${u.nome.split(' ').map(n=>n[0]).slice(0,2).join('')}</div>
+              <div class="avatar">${u.nome.split(' ').map(n => n[0]).slice(0, 2).join('')}</div>
               <div class="cell-info"><span class="cell-primary">${u.nome}</span><span class="cell-secondary">${u.email}</span></div>
             </div>
           </td>
@@ -504,4 +626,5 @@
     function downloadBackup() { Toast.info('Download iniciado...'); }
   </script>
 </body>
+
 </html>

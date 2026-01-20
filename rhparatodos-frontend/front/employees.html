@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,12 +9,13 @@
   <link rel="stylesheet" href="public/styles/dashboard.css">
   <link rel="stylesheet" href="public/styles/components.css">
 </head>
+
 <body>
   <!-- Sidebar -->
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
       <div class="logo">
-        <img src="/front/public/assets/gruporhpaint.png" alt="logo_menu_lateral" height="60">  
+        <img src="/front/public/assets/gruporhpaint.png" alt="logo_menu_lateral" height="60">
       </div>
     </div>
 
@@ -21,7 +23,7 @@
       <a href="dashboard.html" class="nav-item">
         <span class="nav-text">Dashboard</span>
       </a>
-      
+
       <div class="nav-section">Gestão de Pessoas</div>
       <a href="employees.html" class="nav-item active">
         <span class="nav-text">Funcionários</span>
@@ -32,7 +34,7 @@
       <a href="positions.html" class="nav-item">
         <span class="nav-text">Cargos</span>
       </a>
-      
+
       <div class="nav-section">Recursos Humanos</div>
       <a href="recruitment.html" class="nav-item">
         <span class="nav-text">Recrutamento</span>
@@ -43,7 +45,7 @@
       <a href="performance.html" class="nav-item">
         <span class="nav-text">Avaliações</span>
       </a>
-      
+
       <div class="nav-section">Departamento Pessoal</div>
       <a href="payroll.html" class="nav-item">
         <span class="nav-text">Folha de Pagamento</span>
@@ -57,7 +59,7 @@
       <a href="timesheet.html" class="nav-item">
         <span class="nav-text">Ponto</span>
       </a>
-      
+
       <div class="nav-section">Administração</div>
       <a href="reports.html" class="nav-item">
         <span class="nav-text">Relatórios</span>
@@ -104,28 +106,32 @@
       <div class="stats-row">
         <div class="stat-box">
           <div class="stat-box-header">
-            <div class="stat-box-icon" style="background: rgba(44, 62, 80, 0.1); color: var(--primary-dark);"><img src="/front/public/assets/id-card-lanyard (1).png" alt="icone_funcionarios"></div>
+            <div class="stat-box-icon" style="background: rgba(44, 62, 80, 0.1); color: var(--primary-dark);"><img
+                src="/front/public/assets/id-card-lanyard (1).png" alt="icone_funcionarios"></div>
           </div>
           <div class="stat-box-value" id="statTotal">0</div>
           <div class="stat-box-label">Total de Funcionários</div>
         </div>
         <div class="stat-box">
           <div class="stat-box-header">
-            <div class="stat-box-icon" style="background: rgba(39, 174, 96, 0.1); color: var(--success-green);"><img src="/front/public/assets/check (1).png" alt="icone_funcionarios_ativos"></div>
+            <div class="stat-box-icon" style="background: rgba(39, 174, 96, 0.1); color: var(--success-green);"><img
+                src="/front/public/assets/check (1).png" alt="icone_funcionarios_ativos"></div>
           </div>
           <div class="stat-box-value" id="statAtivos">0</div>
           <div class="stat-box-label">Ativos</div>
         </div>
         <div class="stat-box">
           <div class="stat-box-header">
-            <div class="stat-box-icon" style="background: rgba(243, 156, 18, 0.1); color: var(--warning-orange);"><img src="/front/public/assets/hourglass.png" alt="icone_funcionarios_ferias"></div>
+            <div class="stat-box-icon" style="background: rgba(243, 156, 18, 0.1); color: var(--warning-orange);"><img
+                src="/front/public/assets/hourglass.png" alt="icone_funcionarios_ferias"></div>
           </div>
           <div class="stat-box-value" id="statFerias">0</div>
           <div class="stat-box-label">Em Férias</div>
         </div>
         <div class="stat-box">
           <div class="stat-box-header">
-            <div class="stat-box-icon" style="background: rgba(231, 76, 60, 0.1); color: var(--error-red);"><img src="/front/public/assets/door-open.png" alt="icone_funcionarios_desligados"></div>
+            <div class="stat-box-icon" style="background: rgba(231, 76, 60, 0.1); color: var(--error-red);"><img
+                src="/front/public/assets/door-open.png" alt="icone_funcionarios_desligados"></div>
           </div>
           <div class="stat-box-value" id="statDesligados">0</div>
           <div class="stat-box-label">Desligados (mês)</div>
@@ -151,7 +157,8 @@
       <!-- Filters -->
       <div class="filters-bar">
         <div class="search-box">
-          <input type="text" id="searchInput" placeholder="Buscar por nome, matrícula ou CPF..." onkeyup="filterEmployees()">
+          <input type="text" id="searchInput" placeholder="Buscar por nome, matrícula ou CPF..."
+            onkeyup="filterEmployees()">
         </div>
         <div class="filter-group">
           <label>Departamento:</label>
@@ -225,7 +232,7 @@
       <div class="modal-body">
         <form id="employeeForm">
           <input type="hidden" id="employeeId" name="id">
-          
+
           <!-- Tabs -->
           <div class="tabs" data-tab-content="employeeTabs">
             <button type="button" class="tab-btn active" data-tab="dados">Dados Pessoais</button>
@@ -503,7 +510,8 @@
                 </div>
                 <div class="form-group">
                   <label class="form-label">Chave PIX</label>
-                  <input type="text" class="form-input" name="pix" placeholder="CPF, Email, Telefone ou Chave aleatória">
+                  <input type="text" class="form-input" name="pix"
+                    placeholder="CPF, Email, Telefone ou Chave aleatória">
                 </div>
               </div>
             </div>
@@ -538,4 +546,5 @@
   <script src="public/scripts/components.js"></script>
   <script src="public/scripts/employees.js"></script>
 </body>
+
 </html>

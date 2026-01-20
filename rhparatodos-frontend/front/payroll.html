@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +9,7 @@
   <link rel="stylesheet" href="public/styles/dashboard.css">
   <link rel="stylesheet" href="public/styles/components.css">
 </head>
+
 <body>
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
@@ -19,7 +21,7 @@
       <a href="dashboard.html" class="nav-item">
         <span class="nav-text">Dashboard</span>
       </a>
-      
+
       <div class="nav-section">Gestão de Pessoas</div>
       <a href="employees.html" class="nav-item">
         <span class="nav-text">Funcionários</span>
@@ -30,7 +32,7 @@
       <a href="positions.html" class="nav-item">
         <span class="nav-text">Cargos</span>
       </a>
-      
+
       <div class="nav-section">Recursos Humanos</div>
       <a href="recruitment.html" class="nav-item">
         <span class="nav-text">Recrutamento</span>
@@ -41,7 +43,7 @@
       <a href="performance.html" class="nav-item">
         <span class="nav-text">Avaliações</span>
       </a>
-      
+
       <div class="nav-section">Departamento Pessoal</div>
       <a href="payroll.html" class="nav-item active">
         <span class="nav-text">Folha de Pagamento</span>
@@ -55,7 +57,7 @@
       <a href="timesheet.html" class="nav-item">
         <span class="nav-text">Ponto</span>
       </a>
-      
+
       <div class="nav-section">Administração</div>
       <a href="reports.html" class="nav-item">
         <span class="nav-text">Relatórios</span>
@@ -99,22 +101,26 @@
       <!-- Stats -->
       <div class="stats-row">
         <div class="stat-box">
-          <div class="stat-box-icon" style="background: rgba(44, 62, 80, 0.1); color: var(--primary-dark);"><img src="/front/public/assets/scroll.png" alt="icone_total_folha"></div>
+          <div class="stat-box-icon" style="background: rgba(44, 62, 80, 0.1); color: var(--primary-dark);"><img
+              src="/front/public/assets/scroll.png" alt="icone_total_folha"></div>
           <div class="stat-box-value" id="statTotal">R$ 0</div>
           <div class="stat-box-label">Total da Folha</div>
         </div>
         <div class="stat-box">
-          <div class="stat-box-icon" style="background: rgba(39, 174, 96, 0.1); color: var(--success-green);"><img src="/front/public/assets/dollar-sign.png" alt="icone_total_liquido"></div>
+          <div class="stat-box-icon" style="background: rgba(39, 174, 96, 0.1); color: var(--success-green);"><img
+              src="/front/public/assets/dollar-sign.png" alt="icone_total_liquido"></div>
           <div class="stat-box-value" id="statLiquido">R$ 0</div>
           <div class="stat-box-label">Total Líquido</div>
         </div>
         <div class="stat-box">
-          <div class="stat-box-icon" style="background: rgba(231, 76, 60, 0.1); color: var(--error-red);"><img src="/front/public/assets/percent.png" alt="icone_total_descontos"></div>
+          <div class="stat-box-icon" style="background: rgba(231, 76, 60, 0.1); color: var(--error-red);"><img
+              src="/front/public/assets/percent.png" alt="icone_total_descontos"></div>
           <div class="stat-box-value" id="statDescontos">R$ 0</div>
           <div class="stat-box-label">Total Descontos</div>
         </div>
         <div class="stat-box">
-          <div class="stat-box-icon" style="background: rgba(243, 156, 18, 0.1); color: var(--warning-orange);"><img src="/front/public/assets/users (1).png" alt="icone_funcionarios"></div>
+          <div class="stat-box-icon" style="background: rgba(243, 156, 18, 0.1); color: var(--warning-orange);"><img
+              src="/front/public/assets/users (1).png" alt="icone_funcionarios"></div>
           <div class="stat-box-value" id="statFuncionarios">0</div>
           <div class="stat-box-label">Funcionários</div>
         </div>
@@ -126,7 +132,8 @@
           <p class="page-subtitle">Competência: <strong id="competencia">Janeiro/2026</strong></p>
         </div>
         <div class="page-actions">
-          <button class="btn btn-secondary" onclick="exportPayroll()"><img src="/front/public/assets/folder-output.png" alt="icone_exportar"> Exportar</button>
+          <button class="btn btn-secondary" onclick="exportPayroll()"><img src="/front/public/assets/folder-output.png"
+              alt="icone_exportar"> Exportar</button>
           <button class="btn btn-secondary" onclick="generatePayroll()">🔄 Gerar Folha</button>
           <button class="btn btn-primary" onclick="approvePayroll()">✓ Aprovar Folha</button>
         </div>
@@ -247,7 +254,7 @@
       const total = payrollData.reduce((sum, p) => sum + p.salario_base + p.proventos, 0);
       const liquido = payrollData.reduce((sum, p) => sum + p.liquido, 0);
       const descontos = payrollData.reduce((sum, p) => sum + p.descontos, 0);
-      
+
       document.getElementById("statTotal").textContent = formatCurrency(total);
       document.getElementById("statLiquido").textContent = formatCurrency(liquido);
       document.getElementById("statDescontos").textContent = formatCurrency(descontos);
@@ -265,7 +272,7 @@
         <tr>
           <td>
             <div class="cell-avatar">
-              <div class="avatar">${p.nome.split(' ').map(n=>n[0]).slice(0,2).join('')}</div>
+              <div class="avatar">${p.nome.split(' ').map(n => n[0]).slice(0, 2).join('')}</div>
               <div class="cell-info">
                 <span class="cell-primary">${p.nome}</span>
                 <span class="cell-secondary">${p.matricula}</span>
@@ -291,7 +298,7 @@
     function viewDetails(id) {
       const p = payrollData.find(x => x.id === id);
       if (!p) return;
-      
+
       document.getElementById("detailContent").innerHTML = `
         <div style="border-bottom: 2px solid var(--gray-200); padding-bottom: var(--spacing-4); margin-bottom: var(--spacing-4);">
           <h2 style="margin: 0;">${p.nome}</h2>
@@ -326,7 +333,7 @@
           <h3 style="margin: 0; color: var(--primary-dark);">Salário Líquido: ${formatCurrency(p.liquido)}</h3>
         </div>
       `;
-      
+
       Modal.open('detailModal');
     }
 
@@ -338,4 +345,5 @@
     function formatCurrency(val) { return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val || 0); }
   </script>
 </body>
+
 </html>

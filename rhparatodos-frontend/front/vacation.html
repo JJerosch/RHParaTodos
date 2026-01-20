@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +9,7 @@
   <link rel="stylesheet" href="public/styles/dashboard.css">
   <link rel="stylesheet" href="public/styles/components.css">
 </head>
+
 <body>
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
@@ -19,7 +21,7 @@
       <a href="dashboard.html" class="nav-item">
         <span class="nav-text">Dashboard</span>
       </a>
-      
+
       <div class="nav-section">Gestão de Pessoas</div>
       <a href="employees.html" class="nav-item">
         <span class="nav-text">Funcionários</span>
@@ -30,7 +32,7 @@
       <a href="positions.html" class="nav-item">
         <span class="nav-text">Cargos</span>
       </a>
-      
+
       <div class="nav-section">Recursos Humanos</div>
       <a href="recruitment.html" class="nav-item">
         <span class="nav-text">Recrutamento</span>
@@ -41,7 +43,7 @@
       <a href="performance.html" class="nav-item">
         <span class="nav-text">Avaliações</span>
       </a>
-      
+
       <div class="nav-section">Departamento Pessoal</div>
       <a href="payroll.html" class="nav-item">
         <span class="nav-text">Folha de Pagamento</span>
@@ -55,7 +57,7 @@
       <a href="timesheet.html" class="nav-item">
         <span class="nav-text">Ponto</span>
       </a>
-      
+
       <div class="nav-section">Administração</div>
       <a href="reports.html" class="nav-item">
         <span class="nav-text">Relatórios</span>
@@ -97,16 +99,40 @@
 
     <div class="content-area">
       <div class="stats-row">
-        <div class="stat-box"><div class="stat-box-icon" style="background: rgba(39, 174, 96, 0.1); color: var(--success-green);"><img src="/front/public/assets/check (1).png" alt="icone_ferias_aprovadas"></div><div class="stat-box-value" id="statAprovadas">8</div><div class="stat-box-label">Férias Aprovadas</div></div>
-        <div class="stat-box"><div class="stat-box-icon" style="background: rgba(243, 156, 18, 0.1); color: var(--warning-orange);"><img src="/front/public/assets/hourglass.png" alt="icone_pendentes"></div><div class="stat-box-value" id="statPendentes">5</div><div class="stat-box-label">Pendentes</div></div>
-        <div class="stat-box"><div class="stat-box-icon" style="background: rgba(44, 62, 80, 0.1); color: var(--primary-dark);"><img src="/front/public/assets/tree-palm (1).png" alt="icone_em_ferias"></div><div class="stat-box-value" id="statEmFerias">3</div><div class="stat-box-label">Em Férias Agora</div></div>
-        <div class="stat-box"><div class="stat-box-icon" style="background: rgba(231, 76, 60, 0.1); color: var(--error-red);"><img src="/front/public/assets/triangle-alert.png" alt="icone_ferias_vencidas"></div><div class="stat-box-value" id="statVencidas">12</div><div class="stat-box-label">Férias Vencidas</div></div>
+        <div class="stat-box">
+          <div class="stat-box-icon" style="background: rgba(39, 174, 96, 0.1); color: var(--success-green);"><img
+              src="/front/public/assets/check (1).png" alt="icone_ferias_aprovadas"></div>
+          <div class="stat-box-value" id="statAprovadas">8</div>
+          <div class="stat-box-label">Férias Aprovadas</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-box-icon" style="background: rgba(243, 156, 18, 0.1); color: var(--warning-orange);"><img
+              src="/front/public/assets/hourglass.png" alt="icone_pendentes"></div>
+          <div class="stat-box-value" id="statPendentes">5</div>
+          <div class="stat-box-label">Pendentes</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-box-icon" style="background: rgba(44, 62, 80, 0.1); color: var(--primary-dark);"><img
+              src="/front/public/assets/tree-palm (1).png" alt="icone_em_ferias"></div>
+          <div class="stat-box-value" id="statEmFerias">3</div>
+          <div class="stat-box-label">Em Férias Agora</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-box-icon" style="background: rgba(231, 76, 60, 0.1); color: var(--error-red);"><img
+              src="/front/public/assets/triangle-alert.png" alt="icone_ferias_vencidas"></div>
+          <div class="stat-box-value" id="statVencidas">12</div>
+          <div class="stat-box-label">Férias Vencidas</div>
+        </div>
       </div>
 
       <div class="page-header">
-        <div><h2 class="page-title">Solicitações de Férias</h2><p class="page-subtitle">Gerencie as solicitações e programações de férias</p></div>
+        <div>
+          <h2 class="page-title">Solicitações de Férias</h2>
+          <p class="page-subtitle">Gerencie as solicitações e programações de férias</p>
+        </div>
         <div class="page-actions">
-          <button class="btn btn-primary" onclick="openModal()"><img src="/front/public/assets/plus.png" alt="icone_nova_solicitacao"> Nova Solicitação</button>
+          <button class="btn btn-primary" onclick="openModal()"><img src="/front/public/assets/plus.png"
+              alt="icone_nova_solicitacao"> Nova Solicitação</button>
         </div>
       </div>
 
@@ -179,7 +205,10 @@
   <!-- Modal Solicitação -->
   <div class="modal" id="modal">
     <div class="modal-dialog modal-md">
-      <div class="modal-header"><h3 class="modal-title">Nova Solicitação de Férias</h3><button class="modal-close" onclick="Modal.close('modal')">&times;</button></div>
+      <div class="modal-header">
+        <h3 class="modal-title">Nova Solicitação de Férias</h3><button class="modal-close"
+          onclick="Modal.close('modal')">&times;</button>
+      </div>
       <div class="modal-body">
         <form id="form">
           <div class="form-group">
@@ -193,24 +222,37 @@
             </select>
           </div>
           <div class="form-row form-row-2">
-            <div class="form-group"><label class="form-label">Data Início *</label><input type="date" class="form-input" name="data_inicio" required></div>
-            <div class="form-group"><label class="form-label">Data Fim *</label><input type="date" class="form-input" name="data_fim" required></div>
+            <div class="form-group"><label class="form-label">Data Início *</label><input type="date" class="form-input"
+                name="data_inicio" required></div>
+            <div class="form-group"><label class="form-label">Data Fim *</label><input type="date" class="form-input"
+                name="data_fim" required></div>
           </div>
           <div class="form-row form-row-2">
-            <div class="form-group"><label class="form-label">Dias de Férias</label><input type="number" class="form-input" name="dias" value="30" min="5" max="30"></div>
-            <div class="form-group"><label class="form-label">Abono Pecuniário</label><select class="form-select" name="abono"><option value="false">Não</option><option value="true">Sim (vender 10 dias)</option></select></div>
+            <div class="form-group"><label class="form-label">Dias de Férias</label><input type="number"
+                class="form-input" name="dias" value="30" min="5" max="30"></div>
+            <div class="form-group"><label class="form-label">Abono Pecuniário</label><select class="form-select"
+                name="abono">
+                <option value="false">Não</option>
+                <option value="true">Sim (vender 10 dias)</option>
+              </select></div>
           </div>
-          <div class="form-group"><label class="form-label">Observações</label><textarea class="form-input" name="observacoes" rows="2"></textarea></div>
+          <div class="form-group"><label class="form-label">Observações</label><textarea class="form-input"
+              name="observacoes" rows="2"></textarea></div>
         </form>
       </div>
-      <div class="modal-footer"><button class="btn btn-secondary" onclick="Modal.close('modal')">Cancelar</button><button class="btn btn-primary" onclick="save()">Solicitar</button></div>
+      <div class="modal-footer"><button class="btn btn-secondary"
+          onclick="Modal.close('modal')">Cancelar</button><button class="btn btn-primary"
+          onclick="save()">Solicitar</button></div>
     </div>
   </div>
 
   <!-- Modal Calendário -->
   <div class="modal" id="calendarModal">
     <div class="modal-dialog modal-lg">
-      <div class="modal-header"><h3 class="modal-title">Calendário de Férias</h3><button class="modal-close" onclick="Modal.close('calendarModal')">&times;</button></div>
+      <div class="modal-header">
+        <h3 class="modal-title">Calendário de Férias</h3><button class="modal-close"
+          onclick="Modal.close('calendarModal')">&times;</button>
+      </div>
       <div class="modal-body">
         <div id="calendarView"></div>
       </div>
@@ -288,7 +330,7 @@
     function render() {
       document.getElementById("solicitacoesBody").innerHTML = solicitacoes.map(s => `
         <tr>
-          <td><div class="cell-avatar"><div class="avatar">${s.nome.split(' ').map(n=>n[0]).slice(0,2).join('')}</div><span>${s.nome}</span></div></td>
+          <td><div class="cell-avatar"><div class="avatar">${s.nome.split(' ').map(n => n[0]).slice(0, 2).join('')}</div><span>${s.nome}</span></div></td>
           <td>${formatDate(s.inicio)} a ${formatDate(s.fim)}</td>
           <td class="hide-mobile">${s.dias} dias</td>
           <td class="hide-mobile">${formatDate(s.solicitado)}</td>
@@ -306,7 +348,7 @@
 
       document.getElementById("programadasBody").innerHTML = programadas.map(p => `
         <tr>
-          <td><div class="cell-avatar"><div class="avatar">${p.nome.split(' ').map(n=>n[0]).slice(0,2).join('')}</div><span>${p.nome}</span></div></td>
+          <td><div class="cell-avatar"><div class="avatar">${p.nome.split(' ').map(n => n[0]).slice(0, 2).join('')}</div><span>${p.nome}</span></div></td>
           <td>${formatDate(p.inicio)}</td>
           <td>${formatDate(p.fim)}</td>
           <td class="hide-mobile">${p.dias} dias</td>
@@ -316,7 +358,7 @@
 
       document.getElementById("vencidasBody").innerHTML = vencidas.map(v => `
         <tr>
-          <td><div class="cell-avatar"><div class="avatar">${v.nome.split(' ').map(n=>n[0]).slice(0,2).join('')}</div><span>${v.nome}</span></div></td>
+          <td><div class="cell-avatar"><div class="avatar">${v.nome.split(' ').map(n => n[0]).slice(0, 2).join('')}</div><span>${v.nome}</span></div></td>
           <td>${v.periodo}</td>
           <td>${v.dias} dias</td>
           <td><span class="badge badge-danger">${formatDate(v.vencimento)}</span></td>
@@ -331,7 +373,7 @@
     function reject(id) { Confirm.show('Rejeitar esta solicitação de férias?', () => { Toast.warning('Férias rejeitadas'); }); }
     function viewDetails(id) { Toast.info('Detalhes da solicitação'); }
     function scheduleVacation(id) { openModal(); }
-    
+
     function showCalendar() {
       const months = ['Janeiro', 'Fevereiro', 'Março', 'Abril'];
       document.getElementById("calendarView").innerHTML = `
@@ -340,10 +382,10 @@
             <div style="background: var(--gray-50); padding: var(--spacing-4); border-radius: var(--radius-md);">
               <h4 style="margin-bottom: var(--spacing-3);">${m} 2026</h4>
               <div style="display: flex; flex-wrap: wrap; gap: 2px;">
-                ${Array.from({length: 30}, (_, d) => {
-                  const hasVacation = Math.random() > 0.8;
-                  return `<div style="width: 24px; height: 24px; background: ${hasVacation ? 'var(--primary-dark)' : 'white'}; color: ${hasVacation ? 'white' : 'var(--gray-600)'}; display: flex; align-items: center; justify-content: center; font-size: 11px; border-radius: 3px;">${d + 1}</div>`;
-                }).join('')}
+                ${Array.from({ length: 30 }, (_, d) => {
+        const hasVacation = Math.random() > 0.8;
+        return `<div style="width: 24px; height: 24px; background: ${hasVacation ? 'var(--primary-dark)' : 'white'}; color: ${hasVacation ? 'white' : 'var(--gray-600)'}; display: flex; align-items: center; justify-content: center; font-size: 11px; border-radius: 3px;">${d + 1}</div>`;
+      }).join('')}
               </div>
             </div>
           `).join('')}
@@ -358,4 +400,5 @@
     function formatDate(d) { return new Date(d + 'T00:00:00').toLocaleDateString('pt-BR'); }
   </script>
 </body>
+
 </html>

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +9,7 @@
   <link rel="stylesheet" href="public/styles/dashboard.css">
   <link rel="stylesheet" href="public/styles/components.css">
 </head>
+
 <body>
   <!-- Sidebar -->
   <aside class="sidebar" id="sidebar">
@@ -20,7 +22,7 @@
       <a href="dashboard.html" class="nav-item">
         <span class="nav-text">Dashboard</span>
       </a>
-      
+
       <div class="nav-section">Gestão de Pessoas</div>
       <a href="employees.html" class="nav-item">
         <span class="nav-text">Funcionários</span>
@@ -31,7 +33,7 @@
       <a href="positions.html" class="nav-item">
         <span class="nav-text">Cargos</span>
       </a>
-      
+
       <div class="nav-section">Recursos Humanos</div>
       <a href="recruitment.html" class="nav-item">
         <span class="nav-text">Recrutamento</span>
@@ -42,7 +44,7 @@
       <a href="performance.html" class="nav-item">
         <span class="nav-text">Avaliações</span>
       </a>
-      
+
       <div class="nav-section">Departamento Pessoal</div>
       <a href="payroll.html" class="nav-item">
         <span class="nav-text">Folha de Pagamento</span>
@@ -56,7 +58,7 @@
       <a href="timesheet.html" class="nav-item">
         <span class="nav-text">Ponto</span>
       </a>
-      
+
       <div class="nav-section">Administração</div>
       <a href="reports.html" class="nav-item">
         <span class="nav-text">Relatórios</span>
@@ -102,28 +104,32 @@
       <div class="stats-row">
         <div class="stat-box">
           <div class="stat-box-header">
-            <div class="stat-box-icon" style="background: rgba(44, 62, 80, 0.1); color: var(--primary-dark);"><img src="/front/public/assets/building-2.png" alt="icone_departamentos"></div>
+            <div class="stat-box-icon" style="background: rgba(44, 62, 80, 0.1); color: var(--primary-dark);"><img
+                src="/front/public/assets/building-2.png" alt="icone_departamentos"></div>
           </div>
           <div class="stat-box-value" id="statTotal">0</div>
           <div class="stat-box-label">Total de Departamentos</div>
         </div>
         <div class="stat-box">
           <div class="stat-box-header">
-            <div class="stat-box-icon" style="background: rgba(39, 174, 96, 0.1); color: var(--success-green);"><img src="/front/public/assets/check (1).png" alt="icone_departamentos_ativos"></div>
+            <div class="stat-box-icon" style="background: rgba(39, 174, 96, 0.1); color: var(--success-green);"><img
+                src="/front/public/assets/check (1).png" alt="icone_departamentos_ativos"></div>
           </div>
           <div class="stat-box-value" id="statAtivos">0</div>
           <div class="stat-box-label">Ativos</div>
         </div>
         <div class="stat-box">
           <div class="stat-box-header">
-            <div class="stat-box-icon" style="background: rgba(243, 156, 18, 0.1); color: var(--warning-orange);"><img src="/front/public/assets/users (1).png" alt="icone_total_funcionarios"></div>
+            <div class="stat-box-icon" style="background: rgba(243, 156, 18, 0.1); color: var(--warning-orange);"><img
+                src="/front/public/assets/users (1).png" alt="icone_total_funcionarios"></div>
           </div>
           <div class="stat-box-value" id="statFuncionarios">0</div>
           <div class="stat-box-label">Total de Funcionários</div>
         </div>
         <div class="stat-box">
           <div class="stat-box-header">
-            <div class="stat-box-icon" style="background: rgba(93, 109, 126, 0.1); color: var(--info-gray);"><img src="/front/public/assets/scale.png" alt="icone_media_departamento"></div>
+            <div class="stat-box-icon" style="background: rgba(93, 109, 126, 0.1); color: var(--info-gray);"><img
+                src="/front/public/assets/scale.png" alt="icone_media_departamento"></div>
           </div>
           <div class="stat-box-value" id="statMedia">0</div>
           <div class="stat-box-label">Média por Departamento</div>
@@ -193,7 +199,7 @@
       grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
       gap: var(--spacing-4);
     }
-    
+
     .department-card {
       background: white;
       border-radius: var(--radius-lg);
@@ -202,19 +208,19 @@
       border: 1px solid var(--gray-200);
       transition: all 0.2s;
     }
-    
+
     .department-card:hover {
       box-shadow: var(--shadow-md);
       transform: translateY(-2px);
     }
-    
+
     .department-header {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
       margin-bottom: var(--spacing-4);
     }
-    
+
     .department-icon {
       width: 48px;
       height: 48px;
@@ -225,42 +231,42 @@
       justify-content: center;
       font-size: 24px;
     }
-    
+
     .department-actions {
       display: flex;
       gap: var(--spacing-1);
     }
-    
+
     .department-name {
       font-size: var(--font-size-lg);
       font-weight: 600;
       color: var(--gray-800);
       margin-bottom: var(--spacing-1);
     }
-    
+
     .department-desc {
       font-size: var(--font-size-sm);
       color: var(--gray-500);
       margin-bottom: var(--spacing-4);
     }
-    
+
     .department-stats {
       display: flex;
       gap: var(--spacing-6);
       padding-top: var(--spacing-4);
       border-top: 1px solid var(--gray-100);
     }
-    
+
     .department-stat {
       text-align: center;
     }
-    
+
     .department-stat-value {
       font-size: var(--font-size-xl);
       font-weight: 700;
       color: var(--primary-dark);
     }
-    
+
     .department-stat-label {
       font-size: var(--font-size-xs);
       color: var(--gray-500);
@@ -280,9 +286,9 @@
       { id: 5, nome: "Operações", descricao: "Logística, produção e gestão operacional", funcionarios: 52, cargos: 9, ativo: true },
       { id: 6, nome: "Jurídico", descricao: "Assessoria jurídica e compliance", funcionarios: 8, cargos: 3, ativo: true }
     ];
-    
+
     let currentDeptId = null;
-    
+
     document.addEventListener("DOMContentLoaded", () => {
       if (!Auth.requireAuth()) return;
       initUserMenu();
@@ -290,7 +296,7 @@
       renderDepartments();
       updateStats();
     });
-    
+
     function initUserMenu() {
       const user = Auth.getCurrentUser();
       if (user) {
@@ -318,22 +324,22 @@
         }
       });
     }
-    
+
     function updateStats() {
       const total = departments.length;
       const ativos = departments.filter(d => d.ativo).length;
       const funcionarios = departments.reduce((sum, d) => sum + d.funcionarios, 0);
       const media = Math.round(funcionarios / total);
-      
+
       document.getElementById("statTotal").textContent = total;
       document.getElementById("statAtivos").textContent = ativos;
       document.getElementById("statFuncionarios").textContent = funcionarios;
       document.getElementById("statMedia").textContent = media;
     }
-    
+
     function renderDepartments() {
       const grid = document.getElementById("departmentsGrid");
-      
+
       grid.innerHTML = departments.map((dept, i) => `
         <div class="department-card">
           <div class="department-header">
@@ -359,17 +365,17 @@
           </div>
         </div>
       `).join('');
-      
+
       // Update parent select
       const select = document.getElementById("parentDeptSelect");
-      select.innerHTML = '<option value="">Nenhum (Raiz)</option>' + 
+      select.innerHTML = '<option value="">Nenhum (Raiz)</option>' +
         departments.map(d => `<option value="${d.id}">${d.nome}</option>`).join('');
     }
-    
+
     function openDepartmentModal(id = null) {
       currentDeptId = id;
       document.getElementById("departmentForm").reset();
-      
+
       if (id) {
         document.getElementById("modalTitle").textContent = "Editar Departamento";
         const dept = departments.find(d => d.id === id);
@@ -377,20 +383,20 @@
       } else {
         document.getElementById("modalTitle").textContent = "Novo Departamento";
       }
-      
+
       Modal.open('departmentModal');
     }
-    
+
     function editDepartment(id) { openDepartmentModal(id); }
-    
+
     function saveDepartment() {
       const data = Form.serialize('departmentForm');
-      
+
       if (!data.nome) {
         Toast.error('Nome é obrigatório');
         return;
       }
-      
+
       if (currentDeptId) {
         const idx = departments.findIndex(d => d.id === currentDeptId);
         if (idx > -1) departments[idx] = { ...departments[idx], ...data, ativo: !!data.ativo };
@@ -399,12 +405,12 @@
         departments.push({ id: Date.now(), ...data, ativo: !!data.ativo, funcionarios: 0, cargos: 0 });
         Toast.success('Departamento criado!');
       }
-      
+
       Modal.close('departmentModal');
       renderDepartments();
       updateStats();
     }
-    
+
     function deleteDepartment(id) {
       const dept = departments.find(d => d.id === id);
       Confirm.show(`Excluir o departamento <strong>${dept.nome}</strong>?`, () => {
@@ -417,4 +423,5 @@
     }
   </script>
 </body>
+
 </html>

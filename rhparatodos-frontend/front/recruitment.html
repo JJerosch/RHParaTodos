@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,27 +9,132 @@
   <link rel="stylesheet" href="public/styles/dashboard.css">
   <link rel="stylesheet" href="public/styles/components.css">
   <style>
-    .kanban-board { display: flex; gap: var(--spacing-4); overflow-x: auto; padding-bottom: var(--spacing-4); }
-    .kanban-column { min-width: 280px; flex: 1; background: var(--gray-100); border-radius: var(--radius-lg); padding: var(--spacing-4); }
-    .kanban-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-4); padding-bottom: var(--spacing-3); border-bottom: 2px solid var(--gray-200); }
-    .kanban-title { font-weight: 600; color: var(--gray-700); }
-    .kanban-count { background: var(--gray-300); padding: 2px 8px; border-radius: 10px; font-size: var(--font-size-sm); }
-    .kanban-cards { display: flex; flex-direction: column; gap: var(--spacing-3); min-height: 200px; }
-    .candidate-card { background: white; border-radius: var(--radius-md); padding: var(--spacing-4); box-shadow: var(--shadow-sm); cursor: grab; transition: all 0.2s; }
-    .candidate-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
-    .candidate-name { font-weight: 600; margin-bottom: var(--spacing-1); }
-    .candidate-position { font-size: var(--font-size-sm); color: var(--gray-500); margin-bottom: var(--spacing-2); }
-    .candidate-meta { display: flex; gap: var(--spacing-3); font-size: var(--font-size-xs); color: var(--gray-400); }
-    .job-card { background: white; border-radius: var(--radius-lg); padding: var(--spacing-5); box-shadow: var(--shadow-sm); border: 1px solid var(--gray-200); }
-    .job-header { display: flex; justify-content: space-between; margin-bottom: var(--spacing-3); }
-    .job-title { font-size: var(--font-size-lg); font-weight: 600; }
-    .job-meta { display: flex; gap: var(--spacing-4); font-size: var(--font-size-sm); color: var(--gray-500); margin-bottom: var(--spacing-3); }
-    .job-stats { display: flex; gap: var(--spacing-6); padding-top: var(--spacing-3); border-top: 1px solid var(--gray-100); }
-    .job-stat { text-align: center; }
-    .job-stat-value { font-size: var(--font-size-xl); font-weight: 700; color: var(--primary-dark); }
-    .job-stat-label { font-size: var(--font-size-xs); color: var(--gray-500); }
+    .kanban-board {
+      display: flex;
+      gap: var(--spacing-4);
+      overflow-x: auto;
+      padding-bottom: var(--spacing-4);
+    }
+
+    .kanban-column {
+      min-width: 280px;
+      flex: 1;
+      background: var(--gray-100);
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-4);
+    }
+
+    .kanban-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--spacing-4);
+      padding-bottom: var(--spacing-3);
+      border-bottom: 2px solid var(--gray-200);
+    }
+
+    .kanban-title {
+      font-weight: 600;
+      color: var(--gray-700);
+    }
+
+    .kanban-count {
+      background: var(--gray-300);
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: var(--font-size-sm);
+    }
+
+    .kanban-cards {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-3);
+      min-height: 200px;
+    }
+
+    .candidate-card {
+      background: white;
+      border-radius: var(--radius-md);
+      padding: var(--spacing-4);
+      box-shadow: var(--shadow-sm);
+      cursor: grab;
+      transition: all 0.2s;
+    }
+
+    .candidate-card:hover {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+    }
+
+    .candidate-name {
+      font-weight: 600;
+      margin-bottom: var(--spacing-1);
+    }
+
+    .candidate-position {
+      font-size: var(--font-size-sm);
+      color: var(--gray-500);
+      margin-bottom: var(--spacing-2);
+    }
+
+    .candidate-meta {
+      display: flex;
+      gap: var(--spacing-3);
+      font-size: var(--font-size-xs);
+      color: var(--gray-400);
+    }
+
+    .job-card {
+      background: white;
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-5);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--gray-200);
+    }
+
+    .job-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: var(--spacing-3);
+    }
+
+    .job-title {
+      font-size: var(--font-size-lg);
+      font-weight: 600;
+    }
+
+    .job-meta {
+      display: flex;
+      gap: var(--spacing-4);
+      font-size: var(--font-size-sm);
+      color: var(--gray-500);
+      margin-bottom: var(--spacing-3);
+    }
+
+    .job-stats {
+      display: flex;
+      gap: var(--spacing-6);
+      padding-top: var(--spacing-3);
+      border-top: 1px solid var(--gray-100);
+    }
+
+    .job-stat {
+      text-align: center;
+    }
+
+    .job-stat-value {
+      font-size: var(--font-size-xl);
+      font-weight: 700;
+      color: var(--primary-dark);
+    }
+
+    .job-stat-label {
+      font-size: var(--font-size-xs);
+      color: var(--gray-500);
+    }
   </style>
 </head>
+
 <body>
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
@@ -40,7 +146,7 @@
       <a href="dashboard.html" class="nav-item">
         <span class="nav-text">Dashboard</span>
       </a>
-      
+
       <div class="nav-section">Gestão de Pessoas</div>
       <a href="employees.html" class="nav-item">
         <span class="nav-text">Funcionários</span>
@@ -51,7 +157,7 @@
       <a href="positions.html" class="nav-item">
         <span class="nav-text">Cargos</span>
       </a>
-      
+
       <div class="nav-section">Recursos Humanos</div>
       <a href="recruitment.html" class="nav-item active">
         <span class="nav-text">Recrutamento</span>
@@ -62,7 +168,7 @@
       <a href="performance.html" class="nav-item">
         <span class="nav-text">Avaliações</span>
       </a>
-      
+
       <div class="nav-section">Departamento Pessoal</div>
       <a href="payroll.html" class="nav-item">
         <span class="nav-text">Folha de Pagamento</span>
@@ -76,7 +182,7 @@
       <a href="timesheet.html" class="nav-item">
         <span class="nav-text">Ponto</span>
       </a>
-      
+
       <div class="nav-section">Administração</div>
       <a href="reports.html" class="nav-item">
         <span class="nav-text">Relatórios</span>
@@ -116,10 +222,30 @@
 
     <div class="content-area">
       <div class="stats-row">
-        <div class="stat-box"><div class="stat-box-icon" style="background: rgba(44, 62, 80, 0.1);">📋</div><div class="stat-box-value">8</div><div class="stat-box-label">Vagas Abertas</div></div>
-        <div class="stat-box"><div class="stat-box-icon" style="background: rgba(39, 174, 96, 0.1);">👥</div><div class="stat-box-value">156</div><div class="stat-box-label">Candidatos Ativos</div></div>
-        <div class="stat-box"><div class="stat-box-icon" style="background: rgba(243, 156, 18, 0.1);">📅</div><div class="stat-box-value">12</div><div class="stat-box-label">Entrevistas Agendadas</div></div>
-        <div class="stat-box"><div class="stat-box-icon" style="background: rgba(231, 76, 60, 0.1);">✓</div><div class="stat-box-value">3</div><div class="stat-box-label">Contratações (mês)</div></div>
+        <div class="stat-box">
+          <div class="stat-box-icon" style="background: rgba(44, 62, 80, 0.1);"><img
+              src="/front/public/assets/file-text.png" alt="icone_vagas_abertas"></div>
+          <div class="stat-box-value">8</div>
+          <div class="stat-box-label">Vagas Abertas</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-box-icon" style="background: rgba(39, 174, 96, 0.1);"><img
+              src="/front/public/assets/file-user.png" alt="icone_candidatos_ativos"></div>
+          <div class="stat-box-value">156</div>
+          <div class="stat-box-label">Candidatos Ativos</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-box-icon" style="background: rgba(243, 156, 18, 0.1);"><img
+              src="/front/public/assets/calendar-check.png" alt="icone_entrevistas_agendadas"></div>
+          <div class="stat-box-value">12</div>
+          <div class="stat-box-label">Entrevistas Agendadas</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-box-icon" style="background: rgba(231, 76, 60, 0.1);"><img
+              src="/front/public/assets/check (1).png" alt="icone_contratacoes"></div>
+          <div class="stat-box-value">3</div>
+          <div class="stat-box-label">Contratações (mês)</div>
+        </div>
       </div>
 
       <!-- Tabs -->
@@ -132,30 +258,38 @@
       <!-- Tab Vagas -->
       <div id="tabVagas">
         <div class="page-header">
-          <div><h2 class="page-title">Vagas Abertas</h2></div>
+          <div>
+            <h2 class="page-title">Vagas Abertas</h2>
+          </div>
           <button class="btn btn-primary" onclick="openJobModal()">+ Nova Vaga</button>
         </div>
-        
-        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: var(--spacing-4);" id="jobsGrid"></div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: var(--spacing-4);"
+          id="jobsGrid"></div>
       </div>
 
       <!-- Tab Candidatos (Kanban) -->
       <div id="tabCandidatos" style="display: none;">
         <div class="page-header">
-          <div><h2 class="page-title">Pipeline de Candidatos</h2><p class="page-subtitle">Arraste os cards para mover candidatos entre etapas</p></div>
+          <div>
+            <h2 class="page-title">Pipeline de Candidatos</h2>
+            <p class="page-subtitle">Arraste os cards para mover candidatos entre etapas</p>
+          </div>
           <button class="btn btn-primary" onclick="openCandidateModal()">+ Novo Candidato</button>
         </div>
-        
+
         <div class="kanban-board" id="kanbanBoard"></div>
       </div>
 
       <!-- Tab Entrevistas -->
       <div id="tabEntrevistas" style="display: none;">
         <div class="page-header">
-          <div><h2 class="page-title">Agenda de Entrevistas</h2></div>
+          <div>
+            <h2 class="page-title">Agenda de Entrevistas</h2>
+          </div>
           <button class="btn btn-primary" onclick="scheduleInterview()">+ Agendar Entrevista</button>
         </div>
-        
+
         <div class="table-container">
           <table class="data-table">
             <thead>
@@ -179,27 +313,58 @@
   <!-- Modal Nova Vaga -->
   <div class="modal" id="jobModal">
     <div class="modal-dialog modal-lg">
-      <div class="modal-header"><h3 class="modal-title">Nova Vaga</h3><button class="modal-close" onclick="Modal.close('jobModal')">&times;</button></div>
+      <div class="modal-header">
+        <h3 class="modal-title">Nova Vaga</h3><button class="modal-close"
+          onclick="Modal.close('jobModal')">&times;</button>
+      </div>
       <div class="modal-body">
         <form id="jobForm">
           <div class="form-row form-row-2">
-            <div class="form-group"><label class="form-label">Título da Vaga *</label><input type="text" class="form-input" name="titulo" required></div>
-            <div class="form-group"><label class="form-label">Departamento *</label><select class="form-select" name="departamento" required><option value="">Selecione</option><option>Tecnologia</option><option>RH</option><option>Financeiro</option><option>Comercial</option></select></div>
+            <div class="form-group"><label class="form-label">Título da Vaga *</label><input type="text"
+                class="form-input" name="titulo" required></div>
+            <div class="form-group"><label class="form-label">Departamento *</label><select class="form-select"
+                name="departamento" required>
+                <option value="">Selecione</option>
+                <option>Tecnologia</option>
+                <option>RH</option>
+                <option>Financeiro</option>
+                <option>Comercial</option>
+              </select></div>
           </div>
           <div class="form-row form-row-3">
-            <div class="form-group"><label class="form-label">Tipo</label><select class="form-select" name="tipo"><option>CLT</option><option>PJ</option><option>Estágio</option></select></div>
-            <div class="form-group"><label class="form-label">Nível</label><select class="form-select" name="nivel"><option>Junior</option><option>Pleno</option><option>Senior</option><option>Gestão</option></select></div>
-            <div class="form-group"><label class="form-label">Modalidade</label><select class="form-select" name="modalidade"><option>Presencial</option><option>Híbrido</option><option>Remoto</option></select></div>
+            <div class="form-group"><label class="form-label">Tipo</label><select class="form-select" name="tipo">
+                <option>CLT</option>
+                <option>PJ</option>
+                <option>Estágio</option>
+              </select></div>
+            <div class="form-group"><label class="form-label">Nível</label><select class="form-select" name="nivel">
+                <option>Junior</option>
+                <option>Pleno</option>
+                <option>Senior</option>
+                <option>Gestão</option>
+              </select></div>
+            <div class="form-group"><label class="form-label">Modalidade</label><select class="form-select"
+                name="modalidade">
+                <option>Presencial</option>
+                <option>Híbrido</option>
+                <option>Remoto</option>
+              </select></div>
           </div>
           <div class="form-row form-row-2">
-            <div class="form-group"><label class="form-label">Faixa Salarial (de)</label><input type="text" class="form-input" name="salario_min" data-mask="currency"></div>
-            <div class="form-group"><label class="form-label">Faixa Salarial (até)</label><input type="text" class="form-input" name="salario_max" data-mask="currency"></div>
+            <div class="form-group"><label class="form-label">Faixa Salarial (de)</label><input type="text"
+                class="form-input" name="salario_min" data-mask="currency"></div>
+            <div class="form-group"><label class="form-label">Faixa Salarial (até)</label><input type="text"
+                class="form-input" name="salario_max" data-mask="currency"></div>
           </div>
-          <div class="form-group"><label class="form-label">Descrição da Vaga</label><textarea class="form-input" name="descricao" rows="4"></textarea></div>
-          <div class="form-group"><label class="form-label">Requisitos</label><textarea class="form-input" name="requisitos" rows="3"></textarea></div>
+          <div class="form-group"><label class="form-label">Descrição da Vaga</label><textarea class="form-input"
+              name="descricao" rows="4"></textarea></div>
+          <div class="form-group"><label class="form-label">Requisitos</label><textarea class="form-input"
+              name="requisitos" rows="3"></textarea></div>
         </form>
       </div>
-      <div class="modal-footer"><button class="btn btn-secondary" onclick="Modal.close('jobModal')">Cancelar</button><button class="btn btn-primary" onclick="saveJob()">Publicar Vaga</button></div>
+      <div class="modal-footer"><button class="btn btn-secondary"
+          onclick="Modal.close('jobModal')">Cancelar</button><button class="btn btn-primary"
+          onclick="saveJob()">Publicar Vaga</button></div>
     </div>
   </div>
 
@@ -290,14 +455,14 @@
           <div class="job-header">
             <h3 class="job-title">${j.titulo}</h3>
             <div class="cell-actions">
-              <button class="btn-icon edit" onclick="editJob(${j.id})">✏️</button>
-              <button class="btn-icon delete" onclick="closeJob(${j.id})">✕</button>
+              <button class="btn-icon edit" onclick="editJob(${j.id})"><img src="/front/public/assets/pencil (1).png" alt="icone_editar"></button>
+              <button class="btn-icon delete" onclick="closeJob(${j.id})"><img src="/front/public/assets/x.png" alt="icone_excluir"></button>
             </div>
           </div>
           <div class="job-meta">
-            <span>🏢 ${j.departamento}</span>
-            <span>📍 ${j.modalidade}</span>
-            <span>📊 ${j.nivel}</span>
+            <span>${j.departamento}</span>
+            <span>${j.modalidade}</span>
+            <span>${j.nivel}</span>
           </div>
           <span class="badge badge-success">${j.tipo}</span>
           <div class="job-stats">
@@ -329,7 +494,7 @@
               <div class="candidate-card" draggable="true">
                 <div class="candidate-name">${c.nome}</div>
                 <div class="candidate-position">${c.vaga}</div>
-                <div class="candidate-meta"><span>📅 ${c.data}</span></div>
+                <div class="candidate-meta"><span>${c.data}</span></div>
               </div>
             `).join('')}
           </div>
@@ -348,8 +513,8 @@
           <td><span class="badge ${i.status === 'AGENDADA' ? 'badge-warning' : 'badge-success'}">${i.status === 'AGENDADA' ? 'Agendada' : 'Realizada'}</span></td>
           <td>
             <div class="cell-actions">
-              <button class="btn-icon view" onclick="viewInterview(${i.id})">👁️</button>
-              <button class="btn-icon edit" onclick="editInterview(${i.id})">✏️</button>
+              <button class="btn-icon view" onclick="viewInterview(${i.id})"><img src="/front/public/assets/eye.png" alt="icone_visualizar"></button>
+              <button class="btn-icon edit" onclick="editInterview(${i.id})"><img src="/front/public/assets/pencil (1).png" alt="icone_editar"></button>
             </div>
           </td>
         </tr>
@@ -366,4 +531,5 @@
     function editInterview(id) { Toast.info('Editar entrevista'); }
   </script>
 </body>
+
 </html>

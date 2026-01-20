@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,24 +9,102 @@
   <link rel="stylesheet" href="public/styles/dashboard.css">
   <link rel="stylesheet" href="public/styles/components.css">
   <style>
-    .rating-stars { color: var(--warning-orange); font-size: 18px; }
-    .evaluation-card { background: white; border-radius: var(--radius-lg); padding: var(--spacing-5); box-shadow: var(--shadow-sm); border: 1px solid var(--gray-200); margin-bottom: var(--spacing-4); }
-    .evaluation-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: var(--spacing-4); }
-    .evaluation-info h3 { margin: 0 0 var(--spacing-1); }
-    .evaluation-meta { font-size: var(--font-size-sm); color: var(--gray-500); }
-    .competency-item { display: flex; justify-content: space-between; align-items: center; padding: var(--spacing-3) 0; border-bottom: 1px solid var(--gray-100); }
-    .competency-item:last-child { border-bottom: none; }
-    .competency-name { font-weight: 500; }
-    .competency-score { display: flex; align-items: center; gap: var(--spacing-2); }
-    .score-bar { width: 100px; height: 8px; background: var(--gray-200); border-radius: 4px; overflow: hidden; }
-    .score-fill { height: 100%; border-radius: 4px; }
-    .cycle-card { background: white; border-radius: var(--radius-lg); padding: var(--spacing-5); box-shadow: var(--shadow-sm); border-left: 4px solid var(--primary-dark); }
-    .cycle-status { display: flex; gap: var(--spacing-6); margin-top: var(--spacing-4); }
-    .cycle-stat { text-align: center; }
-    .cycle-stat-value { font-size: var(--font-size-2xl); font-weight: 700; color: var(--primary-dark); }
-    .cycle-stat-label { font-size: var(--font-size-sm); color: var(--gray-500); }
+    .rating-stars {
+      color: var(--warning-orange);
+      font-size: 18px;
+    }
+
+    .evaluation-card {
+      background: white;
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-5);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--gray-200);
+      margin-bottom: var(--spacing-4);
+    }
+
+    .evaluation-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: var(--spacing-4);
+    }
+
+    .evaluation-info h3 {
+      margin: 0 0 var(--spacing-1);
+    }
+
+    .evaluation-meta {
+      font-size: var(--font-size-sm);
+      color: var(--gray-500);
+    }
+
+    .competency-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: var(--spacing-3) 0;
+      border-bottom: 1px solid var(--gray-100);
+    }
+
+    .competency-item:last-child {
+      border-bottom: none;
+    }
+
+    .competency-name {
+      font-weight: 500;
+    }
+
+    .competency-score {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-2);
+    }
+
+    .score-bar {
+      width: 100px;
+      height: 8px;
+      background: var(--gray-200);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .score-fill {
+      height: 100%;
+      border-radius: 4px;
+    }
+
+    .cycle-card {
+      background: white;
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-5);
+      box-shadow: var(--shadow-sm);
+      border-left: 4px solid var(--primary-dark);
+    }
+
+    .cycle-status {
+      display: flex;
+      gap: var(--spacing-6);
+      margin-top: var(--spacing-4);
+    }
+
+    .cycle-stat {
+      text-align: center;
+    }
+
+    .cycle-stat-value {
+      font-size: var(--font-size-2xl);
+      font-weight: 700;
+      color: var(--primary-dark);
+    }
+
+    .cycle-stat-label {
+      font-size: var(--font-size-sm);
+      color: var(--gray-500);
+    }
   </style>
 </head>
+
 <body>
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
@@ -37,7 +116,7 @@
       <a href="dashboard.html" class="nav-item">
         <span class="nav-text">Dashboard</span>
       </a>
-      
+
       <div class="nav-section">Gestão de Pessoas</div>
       <a href="employees.html" class="nav-item">
         <span class="nav-text">Funcionários</span>
@@ -48,7 +127,7 @@
       <a href="positions.html" class="nav-item">
         <span class="nav-text">Cargos</span>
       </a>
-      
+
       <div class="nav-section">Recursos Humanos</div>
       <a href="recruitment.html" class="nav-item">
         <span class="nav-text">Recrutamento</span>
@@ -59,7 +138,7 @@
       <a href="performance.html" class="nav-item active">
         <span class="nav-text">Avaliações</span>
       </a>
-      
+
       <div class="nav-section">Departamento Pessoal</div>
       <a href="payroll.html" class="nav-item">
         <span class="nav-text">Folha de Pagamento</span>
@@ -73,7 +152,7 @@
       <a href="timesheet.html" class="nav-item">
         <span class="nav-text">Ponto</span>
       </a>
-      
+
       <div class="nav-section">Administração</div>
       <a href="reports.html" class="nav-item">
         <span class="nav-text">Relatórios</span>
@@ -124,19 +203,50 @@
           <span class="badge badge-warning" style="font-size: var(--font-size-base);">Em Andamento</span>
         </div>
         <div class="cycle-status">
-          <div class="cycle-stat"><div class="cycle-stat-value">248</div><div class="cycle-stat-label">Total de Avaliações</div></div>
-          <div class="cycle-stat"><div class="cycle-stat-value">156</div><div class="cycle-stat-label">Concluídas</div></div>
-          <div class="cycle-stat"><div class="cycle-stat-value">72</div><div class="cycle-stat-label">Pendentes</div></div>
-          <div class="cycle-stat"><div class="cycle-stat-value">20</div><div class="cycle-stat-label">Em Revisão</div></div>
-          <div class="cycle-stat"><div class="cycle-stat-value">63%</div><div class="cycle-stat-label">Progresso</div></div>
+          <div class="cycle-stat">
+            <div class="cycle-stat-value">248</div>
+            <div class="cycle-stat-label">Total de Avaliações</div>
+          </div>
+          <div class="cycle-stat">
+            <div class="cycle-stat-value">156</div>
+            <div class="cycle-stat-label">Concluídas</div>
+          </div>
+          <div class="cycle-stat">
+            <div class="cycle-stat-value">72</div>
+            <div class="cycle-stat-label">Pendentes</div>
+          </div>
+          <div class="cycle-stat">
+            <div class="cycle-stat-value">20</div>
+            <div class="cycle-stat-label">Em Revisão</div>
+          </div>
+          <div class="cycle-stat">
+            <div class="cycle-stat-value">63%</div>
+            <div class="cycle-stat-label">Progresso</div>
+          </div>
         </div>
       </div>
 
       <div class="stats-row">
-        <div class="stat-box"><div class="stat-box-icon" style="background: rgba(39, 174, 96, 0.1);">⭐</div><div class="stat-box-value">4.2</div><div class="stat-box-label">Média Geral</div></div>
-        <div class="stat-box"><div class="stat-box-icon" style="background: rgba(44, 62, 80, 0.1);">👥</div><div class="stat-box-value">5</div><div class="stat-box-label">Pendentes (Você)</div></div>
-        <div class="stat-box"><div class="stat-box-icon" style="background: rgba(243, 156, 18, 0.1);">📝</div><div class="stat-box-value">3</div><div class="stat-box-label">Para Revisar</div></div>
-        <div class="stat-box"><div class="stat-box-icon" style="background: rgba(231, 76, 60, 0.1);">⏳</div><div class="stat-box-label">Prazo Final</div><div class="stat-box-value" style="font-size: var(--font-size-lg);">15/01/2026</div></div>
+        <div class="stat-box">
+          <div class="stat-box-icon" style="background: rgba(39, 174, 96, 0.1);">⭐</div>
+          <div class="stat-box-value">4.2</div>
+          <div class="stat-box-label">Média Geral</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-box-icon" style="background: rgba(44, 62, 80, 0.1);">👥</div>
+          <div class="stat-box-value">5</div>
+          <div class="stat-box-label">Pendentes (Você)</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-box-icon" style="background: rgba(243, 156, 18, 0.1);">📝</div>
+          <div class="stat-box-value">3</div>
+          <div class="stat-box-label">Para Revisar</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-box-icon" style="background: rgba(231, 76, 60, 0.1);">⏳</div>
+          <div class="stat-box-label">Prazo Final</div>
+          <div class="stat-box-value" style="font-size: var(--font-size-lg);">15/01/2026</div>
+        </div>
       </div>
 
       <!-- Tabs -->
@@ -149,16 +259,29 @@
 
       <!-- Tab Minhas Avaliações -->
       <div id="tabMinhas">
-        <div class="page-header"><h2 class="page-title">Avaliações Pendentes</h2></div>
+        <div class="page-header">
+          <h2 class="page-title">Avaliações Pendentes</h2>
+        </div>
         <div id="pendingEvaluations"></div>
       </div>
 
       <!-- Tab Equipe -->
       <div id="tabEquipe" style="display: none;">
-        <div class="page-header"><h2 class="page-title">Avaliações da Equipe</h2></div>
+        <div class="page-header">
+          <h2 class="page-title">Avaliações da Equipe</h2>
+        </div>
         <div class="table-container">
           <table class="data-table">
-            <thead><tr><th>Funcionário</th><th>Cargo</th><th>Autoavaliação</th><th>Avaliação Gestor</th><th>Nota Final</th><th>Ações</th></tr></thead>
+            <thead>
+              <tr>
+                <th>Funcionário</th>
+                <th>Cargo</th>
+                <th>Autoavaliação</th>
+                <th>Avaliação Gestor</th>
+                <th>Nota Final</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
             <tbody id="teamBody"></tbody>
           </table>
         </div>
@@ -166,14 +289,42 @@
 
       <!-- Tab Histórico -->
       <div id="tabHistorico" style="display: none;">
-        <div class="page-header"><h2 class="page-title">Histórico de Avaliações</h2></div>
+        <div class="page-header">
+          <h2 class="page-title">Histórico de Avaliações</h2>
+        </div>
         <div class="table-container">
           <table class="data-table">
-            <thead><tr><th>Ciclo</th><th>Período</th><th>Nota Final</th><th>Status</th><th>Ações</th></tr></thead>
+            <thead>
+              <tr>
+                <th>Ciclo</th>
+                <th>Período</th>
+                <th>Nota Final</th>
+                <th>Status</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
             <tbody>
-              <tr><td><strong>Q4 2025</strong></td><td>Out-Dez 2025</td><td><span class="rating-stars">★★★★☆</span> 4.3</td><td><span class="badge badge-success">Concluído</span></td><td><button class="btn-icon view">👁️</button></td></tr>
-              <tr><td><strong>Q3 2025</strong></td><td>Jul-Set 2025</td><td><span class="rating-stars">★★★★☆</span> 4.1</td><td><span class="badge badge-success">Concluído</span></td><td><button class="btn-icon view">👁️</button></td></tr>
-              <tr><td><strong>Q2 2025</strong></td><td>Abr-Jun 2025</td><td><span class="rating-stars">★★★★★</span> 4.5</td><td><span class="badge badge-success">Concluído</span></td><td><button class="btn-icon view">👁️</button></td></tr>
+              <tr>
+                <td><strong>Q4 2025</strong></td>
+                <td>Out-Dez 2025</td>
+                <td><span class="rating-stars">★★★★☆</span> 4.3</td>
+                <td><span class="badge badge-success">Concluído</span></td>
+                <td><button class="btn-icon view">👁️</button></td>
+              </tr>
+              <tr>
+                <td><strong>Q3 2025</strong></td>
+                <td>Jul-Set 2025</td>
+                <td><span class="rating-stars">★★★★☆</span> 4.1</td>
+                <td><span class="badge badge-success">Concluído</span></td>
+                <td><button class="btn-icon view">👁️</button></td>
+              </tr>
+              <tr>
+                <td><strong>Q2 2025</strong></td>
+                <td>Abr-Jun 2025</td>
+                <td><span class="rating-stars">★★★★★</span> 4.5</td>
+                <td><span class="badge badge-success">Concluído</span></td>
+                <td><button class="btn-icon view">👁️</button></td>
+              </tr>
             </tbody>
           </table>
         </div>
@@ -181,11 +332,14 @@
 
       <!-- Tab Config -->
       <div id="tabConfig" style="display: none;">
-        <div class="page-header"><h2 class="page-title">Configurações de Avaliação</h2></div>
+        <div class="page-header">
+          <h2 class="page-title">Configurações de Avaliação</h2>
+        </div>
         <div class="card">
           <h3 style="margin-bottom: var(--spacing-4);">Competências Avaliadas</h3>
           <div id="competenciesList"></div>
-          <button class="btn btn-primary" style="margin-top: var(--spacing-4);" onclick="addCompetency()">+ Adicionar Competência</button>
+          <button class="btn btn-primary" style="margin-top: var(--spacing-4);" onclick="addCompetency()">+ Adicionar
+            Competência</button>
         </div>
       </div>
     </div>
@@ -194,16 +348,27 @@
   <!-- Modal Avaliação -->
   <div class="modal" id="evaluationModal">
     <div class="modal-dialog modal-lg">
-      <div class="modal-header"><h3 class="modal-title" id="evalModalTitle">Realizar Avaliação</h3><button class="modal-close" onclick="Modal.close('evaluationModal')">&times;</button></div>
+      <div class="modal-header">
+        <h3 class="modal-title" id="evalModalTitle">Realizar Avaliação</h3><button class="modal-close"
+          onclick="Modal.close('evaluationModal')">&times;</button>
+      </div>
       <div class="modal-body">
-        <div id="evalEmployee" style="display: flex; align-items: center; gap: var(--spacing-4); padding-bottom: var(--spacing-4); border-bottom: 1px solid var(--gray-200); margin-bottom: var(--spacing-4);"></div>
+        <div id="evalEmployee"
+          style="display: flex; align-items: center; gap: var(--spacing-4); padding-bottom: var(--spacing-4); border-bottom: 1px solid var(--gray-200); margin-bottom: var(--spacing-4);">
+        </div>
         <form id="evaluationForm">
           <div id="competenciesForm"></div>
-          <div class="form-group" style="margin-top: var(--spacing-4);"><label class="form-label">Comentários Gerais</label><textarea class="form-input" name="comentarios" rows="4" placeholder="Pontos fortes, áreas de melhoria, recomendações..."></textarea></div>
-          <div class="form-group"><label class="form-label">Metas para o Próximo Período</label><textarea class="form-input" name="metas" rows="3"></textarea></div>
+          <div class="form-group" style="margin-top: var(--spacing-4);"><label class="form-label">Comentários
+              Gerais</label><textarea class="form-input" name="comentarios" rows="4"
+              placeholder="Pontos fortes, áreas de melhoria, recomendações..."></textarea></div>
+          <div class="form-group"><label class="form-label">Metas para o Próximo Período</label><textarea
+              class="form-input" name="metas" rows="3"></textarea></div>
         </form>
       </div>
-      <div class="modal-footer"><button class="btn btn-secondary" onclick="Modal.close('evaluationModal')">Cancelar</button><button class="btn btn-secondary" onclick="saveDraft()">Salvar Rascunho</button><button class="btn btn-primary" onclick="submitEvaluation()">Enviar Avaliação</button></div>
+      <div class="modal-footer"><button class="btn btn-secondary"
+          onclick="Modal.close('evaluationModal')">Cancelar</button><button class="btn btn-secondary"
+          onclick="saveDraft()">Salvar Rascunho</button><button class="btn btn-primary"
+          onclick="submitEvaluation()">Enviar Avaliação</button></div>
     </div>
   </div>
 
@@ -287,10 +452,10 @@
       // Team evaluations
       document.getElementById("teamBody").innerHTML = teamEvals.map(e => `
         <tr>
-          <td><div class="cell-avatar"><div class="avatar">${e.nome.split(' ').map(n=>n[0]).slice(0,2).join('')}</div><span>${e.nome}</span></div></td>
+          <td><div class="cell-avatar"><div class="avatar">${e.nome.split(' ').map(n => n[0]).slice(0, 2).join('')}</div><span>${e.nome}</span></div></td>
           <td>${e.cargo}</td>
-          <td>${e.auto ? `<span class="rating-stars">${'★'.repeat(Math.round(e.auto))}${'☆'.repeat(5-Math.round(e.auto))}</span> ${e.auto}` : '<span class="badge badge-warning">Pendente</span>'}</td>
-          <td>${e.gestor ? `<span class="rating-stars">${'★'.repeat(Math.round(e.gestor))}${'☆'.repeat(5-Math.round(e.gestor))}</span> ${e.gestor}` : '<button class="btn btn-primary btn-sm" onclick="startEvaluation(${e.id}, \'Gestor\', \'${e.nome}\')">Avaliar</button>'}</td>
+          <td>${e.auto ? `<span class="rating-stars">${'★'.repeat(Math.round(e.auto))}${'☆'.repeat(5 - Math.round(e.auto))}</span> ${e.auto}` : '<span class="badge badge-warning">Pendente</span>'}</td>
+          <td>${e.gestor ? `<span class="rating-stars">${'★'.repeat(Math.round(e.gestor))}${'☆'.repeat(5 - Math.round(e.gestor))}</span> ${e.gestor}` : '<button class="btn btn-primary btn-sm" onclick="startEvaluation(${e.id}, \'Gestor\', \'${e.nome}\')">Avaliar</button>'}</td>
           <td>${e.final ? `<strong>${e.final}</strong>` : '-'}</td>
           <td><button class="btn-icon view" onclick="viewEvaluation(${e.id})">👁️</button></td>
         </tr>
@@ -308,20 +473,20 @@
     function startEvaluation(id, tipo, nome) {
       document.getElementById("evalModalTitle").textContent = tipo === 'Autoavaliação' ? 'Autoavaliação' : `Avaliar ${nome}`;
       document.getElementById("evalEmployee").innerHTML = `
-        <div class="avatar avatar-lg">${nome.split(' ').map(n=>n[0]).slice(0,2).join('')}</div>
+        <div class="avatar avatar-lg">${nome.split(' ').map(n => n[0]).slice(0, 2).join('')}</div>
         <div><h3 style="margin: 0;">${nome}</h3><p style="margin: 0; color: var(--gray-500);">${tipo}</p></div>
       `;
-      
+
       document.getElementById("competenciesForm").innerHTML = competencies.map(c => `
         <div class="form-group">
           <label class="form-label">${c.nome}</label>
           <small style="display: block; color: var(--gray-500); margin-bottom: var(--spacing-2);">${c.descricao}</small>
           <div style="display: flex; gap: var(--spacing-2);">
-            ${[1,2,3,4,5].map(n => `<label style="display: flex; flex-direction: column; align-items: center; cursor: pointer;"><input type="radio" name="comp_${c.id}" value="${n}" style="margin-bottom: 4px;"><span>${n}</span></label>`).join('')}
+            ${[1, 2, 3, 4, 5].map(n => `<label style="display: flex; flex-direction: column; align-items: center; cursor: pointer;"><input type="radio" name="comp_${c.id}" value="${n}" style="margin-bottom: 4px;"><span>${n}</span></label>`).join('')}
           </div>
         </div>
       `).join('');
-      
+
       Modal.open('evaluationModal');
     }
 
@@ -333,4 +498,5 @@
     function removeCompetency(id) { Confirm.show('Remover esta competência?', () => Toast.success('Competência removida')); }
   </script>
 </body>
+
 </html>

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,22 +9,101 @@
   <link rel="stylesheet" href="public/styles/dashboard.css">
   <link rel="stylesheet" href="public/styles/components.css">
   <style>
-    .training-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: var(--spacing-4); }
-    .training-card { background: white; border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-sm); border: 1px solid var(--gray-200); transition: all 0.2s; }
-    .training-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
-    .training-banner { height: 120px; background: linear-gradient(135deg, var(--primary-dark), var(--primary-gray)); display: flex; align-items: center; justify-content: center; font-size: 48px; }
-    .training-body { padding: var(--spacing-5); }
-    .training-category { font-size: var(--font-size-xs); text-transform: uppercase; color: var(--gray-500); margin-bottom: var(--spacing-2); }
-    .training-title { font-size: var(--font-size-lg); font-weight: 600; margin-bottom: var(--spacing-2); }
-    .training-desc { font-size: var(--font-size-sm); color: var(--gray-500); margin-bottom: var(--spacing-4); }
-    .training-meta { display: flex; gap: var(--spacing-4); font-size: var(--font-size-sm); color: var(--gray-500); margin-bottom: var(--spacing-4); }
-    .training-footer { display: flex; justify-content: space-between; align-items: center; padding-top: var(--spacing-3); border-top: 1px solid var(--gray-100); }
-    .training-progress { flex: 1; margin-right: var(--spacing-4); }
-    .progress-bar { height: 8px; background: var(--gray-200); border-radius: 4px; overflow: hidden; }
-    .progress-fill { height: 100%; background: var(--success-green); border-radius: 4px; transition: width 0.3s; }
-    .progress-text { font-size: var(--font-size-xs); color: var(--gray-500); margin-top: 4px; }
+    .training-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: var(--spacing-4);
+    }
+
+    .training-card {
+      background: white;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--gray-200);
+      transition: all 0.2s;
+    }
+
+    .training-card:hover {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+    }
+
+    .training-banner {
+      height: 120px;
+      background: linear-gradient(135deg, var(--primary-dark), var(--primary-gray));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+    }
+
+    .training-body {
+      padding: var(--spacing-5);
+    }
+
+    .training-category {
+      font-size: var(--font-size-xs);
+      text-transform: uppercase;
+      color: var(--gray-500);
+      margin-bottom: var(--spacing-2);
+    }
+
+    .training-title {
+      font-size: var(--font-size-lg);
+      font-weight: 600;
+      margin-bottom: var(--spacing-2);
+    }
+
+    .training-desc {
+      font-size: var(--font-size-sm);
+      color: var(--gray-500);
+      margin-bottom: var(--spacing-4);
+    }
+
+    .training-meta {
+      display: flex;
+      gap: var(--spacing-4);
+      font-size: var(--font-size-sm);
+      color: var(--gray-500);
+      margin-bottom: var(--spacing-4);
+    }
+
+    .training-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: var(--spacing-3);
+      border-top: 1px solid var(--gray-100);
+    }
+
+    .training-progress {
+      flex: 1;
+      margin-right: var(--spacing-4);
+    }
+
+    .progress-bar {
+      height: 8px;
+      background: var(--gray-200);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--success-green);
+      border-radius: 4px;
+      transition: width 0.3s;
+    }
+
+    .progress-text {
+      font-size: var(--font-size-xs);
+      color: var(--gray-500);
+      margin-top: 4px;
+    }
   </style>
 </head>
+
 <body>
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
@@ -35,7 +115,7 @@
       <a href="dashboard.html" class="nav-item">
         <span class="nav-text">Dashboard</span>
       </a>
-      
+
       <div class="nav-section">Gestão de Pessoas</div>
       <a href="employees.html" class="nav-item">
         <span class="nav-text">Funcionários</span>
@@ -46,7 +126,7 @@
       <a href="positions.html" class="nav-item">
         <span class="nav-text">Cargos</span>
       </a>
-      
+
       <div class="nav-section">Recursos Humanos</div>
       <a href="recruitment.html" class="nav-item">
         <span class="nav-text">Recrutamento</span>
@@ -57,7 +137,7 @@
       <a href="performance.html" class="nav-item">
         <span class="nav-text">Avaliações</span>
       </a>
-      
+
       <div class="nav-section">Departamento Pessoal</div>
       <a href="payroll.html" class="nav-item">
         <span class="nav-text">Folha de Pagamento</span>
@@ -71,7 +151,7 @@
       <a href="timesheet.html" class="nav-item">
         <span class="nav-text">Ponto</span>
       </a>
-      
+
       <div class="nav-section">Administração</div>
       <a href="reports.html" class="nav-item">
         <span class="nav-text">Relatórios</span>
@@ -113,10 +193,30 @@
 
     <div class="content-area">
       <div class="stats-row">
-        <div class="stat-box"><div class="stat-box-icon" style="background: rgba(44, 62, 80, 0.1);">🎓</div><div class="stat-box-value">24</div><div class="stat-box-label">Treinamentos Disponíveis</div></div>
-        <div class="stat-box"><div class="stat-box-icon" style="background: rgba(39, 174, 96, 0.1);">✓</div><div class="stat-box-value">156</div><div class="stat-box-label">Conclusões (mês)</div></div>
-        <div class="stat-box"><div class="stat-box-icon" style="background: rgba(243, 156, 18, 0.1);">⏳</div><div class="stat-box-value">89</div><div class="stat-box-label">Em Andamento</div></div>
-        <div class="stat-box"><div class="stat-box-icon" style="background: rgba(231, 76, 60, 0.1);">📊</div><div class="stat-box-value">78%</div><div class="stat-box-label">Taxa de Conclusão</div></div>
+        <div class="stat-box">
+          <div class="stat-box-icon" style="background: rgba(44, 62, 80, 0.1);"><img
+              src="/front/public/assets/graduation-cap.png" alt="icone_treinamentos_disponiveis"></div>
+          <div class="stat-box-value">24</div>
+          <div class="stat-box-label">Treinamentos Disponíveis</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-box-icon" style="background: rgba(39, 174, 96, 0.1);"><img
+              src="/front/public/assets/check (1).png" alt="icone_conclusoes"></div>
+          <div class="stat-box-value">156</div>
+          <div class="stat-box-label">Conclusões (mês)</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-box-icon" style="background: rgba(243, 156, 18, 0.1);"><img
+              src="/front/public/assets/hourglass.png" alt="icone_em_andamento"></div>
+          <div class="stat-box-value">89</div>
+          <div class="stat-box-label">Em Andamento</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-box-icon" style="background: rgba(231, 76, 60, 0.1);"><img
+              src="/front/public/assets/chart-column (1).png" alt="icone_taxa_conclusao"></div>
+          <div class="stat-box-value">78%</div>
+          <div class="stat-box-label">Taxa de Conclusão</div>
+        </div>
       </div>
 
       <!-- Tabs -->
@@ -129,14 +229,29 @@
       <!-- Tab Catálogo -->
       <div id="tabCatalogo">
         <div class="page-header">
-          <div><h2 class="page-title">Catálogo de Treinamentos</h2><p class="page-subtitle">Explore e inscreva-se nos treinamentos disponíveis</p></div>
+          <div>
+            <h2 class="page-title">Catálogo de Treinamentos</h2>
+            <p class="page-subtitle">Explore e inscreva-se nos treinamentos disponíveis</p>
+          </div>
           <button class="btn btn-primary" onclick="openTrainingModal()">+ Novo Treinamento</button>
         </div>
 
         <div class="filters-bar">
-          <div class="search-box"><input type="text" id="search" placeholder="Buscar treinamento..." onkeyup="filter()"></div>
-          <div class="filter-group"><label>Categoria:</label><select id="filterCat" onchange="filter()"><option value="">Todas</option><option>Técnico</option><option>Liderança</option><option>Compliance</option><option>Soft Skills</option></select></div>
-          <div class="filter-group"><label>Modalidade:</label><select id="filterMod" onchange="filter()"><option value="">Todas</option><option>Online</option><option>Presencial</option><option>Híbrido</option></select></div>
+          <div class="search-box"><input type="text" id="search" placeholder="Buscar treinamento..." onkeyup="filter()">
+          </div>
+          <div class="filter-group"><label>Categoria:</label><select id="filterCat" onchange="filter()">
+              <option value="">Todas</option>
+              <option>Técnico</option>
+              <option>Liderança</option>
+              <option>Compliance</option>
+              <option>Soft Skills</option>
+            </select></div>
+          <div class="filter-group"><label>Modalidade:</label><select id="filterMod" onchange="filter()">
+              <option value="">Todas</option>
+              <option>Online</option>
+              <option>Presencial</option>
+              <option>Híbrido</option>
+            </select></div>
         </div>
 
         <div class="training-grid" id="trainingGrid"></div>
@@ -144,16 +259,29 @@
 
       <!-- Tab Meus Treinamentos -->
       <div id="tabMeus" style="display: none;">
-        <div class="page-header"><h2 class="page-title">Meus Treinamentos</h2></div>
+        <div class="page-header">
+          <h2 class="page-title">Meus Treinamentos</h2>
+        </div>
         <div class="training-grid" id="myTrainingGrid"></div>
       </div>
 
       <!-- Tab Gestão -->
       <div id="tabGestao" style="display: none;">
-        <div class="page-header"><h2 class="page-title">Gestão de Treinamentos</h2></div>
+        <div class="page-header">
+          <h2 class="page-title">Gestão de Treinamentos</h2>
+        </div>
         <div class="table-container">
           <table class="data-table">
-            <thead><tr><th>Treinamento</th><th>Inscritos</th><th>Em Andamento</th><th>Concluídos</th><th>Taxa</th><th>Ações</th></tr></thead>
+            <thead>
+              <tr>
+                <th>Treinamento</th>
+                <th>Inscritos</th>
+                <th>Em Andamento</th>
+                <th>Concluídos</th>
+                <th>Taxa</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
             <tbody id="managementBody"></tbody>
           </table>
         </div>
@@ -164,24 +292,47 @@
   <!-- Modal Novo Treinamento -->
   <div class="modal" id="trainingModal">
     <div class="modal-dialog modal-lg">
-      <div class="modal-header"><h3 class="modal-title">Novo Treinamento</h3><button class="modal-close" onclick="Modal.close('trainingModal')">&times;</button></div>
+      <div class="modal-header">
+        <h3 class="modal-title">Novo Treinamento</h3><button class="modal-close"
+          onclick="Modal.close('trainingModal')">&times;</button>
+      </div>
       <div class="modal-body">
         <form id="trainingForm">
           <div class="form-row form-row-2">
-            <div class="form-group"><label class="form-label">Título *</label><input type="text" class="form-input" name="titulo" required></div>
-            <div class="form-group"><label class="form-label">Categoria *</label><select class="form-select" name="categoria" required><option value="">Selecione</option><option>Técnico</option><option>Liderança</option><option>Compliance</option><option>Soft Skills</option></select></div>
+            <div class="form-group"><label class="form-label">Título *</label><input type="text" class="form-input"
+                name="titulo" required></div>
+            <div class="form-group"><label class="form-label">Categoria *</label><select class="form-select"
+                name="categoria" required>
+                <option value="">Selecione</option>
+                <option>Técnico</option>
+                <option>Liderança</option>
+                <option>Compliance</option>
+                <option>Soft Skills</option>
+              </select></div>
           </div>
           <div class="form-row form-row-3">
-            <div class="form-group"><label class="form-label">Modalidade</label><select class="form-select" name="modalidade"><option>Online</option><option>Presencial</option><option>Híbrido</option></select></div>
-            <div class="form-group"><label class="form-label">Carga Horária</label><input type="number" class="form-input" name="carga_horaria" placeholder="horas"></div>
-            <div class="form-group"><label class="form-label">Prazo (dias)</label><input type="number" class="form-input" name="prazo" placeholder="dias"></div>
+            <div class="form-group"><label class="form-label">Modalidade</label><select class="form-select"
+                name="modalidade">
+                <option>Online</option>
+                <option>Presencial</option>
+                <option>Híbrido</option>
+              </select></div>
+            <div class="form-group"><label class="form-label">Carga Horária</label><input type="number"
+                class="form-input" name="carga_horaria" placeholder="horas"></div>
+            <div class="form-group"><label class="form-label">Prazo (dias)</label><input type="number"
+                class="form-input" name="prazo" placeholder="dias"></div>
           </div>
-          <div class="form-group"><label class="form-label">Descrição</label><textarea class="form-input" name="descricao" rows="3"></textarea></div>
-          <div class="form-group"><label class="form-label">Conteúdo Programático</label><textarea class="form-input" name="conteudo" rows="4"></textarea></div>
-          <div class="form-group"><label class="checkbox-label"><input type="checkbox" name="obrigatorio"><span>Treinamento Obrigatório</span></label></div>
+          <div class="form-group"><label class="form-label">Descrição</label><textarea class="form-input"
+              name="descricao" rows="3"></textarea></div>
+          <div class="form-group"><label class="form-label">Conteúdo Programático</label><textarea class="form-input"
+              name="conteudo" rows="4"></textarea></div>
+          <div class="form-group"><label class="checkbox-label"><input type="checkbox"
+                name="obrigatorio"><span>Treinamento Obrigatório</span></label></div>
         </form>
       </div>
-      <div class="modal-footer"><button class="btn btn-secondary" onclick="Modal.close('trainingModal')">Cancelar</button><button class="btn btn-primary" onclick="saveTraining()">Salvar</button></div>
+      <div class="modal-footer"><button class="btn btn-secondary"
+          onclick="Modal.close('trainingModal')">Cancelar</button><button class="btn btn-primary"
+          onclick="saveTraining()">Salvar</button></div>
     </div>
   </div>
 
@@ -316,4 +467,5 @@
     function editTraining(id) { openTrainingModal(); }
   </script>
 </body>
+
 </html>
