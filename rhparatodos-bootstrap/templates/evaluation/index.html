@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/head :: head('Avaliação de Desempenho')}"></head>
+<body>
+    <div class="app-wrapper">
+        <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+        
+        <main class="main-content">
+            <div th:replace="~{fragments/header :: header(${breadcrumbs})}"></div>
+            <div th:replace="~{fragments/header :: alerts}"></div>
+            
+            <div class="content-wrapper">
+                <!-- Stats -->
+                <div class="stats-grid">
+                    <div class="card stat-card card-border-left">
+                        <div class="card-body">
+                            <i class="bi bi-clipboard-check stat-icon"></i>
+                            <div class="stat-value" th:text="${stats?.cicloAtual ?: 'N/A'}">2025.2</div>
+                            <div class="stat-label">Ciclo Atual</div>
+                        </div>
+                    </div>
+                    <div class="card stat-card card-border-left warning">
+                        <div class="card-body">
+                            <i class="bi bi-hourglass-split stat-icon"></i>
+                            <div class="stat-value" th:text="${stats?.pendentes ?: 0}">24</div>
+                            <div class="stat-label">Avaliações Pendentes</div>
+                        </div>
+                    </div>
+                    <div class="card stat-card card-border-left success">
+                        <div class="card-body">
+                            <i class="bi bi-check-circle stat-icon"></i>
+                            <div class="stat-value" th:text="${stats?.concluidas ?: 0}">132</div>
+                            <div class="stat-label">Avaliações Concluídas</div>
+                        </div>
+                    </div>
+                    <div class="card stat-card card-border-left info">
+                        <div class="card-body">
+                            <i class="bi bi-graph-up-arrow stat-icon"></i>
+                            <div class="stat-value" th:text="${stats?.mediaGeral ?: '0.0'}">4.2</div>
+                            <div class="stat-label">Média Geral</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Page Header -->
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Avaliação de Desempenho</h1>
+                        <p class="page-subtitle">Gerencie ciclos de avaliação e PDIs</p>
+                    </div>
+                    <div class="page-actions" sec:authorize="hasAnyRole('ADMIN', 'RH_CHEFE')">
+                        <button type="button" class="btn btn-outline-primary me-2" data-bs-toggle="modal" data-bs-target="#modalCiclo">
+                            <i class="bi bi-calendar-plus me-1"></i> Novo Ciclo
+                        </button>
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalAvaliacao">
+                            <i class="bi bi-plus-lg me-1"></i> Iniciar Avaliação
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Progress do Ciclo -->
+                <div class="card mb-4" th:if="${cicloAtivo != null}">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div>
+                                <h5 class="mb-1" th:text="${cicloAtivo.nome}">Ciclo 2025.2 - Avaliação Semestral</h5>
+                                <p class="text-muted mb-0">
+                                    <span th:text="${#temporals.format(cicloAtivo.dataInicio, 'dd/MM/yyyy')}">01/07/2025</span>
+                                    a 
+                                    <span th:text="${#temporals.format(cicloAtivo.dataFim, 'dd/MM/yyyy')}">31/12/2025</span>
+                                </p>
+                            </div>
+                            <span class="badge bg-success fs-6">Em Andamento</span>
+                        </div>
+                        
+                        <div class="row text-center">
+                            <div class="col-md-3">
+                                <div class="border rounded p-3">
+                                    <div class="fs-4 fw-bold text-warning" th:text="${cicloAtivo.autoavaliacoesPendentes}">45</div>
+                                    <small class="text-muted">Autoavaliações Pendentes</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="border rounded p-3">
+                                    <div class="fs-4 fw-bold text-info" th:text="${cicloAtivo.avaliacoesGestorPendentes}">32</div>
+                                    <small class="text-muted">Avaliações do Gestor</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="border rounded p-3">
+                                    <div class="fs-4 fw-bold text-primary" th:text="${cicloAtivo.calibracoesPendentes}">8</div>
+                                    <small class="text-muted">Calibrações Pendentes</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="border rounded p-3">
+                                    <div class="fs-4 fw-bold text-success" th:text="${cicloAtivo.feedbacksEntregues}">71</div>
+                                    <small class="text-muted">Feedbacks Entregues</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Tabs -->
+                <ul class="nav nav-tabs mb-4" role="tablist">
+                    <li class="nav-item">
+                        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tabAvaliacoes">
+                            <i class="bi bi-clipboard-data me-1"></i> Avaliações
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabPDI">
+                            <i class="bi bi-journal-text me-1"></i> PDIs
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabCompetencias">
+                            <i class="bi bi-star me-1"></i> Competências
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabResultados">
+                            <i class="bi bi-bar-chart me-1"></i> Resultados
+                        </button>
+                    </li>
+                </ul>
+                
+                <div class="tab-content">
+                    <!-- Tab Avaliações -->
+                    <div class="tab-pane fade show active" id="tabAvaliacoes">
+                        <div class="filters-card mb-4">
+                            <div class="filters-row">
+                                <div class="filter-group">
+                                    <label class="form-label">Ciclo</label>
+                                    <select class="form-select">
+                                        <option th:each="c : ${ciclos}" th:value="${c.id}" th:text="${c.nome}" 
+                                                th:selected="${c.id == cicloAtivo?.id}">Ciclo</option>
+                                    </select>
+                                </div>
+                                <div class="filter-group">
+                                    <label class="form-label">Departamento</label>
+                                    <select class="form-select">
+                                        <option value="">Todos</option>
+                                        <option th:each="d : ${departamentos}" th:value="${d.id}" th:text="${d.nome}">Dept</option>
+                                    </select>
+                                </div>
+                                <div class="filter-group">
+                                    <label class="form-label">Status</label>
+                                    <select class="form-select">
+                                        <option value="">Todos</option>
+                                        <option value="PENDENTE">Pendente</option>
+                                        <option value="EM_ANDAMENTO">Em Andamento</option>
+                                        <option value="CONCLUIDA">Concluída</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-hover mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Funcionário</th>
+                                                <th>Cargo</th>
+                                                <th>Autoavaliação</th>
+                                                <th>Avaliação Gestor</th>
+                                                <th>Nota Final</th>
+                                                <th>Status</th>
+                                                <th>Ações</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr th:each="aval : ${avaliacoes}">
+                                                <td>
+                                                    <div class="cell-with-avatar">
+                                                        <div class="cell-avatar" th:text="${#strings.substring(aval.funcionario.nomeCompleto, 0, 1)}">J</div>
+                                                        <div class="cell-info">
+                                                            <span class="cell-title" th:text="${aval.funcionario.nomeCompleto}">João Silva</span>
+                                                            <span class="cell-subtitle" th:text="${aval.funcionario.departamento?.nome}">TI</span>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td th:text="${aval.funcionario.cargo?.titulo}">Analista</td>
+                                                <td>
+                                                    <span th:if="${aval.notaAutoavaliacao != null}" class="fw-semibold" 
+                                                          th:text="${aval.notaAutoavaliacao}">4.5</span>
+                                                    <span th:unless="${aval.notaAutoavaliacao != null}" class="text-muted">-</span>
+                                                </td>
+                                                <td>
+                                                    <span th:if="${aval.notaGestor != null}" class="fw-semibold" 
+                                                          th:text="${aval.notaGestor}">4.2</span>
+                                                    <span th:unless="${aval.notaGestor != null}" class="text-muted">-</span>
+                                                </td>
+                                                <td>
+                                                    <span th:if="${aval.notaFinal != null}" class="badge fs-6"
+                                                          th:classappend="${aval.notaFinal >= 4 ? 'bg-success' : (aval.notaFinal >= 3 ? 'bg-warning text-dark' : 'bg-danger')}"
+                                                          th:text="${aval.notaFinal}">4.3</span>
+                                                    <span th:unless="${aval.notaFinal != null}" class="text-muted">-</span>
+                                                </td>
+                                                <td>
+                                                    <span class="badge badge-status"
+                                                          th:classappend="${aval.status == 'CONCLUIDA' ? 'badge-ativo' : (aval.status == 'EM_ANDAMENTO' ? 'badge-ferias' : 'badge-afastado')}"
+                                                          th:text="${aval.statusDescricao}">Pendente</span>
+                                                </td>
+                                                <td>
+                                                    <div class="table-actions">
+                                                        <a th:href="@{/avaliacoes/{id}(id=${aval.id})}" class="btn-table-action view" title="Ver Detalhes">
+                                                            <i class="bi bi-eye"></i>
+                                                        </a>
+                                                        <button class="btn-table-action edit" title="Avaliar" 
+                                                                th:if="${aval.status != 'CONCLUIDA'}"
+                                                                sec:authorize="hasAnyRole('ADMIN', 'RH_CHEFE')">
+                                                            <i class="bi bi-pencil"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tab PDI -->
+                    <div class="tab-pane fade" id="tabPDI">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <span><i class="bi bi-journal-text me-2"></i>Planos de Desenvolvimento Individual</span>
+                                <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#modalPDI">
+                                    <i class="bi bi-plus"></i> Novo PDI
+                                </button>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-hover mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Funcionário</th>
+                                                <th>Competência</th>
+                                                <th>Ação de Desenvolvimento</th>
+                                                <th>Prazo</th>
+                                                <th>Progresso</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr th:each="pdi : ${pdis}">
+                                                <td th:text="${pdi.funcionario.nomeCompleto}">João Silva</td>
+                                                <td th:text="${pdi.competencia}">Liderança</td>
+                                                <td th:text="${pdi.acao}">Participar de treinamento de gestão</td>
+                                                <td th:text="${#temporals.format(pdi.prazo, 'dd/MM/yyyy')}">30/06/2026</td>
+                                                <td style="width: 120px;">
+                                                    <div class="progress" style="height: 6px;">
+                                                        <div class="progress-bar" th:style="'width: ' + ${pdi.progresso} + '%'"></div>
+                                                    </div>
+                                                    <small class="text-muted" th:text="${pdi.progresso + '%'}">50%</small>
+                                                </td>
+                                                <td>
+                                                    <span class="badge" th:classappend="${pdi.status == 'CONCLUIDO' ? 'bg-success' : (pdi.status == 'EM_ANDAMENTO' ? 'bg-info' : 'bg-secondary')}"
+                                                          th:text="${pdi.statusDescricao}">Em Andamento</span>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tab Competências -->
+                    <div class="tab-pane fade" id="tabCompetencias">
+                        <div class="row">
+                            <div th:each="comp : ${competencias}" class="col-lg-4 col-md-6 mb-4">
+                                <div class="card h-100">
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <span th:text="${comp.nome}">Comunicação</span>
+                                        <span class="badge bg-primary" th:text="${'Peso: ' + comp.peso}">Peso: 2</span>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="text-muted small" th:text="${comp.descricao}">
+                                            Capacidade de se expressar de forma clara e eficaz.
+                                        </p>
+                                        <h6 class="mb-2">Comportamentos Esperados:</h6>
+                                        <ul class="small">
+                                            <li th:each="comportamento : ${comp.comportamentos}" th:text="${comportamento}">
+                                                Comportamento esperado
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tab Resultados -->
+                    <div class="tab-pane fade" id="tabResultados">
+                        <div class="row">
+                            <div class="col-lg-6 mb-4">
+                                <div class="card h-100">
+                                    <div class="card-header">
+                                        <i class="bi bi-bar-chart me-2"></i>Distribuição de Notas
+                                    </div>
+                                    <div class="card-body">
+                                        <canvas id="chartNotas" height="250"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 mb-4">
+                                <div class="card h-100">
+                                    <div class="card-header">
+                                        <i class="bi bi-diagram-3 me-2"></i>Por Departamento
+                                    </div>
+                                    <div class="card-body">
+                                        <canvas id="chartDepartamentos" height="250"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 9-Box Grid -->
+                        <div class="card">
+                            <div class="card-header">
+                                <i class="bi bi-grid-3x3 me-2"></i>Matriz 9-Box (Potencial x Desempenho)
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-bordered text-center" style="table-layout: fixed;">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 100px;"></th>
+                                                <th class="bg-danger bg-opacity-25">Baixo Desempenho</th>
+                                                <th class="bg-warning bg-opacity-25">Desempenho Médio</th>
+                                                <th class="bg-success bg-opacity-25">Alto Desempenho</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td class="bg-success bg-opacity-25 fw-semibold">Alto Potencial</td>
+                                                <td class="p-3">
+                                                    <div class="text-warning fw-bold">Enigma</div>
+                                                    <span class="badge bg-secondary" th:text="${nineBox?.enigma ?: 0}">3</span>
+                                                </td>
+                                                <td class="p-3">
+                                                    <div class="text-info fw-bold">Potencial Futuro</div>
+                                                    <span class="badge bg-secondary" th:text="${nineBox?.potencialFuturo ?: 0}">8</span>
+                                                </td>
+                                                <td class="p-3">
+                                                    <div class="text-success fw-bold">Estrela</div>
+                                                    <span class="badge bg-success" th:text="${nineBox?.estrela ?: 0}">12</span>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="bg-warning bg-opacity-25 fw-semibold">Potencial Médio</td>
+                                                <td class="p-3">
+                                                    <div class="text-danger fw-bold">Questionável</div>
+                                                    <span class="badge bg-secondary" th:text="${nineBox?.questionavel ?: 0}">5</span>
+                                                </td>
+                                                <td class="p-3">
+                                                    <div class="fw-bold">Mantenedor</div>
+                                                    <span class="badge bg-secondary" th:text="${nineBox?.mantenedor ?: 0}">45</span>
+                                                </td>
+                                                <td class="p-3">
+                                                    <div class="text-primary fw-bold">Alto Desempenho</div>
+                                                    <span class="badge bg-primary" th:text="${nineBox?.altoDesempenho ?: 0}">28</span>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="bg-danger bg-opacity-25 fw-semibold">Baixo Potencial</td>
+                                                <td class="p-3">
+                                                    <div class="text-danger fw-bold">Insuficiente</div>
+                                                    <span class="badge bg-danger" th:text="${nineBox?.insuficiente ?: 0}">2</span>
+                                                </td>
+                                                <td class="p-3">
+                                                    <div class="fw-bold">Eficaz</div>
+                                                    <span class="badge bg-secondary" th:text="${nineBox?.eficaz ?: 0}">18</span>
+                                                </td>
+                                                <td class="p-3">
+                                                    <div class="fw-bold">Especialista</div>
+                                                    <span class="badge bg-secondary" th:text="${nineBox?.especialista ?: 0}">15</span>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Modais -->
+    <div class="modal fade" id="modalCiclo" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form th:action="@{/avaliacoes/ciclos/salvar}" method="post">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                    <div class="modal-header">
+                        <h5 class="modal-title">Novo Ciclo de Avaliação</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label required">Nome do Ciclo</label>
+                            <input type="text" class="form-control" name="nome" required placeholder="Ex: Ciclo 2026.1">
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label required">Data Início</label>
+                                <input type="date" class="form-control" name="dataInicio" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label required">Data Fim</label>
+                                <input type="date" class="form-control" name="dataFim" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Tipo de Avaliação</label>
+                            <select class="form-select" name="tipo">
+                                <option value="180">180° (Gestor + Autoavaliação)</option>
+                                <option value="360">360° (Completa)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Criar Ciclo</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div th:replace="~{fragments/scripts :: scripts}"></div>
+    
+    <script th:inline="javascript">
+        const dadosNotas = /*[[${dadosDistribuicaoNotas}]]*/ {
+            labels: ['1-2', '2-3', '3-4', '4-5'],
+            valores: [5, 15, 65, 45]
+        };
+        
+        const dadosDepts = /*[[${dadosPorDepartamento}]]*/ {
+            labels: ['TI', 'RH', 'Financeiro', 'Comercial'],
+            valores: [4.2, 4.0, 3.8, 4.1]
+        };
+        
+        // Gráfico Distribuição
+        new Chart(document.getElementById('chartNotas'), {
+            type: 'bar',
+            data: {
+                labels: dadosNotas.labels,
+                datasets: [{
+                    label: 'Funcionários',
+                    data: dadosNotas.valores,
+                    backgroundColor: ['#e74c3c', '#f39c12', '#3498db', '#27ae60'],
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } }
+            }
+        });
+        
+        // Gráfico Departamentos
+        new Chart(document.getElementById('chartDepartamentos'), {
+            type: 'bar',
+            data: {
+                labels: dadosDepts.labels,
+                datasets: [{
+                    label: 'Média',
+                    data: dadosDepts.valores,
+                    backgroundColor: 'rgba(44, 62, 80, 0.8)',
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                plugins: { legend: { display: false } },
+                scales: { x: { max: 5 } }
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/head :: head('Endomarketing')}"></head>
+<body>
+    <div class="app-wrapper">
+        <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+        
+        <main class="main-content">
+            <div th:replace="~{fragments/header :: header(${breadcrumbs})}"></div>
+            <div th:replace="~{fragments/header :: alerts}"></div>
+            
+            <div class="content-wrapper">
+                <!-- Stats -->
+                <div class="stats-grid">
+                    <div class="card stat-card card-border-left success">
+                        <div class="card-body">
+                            <i class="bi bi-emoji-smile stat-icon"></i>
+                            <div class="stat-value" th:text="${stats?.satisfacaoGeral ?: '0%'}">78%</div>
+                            <div class="stat-label">Satisfação Geral</div>
+                        </div>
+                    </div>
+                    <div class="card stat-card card-border-left info">
+                        <div class="card-body">
+                            <i class="bi bi-trophy stat-icon"></i>
+                            <div class="stat-value" th:text="${stats?.pontosDistribuidos ?: 0}">12.500</div>
+                            <div class="stat-label">Pontos Distribuídos</div>
+                        </div>
+                    </div>
+                    <div class="card stat-card card-border-left warning">
+                        <div class="card-body">
+                            <i class="bi bi-gift stat-icon"></i>
+                            <div class="stat-value" th:text="${stats?.brindesResgatados ?: 0}">156</div>
+                            <div class="stat-label">Brindes Resgatados</div>
+                        </div>
+                    </div>
+                    <div class="card stat-card card-border-left">
+                        <div class="card-body">
+                            <i class="bi bi-calendar-event stat-icon"></i>
+                            <div class="stat-value" th:text="${stats?.eventosRealizados ?: 0}">8</div>
+                            <div class="stat-label">Eventos (ano)</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Page Header -->
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Endomarketing</h1>
+                        <p class="page-subtitle">Engajamento, reconhecimentos e pesquisas de clima</p>
+                    </div>
+                </div>
+                
+                <!-- Tabs -->
+                <ul class="nav nav-tabs mb-4" role="tablist">
+                    <li class="nav-item">
+                        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tabBrindes">
+                            <i class="bi bi-gift me-1"></i> Brindes e Pontuação
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabPesquisa">
+                            <i class="bi bi-clipboard-data me-1"></i> Pesquisa de Clima
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabReconhecimentos">
+                            <i class="bi bi-star me-1"></i> Reconhecimentos
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabEventos">
+                            <i class="bi bi-calendar-event me-1"></i> Eventos
+                        </button>
+                    </li>
+                </ul>
+                
+                <div class="tab-content">
+                    <!-- Tab Brindes -->
+                    <div class="tab-pane fade show active" id="tabBrindes">
+                        <!-- Catálogo de Brindes -->
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h5 class="mb-0"><i class="bi bi-shop me-2"></i>Catálogo de Brindes</h5>
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalBrinde"
+                                    sec:authorize="hasAnyRole('ADMIN', 'RH_CHEFE')">
+                                <i class="bi bi-plus-lg me-1"></i> Novo Brinde
+                            </button>
+                        </div>
+                        
+                        <div class="row">
+                            <div th:each="brinde : ${brindes}" class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                                <div class="card h-100">
+                                    <div class="card-body text-center">
+                                        <div class="mb-3">
+                                            <i class="bi" th:classappend="${brinde.icone ?: 'bi-gift'}" style="font-size: 3rem; color: var(--rh-primary);"></i>
+                                        </div>
+                                        <h6 th:text="${brinde.nome}">Camiseta</h6>
+                                        <p class="text-muted small mb-2" th:text="${brinde.descricao}">Camiseta personalizada</p>
+                                        <div class="d-flex justify-content-center align-items-center gap-1 mb-2">
+                                            <i class="bi bi-coin text-warning"></i>
+                                            <span class="fw-bold" th:text="${brinde.pontos}">500</span>
+                                            <span class="small text-muted">pontos</span>
+                                        </div>
+                                        <span class="badge" th:classappend="${brinde.disponivel ? 'bg-success' : 'bg-secondary'}"
+                                              th:text="${brinde.disponivel ? 'Disponível' : 'Esgotado'}">Disponível</span>
+                                    </div>
+                                    <div class="card-footer bg-transparent text-center">
+                                        <small class="text-muted" th:text="${brinde.estoque + ' em estoque'}">25 em estoque</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Ranking de Pontos -->
+                        <div class="card mt-4">
+                            <div class="card-header">
+                                <i class="bi bi-trophy me-2"></i>Ranking de Pontuação
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-hover mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 60px;">#</th>
+                                                <th>Funcionário</th>
+                                                <th>Departamento</th>
+                                                <th class="text-center">Pontos Acumulados</th>
+                                                <th class="text-center">Pontos Utilizados</th>
+                                                <th class="text-center">Saldo</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr th:each="rank, stat : ${ranking}">
+                                                <td>
+                                                    <span class="badge fs-6" 
+                                                          th:classappend="${stat.index == 0 ? 'bg-warning' : (stat.index == 1 ? 'bg-secondary' : (stat.index == 2 ? 'bg-danger' : 'bg-light text-dark'))}"
+                                                          th:text="${stat.index + 1}">1</span>
+                                                </td>
+                                                <td>
+                                                    <div class="cell-with-avatar">
+                                                        <div class="cell-avatar" th:text="${#strings.substring(rank.funcionario.nomeCompleto, 0, 1)}">J</div>
+                                                        <div class="cell-info">
+                                                            <span class="cell-title" th:text="${rank.funcionario.nomeCompleto}">João Silva</span>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td th:text="${rank.funcionario.departamento?.nome}">TI</td>
+                                                <td class="text-center text-success" th:text="${rank.pontosAcumulados}">2.500</td>
+                                                <td class="text-center text-danger" th:text="${rank.pontosUtilizados}">1.000</td>
+                                                <td class="text-center fw-bold" th:text="${rank.saldo}">1.500</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tab Pesquisa de Clima -->
+                    <div class="tab-pane fade" id="tabPesquisa">
+                        <!-- Pesquisa Ativa -->
+                        <div th:if="${pesquisaAtiva != null}" class="card mb-4">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <div>
+                                    <i class="bi bi-clipboard-data me-2"></i>
+                                    <span th:text="${pesquisaAtiva.titulo}">Pesquisa de Clima 2026</span>
+                                </div>
+                                <span class="badge bg-success">Em Andamento</span>
+                            </div>
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col-md-8">
+                                        <p class="text-muted mb-2" th:text="${pesquisaAtiva.descricao}">
+                                            Avalie sua satisfação com diversos aspectos do ambiente de trabalho.
+                                        </p>
+                                        <div class="d-flex gap-4 text-muted small">
+                                            <span><i class="bi bi-calendar me-1"></i> <span th:text="${#temporals.format(pesquisaAtiva.dataInicio, 'dd/MM')}">01/01</span> - <span th:text="${#temporals.format(pesquisaAtiva.dataFim, 'dd/MM/yyyy')}">31/01/2026</span></span>
+                                            <span><i class="bi bi-people me-1"></i> <span th:text="${pesquisaAtiva.respostas + '/' + pesquisaAtiva.totalFuncionarios}">120/156</span> respostas</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                                        <div class="d-flex align-items-center justify-content-md-end gap-2 mb-2">
+                                            <span class="text-muted">Participação:</span>
+                                            <span class="fw-bold fs-5" th:text="${pesquisaAtiva.participacao + '%'}">77%</span>
+                                        </div>
+                                        <div class="progress" style="height: 8px;">
+                                            <div class="progress-bar bg-success" th:style="'width: ' + ${pesquisaAtiva.participacao} + '%'"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Resultados -->
+                        <div class="row">
+                            <div class="col-lg-6 mb-4">
+                                <div class="card h-100">
+                                    <div class="card-header">
+                                        <i class="bi bi-graph-up me-2"></i>Índices por Dimensão
+                                    </div>
+                                    <div class="card-body">
+                                        <div th:each="dimensao : ${dimensoes}">
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <span th:text="${dimensao.nome}">Ambiente de Trabalho</span>
+                                                <span class="fw-semibold" th:text="${dimensao.nota + '%'}">85%</span>
+                                            </div>
+                                            <div class="progress mb-3" style="height: 8px;">
+                                                <div class="progress-bar" 
+                                                     th:classappend="${dimensao.nota >= 80 ? 'bg-success' : (dimensao.nota >= 60 ? 'bg-warning' : 'bg-danger')}"
+                                                     th:style="'width: ' + ${dimensao.nota} + '%'"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 mb-4">
+                                <div class="card h-100">
+                                    <div class="card-header">
+                                        <i class="bi bi-bar-chart me-2"></i>Evolução (últimas pesquisas)
+                                    </div>
+                                    <div class="card-body">
+                                        <canvas id="chartClima" height="250"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Histórico de Pesquisas -->
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <span><i class="bi bi-clock-history me-2"></i>Histórico de Pesquisas</span>
+                                <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#modalPesquisa"
+                                        sec:authorize="hasAnyRole('ADMIN', 'RH_CHEFE')">
+                                    <i class="bi bi-plus"></i> Nova Pesquisa
+                                </button>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-hover mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Pesquisa</th>
+                                                <th>Período</th>
+                                                <th class="text-center">Participação</th>
+                                                <th class="text-center">Índice Geral</th>
+                                                <th>Status</th>
+                                                <th>Ações</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr th:each="pesq : ${pesquisas}">
+                                                <td th:text="${pesq.titulo}">Pesquisa 2025.2</td>
+                                                <td th:text="${#temporals.format(pesq.dataInicio, 'MM/yyyy')}">07/2025</td>
+                                                <td class="text-center" th:text="${pesq.participacao + '%'}">82%</td>
+                                                <td class="text-center">
+                                                    <span class="badge fs-6" th:classappend="${pesq.indice >= 80 ? 'bg-success' : (pesq.indice >= 60 ? 'bg-warning text-dark' : 'bg-danger')}"
+                                                          th:text="${pesq.indice + '%'}">75%</span>
+                                                </td>
+                                                <td>
+                                                    <span class="badge" th:classappend="${pesq.status == 'FINALIZADA' ? 'bg-secondary' : 'bg-success'}"
+                                                          th:text="${pesq.statusDescricao}">Finalizada</span>
+                                                </td>
+                                                <td>
+                                                    <a th:href="@{/endomarketing/pesquisas/{id}(id=${pesq.id})}" class="btn btn-sm btn-outline-primary">
+                                                        <i class="bi bi-eye"></i> Ver Resultados
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tab Reconhecimentos -->
+                    <div class="tab-pane fade" id="tabReconhecimentos">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h5 class="mb-0"><i class="bi bi-star me-2"></i>Reconhecimentos e Destaques</h5>
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalReconhecimento">
+                                <i class="bi bi-plus-lg me-1"></i> Novo Reconhecimento
+                            </button>
+                        </div>
+                        
+                        <div class="row">
+                            <div th:each="rec : ${reconhecimentos}" class="col-lg-4 col-md-6 mb-4">
+                                <div class="card h-100">
+                                    <div class="card-body text-center">
+                                        <div class="mb-3">
+                                            <div class="cell-avatar mx-auto" style="width: 60px; height: 60px; font-size: 1.5rem;"
+                                                 th:text="${#strings.substring(rec.funcionario.nomeCompleto, 0, 1)}">J</div>
+                                        </div>
+                                        <h6 th:text="${rec.funcionario.nomeCompleto}">João Silva</h6>
+                                        <p class="text-muted small" th:text="${rec.funcionario.cargo?.titulo}">Analista</p>
+                                        
+                                        <div class="badge bg-warning text-dark mb-2" th:text="${rec.categoria}">Destaque do Mês</div>
+                                        <p class="small" th:text="${rec.motivo}">Excelente performance no projeto X</p>
+                                        
+                                        <div class="d-flex justify-content-center align-items-center gap-1">
+                                            <i class="bi bi-coin text-warning"></i>
+                                            <span class="fw-semibold">+<span th:text="${rec.pontos}">500</span> pontos</span>
+                                        </div>
+                                    </div>
+                                    <div class="card-footer bg-transparent text-center">
+                                        <small class="text-muted" th:text="${#temporals.format(rec.data, 'dd/MM/yyyy')}">15/01/2026</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tab Eventos -->
+                    <div class="tab-pane fade" id="tabEventos">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h5 class="mb-0"><i class="bi bi-calendar-event me-2"></i>Calendário de Eventos</h5>
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalEvento"
+                                    sec:authorize="hasAnyRole('ADMIN', 'RH_CHEFE')">
+                                <i class="bi bi-plus-lg me-1"></i> Novo Evento
+                            </button>
+                        </div>
+                        
+                        <div class="row">
+                            <div th:each="evento : ${eventos}" class="col-lg-4 col-md-6 mb-4">
+                                <div class="card h-100">
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <span class="badge" th:classappend="${evento.tipo == 'COMEMORACAO' ? 'bg-warning text-dark' : (evento.tipo == 'INTEGRACAO' ? 'bg-info' : 'bg-primary')}"
+                                              th:text="${evento.tipoDescricao}">Comemoração</span>
+                                        <span class="badge" th:classappend="${evento.status == 'REALIZADO' ? 'bg-success' : (evento.status == 'AGENDADO' ? 'bg-primary' : 'bg-secondary')}"
+                                              th:text="${evento.statusDescricao}">Agendado</span>
+                                    </div>
+                                    <div class="card-body">
+                                        <h6 th:text="${evento.titulo}">Confraternização de Fim de Ano</h6>
+                                        <p class="text-muted small" th:text="${evento.descricao}">
+                                            Descrição do evento
+                                        </p>
+                                        
+                                        <div class="d-flex flex-column gap-1 small">
+                                            <span><i class="bi bi-calendar me-2"></i><span th:text="${#temporals.format(evento.data, 'dd/MM/yyyy HH:mm')}">20/12/2025 19:00</span></span>
+                                            <span><i class="bi bi-geo-alt me-2"></i><span th:text="${evento.local}">Salão de Festas</span></span>
+                                            <span><i class="bi bi-people me-2"></i><span th:text="${evento.confirmados + ' confirmados'}">120 confirmados</span></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Modais -->
+    <div class="modal fade" id="modalBrinde" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form th:action="@{/endomarketing/brindes/salvar}" method="post">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                    <div class="modal-header">
+                        <h5 class="modal-title">Novo Brinde</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label required">Nome do Brinde</label>
+                            <input type="text" class="form-control" name="nome" required>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label required">Pontos</label>
+                                <input type="number" class="form-control" name="pontos" required min="1">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label required">Estoque</label>
+                                <input type="number" class="form-control" name="estoque" required min="0">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Descrição</label>
+                            <textarea class="form-control" name="descricao" rows="2"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Ícone</label>
+                            <select class="form-select" name="icone">
+                                <option value="bi-gift">🎁 Presente</option>
+                                <option value="bi-bag">🛍️ Sacola</option>
+                                <option value="bi-cup-hot">☕ Caneca</option>
+                                <option value="bi-tshirt">👕 Camiseta</option>
+                                <option value="bi-headphones">🎧 Fone</option>
+                                <option value="bi-laptop">💻 Eletrônico</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Salvar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal fade" id="modalReconhecimento" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form th:action="@{/endomarketing/reconhecimentos/salvar}" method="post">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                    <div class="modal-header">
+                        <h5 class="modal-title">Novo Reconhecimento</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label required">Funcionário</label>
+                            <select class="form-select" name="funcionarioId" required>
+                                <option value="">Selecione</option>
+                                <option th:each="f : ${funcionarios}" th:value="${f.id}" th:text="${f.nomeCompleto}">Func</option>
+                            </select>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label required">Categoria</label>
+                                <select class="form-select" name="categoria" required>
+                                    <option value="DESTAQUE_MES">Destaque do Mês</option>
+                                    <option value="INOVACAO">Inovação</option>
+                                    <option value="COLABORACAO">Colaboração</option>
+                                    <option value="SUPERACAO">Superação</option>
+                                    <option value="TEMPO_CASA">Tempo de Casa</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label required">Pontos</label>
+                                <input type="number" class="form-control" name="pontos" required min="1" value="100">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label required">Motivo</label>
+                            <textarea class="form-control" name="motivo" rows="3" required></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Reconhecer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div th:replace="~{fragments/scripts :: scripts}"></div>
+    
+    <script th:inline="javascript">
+        const dadosClima = /*[[${dadosClima}]]*/ {
+            labels: ['2024.1', '2024.2', '2025.1', '2025.2'],
+            valores: [72, 75, 78, 81]
+        };
+        
+        new Chart(document.getElementById('chartClima'), {
+            type: 'line',
+            data: {
+                labels: dadosClima.labels,
+                datasets: [{
+                    label: 'Índice de Satisfação',
+                    data: dadosClima.valores,
+                    borderColor: '#27ae60',
+                    backgroundColor: 'rgba(39, 174, 96, 0.1)',
+                    fill: true,
+                    tension: 0.3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { y: { min: 0, max: 100 } }
+            }
+        });
+    </script>
+</body>
+</html>

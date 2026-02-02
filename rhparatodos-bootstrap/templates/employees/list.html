@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/head :: head('Funcionários')}"></head>
+<body>
+    <div class="app-wrapper">
+        <!-- Sidebar -->
+        <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <div th:replace="~{fragments/header :: header(${breadcrumbs})}"></div>
+            
+            <!-- Alerts -->
+            <div th:replace="~{fragments/header :: alerts}"></div>
+            
+            <!-- Content -->
+            <div class="content-wrapper">
+                <!-- Stats Cards -->
+                <div class="stats-grid">
+                    <div class="card stat-card card-border-left">
+                        <div class="card-body">
+                            <i class="bi bi-people stat-icon"></i>
+                            <div class="stat-value" th:text="${stats?.total ?: 0}">156</div>
+                            <div class="stat-label">Total de Funcionários</div>
+                        </div>
+                    </div>
+                    <div class="card stat-card card-border-left success">
+                        <div class="card-body">
+                            <i class="bi bi-person-check stat-icon"></i>
+                            <div class="stat-value" th:text="${stats?.ativos ?: 0}">142</div>
+                            <div class="stat-label">Ativos</div>
+                        </div>
+                    </div>
+                    <div class="card stat-card card-border-left warning">
+                        <div class="card-body">
+                            <i class="bi bi-person-exclamation stat-icon"></i>
+                            <div class="stat-value" th:text="${stats?.afastados ?: 0}">8</div>
+                            <div class="stat-label">Afastados / Férias</div>
+                        </div>
+                    </div>
+                    <div class="card stat-card card-border-left danger">
+                        <div class="card-body">
+                            <i class="bi bi-person-dash stat-icon"></i>
+                            <div class="stat-value" th:text="${stats?.desligados ?: 0}">6</div>
+                            <div class="stat-label">Desligados (mês)</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Page Header -->
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Funcionários</h1>
+                        <p class="page-subtitle">Gerencie todos os funcionários da empresa</p>
+                    </div>
+                    <div class="page-actions">
+                        <div class="dropdown">
+                            <button class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                                <i class="bi bi-download me-1"></i> Exportar
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" th:href="@{/funcionarios/exportar(formato='pdf')}"><i class="bi bi-file-pdf me-2 text-danger"></i>PDF</a></li>
+                                <li><a class="dropdown-item" th:href="@{/funcionarios/exportar(formato='excel')}"><i class="bi bi-file-excel me-2 text-success"></i>Excel</a></li>
+                                <li><a class="dropdown-item" th:href="@{/funcionarios/exportar(formato='csv')}"><i class="bi bi-file-text me-2"></i>CSV</a></li>
+                            </ul>
+                        </div>
+                        <a th:href="@{/funcionarios/novo}" class="btn btn-primary" sec:authorize="hasAnyRole('ADMIN', 'RH_CHEFE', 'RH_ASSISTENTE')">
+                            <i class="bi bi-plus-lg me-1"></i> Novo Funcionário
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Filters -->
+                <div class="filters-card">
+                    <form th:action="@{/funcionarios}" method="get" id="filterForm">
+                        <div class="filters-row">
+                            <div class="filter-group search">
+                                <label class="form-label">Buscar</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                                    <input type="text" class="form-control" name="busca" th:value="${param.busca}"
+                                           placeholder="Nome, matrícula, CPF ou email...">
+                                </div>
+                            </div>
+                            
+                            <div class="filter-group">
+                                <label class="form-label">Departamento</label>
+                                <select class="form-select" name="departamento">
+                                    <option value="">Todos</option>
+                                    <option th:each="dept : ${departamentos}" th:value="${dept.id}" 
+                                            th:text="${dept.nome}" th:selected="${param.departamento == dept.id}">Departamento</option>
+                                </select>
+                            </div>
+                            
+                            <div class="filter-group">
+                                <label class="form-label">Cargo</label>
+                                <select class="form-select" name="cargo">
+                                    <option value="">Todos</option>
+                                    <option th:each="cargo : ${cargos}" th:value="${cargo.id}" 
+                                            th:text="${cargo.titulo}" th:selected="${param.cargo == cargo.id}">Cargo</option>
+                                </select>
+                            </div>
+                            
+                            <div class="filter-group">
+                                <label class="form-label">Status</label>
+                                <select class="form-select" name="status">
+                                    <option value="">Todos</option>
+                                    <option value="ATIVO" th:selected="${param.status == 'ATIVO'}">Ativo</option>
+                                    <option value="FERIAS" th:selected="${param.status == 'FERIAS'}">Em Férias</option>
+                                    <option value="AFASTADO" th:selected="${param.status == 'AFASTADO'}">Afastado</option>
+                                    <option value="DESLIGADO" th:selected="${param.status == 'DESLIGADO'}">Desligado</option>
+                                </select>
+                            </div>
+                            
+                            <div class="filter-actions">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-funnel"></i> Filtrar
+                                </button>
+                                <a th:href="@{/funcionarios}" class="btn btn-outline-secondary">
+                                    <i class="bi bi-x-lg"></i> Limpar
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Table -->
+                <div class="card">
+                    <div class="card-body p-0">
+                        <!-- Bulk Actions -->
+                        <div class="p-3 border-bottom d-none" id="bulkActions">
+                            <div class="d-flex align-items-center gap-3">
+                                <span class="text-muted"><span id="selectedCount">0</span> selecionado(s)</span>
+                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="exportSelected()">
+                                    <i class="bi bi-download"></i> Exportar
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteSelected()"
+                                        sec:authorize="hasAnyRole('ADMIN', 'RH_CHEFE')">
+                                    <i class="bi bi-trash"></i> Excluir
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0" id="funcionariosTable">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 40px;">
+                                            <input type="checkbox" class="form-check-input" id="selectAll" onchange="toggleSelectAll()">
+                                        </th>
+                                        <th class="sortable" onclick="sortTable('nome')">
+                                            Funcionário
+                                            <i class="bi bi-arrow-down-up"></i>
+                                        </th>
+                                        <th class="sortable" onclick="sortTable('matricula')">
+                                            Matrícula
+                                            <i class="bi bi-arrow-down-up"></i>
+                                        </th>
+                                        <th class="sortable hide-mobile" onclick="sortTable('departamento')">
+                                            Departamento
+                                            <i class="bi bi-arrow-down-up"></i>
+                                        </th>
+                                        <th class="sortable hide-mobile" onclick="sortTable('cargo')">
+                                            Cargo
+                                            <i class="bi bi-arrow-down-up"></i>
+                                        </th>
+                                        <th class="sortable hide-mobile" onclick="sortTable('dataAdmissao')">
+                                            Admissão
+                                            <i class="bi bi-arrow-down-up"></i>
+                                        </th>
+                                        <th>Status</th>
+                                        <th style="width: 120px;">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="func : ${funcionarios.content}" th:data-id="${func.id}">
+                                        <td>
+                                            <input type="checkbox" class="form-check-input row-checkbox" 
+                                                   th:value="${func.id}" onchange="updateBulkActions()">
+                                        </td>
+                                        <td>
+                                            <div class="cell-with-avatar">
+                                                <div class="cell-avatar" 
+                                                     th:text="${#strings.substring(func.nomeCompleto, 0, 1)}">J</div>
+                                                <div class="cell-info">
+                                                    <span class="cell-title" th:text="${func.nomeCompleto}">João Silva Santos</span>
+                                                    <span class="cell-subtitle" th:text="${func.emailCorporativo}">joao.silva@empresa.com</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td th:text="${func.matricula}">000001</td>
+                                        <td class="hide-mobile" th:text="${func.departamento?.nome}">Tecnologia</td>
+                                        <td class="hide-mobile" th:text="${func.cargo?.titulo}">Analista</td>
+                                        <td class="hide-mobile" th:text="${#temporals.format(func.dataAdmissao, 'dd/MM/yyyy')}">01/01/2024</td>
+                                        <td>
+                                            <span class="badge badge-status" 
+                                                  th:classappend="'badge-' + ${#strings.toLowerCase(func.status)}"
+                                                  th:text="${func.statusDescricao}">Ativo</span>
+                                        </td>
+                                        <td>
+                                            <div class="table-actions">
+                                                <a th:href="@{/funcionarios/{id}(id=${func.id})}" 
+                                                   class="btn-table-action view" data-bs-toggle="tooltip" title="Visualizar">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
+                                                <a th:href="@{/funcionarios/{id}/editar(id=${func.id})}" 
+                                                   class="btn-table-action edit" data-bs-toggle="tooltip" title="Editar"
+                                                   sec:authorize="hasAnyRole('ADMIN', 'RH_CHEFE', 'RH_ASSISTENTE')">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                                <button type="button" class="btn-table-action delete" 
+                                                        data-bs-toggle="tooltip" title="Excluir"
+                                                        th:onclick="'confirmDelete(\'' + @{/funcionarios/{id}/excluir(id=${func.id})} + '\', \'' + ${func.nomeCompleto} + '\')'"
+                                                        sec:authorize="hasAnyRole('ADMIN', 'RH_CHEFE')">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    
+                                    <!-- Empty State -->
+                                    <tr th:if="${funcionarios.content.isEmpty()}">
+                                        <td colspan="8">
+                                            <div th:replace="~{fragments/scripts :: empty-state('bi-people', 'Nenhum funcionário encontrado', 'Tente ajustar os filtros ou adicione um novo funcionário.')}"></div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Pagination -->
+                        <div class="p-3 border-top" th:if="${!funcionarios.content.isEmpty()}">
+                            <div th:replace="~{fragments/scripts :: pagination(${funcionarios}, '/funcionarios')}"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Modal de Exclusão -->
+    <div th:replace="~{fragments/scripts :: modal-delete}"></div>
+    
+    <!-- Scripts -->
+    <div th:replace="~{fragments/scripts :: scripts}"></div>
+    <script th:replace="~{fragments/scripts :: script-delete}"></script>
+    
+    <script>
+        // Select All
+        function toggleSelectAll() {
+            const checked = document.getElementById('selectAll').checked;
+            document.querySelectorAll('.row-checkbox').forEach(cb => cb.checked = checked);
+            updateBulkActions();
+        }
+        
+        // Update bulk actions visibility
+        function updateBulkActions() {
+            const checkboxes = document.querySelectorAll('.row-checkbox:checked');
+            const bulkActions = document.getElementById('bulkActions');
+            const selectedCount = document.getElementById('selectedCount');
+            
+            if (checkboxes.length > 0) {
+                bulkActions.classList.remove('d-none');
+                selectedCount.textContent = checkboxes.length;
+            } else {
+                bulkActions.classList.add('d-none');
+            }
+            
+            // Update select all state
+            const allCheckboxes = document.querySelectorAll('.row-checkbox');
+            document.getElementById('selectAll').checked = 
+                allCheckboxes.length > 0 && checkboxes.length === allCheckboxes.length;
+        }
+        
+        // Export selected
+        function exportSelected() {
+            const ids = Array.from(document.querySelectorAll('.row-checkbox:checked'))
+                .map(cb => cb.value)
+                .join(',');
+            
+            if (ids) {
+                window.location.href = '/funcionarios/exportar?ids=' + ids + '&formato=excel';
+            }
+        }
+        
+        // Delete selected
+        function deleteSelected() {
+            const checkboxes = document.querySelectorAll('.row-checkbox:checked');
+            if (checkboxes.length === 0) return;
+            
+            Confirm.show({
+                title: 'Excluir funcionários',
+                message: `Tem certeza que deseja excluir <strong>${checkboxes.length}</strong> funcionário(s)?<br>Esta ação não pode ser desfeita.`,
+                confirmText: 'Excluir',
+                onConfirm: () => {
+                    const ids = Array.from(checkboxes).map(cb => cb.value).join(',');
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = '/funcionarios/excluir-lote?ids=' + ids;
+                    form.innerHTML = `<input type="hidden" name="${csrfHeader.toLowerCase().replace('x-', '')}" value="${csrfToken}">`;
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            });
+        }
+        
+        // Sort table
+        function sortTable(column) {
+            const url = new URL(window.location);
+            const currentSort = url.searchParams.get('sort');
+            const currentDir = url.searchParams.get('dir');
+            
+            if (currentSort === column) {
+                url.searchParams.set('dir', currentDir === 'asc' ? 'desc' : 'asc');
+            } else {
+                url.searchParams.set('sort', column);
+                url.searchParams.set('dir', 'asc');
+            }
+            
+            window.location = url;
+        }
+        
+        // Change page size
+        function changePageSize(size) {
+            const url = new URL(window.location);
+            url.searchParams.set('size', size);
+            url.searchParams.set('page', '0');
+            window.location = url;
+        }
+    </script>
+</body>
+</html>

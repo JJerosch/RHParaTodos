@@ -1,0 +1,412 @@
+"pg_get_functiondef"
+"CREATE OR REPLACE FUNCTION public.base_inss_folha(p_folha_id bigint)
+ RETURNS numeric
+ LANGUAGE plpgsql
+AS $function$
+DECLARE
+  v_base numeric;
+BEGIN
+  SELECT COALESCE(SUM(fl.valor), 0)
+  INTO v_base
+  FROM public.folha_lancamentos fl
+  LEFT JOIN public.folha_eventos_catalogo c_id ON c_id.id = fl.evento_id
+  LEFT JOIN public.folha_eventos_catalogo c_cd ON c_cd.codigo = fl.codigo
+  WHERE fl.folha_id = p_folha_id
+    AND COALESCE(c_id.natureza, c_cd.natureza) = 'PROVENTO'
+    AND COALESCE(c_id.incide_inss, c_cd.incide_inss, false) = true;
+
+  RETURN COALESCE(v_base, 0);
+END;
+$function$
+"
+"CREATE OR REPLACE FUNCTION public.base_irrf_folha(p_folha_id bigint)
+ RETURNS numeric
+ LANGUAGE plpgsql
+AS $function$
+DECLARE
+  v_base numeric;
+BEGIN
+  SELECT COALESCE(SUM(fl.valor), 0)
+  INTO v_base
+  FROM public.folha_lancamentos fl
+  LEFT JOIN public.folha_eventos_catalogo c_id ON c_id.id = fl.evento_id
+  LEFT JOIN public.folha_eventos_catalogo c_cd ON c_cd.codigo = fl.codigo
+  WHERE fl.folha_id = p_folha_id
+    AND COALESCE(c_id.natureza, c_cd.natureza) = 'PROVENTO'
+    AND COALESCE(c_id.incide_irrf, c_cd.incide_irrf, false) = true;
+
+  RETURN COALESCE(v_base, 0);
+END;
+$function$
+"
+"CREATE OR REPLACE FUNCTION public.calcular_inss_progressivo(p_base numeric, p_ano integer)
+ RETURNS numeric
+ LANGUAGE plpgsql
+AS $function$
+DECLARE
+  r record;
+  v_total numeric := 0;
+  v_parcela numeric;
+  v_lim_sup numeric;
+BEGIN
+  IF p_base IS NULL OR p_base <= 0 THEN
+    RETURN 0;
+  END IF;
+
+  FOR r IN
+    SELECT faixa_inicio, faixa_fim, aliquota
+    FROM public.inss_faixas
+    WHERE ano = p_ano
+    ORDER BY faixa_inicio
+  LOOP
+    EXIT WHEN p_base <= r.faixa_inicio;
+
+    v_lim_sup := COALESCE(r.faixa_fim, p_base);
+    v_parcela := LEAST(p_base, v_lim_sup) - r.faixa_inicio;
+
+    IF v_parcela > 0 THEN
+      v_total := v_total + (v_parcela * r.aliquota);
+    END IF;
+
+    EXIT WHEN r.faixa_fim IS NULL OR p_base <= r.faixa_fim;
+  END LOOP;
+
+  RETURN ROUND(v_total, 2);
+END;
+$function$
+"
+"CREATE OR REPLACE FUNCTION public.calcular_irrf_progressivo(p_base numeric)
+ RETURNS numeric
+ LANGUAGE plpgsql
+AS $function$
+DECLARE
+    v_irrf numeric := 0;
+BEGIN
+    SELECT
+        (p_base * aliquota) - parcela_deduzir
+    INTO v_irrf
+    FROM irrf_tabela
+    WHERE p_base BETWEEN faixa_min AND faixa_max
+    ORDER BY faixa_min DESC
+    LIMIT 1;
+
+    RETURN COALESCE(v_irrf, 0);
+END;
+$function$
+"
+"CREATE OR REPLACE FUNCTION public.calcular_irrf_progressivo(p_base numeric, p_data date)
+ RETURNS numeric
+ LANGUAGE plpgsql
+AS $function$
+DECLARE
+    r RECORD;
+    v_irrf numeric := 0;
+BEGIN
+    SELECT *
+    INTO r
+    FROM irrf_tabela
+    WHERE p_base >= faixa_min
+      AND (faixa_max IS NULL OR p_base <= faixa_max)
+      AND vigente_desde <= p_data
+    ORDER BY vigente_desde DESC
+    LIMIT 1;
+
+    IF FOUND THEN
+        v_irrf := (p_base * r.aliquota) - r.parcela_deduzir;
+    END IF;
+
+    RETURN GREATEST(ROUND(v_irrf, 2), 0);
+END;
+$function$
+"
+"CREATE OR REPLACE FUNCTION public.fn_auditoria_lgpd()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+BEGIN
+    INSERT INTO auditoria_lgpd (
+        tabela_afetada,
+        registro_id,
+        operacao,
+        usuario_id,
+        perfil_usuario,
+        dados_antes,
+        dados_depois,
+        ip_origem,
+        criado_em
+    )
+    VALUES (
+        TG_TABLE_NAME,
+        COALESCE(NEW.id, OLD.id),
+        TG_OP,
+        current_setting('app.usuario_id', true)::bigint,
+        current_setting('app.perfil_usuario', true),
+        CASE WHEN TG_OP IN ('UPDATE','DELETE') THEN to_jsonb(OLD) END,
+        CASE WHEN TG_OP IN ('INSERT','UPDATE') THEN to_jsonb(NEW) END,
+        inet_client_addr(),
+        now()
+    );
+
+    RETURN NEW;
+END;
+$function$
+"
+"CREATE OR REPLACE FUNCTION public.gerar_eventos_ponto_folha(p_folha_id bigint, p_funcionario_id bigint, p_competencia date)
+ RETURNS void
+ LANGUAGE plpgsql
+AS $function$
+DECLARE
+    v_horas_extras numeric := 0;
+    v_horas_faltas numeric := 0;
+    v_valor_hora numeric;
+BEGIN
+    SELECT salario_atual / 220
+    INTO v_valor_hora
+    FROM funcionarios
+    WHERE id = p_funcionario_id;
+
+    SELECT
+        COALESCE(SUM(horas_extras), 0),
+        COALESCE(SUM(horas_faltantes), 0)
+    INTO
+        v_horas_extras,
+        v_horas_faltas
+    FROM ponto_apuracao_diaria
+    WHERE funcionario_id = p_funcionario_id
+      AND date_trunc('month', data) = date_trunc('month', p_competencia);
+
+    IF v_horas_extras > 0 THEN
+        INSERT INTO folha_lancamentos (
+            folha_id, tipo, codigo, descricao, referencia, valor, origem
+        )
+        VALUES (
+            p_folha_id,
+            'PROVENTO',
+            'HEXTRA',
+            'Horas Extras',
+            v_horas_extras,
+            ROUND(v_horas_extras * v_valor_hora * 1.5, 2),
+            'PONTO'
+        );
+    END IF;
+
+    IF v_horas_faltas > 0 THEN
+        INSERT INTO folha_lancamentos (
+            folha_id, tipo, codigo, descricao, referencia, valor, origem
+        )
+        VALUES (
+            p_folha_id,
+            'DESCONTO',
+            'FALTA',
+            'Desconto por Faltas',
+            v_horas_faltas,
+            ROUND(v_horas_faltas * v_valor_hora, 2),
+            'PONTO'
+        );
+    END IF;
+END;
+$function$
+"
+"CREATE OR REPLACE FUNCTION public.gerar_lancamentos_beneficios(p_folha_id bigint)
+ RETURNS void
+ LANGUAGE plpgsql
+AS $function$
+DECLARE
+    v_funcionario_id bigint;
+    v_competencia date;
+BEGIN
+    -- dados da folha
+    SELECT funcionario_id, competencia
+    INTO v_funcionario_id, v_competencia
+    FROM folha_pagamentos
+    WHERE id = p_folha_id;
+
+    -- evita duplicidade
+    DELETE FROM folha_lancamentos
+    WHERE folha_id = p_folha_id
+      AND origem = 'BENEFICIO';
+
+    -- gera lançamentos
+    INSERT INTO folha_lancamentos (
+        folha_id,
+        tipo,
+        codigo,
+        descricao,
+        referencia,
+        valor,
+        origem,
+        evento_id
+    )
+    SELECT
+        p_folha_id,
+        tb.natureza,
+        'BEN_' || tb.id,
+        tb.nome,
+        NULL,
+        COALESCE(fb.valor, tb.valor_padrao),
+        'BENEFICIO',
+        NULL
+    FROM funcionarios_beneficios fb
+    JOIN tipos_beneficios tb ON tb.id = fb.tipo_beneficio_id
+    WHERE fb.funcionario_id = v_funcionario_id
+      AND fb.ativo = true
+      AND fb.data_inicio <= (date_trunc('month', v_competencia) + interval '1 month - 1 day')
+      AND (fb.data_fim IS NULL OR fb.data_fim >= date_trunc('month', v_competencia));
+END;
+$function$
+"
+"CREATE OR REPLACE FUNCTION public.gerar_lancamentos_beneficios(p_folha_id bigint, p_funcionario_id bigint)
+ RETURNS void
+ LANGUAGE plpgsql
+AS $function$
+BEGIN
+  PERFORM public.gerar_lancamentos_beneficios(p_folha_id);
+END;
+$function$
+"
+"CREATE OR REPLACE FUNCTION public.processar_folha(p_folha_id bigint, p_funcionario_id bigint, p_usuario_id bigint)
+ RETURNS void
+ LANGUAGE plpgsql
+AS $function$
+DECLARE
+  v_competencia date;
+BEGIN
+  -- evita duplicidade em reprocessamento (limpa itens gerados pelo sistema)
+  DELETE FROM public.folha_lancamentos
+  WHERE folha_id = p_folha_id
+    AND origem IN ('CONTRATO','BENEFICIO','PONTO','FERIAS','SISTEMA','CALCULO_AUTOMATICO');
+
+  -- salário base
+  INSERT INTO public.folha_lancamentos (folha_id, tipo, codigo, descricao, valor, origem)
+  SELECT p_folha_id, 'PROVENTO', 'SALARIO', 'Salário Base', salario_atual, 'CONTRATO'
+  FROM public.funcionarios
+  WHERE id = p_funcionario_id;
+
+  -- benefícios (assinatura compatível)
+  PERFORM public.gerar_lancamentos_beneficios(p_folha_id, p_funcionario_id);
+
+  -- ponto
+  SELECT competencia INTO v_competencia
+  FROM public.folha_pagamentos
+  WHERE id = p_folha_id;
+
+  PERFORM public.gerar_eventos_ponto_folha(p_folha_id, p_funcionario_id, v_competencia);
+
+  -- caminho B: recalcula impostos/encargos só aqui
+  PERFORM public.recalcular_folha(p_folha_id);
+
+  -- NÃO fecha a folha aqui
+END;
+$function$
+"
+"CREATE OR REPLACE FUNCTION public.recalcular_folha(p_folha_id bigint)
+ RETURNS void
+ LANGUAGE plpgsql
+AS $function$
+BEGIN
+  PERFORM public.gerar_lancamento_inss(p_folha_id);
+  PERFORM public.gerar_lancamento_irrf(p_folha_id);
+  PERFORM public.gerar_fgts(p_folha_id);
+  PERFORM public.recalcular_totais_folha(p_folha_id);
+END;
+$function$
+"
+"CREATE OR REPLACE FUNCTION public.recalcular_totais_folha()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+BEGIN
+    UPDATE folha_pagamentos fp
+    SET
+        total_proventos = COALESCE((
+            SELECT SUM(valor)
+            FROM folha_lancamentos
+            WHERE folha_id = fp.id
+              AND tipo = 'PROVENTO'
+        ), 0),
+
+        total_descontos = COALESCE((
+            SELECT SUM(valor)
+            FROM folha_lancamentos
+            WHERE folha_id = fp.id
+              AND tipo = 'DESCONTO'
+        ), 0),
+
+        salario_liquido =
+            COALESCE((
+                SELECT SUM(valor)
+                FROM folha_lancamentos
+                WHERE folha_id = fp.id
+                  AND tipo = 'PROVENTO'
+            ), 0)
+            -
+            COALESCE((
+                SELECT SUM(valor)
+                FROM folha_lancamentos
+                WHERE folha_id = fp.id
+                  AND tipo = 'DESCONTO'
+            ), 0)
+
+    WHERE fp.id = NEW.folha_id;
+
+    RETURN NEW;
+END;
+$function$
+"
+"CREATE OR REPLACE FUNCTION public.recalcular_totais_folha(p_folha_id bigint)
+ RETURNS void
+ LANGUAGE plpgsql
+AS $function$
+DECLARE
+  v_proventos numeric;
+  v_descontos numeric;
+BEGIN
+  SELECT COALESCE(SUM(valor),0) INTO v_proventos
+  FROM public.folha_lancamentos
+  WHERE folha_id = p_folha_id AND tipo='PROVENTO';
+
+  SELECT COALESCE(SUM(valor),0) INTO v_descontos
+  FROM public.folha_lancamentos
+  WHERE folha_id = p_folha_id AND tipo='DESCONTO';
+
+  UPDATE public.folha_pagamentos
+  SET total_proventos = v_proventos,
+      total_descontos = v_descontos,
+      valor_liquido   = v_proventos - v_descontos
+  WHERE id = p_folha_id;
+END;
+$function$
+"
+"CREATE OR REPLACE FUNCTION public.trg_bloquear_lancamento_folha_fechada()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+DECLARE
+  v_folha_id bigint;
+BEGIN
+  v_folha_id := COALESCE(NEW.folha_id, OLD.folha_id);
+
+  IF EXISTS (
+    SELECT 1 FROM public.folha_pagamentos
+    WHERE id = v_folha_id AND status = 'FECHADA'
+  ) THEN
+    RAISE EXCEPTION 'Folha fechada. Não é permitido alterar lançamentos.';
+  END IF;
+
+  RETURN COALESCE(NEW, OLD);
+END;
+$function$
+"
+"CREATE OR REPLACE FUNCTION public.trg_processar_folha_insert()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+DECLARE
+  v_usuario_id bigint;
+BEGIN
+  v_usuario_id := NULLIF(current_setting('app.usuario_id', true), '')::bigint;
+  PERFORM public.processar_folha(NEW.id, NEW.funcionario_id, COALESCE(v_usuario_id, 0));
+  RETURN NEW;
+END;
+$function$
+"

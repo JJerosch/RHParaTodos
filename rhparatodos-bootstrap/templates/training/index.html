@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/head :: head('Treinamentos')}"></head>
+<body>
+    <div class="app-wrapper">
+        <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+        
+        <main class="main-content">
+            <div th:replace="~{fragments/header :: header(${breadcrumbs})}"></div>
+            <div th:replace="~{fragments/header :: alerts}"></div>
+            
+            <div class="content-wrapper">
+                <!-- Stats -->
+                <div class="stats-grid">
+                    <div class="card stat-card card-border-left">
+                        <div class="card-body">
+                            <i class="bi bi-mortarboard stat-icon"></i>
+                            <div class="stat-value" th:text="${stats?.totalTreinamentos ?: 0}">24</div>
+                            <div class="stat-label">Treinamentos Disponíveis</div>
+                        </div>
+                    </div>
+                    <div class="card stat-card card-border-left success">
+                        <div class="card-body">
+                            <i class="bi bi-check-circle stat-icon"></i>
+                            <div class="stat-value" th:text="${stats?.concluidos ?: 0}">156</div>
+                            <div class="stat-label">Conclusões (mês)</div>
+                        </div>
+                    </div>
+                    <div class="card stat-card card-border-left info">
+                        <div class="card-body">
+                            <i class="bi bi-play-circle stat-icon"></i>
+                            <div class="stat-value" th:text="${stats?.emAndamento ?: 0}">42</div>
+                            <div class="stat-label">Em Andamento</div>
+                        </div>
+                    </div>
+                    <div class="card stat-card card-border-left warning">
+                        <div class="card-body">
+                            <i class="bi bi-currency-dollar stat-icon"></i>
+                            <div class="stat-value" th:text="${stats?.orcamentoUtilizado != null ? #numbers.formatCurrency(stats.orcamentoUtilizado) : 'R$ 0'}">R$ 45.000</div>
+                            <div class="stat-label">Orçamento Utilizado</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Page Header -->
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Treinamentos e Desenvolvimento</h1>
+                        <p class="page-subtitle">Gerencie treinamentos e trilhas de aprendizagem</p>
+                    </div>
+                    <div class="page-actions">
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalTreinamento"
+                                sec:authorize="hasAnyRole('ADMIN', 'RH_CHEFE')">
+                            <i class="bi bi-plus-lg me-1"></i> Novo Treinamento
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Tabs -->
+                <ul class="nav nav-tabs mb-4" role="tablist">
+                    <li class="nav-item">
+                        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tabCatalogo">
+                            <i class="bi bi-grid me-1"></i> Catálogo
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabTrilhas">
+                            <i class="bi bi-signpost-split me-1"></i> Trilhas
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabInscricoes">
+                            <i class="bi bi-people me-1"></i> Inscrições
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabRelatorios">
+                            <i class="bi bi-bar-chart me-1"></i> Relatórios
+                        </button>
+                    </li>
+                </ul>
+                
+                <div class="tab-content">
+                    <!-- Tab Catálogo -->
+                    <div class="tab-pane fade show active" id="tabCatalogo">
+                        <!-- Filters -->
+                        <div class="filters-card mb-4">
+                            <div class="filters-row">
+                                <div class="filter-group search">
+                                    <label class="form-label">Buscar</label>
+                                    <input type="text" class="form-control" placeholder="Nome do treinamento...">
+                                </div>
+                                <div class="filter-group">
+                                    <label class="form-label">Categoria</label>
+                                    <select class="form-select">
+                                        <option value="">Todas</option>
+                                        <option value="tecnico">Técnico</option>
+                                        <option value="comportamental">Comportamental</option>
+                                        <option value="lideranca">Liderança</option>
+                                        <option value="compliance">Compliance</option>
+                                    </select>
+                                </div>
+                                <div class="filter-group">
+                                    <label class="form-label">Modalidade</label>
+                                    <select class="form-select">
+                                        <option value="">Todas</option>
+                                        <option value="presencial">Presencial</option>
+                                        <option value="online">Online</option>
+                                        <option value="hibrido">Híbrido</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Grid de Treinamentos -->
+                        <div class="row">
+                            <div th:each="treinamento : ${treinamentos}" class="col-lg-4 col-md-6 mb-4">
+                                <div class="card h-100">
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <span class="badge" th:classappend="${treinamento.categoria == 'tecnico' ? 'bg-primary' : (treinamento.categoria == 'comportamental' ? 'bg-success' : 'bg-info')}"
+                                              th:text="${treinamento.categoriaDescricao}">Técnico</span>
+                                        <span class="badge bg-light text-dark" th:text="${treinamento.modalidade}">Online</span>
+                                    </div>
+                                    <div class="card-body">
+                                        <h5 class="card-title" th:text="${treinamento.nome}">Gestão de Projetos</h5>
+                                        <p class="card-text text-muted small" th:text="${#strings.abbreviate(treinamento.descricao, 100)}">
+                                            Descrição do treinamento...
+                                        </p>
+                                        
+                                        <div class="d-flex flex-wrap gap-2 mb-3">
+                                            <span class="small text-muted">
+                                                <i class="bi bi-clock me-1"></i>
+                                                <span th:text="${treinamento.cargaHoraria + 'h'}">16h</span>
+                                            </span>
+                                            <span class="small text-muted">
+                                                <i class="bi bi-people me-1"></i>
+                                                <span th:text="${treinamento.inscritos + '/' + treinamento.vagas}">15/30</span>
+                                            </span>
+                                            <span class="small text-muted" th:if="${treinamento.proximaTurma != null}">
+                                                <i class="bi bi-calendar me-1"></i>
+                                                <span th:text="${#temporals.format(treinamento.proximaTurma, 'dd/MM')}">15/02</span>
+                                            </span>
+                                        </div>
+                                        
+                                        <div class="progress mb-2" style="height: 6px;" th:if="${treinamento.vagas > 0}">
+                                            <div class="progress-bar" role="progressbar" 
+                                                 th:style="'width: ' + ${(treinamento.inscritos * 100) / treinamento.vagas} + '%'">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card-footer bg-transparent">
+                                        <div class="d-flex gap-2">
+                                            <a th:href="@{/treinamentos/{id}(id=${treinamento.id})}" 
+                                               class="btn btn-sm btn-outline-primary flex-fill">
+                                                <i class="bi bi-eye me-1"></i> Detalhes
+                                            </a>
+                                            <button type="button" class="btn btn-sm btn-primary flex-fill"
+                                                    th:onclick="'inscrever(' + ${treinamento.id} + ')'">
+                                                <i class="bi bi-plus me-1"></i> Inscrever
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tab Trilhas -->
+                    <div class="tab-pane fade" id="tabTrilhas">
+                        <div class="row">
+                            <div th:each="trilha : ${trilhas}" class="col-lg-6 mb-4">
+                                <div class="card h-100">
+                                    <div class="card-header">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="rounded-circle p-3" th:style="'background-color: ' + ${trilha.cor} + '20'">
+                                                <i class="bi" th:classappend="${trilha.icone}" th:style="'color: ' + ${trilha.cor}" style="font-size: 1.5rem;"></i>
+                                            </div>
+                                            <div>
+                                                <h5 class="mb-0" th:text="${trilha.nome}">Trilha de Liderança</h5>
+                                                <small class="text-muted" th:text="${trilha.treinamentos.size() + ' treinamentos'}">5 treinamentos</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="text-muted mb-3" th:text="${trilha.descricao}">
+                                            Descrição da trilha de aprendizagem
+                                        </p>
+                                        
+                                        <div class="list-group list-group-flush">
+                                            <div th:each="t : ${trilha.treinamentos}" class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <span class="badge rounded-pill" th:classappend="${t.obrigatorio ? 'bg-danger' : 'bg-secondary'}"
+                                                          th:text="${t.obrigatorio ? 'Obrigatório' : 'Opcional'}">Obrigatório</span>
+                                                    <span th:text="${t.nome}">Nome do treinamento</span>
+                                                </div>
+                                                <span class="text-muted small" th:text="${t.cargaHoraria + 'h'}">8h</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card-footer bg-transparent">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="small text-muted">
+                                                <i class="bi bi-clock me-1"></i>
+                                                <span th:text="${trilha.cargaHorariaTotal + 'h total'}">40h total</span>
+                                            </span>
+                                            <a th:href="@{/treinamentos/trilhas/{id}(id=${trilha.id})}" class="btn btn-sm btn-outline-primary">
+                                                Ver Trilha
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tab Inscrições -->
+                    <div class="tab-pane fade" id="tabInscricoes">
+                        <div class="card">
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-hover mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Funcionário</th>
+                                                <th>Treinamento</th>
+                                                <th>Turma</th>
+                                                <th>Progresso</th>
+                                                <th>Status</th>
+                                                <th>Ações</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr th:each="inscricao : ${inscricoes}">
+                                                <td>
+                                                    <div class="cell-with-avatar">
+                                                        <div class="cell-avatar" th:text="${#strings.substring(inscricao.funcionario.nomeCompleto, 0, 1)}">J</div>
+                                                        <div class="cell-info">
+                                                            <span class="cell-title" th:text="${inscricao.funcionario.nomeCompleto}">João Silva</span>
+                                                            <span class="cell-subtitle" th:text="${inscricao.funcionario.departamento?.nome}">TI</span>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td th:text="${inscricao.treinamento.nome}">Gestão de Projetos</td>
+                                                <td th:text="${#temporals.format(inscricao.dataTurma, 'dd/MM/yyyy')}">15/02/2026</td>
+                                                <td style="width: 150px;">
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <div class="progress flex-grow-1" style="height: 6px;">
+                                                            <div class="progress-bar" th:style="'width: ' + ${inscricao.progresso} + '%'"></div>
+                                                        </div>
+                                                        <span class="small" th:text="${inscricao.progresso + '%'}">75%</span>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <span class="badge badge-status" 
+                                                          th:classappend="${inscricao.status == 'CONCLUIDO' ? 'badge-ativo' : (inscricao.status == 'EM_ANDAMENTO' ? 'badge-ferias' : 'badge-afastado')}"
+                                                          th:text="${inscricao.statusDescricao}">Em Andamento</span>
+                                                </td>
+                                                <td>
+                                                    <div class="table-actions">
+                                                        <button class="btn-table-action view" title="Ver Certificado" 
+                                                                th:if="${inscricao.status == 'CONCLUIDO'}">
+                                                            <i class="bi bi-award"></i>
+                                                        </button>
+                                                        <button class="btn-table-action edit" title="Avaliar"
+                                                                th:if="${inscricao.status == 'CONCLUIDO'}">
+                                                            <i class="bi bi-star"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tab Relatórios -->
+                    <div class="tab-pane fade" id="tabRelatorios">
+                        <div class="row">
+                            <div class="col-lg-8 mb-4">
+                                <div class="card h-100">
+                                    <div class="card-header">
+                                        <i class="bi bi-graph-up me-2"></i>Treinamentos por Mês
+                                    </div>
+                                    <div class="card-body">
+                                        <canvas id="chartTreinamentos" height="300"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 mb-4">
+                                <div class="card h-100">
+                                    <div class="card-header">
+                                        <i class="bi bi-pie-chart me-2"></i>Por Categoria
+                                    </div>
+                                    <div class="card-body">
+                                        <canvas id="chartCategorias" height="300"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <div class="card-header">
+                                <i class="bi bi-trophy me-2"></i>Top 10 Funcionários (Horas de Treinamento)
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-hover mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Funcionário</th>
+                                                <th>Departamento</th>
+                                                <th>Treinamentos</th>
+                                                <th>Horas</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr th:each="rank, stat : ${ranking}">
+                                                <td>
+                                                    <span class="badge" th:classappend="${stat.index == 0 ? 'bg-warning' : (stat.index == 1 ? 'bg-secondary' : (stat.index == 2 ? 'bg-danger' : 'bg-light text-dark'))}"
+                                                          th:text="${stat.index + 1}">1</span>
+                                                </td>
+                                                <td th:text="${rank.funcionario.nomeCompleto}">João Silva</td>
+                                                <td th:text="${rank.funcionario.departamento?.nome}">TI</td>
+                                                <td th:text="${rank.totalTreinamentos}">12</td>
+                                                <td th:text="${rank.totalHoras + 'h'}">96h</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Modal Novo Treinamento -->
+    <div class="modal fade" id="modalTreinamento" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <form th:action="@{/treinamentos/salvar}" method="post">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                    <div class="modal-header">
+                        <h5 class="modal-title">Novo Treinamento</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-8 mb-3">
+                                <label class="form-label required">Nome do Treinamento</label>
+                                <input type="text" class="form-control" name="nome" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Categoria</label>
+                                <select class="form-select" name="categoria">
+                                    <option value="tecnico">Técnico</option>
+                                    <option value="comportamental">Comportamental</option>
+                                    <option value="lideranca">Liderança</option>
+                                    <option value="compliance">Compliance</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Modalidade</label>
+                                <select class="form-select" name="modalidade">
+                                    <option value="ONLINE">Online</option>
+                                    <option value="PRESENCIAL">Presencial</option>
+                                    <option value="HIBRIDO">Híbrido</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Carga Horária</label>
+                                <input type="number" class="form-control" name="cargaHoraria" value="8">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Vagas</label>
+                                <input type="number" class="form-control" name="vagas" value="30">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Descrição</label>
+                            <textarea class="form-control" name="descricao" rows="3"></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Instrutor/Fornecedor</label>
+                                <input type="text" class="form-control" name="instrutor">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Custo por Participante</label>
+                                <input type="text" class="form-control" name="custo" data-mask="currency">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Salvar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal Inscrição -->
+    <div class="modal fade" id="modalInscricao" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="formInscricao" method="post">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                    <div class="modal-header">
+                        <h5 class="modal-title">Inscrever Funcionário</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label required">Funcionário</label>
+                            <select class="form-select" name="funcionarioId" required>
+                                <option value="">Selecione</option>
+                                <option th:each="f : ${funcionarios}" th:value="${f.id}" th:text="${f.nomeCompleto}">Funcionário</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Observações</label>
+                            <textarea class="form-control" name="observacoes" rows="2"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Inscrever</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div th:replace="~{fragments/scripts :: scripts}"></div>
+    
+    <script th:inline="javascript">
+        const dadosMensal = /*[[${dadosTreinamentosMensal}]]*/ {
+            labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
+            valores: [45, 52, 38, 65, 48, 72]
+        };
+        
+        const dadosCategorias = /*[[${dadosCategorias}]]*/ {
+            labels: ['Técnico', 'Comportamental', 'Liderança', 'Compliance'],
+            valores: [40, 25, 20, 15]
+        };
+        
+        // Gráfico Mensal
+        new Chart(document.getElementById('chartTreinamentos'), {
+            type: 'bar',
+            data: {
+                labels: dadosMensal.labels,
+                datasets: [{
+                    label: 'Conclusões',
+                    data: dadosMensal.valores,
+                    backgroundColor: 'rgba(44, 62, 80, 0.8)',
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } }
+            }
+        });
+        
+        // Gráfico Categorias
+        new Chart(document.getElementById('chartCategorias'), {
+            type: 'doughnut',
+            data: {
+                labels: dadosCategorias.labels,
+                datasets: [{
+                    data: dadosCategorias.valores,
+                    backgroundColor: ['#2c3e50', '#27ae60', '#f39c12', '#e74c3c']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom' } },
+                cutout: '60%'
+            }
+        });
+        
+        function inscrever(treinamentoId) {
+            document.getElementById('formInscricao').action = `/treinamentos/${treinamentoId}/inscrever`;
+            new bootstrap.Modal(document.getElementById('modalInscricao')).show();
+        }
+    </script>
+</body>
+</html>

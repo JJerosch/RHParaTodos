@@ -397,6 +397,7 @@
           <option value="rh-assistente">RH - Assistente</option>
           <option value="dp-chefe">DP - Chefe</option>
           <option value="dp-assistente">DP - Assistente</option>
+          <option value="funcionario">Outro Cargo</option>
         </select>
       </div>
 
@@ -409,6 +410,30 @@
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       if (Auth.isAuthenticated()) window.location.href = 'dashboard.html';
+
+      // Impede que o usuário volte para a opção vazia "Selecione seu perfil" após escolher um perfil
+      const profileSelect = document.getElementById('profile');
+      if (profileSelect) {
+        // armazena valor anterior para evitar retorno
+        profileSelect._previousValue = profileSelect.value;
+        profileSelect.addEventListener('change', (e) => {
+          const select = e.target;
+          const placeholder = select.querySelector('option[value=""]');
+
+          if (select.value !== '') {
+            if (placeholder) { placeholder.disabled = true; placeholder.hidden = true; }
+          } else {
+            // Se tentar voltar para vazio, restaura o valor anterior e mostra alerta
+            if (select._previousValue && select._previousValue !== '') {
+              select.value = select._previousValue;
+              showAlert('error', 'Não é possível voltar para "Selecione seu perfil".');
+              return;
+            }
+          }
+
+          select._previousValue = select.value;
+        });
+      }
     });
 
     function togglePassword() {

@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/head :: head('Cargos')}"></head>
+<body>
+    <div class="app-wrapper">
+        <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+        
+        <main class="main-content">
+            <div th:replace="~{fragments/header :: header(${breadcrumbs})}"></div>
+            <div th:replace="~{fragments/header :: alerts}"></div>
+            
+            <div class="content-wrapper">
+                <!-- Stats -->
+                <div class="stats-grid">
+                    <div class="card stat-card card-border-left">
+                        <div class="card-body">
+                            <i class="bi bi-briefcase stat-icon"></i>
+                            <div class="stat-value" th:text="${stats?.totalCargos ?: 0}">42</div>
+                            <div class="stat-label">Total de Cargos</div>
+                        </div>
+                    </div>
+                    <div class="card stat-card card-border-left success">
+                        <div class="card-body">
+                            <i class="bi bi-check-circle stat-icon"></i>
+                            <div class="stat-value" th:text="${stats?.ativos ?: 0}">38</div>
+                            <div class="stat-label">Cargos Ativos</div>
+                        </div>
+                    </div>
+                    <div class="card stat-card card-border-left info">
+                        <div class="card-body">
+                            <i class="bi bi-layers stat-icon"></i>
+                            <div class="stat-value" th:text="${stats?.niveis ?: 0}">5</div>
+                            <div class="stat-label">Níveis Hierárquicos</div>
+                        </div>
+                    </div>
+                    <div class="card stat-card card-border-left warning">
+                        <div class="card-body">
+                            <i class="bi bi-currency-dollar stat-icon"></i>
+                            <div class="stat-value" th:text="${stats?.mediaSalarial != null ? #numbers.formatCurrency(stats.mediaSalarial) : 'R$ 0'}">R$ 5.500</div>
+                            <div class="stat-label">Média Salarial</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Page Header -->
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Gestão de Cargos</h1>
+                        <p class="page-subtitle">Administre a estrutura de cargos e faixas salariais</p>
+                    </div>
+                    <div class="page-actions" sec:authorize="hasAnyRole('ADMIN', 'RH_CHEFE')">
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalCargo">
+                            <i class="bi bi-plus-lg me-1"></i> Novo Cargo
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Filters -->
+                <div class="filters-card mb-4">
+                    <div class="filters-row">
+                        <div class="filter-group search">
+                            <label class="form-label">Buscar</label>
+                            <input type="text" class="form-control" id="busca" placeholder="Título do cargo...">
+                        </div>
+                        <div class="filter-group">
+                            <label class="form-label">Departamento</label>
+                            <select class="form-select" id="filtroDepartamento">
+                                <option value="">Todos</option>
+                                <option th:each="d : ${departamentos}" th:value="${d.id}" th:text="${d.nome}">Dept</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label class="form-label">Nível</label>
+                            <select class="form-select" id="filtroNivel">
+                                <option value="">Todos</option>
+                                <option value="OPERACIONAL">Operacional</option>
+                                <option value="TECNICO">Técnico</option>
+                                <option value="SUPERVISAO">Supervisão</option>
+                                <option value="GERENCIA">Gerência</option>
+                                <option value="DIRETORIA">Diretoria</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label class="form-label">Status</label>
+                            <select class="form-select" id="filtroStatus">
+                                <option value="">Todos</option>
+                                <option value="true">Ativos</option>
+                                <option value="false">Inativos</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Table -->
+                <div class="card">
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Cargo</th>
+                                        <th>Departamento</th>
+                                        <th>Nível</th>
+                                        <th>Faixa Salarial</th>
+                                        <th class="text-center">Funcionários</th>
+                                        <th>Status</th>
+                                        <th style="width: 100px;">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="cargo : ${cargos}">
+                                        <td>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <div class="rounded-circle p-2 bg-light">
+                                                    <i class="bi bi-briefcase text-primary"></i>
+                                                </div>
+                                                <div>
+                                                    <span class="fw-semibold" th:text="${cargo.titulo}">Analista de Sistemas</span>
+                                                    <br>
+                                                    <small class="text-muted" th:text="${cargo.cbo}">CBO: 2124-05</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td th:text="${cargo.departamento?.nome}">Tecnologia</td>
+                                        <td>
+                                            <span class="badge" th:classappend="${cargo.nivel == 'DIRETORIA' ? 'bg-danger' : (cargo.nivel == 'GERENCIA' ? 'bg-warning text-dark' : (cargo.nivel == 'SUPERVISAO' ? 'bg-info' : 'bg-secondary'))}"
+                                                  th:text="${cargo.nivelDescricao}">Técnico</span>
+                                        </td>
+                                        <td>
+                                            <span th:text="${#numbers.formatCurrency(cargo.salarioMinimo)}">R$ 4.000</span>
+                                            <span class="text-muted">-</span>
+                                            <span th:text="${#numbers.formatCurrency(cargo.salarioMaximo)}">R$ 8.000</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge bg-light text-dark" th:text="${cargo.totalFuncionarios}">12</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge badge-status" th:classappend="${cargo.ativo ? 'badge-ativo' : 'badge-desligado'}"
+                                                  th:text="${cargo.ativo ? 'Ativo' : 'Inativo'}">Ativo</span>
+                                        </td>
+                                        <td>
+                                            <div class="table-actions">
+                                                <button class="btn-table-action view" title="Ver Detalhes"
+                                                        th:onclick="'verCargo(' + ${cargo.id} + ')'">
+                                                    <i class="bi bi-eye"></i>
+                                                </button>
+                                                <button class="btn-table-action edit" title="Editar"
+                                                        th:onclick="'editarCargo(' + ${cargo.id} + ')'"
+                                                        sec:authorize="hasAnyRole('ADMIN', 'RH_CHEFE')">
+                                                    <i class="bi bi-pencil"></i>
+                                                </button>
+                                                <button class="btn-table-action delete" title="Desativar"
+                                                        th:onclick="'desativarCargo(' + ${cargo.id} + ', \'' + ${cargo.titulo} + '\')'"
+                                                        th:if="${cargo.ativo && cargo.totalFuncionarios == 0}"
+                                                        sec:authorize="hasRole('ADMIN')">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Política de Remuneração -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <i class="bi bi-file-text me-2"></i>Política de Remuneração
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <h6>Estrutura de Níveis</h6>
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Nível</th>
+                                            <th>Faixa Base</th>
+                                            <th>Cargos</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><span class="badge bg-secondary">Operacional</span></td>
+                                            <td>R$ 1.500 - R$ 3.000</td>
+                                            <td>12</td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="badge bg-secondary">Técnico</span></td>
+                                            <td>R$ 3.000 - R$ 6.000</td>
+                                            <td>15</td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="badge bg-info">Supervisão</span></td>
+                                            <td>R$ 5.000 - R$ 10.000</td>
+                                            <td>6</td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="badge bg-warning text-dark">Gerência</span></td>
+                                            <td>R$ 10.000 - R$ 20.000</td>
+                                            <td>4</td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="badge bg-danger">Diretoria</span></td>
+                                            <td>R$ 20.000 - R$ 50.000</td>
+                                            <td>3</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="col-lg-6">
+                                <h6>Regras de Progressão</h6>
+                                <ul class="small">
+                                    <li>Reajuste anual conforme convenção coletiva</li>
+                                    <li>Promoção por mérito após avaliação de desempenho ≥ 4.0</li>
+                                    <li>Tempo mínimo de 12 meses no cargo atual para promoção</li>
+                                    <li>Aprovação do gestor e RH para mudança de faixa</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Modal Cargo -->
+    <div class="modal fade" id="modalCargo" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <form th:action="@{/cargos/salvar}" method="post" id="formCargo">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                    <input type="hidden" name="id" id="cargoId">
+                    
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalCargoTitle">Novo Cargo</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-8 mb-3">
+                                <label class="form-label required">Título do Cargo</label>
+                                <input type="text" class="form-control" name="titulo" id="cargoTitulo" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">CBO</label>
+                                <input type="text" class="form-control" name="cbo" id="cargoCbo" placeholder="0000-00">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label required">Departamento</label>
+                                <select class="form-select" name="departamentoId" id="cargoDepartamento" required>
+                                    <option value="">Selecione</option>
+                                    <option th:each="d : ${departamentos}" th:value="${d.id}" th:text="${d.nome}">Dept</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label required">Nível Hierárquico</label>
+                                <select class="form-select" name="nivel" id="cargoNivel" required>
+                                    <option value="">Selecione</option>
+                                    <option value="OPERACIONAL">Operacional</option>
+                                    <option value="TECNICO">Técnico</option>
+                                    <option value="SUPERVISAO">Supervisão</option>
+                                    <option value="GERENCIA">Gerência</option>
+                                    <option value="DIRETORIA">Diretoria</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Salário Mínimo</label>
+                                <input type="text" class="form-control" name="salarioMinimo" id="cargoSalarioMin" data-mask="currency">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Salário Máximo</label>
+                                <input type="text" class="form-control" name="salarioMaximo" id="cargoSalarioMax" data-mask="currency">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Descrição do Cargo</label>
+                            <textarea class="form-control" name="descricao" id="cargoDescricao" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Requisitos</label>
+                            <textarea class="form-control" name="requisitos" id="cargoRequisitos" rows="2" 
+                                      placeholder="Ex: Graduação em TI, 3 anos de experiência"></textarea>
+                        </div>
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" name="ativo" id="cargoAtivo" checked>
+                            <label class="form-check-label" for="cargoAtivo">Cargo Ativo</label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Salvar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal Detalhes -->
+    <div class="modal fade" id="modalDetalhes" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Detalhes do Cargo</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="detalhesContent">
+                    <!-- Carregado via AJAX -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div th:replace="~{fragments/scripts :: modal-delete}"></div>
+    <div th:replace="~{fragments/scripts :: scripts}"></div>
+    
+    <script th:inline="javascript">
+        const cargosData = /*[[${cargosJson}]]*/ [];
+        
+        function editarCargo(id) {
+            const cargo = cargosData.find(c => c.id === id);
+            if (!cargo) return;
+            
+            document.getElementById('modalCargoTitle').textContent = 'Editar Cargo';
+            document.getElementById('cargoId').value = cargo.id;
+            document.getElementById('cargoTitulo').value = cargo.titulo;
+            document.getElementById('cargoCbo').value = cargo.cbo || '';
+            document.getElementById('cargoDepartamento').value = cargo.departamentoId || '';
+            document.getElementById('cargoNivel').value = cargo.nivel || '';
+            document.getElementById('cargoSalarioMin').value = cargo.salarioMinimo ? Format.currency(cargo.salarioMinimo) : '';
+            document.getElementById('cargoSalarioMax').value = cargo.salarioMaximo ? Format.currency(cargo.salarioMaximo) : '';
+            document.getElementById('cargoDescricao').value = cargo.descricao || '';
+            document.getElementById('cargoRequisitos').value = cargo.requisitos || '';
+            document.getElementById('cargoAtivo').checked = cargo.ativo;
+            
+            new bootstrap.Modal(document.getElementById('modalCargo')).show();
+        }
+        
+        async function verCargo(id) {
+            try {
+                const response = await fetch(`/cargos/${id}/detalhes`);
+                const html = await response.text();
+                document.getElementById('detalhesContent').innerHTML = html;
+                new bootstrap.Modal(document.getElementById('modalDetalhes')).show();
+            } catch (error) {
+                Toast.error('Erro ao carregar detalhes');
+            }
+        }
+        
+        function desativarCargo(id, titulo) {
+            Confirm.delete(titulo, () => {
+                window.location.href = `/cargos/${id}/desativar`;
+            });
+        }
+        
+        // Reset modal
+        document.getElementById('modalCargo').addEventListener('hidden.bs.modal', function() {
+            document.getElementById('modalCargoTitle').textContent = 'Novo Cargo';
+            document.getElementById('formCargo').reset();
+            document.getElementById('cargoId').value = '';
+        });
+    </script>
+</body>
+</html>

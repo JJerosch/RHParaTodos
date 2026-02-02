@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/head :: head('Relatórios')}"></head>
+<body>
+    <div class="app-wrapper">
+        <!-- Sidebar -->
+        <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <div th:replace="~{fragments/header :: header(${breadcrumbs})}"></div>
+            
+            <!-- Alerts -->
+            <div th:replace="~{fragments/header :: alerts}"></div>
+            
+            <!-- Content -->
+            <div class="content-wrapper">
+                <!-- Page Header -->
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Relatórios e Analytics</h1>
+                        <p class="page-subtitle">Visualize indicadores e gere relatórios gerenciais</p>
+                    </div>
+                </div>
+                
+                <!-- Quick Stats -->
+                <div class="stats-grid mb-4">
+                    <div class="card stat-card card-border-left">
+                        <div class="card-body">
+                            <i class="bi bi-people stat-icon"></i>
+                            <div class="stat-value" th:text="${kpis?.headcount ?: 0}">156</div>
+                            <div class="stat-label">Headcount Total</div>
+                        </div>
+                    </div>
+                    <div class="card stat-card card-border-left warning">
+                        <div class="card-body">
+                            <i class="bi bi-arrow-repeat stat-icon"></i>
+                            <div class="stat-value" th:text="${kpis?.turnover ?: '0%'}">2.5%</div>
+                            <div class="stat-label">Turnover (12 meses)</div>
+                        </div>
+                    </div>
+                    <div class="card stat-card card-border-left info">
+                        <div class="card-body">
+                            <i class="bi bi-calendar-x stat-icon"></i>
+                            <div class="stat-value" th:text="${kpis?.absenteismo ?: '0%'}">3.2%</div>
+                            <div class="stat-label">Absenteísmo</div>
+                        </div>
+                    </div>
+                    <div class="card stat-card card-border-left success">
+                        <div class="card-body">
+                            <i class="bi bi-clock stat-icon"></i>
+                            <div class="stat-value" th:text="${kpis?.tempoContratacao ?: 0}">18</div>
+                            <div class="stat-label">Tempo Médio Contratação (dias)</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Report Categories -->
+                <div class="row mb-4">
+                    <!-- RH Reports -->
+                    <div class="col-lg-6 mb-4">
+                        <div class="card h-100">
+                            <div class="card-header">
+                                <i class="bi bi-people me-2"></i>Relatórios de RH
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="list-group list-group-flush">
+                                    <a th:href="@{/relatorios/funcionarios}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <i class="bi bi-file-person me-2 text-primary"></i>
+                                            <span>Cadastro de Funcionários</span>
+                                        </div>
+                                        <i class="bi bi-chevron-right text-muted"></i>
+                                    </a>
+                                    <a th:href="@{/relatorios/admissoes-demissoes}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <i class="bi bi-person-plus me-2 text-success"></i>
+                                            <span>Admissões e Demissões</span>
+                                        </div>
+                                        <i class="bi bi-chevron-right text-muted"></i>
+                                    </a>
+                                    <a th:href="@{/relatorios/aniversariantes}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <i class="bi bi-balloon me-2 text-warning"></i>
+                                            <span>Aniversariantes do Mês</span>
+                                        </div>
+                                        <i class="bi bi-chevron-right text-muted"></i>
+                                    </a>
+                                    <a th:href="@{/relatorios/ferias}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <i class="bi bi-calendar-check me-2 text-info"></i>
+                                            <span>Férias (Vencidas e a Vencer)</span>
+                                        </div>
+                                        <i class="bi bi-chevron-right text-muted"></i>
+                                    </a>
+                                    <a th:href="@{/relatorios/treinamentos}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <i class="bi bi-mortarboard me-2 text-secondary"></i>
+                                            <span>Treinamentos Realizados</span>
+                                        </div>
+                                        <i class="bi bi-chevron-right text-muted"></i>
+                                    </a>
+                                    <a th:href="@{/relatorios/avaliacoes}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <i class="bi bi-graph-up me-2 text-primary"></i>
+                                            <span>Avaliações de Desempenho</span>
+                                        </div>
+                                        <i class="bi bi-chevron-right text-muted"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- DP Reports -->
+                    <div class="col-lg-6 mb-4">
+                        <div class="card h-100">
+                            <div class="card-header">
+                                <i class="bi bi-cash-stack me-2"></i>Relatórios de DP
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="list-group list-group-flush">
+                                    <a th:href="@{/relatorios/folha-pagamento}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+                                       sec:authorize="hasAnyRole('ADMIN', 'DP_CHEFE', 'DP_ASSISTENTE')">
+                                        <div>
+                                            <i class="bi bi-file-spreadsheet me-2 text-success"></i>
+                                            <span>Resumo de Folha de Pagamento</span>
+                                        </div>
+                                        <i class="bi bi-chevron-right text-muted"></i>
+                                    </a>
+                                    <a th:href="@{/relatorios/encargos}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+                                       sec:authorize="hasAnyRole('ADMIN', 'DP_CHEFE')">
+                                        <div>
+                                            <i class="bi bi-percent me-2 text-danger"></i>
+                                            <span>Encargos Sociais</span>
+                                        </div>
+                                        <i class="bi bi-chevron-right text-muted"></i>
+                                    </a>
+                                    <a th:href="@{/relatorios/beneficios}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <i class="bi bi-gift me-2 text-primary"></i>
+                                            <span>Custos de Benefícios</span>
+                                        </div>
+                                        <i class="bi bi-chevron-right text-muted"></i>
+                                    </a>
+                                    <a th:href="@{/relatorios/horas-extras}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+                                       sec:authorize="hasAnyRole('ADMIN', 'DP_CHEFE', 'DP_ASSISTENTE')">
+                                        <div>
+                                            <i class="bi bi-clock-history me-2 text-warning"></i>
+                                            <span>Horas Extras e Banco de Horas</span>
+                                        </div>
+                                        <i class="bi bi-chevron-right text-muted"></i>
+                                    </a>
+                                    <a th:href="@{/relatorios/provisoes}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+                                       sec:authorize="hasAnyRole('ADMIN', 'DP_CHEFE')">
+                                        <div>
+                                            <i class="bi bi-piggy-bank me-2 text-info"></i>
+                                            <span>Provisões (Férias e 13º)</span>
+                                        </div>
+                                        <i class="bi bi-chevron-right text-muted"></i>
+                                    </a>
+                                    <a th:href="@{/relatorios/contabil}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+                                       sec:authorize="hasAnyRole('ADMIN', 'DP_CHEFE')">
+                                        <div>
+                                            <i class="bi bi-journal-text me-2 text-secondary"></i>
+                                            <span>Integração Contábil</span>
+                                        </div>
+                                        <i class="bi bi-chevron-right text-muted"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Charts Row -->
+                <div class="row mb-4">
+                    <div class="col-lg-8 mb-4">
+                        <div class="card h-100">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <span><i class="bi bi-graph-up me-2"></i>Evolução do Headcount</span>
+                                <select class="form-select form-select-sm" style="width: auto;" onchange="atualizarGraficoHeadcount(this.value)">
+                                    <option value="12">Últimos 12 meses</option>
+                                    <option value="6">Últimos 6 meses</option>
+                                    <option value="24">Últimos 24 meses</option>
+                                </select>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="chartHeadcount" height="300"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-header">
+                                <i class="bi bi-pie-chart me-2"></i>Distribuição por Departamento
+                            </div>
+                            <div class="card-body">
+                                <canvas id="chartDepartamentos" height="300"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Generate Custom Report -->
+                <div class="card">
+                    <div class="card-header">
+                        <i class="bi bi-sliders me-2"></i>Gerador de Relatórios Customizados
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/relatorios/gerar}" method="get" id="formRelatorio">
+                            <div class="row">
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label">Tipo de Relatório</label>
+                                    <select class="form-select" name="tipo" id="tipoRelatorio" required>
+                                        <option value="">Selecione</option>
+                                        <option value="funcionarios">Funcionários</option>
+                                        <option value="folha">Folha de Pagamento</option>
+                                        <option value="ferias">Férias</option>
+                                        <option value="treinamentos">Treinamentos</option>
+                                        <option value="turnover">Turnover</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label">Período De</label>
+                                    <input type="date" class="form-control" name="dataInicio">
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label">Período Até</label>
+                                    <input type="date" class="form-control" name="dataFim">
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label">Departamento</label>
+                                    <select class="form-select" name="departamento">
+                                        <option value="">Todos</option>
+                                        <option th:each="dept : ${departamentos}" th:value="${dept.id}" th:text="${dept.nome}">Dept</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label">Status</label>
+                                    <select class="form-select" name="status">
+                                        <option value="">Todos</option>
+                                        <option value="ATIVO">Ativos</option>
+                                        <option value="DESLIGADO">Desligados</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label">Formato</label>
+                                    <select class="form-select" name="formato">
+                                        <option value="pdf">PDF</option>
+                                        <option value="excel">Excel</option>
+                                        <option value="csv">CSV</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3 d-flex align-items-end">
+                                    <button type="submit" class="btn btn-primary me-2">
+                                        <i class="bi bi-file-earmark-arrow-down me-1"></i> Gerar Relatório
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary" onclick="visualizarRelatorio()">
+                                        <i class="bi bi-eye me-1"></i> Visualizar
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Scripts -->
+    <div th:replace="~{fragments/scripts :: scripts}"></div>
+    
+    <script th:inline="javascript">
+        // Dados dos gráficos
+        const dadosHeadcount = /*[[${dadosHeadcount}]]*/ {
+            labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
+            admissoes: [5, 3, 8, 4, 6, 2, 7, 3, 5, 4, 6, 8],
+            demissoes: [2, 1, 3, 2, 1, 4, 2, 3, 1, 2, 3, 2],
+            total: [150, 152, 157, 159, 164, 162, 167, 167, 171, 173, 176, 182]
+        };
+        
+        const dadosDepartamentos = /*[[${dadosDepartamentos}]]*/ {
+            labels: ['TI', 'RH', 'Financeiro', 'Comercial', 'Operações'],
+            valores: [45, 12, 18, 35, 46]
+        };
+        
+        // Gráfico de Headcount
+        new Chart(document.getElementById('chartHeadcount'), {
+            type: 'line',
+            data: {
+                labels: dadosHeadcount.labels,
+                datasets: [{
+                    label: 'Total',
+                    data: dadosHeadcount.total,
+                    borderColor: '#2c3e50',
+                    backgroundColor: 'rgba(44, 62, 80, 0.1)',
+                    fill: true,
+                    tension: 0.3
+                }, {
+                    label: 'Admissões',
+                    data: dadosHeadcount.admissoes,
+                    borderColor: '#27ae60',
+                    backgroundColor: 'transparent',
+                    borderDash: [5, 5]
+                }, {
+                    label: 'Demissões',
+                    data: dadosHeadcount.demissoes,
+                    borderColor: '#e74c3c',
+                    backgroundColor: 'transparent',
+                    borderDash: [5, 5]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom' }
+                },
+                scales: {
+                    y: { beginAtZero: false }
+                }
+            }
+        });
+        
+        // Gráfico de Departamentos
+        new Chart(document.getElementById('chartDepartamentos'), {
+            type: 'doughnut',
+            data: {
+                labels: dadosDepartamentos.labels,
+                datasets: [{
+                    data: dadosDepartamentos.valores,
+                    backgroundColor: [
+                        '#2c3e50',
+                        '#34495e',
+                        '#95a5a6',
+                        '#27ae60',
+                        '#3498db'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom' }
+                },
+                cutout: '60%'
+            }
+        });
+        
+        // Visualizar relatório
+        function visualizarRelatorio() {
+            const form = document.getElementById('formRelatorio');
+            const formData = new FormData(form);
+            const params = new URLSearchParams(formData);
+            window.open(`/relatorios/visualizar?${params.toString()}`, '_blank');
+        }
+    </script>
+</body>
+</html>

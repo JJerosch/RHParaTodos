@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/head :: head('Departamentos')}"></head>
+<body>
+    <div class="app-wrapper">
+        <!-- Sidebar -->
+        <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <div th:replace="~{fragments/header :: header(${breadcrumbs})}"></div>
+            
+            <!-- Alerts -->
+            <div th:replace="~{fragments/header :: alerts}"></div>
+            
+            <!-- Content -->
+            <div class="content-wrapper">
+                <!-- Stats Cards -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="card stat-card card-border-left">
+                            <div class="card-body">
+                                <i class="bi bi-diagram-3 stat-icon"></i>
+                                <div class="stat-value" th:text="${stats?.totalDepartamentos ?: 0}">8</div>
+                                <div class="stat-label">Total de Departamentos</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card stat-card card-border-left success">
+                            <div class="card-body">
+                                <i class="bi bi-check-circle stat-icon"></i>
+                                <div class="stat-value" th:text="${stats?.ativos ?: 0}">7</div>
+                                <div class="stat-label">Ativos</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card stat-card card-border-left info">
+                            <div class="card-body">
+                                <i class="bi bi-people stat-icon"></i>
+                                <div class="stat-value" th:text="${stats?.totalFuncionarios ?: 0}">156</div>
+                                <div class="stat-label">Total de Funcionários</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card stat-card card-border-left warning">
+                            <div class="card-body">
+                                <i class="bi bi-calculator stat-icon"></i>
+                                <div class="stat-value" th:text="${stats?.mediaPorDept ?: 0}">20</div>
+                                <div class="stat-label">Média por Departamento</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Page Header -->
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Estrutura Organizacional</h1>
+                        <p class="page-subtitle">Gerencie os departamentos da empresa</p>
+                    </div>
+                    <div class="page-actions">
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalDepartamento"
+                                sec:authorize="hasAnyRole('ADMIN', 'RH_CHEFE')">
+                            <i class="bi bi-plus-lg me-1"></i> Novo Departamento
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Departments Grid -->
+                <div class="row" id="departamentosGrid">
+                    <div th:each="dept : ${departamentos}" class="col-lg-4 col-md-6 mb-4">
+                        <div class="card h-100">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="rounded-circle p-2" 
+                                         th:style="'background-color: ' + ${dept.cor ?: '#2c3e50'} + '20'">
+                                        <i class="bi" th:classappend="${dept.icone ?: 'bi-building'}" 
+                                           th:style="'color: ' + ${dept.cor ?: '#2c3e50'}"></i>
+                                    </div>
+                                    <span class="fw-semibold" th:text="${dept.nome}">Departamento</span>
+                                </div>
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-link text-muted" data-bs-toggle="dropdown">
+                                        <i class="bi bi-three-dots-vertical"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <li>
+                                            <a class="dropdown-item" href="#" 
+                                               th:onclick="'editarDepartamento(' + ${dept.id} + ')'"
+                                               sec:authorize="hasAnyRole('ADMIN', 'RH_CHEFE')">
+                                                <i class="bi bi-pencil me-2"></i>Editar
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" th:href="@{/funcionarios(departamento=${dept.id})}">
+                                                <i class="bi bi-people me-2"></i>Ver Funcionários
+                                            </a>
+                                        </li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <a class="dropdown-item text-danger" href="#" 
+                                               th:onclick="'confirmDelete(\'/departamentos/' + ${dept.id} + '/excluir\', \'' + ${dept.nome} + '\')'"
+                                               sec:authorize="hasRole('ADMIN')">
+                                                <i class="bi bi-trash me-2"></i>Excluir
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <p class="text-muted small mb-3" th:text="${dept.descricao ?: 'Sem descrição'}">
+                                    Descrição do departamento
+                                </p>
+                                
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="text-muted small">Funcionários</span>
+                                    <span class="fw-semibold" th:text="${dept.totalFuncionarios ?: 0}">25</span>
+                                </div>
+                                
+                                <div class="progress mb-3" style="height: 6px;">
+                                    <div class="progress-bar" role="progressbar" 
+                                         th:style="'width: ' + ${dept.percentualFuncionarios ?: 0} + '%'"
+                                         th:attr="aria-valuenow=${dept.percentualFuncionarios ?: 0}">
+                                    </div>
+                                </div>
+                                
+                                <div class="d-flex justify-content-between align-items-center small">
+                                    <div>
+                                        <i class="bi bi-person-badge me-1"></i>
+                                        <span th:text="${dept.gestor?.nomeCompleto ?: 'Sem gestor'}">Gestor</span>
+                                    </div>
+                                    <span class="badge" th:classappend="${dept.ativo ? 'bg-success' : 'bg-secondary'}"
+                                          th:text="${dept.ativo ? 'Ativo' : 'Inativo'}">Ativo</span>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-transparent border-top">
+                                <div class="d-flex gap-2">
+                                    <a th:href="@{/funcionarios(departamento=${dept.id})}" 
+                                       class="btn btn-sm btn-outline-primary flex-fill">
+                                        <i class="bi bi-people me-1"></i> Funcionários
+                                    </a>
+                                    <a th:href="@{/cargos(departamento=${dept.id})}" 
+                                       class="btn btn-sm btn-outline-secondary flex-fill">
+                                        <i class="bi bi-briefcase me-1"></i> Cargos
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Empty State -->
+                    <div th:if="${departamentos == null || departamentos.isEmpty()}" class="col-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <div th:replace="~{fragments/scripts :: empty-state('bi-diagram-3', 'Nenhum departamento cadastrado', 'Clique no botão acima para criar o primeiro departamento.')}"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Organograma -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <i class="bi bi-diagram-2 me-2"></i>Organograma
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle me-2"></i>
+                            O organograma visual será exibido aqui, mostrando a hierarquia dos departamentos.
+                        </div>
+                        <!-- Placeholder para organograma -->
+                        <div id="organograma" style="min-height: 300px;">
+                            <!-- Implementar com D3.js ou similar -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Modal Departamento -->
+    <div class="modal fade" id="modalDepartamento" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form th:action="@{/departamentos/salvar}" method="post" id="formDepartamento" class="needs-validation" novalidate>
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                    <input type="hidden" name="id" id="deptId">
+                    
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalDepartamentoTitle">Novo Departamento</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label required">Nome do Departamento</label>
+                            <input type="text" class="form-control" name="nome" id="deptNome" required maxlength="100">
+                            <div class="invalid-feedback">Nome é obrigatório.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Descrição</label>
+                            <textarea class="form-control" name="descricao" id="deptDescricao" rows="3" maxlength="500"></textarea>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Departamento Pai</label>
+                                <select class="form-select" name="departamentoPaiId" id="deptPai">
+                                    <option value="">Nenhum (raiz)</option>
+                                    <option th:each="d : ${departamentos}" th:value="${d.id}" th:text="${d.nome}">Dept</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Gestor</label>
+                                <select class="form-select" name="gestorId" id="deptGestor">
+                                    <option value="">Selecione</option>
+                                    <option th:each="g : ${gestores}" th:value="${g.id}" th:text="${g.nomeCompleto}">Gestor</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Cor</label>
+                                <input type="color" class="form-control form-control-color w-100" name="cor" id="deptCor" value="#2c3e50">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Ícone</label>
+                                <select class="form-select" name="icone" id="deptIcone">
+                                    <option value="bi-building">🏢 Prédio</option>
+                                    <option value="bi-pc-display">💻 Tecnologia</option>
+                                    <option value="bi-people">👥 Pessoas</option>
+                                    <option value="bi-cash-stack">💰 Financeiro</option>
+                                    <option value="bi-megaphone">📢 Marketing</option>
+                                    <option value="bi-gear">⚙️ Operações</option>
+                                    <option value="bi-shield-check">🛡️ Segurança</option>
+                                    <option value="bi-truck">🚚 Logística</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" name="ativo" id="deptAtivo" checked>
+                            <label class="form-check-label" for="deptAtivo">Departamento Ativo</label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Salvar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal de Exclusão -->
+    <div th:replace="~{fragments/scripts :: modal-delete}"></div>
+    
+    <!-- Scripts -->
+    <div th:replace="~{fragments/scripts :: scripts}"></div>
+    <script th:replace="~{fragments/scripts :: script-delete}"></script>
+    
+    <script th:inline="javascript">
+        // Dados dos departamentos para edição
+        const departamentosData = /*[[${departamentosJson}]]*/ [];
+        
+        // Abrir modal para editar
+        function editarDepartamento(id) {
+            const dept = departamentosData.find(d => d.id === id);
+            if (!dept) return;
+            
+            document.getElementById('modalDepartamentoTitle').textContent = 'Editar Departamento';
+            document.getElementById('deptId').value = dept.id;
+            document.getElementById('deptNome').value = dept.nome;
+            document.getElementById('deptDescricao').value = dept.descricao || '';
+            document.getElementById('deptPai').value = dept.departamentoPaiId || '';
+            document.getElementById('deptGestor').value = dept.gestorId || '';
+            document.getElementById('deptCor').value = dept.cor || '#2c3e50';
+            document.getElementById('deptIcone').value = dept.icone || 'bi-building';
+            document.getElementById('deptAtivo').checked = dept.ativo;
+            
+            new bootstrap.Modal(document.getElementById('modalDepartamento')).show();
+        }
+        
+        // Reset modal ao fechar
+        document.getElementById('modalDepartamento').addEventListener('hidden.bs.modal', function() {
+            document.getElementById('modalDepartamentoTitle').textContent = 'Novo Departamento';
+            document.getElementById('formDepartamento').reset();
+            document.getElementById('deptId').value = '';
+            document.getElementById('formDepartamento').classList.remove('was-validated');
+        });
+        
+        // Validação do formulário
+        document.getElementById('formDepartamento').addEventListener('submit', function(e) {
+            if (!this.checkValidity()) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            this.classList.add('was-validated');
+        });
+    </script>
+</body>
+</html>

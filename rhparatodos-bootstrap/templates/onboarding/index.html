@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/head :: head('Onboarding')}"></head>
+<body>
+    <div class="app-wrapper">
+        <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+        
+        <main class="main-content">
+            <div th:replace="~{fragments/header :: header(${breadcrumbs})}"></div>
+            <div th:replace="~{fragments/header :: alerts}"></div>
+            
+            <div class="content-wrapper">
+                <!-- Stats -->
+                <div class="stats-grid">
+                    <div class="card stat-card card-border-left">
+                        <div class="card-body">
+                            <i class="bi bi-person-plus stat-icon"></i>
+                            <div class="stat-value" th:text="${stats?.emOnboarding ?: 0}">8</div>
+                            <div class="stat-label">Em Onboarding</div>
+                        </div>
+                    </div>
+                    <div class="card stat-card card-border-left success">
+                        <div class="card-body">
+                            <i class="bi bi-check-circle stat-icon"></i>
+                            <div class="stat-value" th:text="${stats?.concluidosMes ?: 0}">12</div>
+                            <div class="stat-label">Concluídos (mês)</div>
+                        </div>
+                    </div>
+                    <div class="card stat-card card-border-left warning">
+                        <div class="card-body">
+                            <i class="bi bi-hourglass-split stat-icon"></i>
+                            <div class="stat-value" th:text="${stats?.tarefasPendentes ?: 0}">24</div>
+                            <div class="stat-label">Tarefas Pendentes</div>
+                        </div>
+                    </div>
+                    <div class="card stat-card card-border-left info">
+                        <div class="card-body">
+                            <i class="bi bi-clock stat-icon"></i>
+                            <div class="stat-value" th:text="${stats?.tempoMedio ?: 0}">15</div>
+                            <div class="stat-label">Tempo Médio (dias)</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Page Header -->
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Onboarding</h1>
+                        <p class="page-subtitle">Integração de novos funcionários</p>
+                    </div>
+                    <div class="page-actions" sec:authorize="hasAnyRole('ADMIN', 'RH_CHEFE', 'RH_ASSISTENTE')">
+                        <button type="button" class="btn btn-outline-primary me-2" data-bs-toggle="modal" data-bs-target="#modalChecklist">
+                            <i class="bi bi-list-check me-1"></i> Gerenciar Checklist
+                        </button>
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalNovoOnboarding">
+                            <i class="bi bi-plus-lg me-1"></i> Novo Onboarding
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Onboardings Ativos -->
+                <div class="row">
+                    <div th:each="onboarding : ${onboardingsAtivos}" class="col-lg-6 mb-4">
+                        <div class="card h-100">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="cell-avatar" th:text="${#strings.substring(onboarding.funcionario.nomeCompleto, 0, 1)}">J</div>
+                                    <div>
+                                        <div class="fw-semibold" th:text="${onboarding.funcionario.nomeCompleto}">João Silva</div>
+                                        <small class="text-muted" th:text="${onboarding.funcionario.cargo?.titulo}">Analista de Sistemas</small>
+                                    </div>
+                                </div>
+                                <span class="badge" th:classappend="${onboarding.fase == 'DOCUMENTACAO' ? 'bg-warning text-dark' : (onboarding.fase == 'TREINAMENTO' ? 'bg-info' : 'bg-primary')}"
+                                      th:text="${onboarding.faseDescricao}">Documentação</span>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="small text-muted">Progresso Geral</span>
+                                    <span class="fw-semibold" th:text="${onboarding.progresso + '%'}">65%</span>
+                                </div>
+                                <div class="progress mb-3" style="height: 8px;">
+                                    <div class="progress-bar" th:style="'width: ' + ${onboarding.progresso} + '%'"></div>
+                                </div>
+                                
+                                <div class="row text-center small mb-3">
+                                    <div class="col border-end">
+                                        <div class="fw-semibold" th:text="${onboarding.tarefasConcluidas + '/' + onboarding.totalTarefas}">8/12</div>
+                                        <span class="text-muted">Tarefas</span>
+                                    </div>
+                                    <div class="col border-end">
+                                        <div class="fw-semibold" th:text="${#temporals.format(onboarding.dataInicio, 'dd/MM')}">15/01</div>
+                                        <span class="text-muted">Início</span>
+                                    </div>
+                                    <div class="col border-end">
+                                        <div class="fw-semibold" th:text="${onboarding.diasRestantes}">7</div>
+                                        <span class="text-muted">Dias Restantes</span>
+                                    </div>
+                                    <div class="col">
+                                        <div class="fw-semibold" th:text="${onboarding.buddy ?: 'N/A'}">Maria</div>
+                                        <span class="text-muted">Buddy</span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Próximas Tarefas -->
+                                <h6 class="small text-muted mb-2">Próximas Tarefas:</h6>
+                                <div class="list-group list-group-flush">
+                                    <div th:each="tarefa, stat : ${onboarding.proximasTarefas}" th:if="${stat.index < 3}"
+                                         class="list-group-item px-0 py-2 d-flex justify-content-between align-items-center">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <i class="bi" th:classappend="${tarefa.concluida ? 'bi-check-circle-fill text-success' : 'bi-circle text-muted'}"></i>
+                                            <span th:class="${tarefa.concluida ? 'text-decoration-line-through text-muted' : ''}" 
+                                                  th:text="${tarefa.descricao}">Entregar documentos</span>
+                                        </div>
+                                        <span class="badge bg-light text-dark" th:text="${tarefa.responsavel}">RH</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-transparent">
+                                <div class="d-flex gap-2">
+                                    <a th:href="@{/onboarding/{id}(id=${onboarding.id})}" class="btn btn-sm btn-outline-primary flex-fill">
+                                        <i class="bi bi-eye me-1"></i> Ver Detalhes
+                                    </a>
+                                    <button type="button" class="btn btn-sm btn-primary flex-fill"
+                                            th:onclick="'atualizarTarefas(' + ${onboarding.id} + ')'"
+                                            sec:authorize="hasAnyRole('ADMIN', 'RH_CHEFE', 'RH_ASSISTENTE')">
+                                        <i class="bi bi-check-lg me-1"></i> Atualizar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div th:if="${onboardingsAtivos == null || onboardingsAtivos.isEmpty()}" class="col-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <div th:replace="~{fragments/scripts :: empty-state('bi-person-plus', 'Nenhum onboarding em andamento', 'Clique em Novo Onboarding para iniciar a integração de um funcionário.')}"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Timeline de Follow-ups -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <i class="bi bi-calendar-event me-2"></i>Próximos Follow-ups (30/60/90 dias)
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Funcionário</th>
+                                        <th>Tipo</th>
+                                        <th>Data</th>
+                                        <th>Responsável</th>
+                                        <th>Status</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="followup : ${followups}">
+                                        <td>
+                                            <div class="cell-with-avatar">
+                                                <div class="cell-avatar" th:text="${#strings.substring(followup.funcionario.nomeCompleto, 0, 1)}">M</div>
+                                                <div class="cell-info">
+                                                    <span class="cell-title" th:text="${followup.funcionario.nomeCompleto}">Maria Santos</span>
+                                                    <span class="cell-subtitle" th:text="${followup.funcionario.departamento?.nome}">RH</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge" th:classappend="${followup.tipo == '30_DIAS' ? 'bg-info' : (followup.tipo == '60_DIAS' ? 'bg-warning text-dark' : 'bg-success')}"
+                                                  th:text="${followup.tipoDescricao}">30 Dias</span>
+                                        </td>
+                                        <td th:text="${#temporals.format(followup.data, 'dd/MM/yyyy')}">15/02/2026</td>
+                                        <td th:text="${followup.responsavel}">Carlos Lima</td>
+                                        <td>
+                                            <span class="badge badge-status"
+                                                  th:classappend="${followup.status == 'REALIZADO' ? 'badge-ativo' : (followup.status == 'AGENDADO' ? 'badge-ferias' : 'badge-afastado')}"
+                                                  th:text="${followup.statusDescricao}">Agendado</span>
+                                        </td>
+                                        <td>
+                                            <div class="table-actions">
+                                                <button class="btn-table-action view" title="Ver Feedback"
+                                                        th:if="${followup.status == 'REALIZADO'}">
+                                                    <i class="bi bi-chat-text"></i>
+                                                </button>
+                                                <button class="btn-table-action edit" title="Registrar"
+                                                        th:if="${followup.status != 'REALIZADO'}"
+                                                        sec:authorize="hasAnyRole('ADMIN', 'RH_CHEFE', 'RH_ASSISTENTE')">
+                                                    <i class="bi bi-pencil"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Checklist Padrão -->
+                <div class="card mt-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span><i class="bi bi-list-check me-2"></i>Checklist Padrão de Onboarding</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div th:each="fase : ${fases}" class="col-md-4 mb-3">
+                                <div class="border rounded p-3 h-100">
+                                    <h6 class="d-flex align-items-center gap-2 mb-3">
+                                        <span class="badge rounded-pill" th:classappend="${fase.cor}" th:text="${fase.ordem}">1</span>
+                                        <span th:text="${fase.nome}">Documentação</span>
+                                    </h6>
+                                    <ul class="list-unstyled small mb-0">
+                                        <li th:each="item : ${fase.itens}" class="mb-2 d-flex align-items-start gap-2">
+                                            <i class="bi bi-check2 text-success mt-1"></i>
+                                            <span th:text="${item}">Entregar documentos pessoais</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Modal Novo Onboarding -->
+    <div class="modal fade" id="modalNovoOnboarding" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form th:action="@{/onboarding/iniciar}" method="post">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                    <div class="modal-header">
+                        <h5 class="modal-title">Iniciar Onboarding</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label required">Funcionário</label>
+                            <select class="form-select" name="funcionarioId" required>
+                                <option value="">Selecione o novo funcionário</option>
+                                <option th:each="f : ${novosFuncionarios}" th:value="${f.id}" 
+                                        th:text="${f.nomeCompleto + ' - Admissão: ' + #temporals.format(f.dataAdmissao, 'dd/MM/yyyy')}">Funcionário</option>
+                            </select>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label required">Data de Início</label>
+                                <input type="date" class="form-control" name="dataInicio" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Duração (dias)</label>
+                                <input type="number" class="form-control" name="duracao" value="30" min="7" max="90">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Buddy/Mentor</label>
+                            <select class="form-select" name="buddyId">
+                                <option value="">Selecione (opcional)</option>
+                                <option th:each="b : ${buddies}" th:value="${b.id}" th:text="${b.nomeCompleto}">Buddy</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Checklist</label>
+                            <select class="form-select" name="checklistId">
+                                <option value="">Checklist Padrão</option>
+                                <option th:each="c : ${checklists}" th:value="${c.id}" th:text="${c.nome}">Checklist</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Iniciar Onboarding</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div th:replace="~{fragments/scripts :: scripts}"></div>
+</body>
+</html>

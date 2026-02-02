@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/head :: head('Turnover')}"></head>
+<body>
+    <div class="app-wrapper">
+        <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+        
+        <main class="main-content">
+            <div th:replace="~{fragments/header :: header(${breadcrumbs})}"></div>
+            <div th:replace="~{fragments/header :: alerts}"></div>
+            
+            <div class="content-wrapper">
+                <!-- Stats -->
+                <div class="stats-grid">
+                    <div class="card stat-card card-border-left warning">
+                        <div class="card-body">
+                            <i class="bi bi-arrow-repeat stat-icon"></i>
+                            <div class="stat-value" th:text="${stats?.turnoverGeral ?: '0%'}">3.2%</div>
+                            <div class="stat-label">Turnover Geral (12 meses)</div>
+                        </div>
+                    </div>
+                    <div class="card stat-card card-border-left danger">
+                        <div class="card-body">
+                            <i class="bi bi-person-dash stat-icon"></i>
+                            <div class="stat-value" th:text="${stats?.turnoverVoluntario ?: '0%'}">2.1%</div>
+                            <div class="stat-label">Turnover Voluntário</div>
+                        </div>
+                    </div>
+                    <div class="card stat-card card-border-left info">
+                        <div class="card-body">
+                            <i class="bi bi-person-x stat-icon"></i>
+                            <div class="stat-value" th:text="${stats?.turnoverInvoluntario ?: '0%'}">1.1%</div>
+                            <div class="stat-label">Turnover Involuntário</div>
+                        </div>
+                    </div>
+                    <div class="card stat-card card-border-left">
+                        <div class="card-body">
+                            <i class="bi bi-currency-dollar stat-icon"></i>
+                            <div class="stat-value" th:text="${stats?.custoRotatividade != null ? #numbers.formatCurrency(stats.custoRotatividade) : 'R$ 0'}">R$ 125.000</div>
+                            <div class="stat-label">Custo Estimado (ano)</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Page Header -->
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Análise de Turnover</h1>
+                        <p class="page-subtitle">Indicadores de rotatividade e análises de desligamento</p>
+                    </div>
+                    <div class="page-actions">
+                        <div class="input-group" style="width: 200px;">
+                            <select class="form-select" id="periodoAnalise" onchange="carregarPeriodo()">
+                                <option value="12" th:selected="${periodo == 12}">Últimos 12 meses</option>
+                                <option value="6" th:selected="${periodo == 6}">Últimos 6 meses</option>
+                                <option value="24" th:selected="${periodo == 24}">Últimos 24 meses</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Tabs -->
+                <ul class="nav nav-tabs mb-4" role="tablist">
+                    <li class="nav-item">
+                        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tabVisaoGeral">
+                            <i class="bi bi-graph-up me-1"></i> Visão Geral
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabAnalise">
+                            <i class="bi bi-pie-chart me-1"></i> Análises
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabEntrevistas">
+                            <i class="bi bi-chat-text me-1"></i> Entrevistas de Desligamento
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabBenchmark">
+                            <i class="bi bi-bar-chart me-1"></i> Benchmark
+                        </button>
+                    </li>
+                </ul>
+                
+                <div class="tab-content">
+                    <!-- Tab Visão Geral -->
+                    <div class="tab-pane fade show active" id="tabVisaoGeral">
+                        <div class="row">
+                            <div class="col-lg-8 mb-4">
+                                <div class="card h-100">
+                                    <div class="card-header">
+                                        <i class="bi bi-graph-up me-2"></i>Evolução do Turnover
+                                    </div>
+                                    <div class="card-body">
+                                        <canvas id="chartEvolucao" height="300"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 mb-4">
+                                <div class="card h-100">
+                                    <div class="card-header">
+                                        <i class="bi bi-pie-chart me-2"></i>Tipo de Desligamento
+                                    </div>
+                                    <div class="card-body">
+                                        <canvas id="chartTipo" height="300"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Métricas Detalhadas -->
+                        <div class="row">
+                            <div class="col-lg-6 mb-4">
+                                <div class="card h-100">
+                                    <div class="card-header">
+                                        <i class="bi bi-diagram-3 me-2"></i>Por Departamento
+                                    </div>
+                                    <div class="card-body p-0">
+                                        <div class="table-responsive">
+                                            <table class="table table-hover mb-0">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Departamento</th>
+                                                        <th class="text-center">Desligamentos</th>
+                                                        <th class="text-center">Taxa</th>
+                                                        <th>Tendência</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr th:each="dept : ${turnoverPorDepartamento}">
+                                                        <td th:text="${dept.nome}">Tecnologia</td>
+                                                        <td class="text-center" th:text="${dept.desligamentos}">5</td>
+                                                        <td class="text-center">
+                                                            <span class="badge" th:classappend="${dept.taxa > 5 ? 'bg-danger' : (dept.taxa > 3 ? 'bg-warning text-dark' : 'bg-success')}"
+                                                                  th:text="${dept.taxa + '%'}">2.5%</span>
+                                                        </td>
+                                                        <td>
+                                                            <i class="bi" th:classappend="${dept.tendencia == 'SUBINDO' ? 'bi-arrow-up text-danger' : (dept.tendencia == 'DESCENDO' ? 'bi-arrow-down text-success' : 'bi-arrow-right text-muted')}"></i>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 mb-4">
+                                <div class="card h-100">
+                                    <div class="card-header">
+                                        <i class="bi bi-clock-history me-2"></i>Por Tempo de Casa
+                                    </div>
+                                    <div class="card-body">
+                                        <canvas id="chartTempoCasa" height="250"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tab Análises -->
+                    <div class="tab-pane fade" id="tabAnalise">
+                        <div class="row">
+                            <div class="col-lg-6 mb-4">
+                                <div class="card h-100">
+                                    <div class="card-header">
+                                        <i class="bi bi-list-check me-2"></i>Principais Motivos de Saída
+                                    </div>
+                                    <div class="card-body">
+                                        <div th:each="motivo, stat : ${motivosSaida}">
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <span th:text="${motivo.descricao}">Melhor oportunidade</span>
+                                                <span class="badge bg-secondary" th:text="${motivo.quantidade}">15</span>
+                                            </div>
+                                            <div class="progress mb-3" style="height: 8px;">
+                                                <div class="progress-bar" th:style="'width: ' + ${motivo.percentual} + '%'"
+                                                     th:classappend="${stat.index == 0 ? 'bg-danger' : (stat.index == 1 ? 'bg-warning' : 'bg-info')}"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 mb-4">
+                                <div class="card h-100">
+                                    <div class="card-header">
+                                        <i class="bi bi-currency-dollar me-2"></i>Custo da Rotatividade
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="alert alert-info mb-3">
+                                            <i class="bi bi-info-circle me-2"></i>
+                                            Custo médio estimado por desligamento: <strong th:text="${#numbers.formatCurrency(custoMedioPorDesligamento)}">R$ 12.500</strong>
+                                        </div>
+                                        
+                                        <table class="table table-sm">
+                                            <tbody>
+                                                <tr>
+                                                    <td>Recrutamento e Seleção</td>
+                                                    <td class="text-end" th:text="${#numbers.formatCurrency(custos?.recrutamento)}">R$ 3.000</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Treinamento do Substituto</td>
+                                                    <td class="text-end" th:text="${#numbers.formatCurrency(custos?.treinamento)}">R$ 5.000</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Perda de Produtividade</td>
+                                                    <td class="text-end" th:text="${#numbers.formatCurrency(custos?.produtividade)}">R$ 2.500</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Verbas Rescisórias (média)</td>
+                                                    <td class="text-end" th:text="${#numbers.formatCurrency(custos?.rescisao)}">R$ 2.000</td>
+                                                </tr>
+                                            </tbody>
+                                            <tfoot class="table-light">
+                                                <tr class="fw-bold">
+                                                    <td>Total Anual Estimado</td>
+                                                    <td class="text-end text-danger" th:text="${#numbers.formatCurrency(custos?.total)}">R$ 125.000</td>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <div class="card-header">
+                                <i class="bi bi-calendar3 me-2"></i>Desligamentos Recentes
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-hover mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Funcionário</th>
+                                                <th>Cargo</th>
+                                                <th>Departamento</th>
+                                                <th>Admissão</th>
+                                                <th>Desligamento</th>
+                                                <th>Tipo</th>
+                                                <th>Motivo</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr th:each="desl : ${desligamentosRecentes}">
+                                                <td th:text="${desl.nomeCompleto}">João Silva</td>
+                                                <td th:text="${desl.cargo}">Analista</td>
+                                                <td th:text="${desl.departamento}">TI</td>
+                                                <td th:text="${#temporals.format(desl.dataAdmissao, 'dd/MM/yyyy')}">01/03/2023</td>
+                                                <td th:text="${#temporals.format(desl.dataDesligamento, 'dd/MM/yyyy')}">15/01/2026</td>
+                                                <td>
+                                                    <span class="badge" th:classappend="${desl.tipo == 'VOLUNTARIO' ? 'bg-warning text-dark' : 'bg-danger'}"
+                                                          th:text="${desl.tipoDescricao}">Voluntário</span>
+                                                </td>
+                                                <td class="small" th:text="${desl.motivo ?: '-'}">Proposta melhor</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tab Entrevistas -->
+                    <div class="tab-pane fade" id="tabEntrevistas">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <span><i class="bi bi-chat-text me-2"></i>Entrevistas de Desligamento</span>
+                                <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#modalEntrevista"
+                                        sec:authorize="hasAnyRole('ADMIN', 'RH_CHEFE', 'RH_ASSISTENTE')">
+                                    <i class="bi bi-plus"></i> Nova Entrevista
+                                </button>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-hover mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Funcionário</th>
+                                                <th>Cargo</th>
+                                                <th>Data Desligamento</th>
+                                                <th>Data Entrevista</th>
+                                                <th>Entrevistador</th>
+                                                <th>Status</th>
+                                                <th>Ações</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr th:each="ent : ${entrevistas}">
+                                                <td th:text="${ent.funcionario}">Maria Santos</td>
+                                                <td th:text="${ent.cargo}">Coordenadora</td>
+                                                <td th:text="${#temporals.format(ent.dataDesligamento, 'dd/MM/yyyy')}">10/01/2026</td>
+                                                <td th:text="${ent.dataEntrevista != null ? #temporals.format(ent.dataEntrevista, 'dd/MM/yyyy') : 'Pendente'}">12/01/2026</td>
+                                                <td th:text="${ent.entrevistador ?: '-'}">Carlos Lima</td>
+                                                <td>
+                                                    <span class="badge" th:classappend="${ent.status == 'REALIZADA' ? 'bg-success' : (ent.status == 'AGENDADA' ? 'bg-info' : 'bg-warning text-dark')}"
+                                                          th:text="${ent.statusDescricao}">Realizada</span>
+                                                </td>
+                                                <td>
+                                                    <div class="table-actions">
+                                                        <button class="btn-table-action view" title="Ver Respostas" th:if="${ent.status == 'REALIZADA'}">
+                                                            <i class="bi bi-eye"></i>
+                                                        </button>
+                                                        <button class="btn-table-action edit" title="Registrar" th:if="${ent.status != 'REALIZADA'}"
+                                                                sec:authorize="hasAnyRole('ADMIN', 'RH_CHEFE', 'RH_ASSISTENTE')">
+                                                            <i class="bi bi-pencil"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tab Benchmark -->
+                    <div class="tab-pane fade" id="tabBenchmark">
+                        <div class="card">
+                            <div class="card-header">
+                                <i class="bi bi-bar-chart me-2"></i>Comparativo com o Mercado
+                            </div>
+                            <div class="card-body">
+                                <canvas id="chartBenchmark" height="300"></canvas>
+                                
+                                <div class="alert alert-info mt-4">
+                                    <i class="bi bi-info-circle me-2"></i>
+                                    <strong>Fonte:</strong> Dados de benchmark baseados em pesquisas de mercado do setor.
+                                    Última atualização: Janeiro/2026.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <div th:replace="~{fragments/scripts :: scripts}"></div>
+    
+    <script th:inline="javascript">
+        const dadosEvolucao = /*[[${dadosEvolucao}]]*/ {
+            labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
+            voluntario: [2, 3, 1, 2, 4, 2, 3, 2, 1, 3, 2, 2],
+            involuntario: [1, 0, 2, 1, 1, 0, 1, 2, 1, 0, 1, 1]
+        };
+        
+        const dadosTipo = /*[[${dadosTipo}]]*/ {
+            labels: ['Voluntário', 'Involuntário'],
+            valores: [65, 35]
+        };
+        
+        const dadosTempoCasa = /*[[${dadosTempoCasa}]]*/ {
+            labels: ['< 1 ano', '1-2 anos', '2-5 anos', '5-10 anos', '> 10 anos'],
+            valores: [35, 25, 20, 12, 8]
+        };
+        
+        const dadosBenchmark = /*[[${dadosBenchmark}]]*/ {
+            labels: ['Sua Empresa', 'Setor', 'Mercado Geral'],
+            valores: [3.2, 4.5, 5.2]
+        };
+        
+        // Gráfico Evolução
+        new Chart(document.getElementById('chartEvolucao'), {
+            type: 'line',
+            data: {
+                labels: dadosEvolucao.labels,
+                datasets: [{
+                    label: 'Voluntário',
+                    data: dadosEvolucao.voluntario,
+                    borderColor: '#f39c12',
+                    backgroundColor: 'transparent',
+                    tension: 0.3
+                }, {
+                    label: 'Involuntário',
+                    data: dadosEvolucao.involuntario,
+                    borderColor: '#e74c3c',
+                    backgroundColor: 'transparent',
+                    tension: 0.3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom' } }
+            }
+        });
+        
+        // Gráfico Tipo
+        new Chart(document.getElementById('chartTipo'), {
+            type: 'doughnut',
+            data: {
+                labels: dadosTipo.labels,
+                datasets: [{
+                    data: dadosTipo.valores,
+                    backgroundColor: ['#f39c12', '#e74c3c']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom' } },
+                cutout: '60%'
+            }
+        });
+        
+        // Gráfico Tempo de Casa
+        new Chart(document.getElementById('chartTempoCasa'), {
+            type: 'bar',
+            data: {
+                labels: dadosTempoCasa.labels,
+                datasets: [{
+                    label: 'Desligamentos',
+                    data: dadosTempoCasa.valores,
+                    backgroundColor: 'rgba(44, 62, 80, 0.8)',
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } }
+            }
+        });
+        
+        // Gráfico Benchmark
+        new Chart(document.getElementById('chartBenchmark'), {
+            type: 'bar',
+            data: {
+                labels: dadosBenchmark.labels,
+                datasets: [{
+                    label: 'Taxa de Turnover (%)',
+                    data: dadosBenchmark.valores,
+                    backgroundColor: ['#27ae60', '#f39c12', '#e74c3c'],
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                plugins: { legend: { display: false } },
+                scales: { x: { max: 10 } }
+            }
+        });
+        
+        function carregarPeriodo() {
+            const periodo = document.getElementById('periodoAnalise').value;
+            window.location.href = `/turnover?periodo=${periodo}`;
+        }
+    </script>
+</body>
+</html>

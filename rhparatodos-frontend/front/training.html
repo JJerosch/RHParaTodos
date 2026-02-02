@@ -340,18 +340,18 @@
   <script src="public/scripts/components.js"></script>
   <script>
     const trainings = [
-      { id: 1, titulo: "Segurança da Informação", categoria: "Compliance", modalidade: "Online", carga: 4, prazo: 30, inscritos: 248, icon: "🔒", obrigatorio: true },
-      { id: 2, titulo: "Liderança e Gestão de Equipes", categoria: "Liderança", modalidade: "Presencial", carga: 16, prazo: 60, inscritos: 45, icon: "👔", obrigatorio: false },
-      { id: 3, titulo: "Excel Avançado", categoria: "Técnico", modalidade: "Online", carga: 8, prazo: 45, inscritos: 89, icon: "📊", obrigatorio: false },
-      { id: 4, titulo: "Comunicação Assertiva", categoria: "Soft Skills", modalidade: "Híbrido", carga: 6, prazo: 30, inscritos: 67, icon: "💬", obrigatorio: false },
-      { id: 5, titulo: "LGPD - Lei Geral de Proteção de Dados", categoria: "Compliance", modalidade: "Online", carga: 3, prazo: 15, inscritos: 248, icon: "📋", obrigatorio: true },
-      { id: 6, titulo: "Metodologias Ágeis", categoria: "Técnico", modalidade: "Online", carga: 12, prazo: 45, inscritos: 56, icon: "🚀", obrigatorio: false }
+      { id: 1, titulo: "Segurança da Informação", categoria: "Compliance", modalidade: "Online", carga: 4, prazo: 30, inscritos: 248, icon: "", obrigatorio: true },
+      { id: 2, titulo: "Liderança e Gestão de Equipes", categoria: "Liderança", modalidade: "Presencial", carga: 16, prazo: 60, inscritos: 45, icon: "", obrigatorio: false },
+      { id: 3, titulo: "Excel Avançado", categoria: "Técnico", modalidade: "Online", carga: 8, prazo: 45, inscritos: 89, icon: "", obrigatorio: false },
+      { id: 4, titulo: "Comunicação Assertiva", categoria: "Soft Skills", modalidade: "Híbrido", carga: 6, prazo: 30, inscritos: 67, icon: "", obrigatorio: false },
+      { id: 5, titulo: "LGPD - Lei Geral de Proteção de Dados", categoria: "Compliance", modalidade: "Online", carga: 3, prazo: 15, inscritos: 248, icon: "", obrigatorio: true },
+      { id: 6, titulo: "Metodologias Ágeis", categoria: "Técnico", modalidade: "Online", carga: 12, prazo: 45, inscritos: 56, icon: "", obrigatorio: false }
     ];
 
     const myTrainings = [
-      { id: 1, titulo: "Segurança da Informação", categoria: "Compliance", progresso: 75, icon: "🔒" },
-      { id: 5, titulo: "LGPD", categoria: "Compliance", progresso: 100, icon: "📋" },
-      { id: 3, titulo: "Excel Avançado", categoria: "Técnico", progresso: 30, icon: "📊" }
+      { id: 1, titulo: "Segurança da Informação", categoria: "Compliance", progresso: 75, icon: "" },
+      { id: 5, titulo: "LGPD", categoria: "Compliance", progresso: 100, icon: "" },
+      { id: 3, titulo: "Excel Avançado", categoria: "Técnico", progresso: 30, icon: "" }
     ];
 
     let filtered = [...trainings];
@@ -406,14 +406,14 @@
     function render() {
       document.getElementById("trainingGrid").innerHTML = filtered.map(t => `
         <div class="training-card">
-          <div class="training-banner">${t.icon}</div>
+          <div class="training-banner"></div>
           <div class="training-body">
             <div class="training-category">${t.categoria} ${t.obrigatorio ? '<span class="badge badge-danger" style="font-size: 10px;">Obrigatório</span>' : ''}</div>
             <h3 class="training-title">${t.titulo}</h3>
             <div class="training-meta">
-              <span>⏱️ ${t.carga}h</span>
-              <span>📅 ${t.prazo} dias</span>
-              <span>📍 ${t.modalidade}</span>
+              <span> ${t.carga}h</span>
+              <span> ${t.prazo} dias</span>
+              <span> ${t.modalidade}</span>
             </div>
             <div class="training-footer">
               <span style="font-size: var(--font-size-sm); color: var(--gray-500);">${t.inscritos} inscritos</span>

@@ -1,0 +1,4 @@
+"tabela","trigger","definicao"
+"folha_lancamentos","bloqueia_lancamentos_folha_fechada","CREATE TRIGGER bloqueia_lancamentos_folha_fechada BEFORE INSERT OR DELETE OR UPDATE ON folha_lancamentos FOR EACH ROW EXECUTE FUNCTION trg_bloquear_lancamento_folha_fechada()"
+"folha_lancamentos","trg_audit_folha_lancamentos","CREATE TRIGGER trg_audit_folha_lancamentos AFTER INSERT OR DELETE OR UPDATE ON folha_lancamentos FOR EACH ROW EXECUTE FUNCTION fn_auditoria_lgpd()"
+"folha_pagamentos","tg_folha_insert","CREATE TRIGGER tg_folha_insert AFTER INSERT ON folha_pagamentos FOR EACH ROW EXECUTE FUNCTION trg_processar_folha_insert()"

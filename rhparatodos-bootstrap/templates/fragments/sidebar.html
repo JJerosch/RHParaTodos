@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+<!-- Sidebar -->
+<aside class="sidebar" id="sidebar" th:fragment="sidebar">
+    <div class="sidebar-header">
+        <a th:href="@{/dashboard}">
+            <img th:src="@{/img/logo-branca.png}" alt="RH Para Todos" class="sidebar-logo">
+        </a>
+    </div>
+    
+    <nav class="sidebar-nav">
+        <!-- Dashboard -->
+        <a th:href="@{/dashboard}" class="nav-item" th:classappend="${menu == 'dashboard' ? 'active' : ''}">
+            <i class="bi bi-speedometer2"></i>
+            <span>Dashboard</span>
+        </a>
+        
+        <!-- Gestão de Pessoas -->
+        <div class="nav-section">Gestão de Pessoas</div>
+        
+        <a th:href="@{/funcionarios}" class="nav-item" th:classappend="${menu == 'funcionarios' ? 'active' : ''}"
+           sec:authorize="hasAnyRole('ADMIN', 'RH_CHEFE', 'RH_ASSISTENTE', 'DP_CHEFE', 'DP_ASSISTENTE')">
+            <i class="bi bi-people"></i>
+            <span>Funcionários</span>
+        </a>
+        
+        <a th:href="@{/departamentos}" class="nav-item" th:classappend="${menu == 'departamentos' ? 'active' : ''}"
+           sec:authorize="hasAnyRole('ADMIN', 'RH_CHEFE', 'RH_ASSISTENTE')">
+            <i class="bi bi-diagram-3"></i>
+            <span>Departamentos</span>
+        </a>
+        
+        <a th:href="@{/cargos}" class="nav-item" th:classappend="${menu == 'cargos' ? 'active' : ''}"
+           sec:authorize="hasAnyRole('ADMIN', 'RH_CHEFE', 'RH_ASSISTENTE')">
+            <i class="bi bi-briefcase"></i>
+            <span>Cargos</span>
+        </a>
+        
+        <!-- Recursos Humanos -->
+        <div class="nav-section" sec:authorize="hasAnyRole('ADMIN', 'RH_CHEFE', 'RH_ASSISTENTE')">Recursos Humanos</div>
+        
+        <a th:href="@{/recrutamento}" class="nav-item" th:classappend="${menu == 'recrutamento' ? 'active' : ''}"
+           sec:authorize="hasAnyRole('ADMIN', 'RH_CHEFE', 'RH_ASSISTENTE')">
+            <i class="bi bi-person-plus"></i>
+            <span>Recrutamento</span>
+        </a>
+        
+        <a th:href="@{/onboarding}" class="nav-item" th:classappend="${menu == 'onboarding' ? 'active' : ''}"
+           sec:authorize="hasAnyRole('ADMIN', 'RH_CHEFE', 'RH_ASSISTENTE')">
+            <i class="bi bi-clipboard-check"></i>
+            <span>Onboarding</span>
+        </a>
+        
+        <a th:href="@{/treinamentos}" class="nav-item" th:classappend="${menu == 'treinamentos' ? 'active' : ''}"
+           sec:authorize="hasAnyRole('ADMIN', 'RH_CHEFE', 'RH_ASSISTENTE')">
+            <i class="bi bi-mortarboard"></i>
+            <span>Treinamentos</span>
+        </a>
+        
+        <a th:href="@{/avaliacoes}" class="nav-item" th:classappend="${menu == 'avaliacoes' ? 'active' : ''}"
+           sec:authorize="hasAnyRole('ADMIN', 'RH_CHEFE', 'RH_ASSISTENTE')">
+            <i class="bi bi-graph-up"></i>
+            <span>Avaliações</span>
+        </a>
+        
+        <!-- Departamento Pessoal -->
+        <div class="nav-section" sec:authorize="hasAnyRole('ADMIN', 'DP_CHEFE', 'DP_ASSISTENTE')">Departamento Pessoal</div>
+        
+        <a th:href="@{/folha-pagamento}" class="nav-item" th:classappend="${menu == 'folha' ? 'active' : ''}"
+           sec:authorize="hasAnyRole('ADMIN', 'DP_CHEFE', 'DP_ASSISTENTE')">
+            <i class="bi bi-cash-stack"></i>
+            <span>Folha de Pagamento</span>
+        </a>
+        
+        <a th:href="@{/beneficios}" class="nav-item" th:classappend="${menu == 'beneficios' ? 'active' : ''}"
+           sec:authorize="hasAnyRole('ADMIN', 'DP_CHEFE', 'DP_ASSISTENTE', 'RH_CHEFE')">
+            <i class="bi bi-gift"></i>
+            <span>Benefícios</span>
+        </a>
+        
+        <a th:href="@{/ferias}" class="nav-item" th:classappend="${menu == 'ferias' ? 'active' : ''}"
+           sec:authorize="hasAnyRole('ADMIN', 'DP_CHEFE', 'DP_ASSISTENTE')">
+            <i class="bi bi-calendar-check"></i>
+            <span>Férias</span>
+        </a>
+        
+        <a th:href="@{/ponto}" class="nav-item" th:classappend="${menu == 'ponto' ? 'active' : ''}"
+           sec:authorize="hasAnyRole('ADMIN', 'DP_CHEFE', 'DP_ASSISTENTE')">
+            <i class="bi bi-clock-history"></i>
+            <span>Controle de Ponto</span>
+        </a>
+        
+        <!-- Endomarketing -->
+        <div class="nav-section" sec:authorize="hasAnyRole('ADMIN', 'RH_CHEFE', 'RH_ASSISTENTE')">Endomarketing</div>
+        
+        <a th:href="@{/endomarketing/brindes}" class="nav-item" th:classappend="${menu == 'brindes' ? 'active' : ''}"
+           sec:authorize="hasAnyRole('ADMIN', 'RH_CHEFE', 'RH_ASSISTENTE')">
+            <i class="bi bi-box-seam"></i>
+            <span>Brindes</span>
+        </a>
+        
+        <a th:href="@{/endomarketing/pesquisa-clima}" class="nav-item" th:classappend="${menu == 'clima' ? 'active' : ''}"
+           sec:authorize="hasAnyRole('ADMIN', 'RH_CHEFE', 'RH_ASSISTENTE')">
+            <i class="bi bi-emoji-smile"></i>
+            <span>Pesquisa de Clima</span>
+        </a>
+        
+        <!-- Administração -->
+        <div class="nav-section" sec:authorize="hasAnyRole('ADMIN', 'RH_CHEFE', 'DP_CHEFE')">Administração</div>
+        
+        <a th:href="@{/relatorios}" class="nav-item" th:classappend="${menu == 'relatorios' ? 'active' : ''}"
+           sec:authorize="hasAnyRole('ADMIN', 'RH_CHEFE', 'DP_CHEFE')">
+            <i class="bi bi-file-earmark-bar-graph"></i>
+            <span>Relatórios</span>
+        </a>
+        
+        <a th:href="@{/turnover}" class="nav-item" th:classappend="${menu == 'turnover' ? 'active' : ''}"
+           sec:authorize="hasAnyRole('ADMIN', 'RH_CHEFE')">
+            <i class="bi bi-arrow-repeat"></i>
+            <span>Turnover</span>
+        </a>
+        
+        <a th:href="@{/configuracoes}" class="nav-item" th:classappend="${menu == 'configuracoes' ? 'active' : ''}"
+           sec:authorize="hasRole('ADMIN')">
+            <i class="bi bi-gear"></i>
+            <span>Configurações</span>
+        </a>
+        
+        <a th:href="@{/usuarios}" class="nav-item" th:classappend="${menu == 'usuarios' ? 'active' : ''}"
+           sec:authorize="hasRole('ADMIN')">
+            <i class="bi bi-person-lock"></i>
+            <span>Usuários</span>
+        </a>
+        
+        <a th:href="@{/auditoria}" class="nav-item" th:classappend="${menu == 'auditoria' ? 'active' : ''}"
+           sec:authorize="hasRole('ADMIN')">
+            <i class="bi bi-shield-check"></i>
+            <span>Auditoria</span>
+        </a>
+    </nav>
+    
+    <div class="sidebar-footer">
+        <a th:href="@{/ajuda}" class="nav-item">
+            <i class="bi bi-question-circle"></i>
+            <span>Ajuda</span>
+        </a>
+    </div>
+</aside>
+
+<!-- Overlay para mobile -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="Sidebar.toggle()"></div>
+</body>
+</html>

@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/head :: head('Folha de Pagamento')}"></head>
+<body>
+    <div class="app-wrapper">
+        <!-- Sidebar -->
+        <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <div th:replace="~{fragments/header :: header(${breadcrumbs})}"></div>
+            
+            <!-- Alerts -->
+            <div th:replace="~{fragments/header :: alerts}"></div>
+            
+            <!-- Content -->
+            <div class="content-wrapper">
+                <!-- Page Header -->
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Folha de Pagamento</h1>
+                        <p class="page-subtitle">Gerencie a folha de pagamento da empresa</p>
+                    </div>
+                    <div class="page-actions">
+                        <div class="input-group" style="width: 200px;">
+                            <select class="form-select" id="competencia" onchange="carregarFolha()">
+                                <option th:each="comp : ${competencias}" th:value="${comp.valor}" 
+                                        th:text="${comp.label}" th:selected="${comp.valor == competenciaAtual}">01/2026</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Stats Cards -->
+                <div class="stats-grid">
+                    <div class="card stat-card card-border-left">
+                        <div class="card-body">
+                            <i class="bi bi-people stat-icon"></i>
+                            <div class="stat-value" th:text="${resumo?.totalFuncionarios ?: 0}">142</div>
+                            <div class="stat-label">Funcionários na Folha</div>
+                        </div>
+                    </div>
+                    <div class="card stat-card card-border-left success">
+                        <div class="card-body">
+                            <i class="bi bi-cash stat-icon"></i>
+                            <div class="stat-value" th:text="${resumo?.totalBruto != null ? #numbers.formatCurrency(resumo.totalBruto) : 'R$ 0,00'}">R$ 500.000,00</div>
+                            <div class="stat-label">Total Bruto</div>
+                        </div>
+                    </div>
+                    <div class="card stat-card card-border-left danger">
+                        <div class="card-body">
+                            <i class="bi bi-dash-circle stat-icon"></i>
+                            <div class="stat-value" th:text="${resumo?.totalDescontos != null ? #numbers.formatCurrency(resumo.totalDescontos) : 'R$ 0,00'}">R$ 85.000,00</div>
+                            <div class="stat-label">Total Descontos</div>
+                        </div>
+                    </div>
+                    <div class="card stat-card card-border-left info">
+                        <div class="card-body">
+                            <i class="bi bi-wallet2 stat-icon"></i>
+                            <div class="stat-value" th:text="${resumo?.totalLiquido != null ? #numbers.formatCurrency(resumo.totalLiquido) : 'R$ 0,00'}">R$ 415.000,00</div>
+                            <div class="stat-label">Total Líquido</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Status da Folha -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-6">
+                                <h5 class="mb-1">
+                                    Competência: <span th:text="${competenciaLabel}">Janeiro/2026</span>
+                                </h5>
+                                <p class="text-muted mb-0">
+                                    Status: 
+                                    <span class="badge" 
+                                          th:classappend="${resumo?.status == 'FECHADA' ? 'bg-success' : (resumo?.status == 'PROCESSANDO' ? 'bg-warning' : 'bg-secondary')}"
+                                          th:text="${resumo?.statusDescricao ?: 'Em Aberto'}">Em Aberto</span>
+                                </p>
+                            </div>
+                            <div class="col-md-6 text-md-end mt-3 mt-md-0">
+                                <div class="btn-group" sec:authorize="hasAnyRole('ADMIN', 'DP_CHEFE')">
+                                    <button type="button" class="btn btn-outline-primary" onclick="calcularFolha()"
+                                            th:disabled="${resumo?.status == 'FECHADA'}">
+                                        <i class="bi bi-calculator me-1"></i> Calcular Folha
+                                    </button>
+                                    <button type="button" class="btn btn-outline-success" onclick="fecharFolha()"
+                                            th:disabled="${resumo?.status != 'CALCULADA'}">
+                                        <i class="bi bi-lock me-1"></i> Fechar Folha
+                                    </button>
+                                    <div class="dropdown">
+                                        <button class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                                            <i class="bi bi-download me-1"></i> Exportar
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end">
+                                            <li><a class="dropdown-item" th:href="@{/folha-pagamento/exportar/resumo}"><i class="bi bi-file-pdf me-2 text-danger"></i>Resumo PDF</a></li>
+                                            <li><a class="dropdown-item" th:href="@{/folha-pagamento/exportar/analitico}"><i class="bi bi-file-excel me-2 text-success"></i>Analítico Excel</a></li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li><a class="dropdown-item" th:href="@{/folha-pagamento/exportar/contabil}"><i class="bi bi-file-text me-2"></i>Relatório Contábil</a></li>
+                                            <li><a class="dropdown-item" th:href="@{/folha-pagamento/exportar/bancario}"><i class="bi bi-bank me-2"></i>Arquivo Bancário</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Tabs -->
+                <ul class="nav nav-tabs mb-4" role="tablist">
+                    <li class="nav-item">
+                        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tabFuncionarios">
+                            <i class="bi bi-people me-1"></i> Funcionários
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabResumo">
+                            <i class="bi bi-bar-chart me-1"></i> Resumo
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabEncargos">
+                            <i class="bi bi-percent me-1"></i> Encargos
+                        </button>
+                    </li>
+                </ul>
+                
+                <div class="tab-content">
+                    <!-- Tab Funcionários -->
+                    <div class="tab-pane fade show active" id="tabFuncionarios">
+                        <!-- Filters -->
+                        <div class="filters-card mb-4">
+                            <div class="filters-row">
+                                <div class="filter-group search">
+                                    <label class="form-label">Buscar</label>
+                                    <input type="text" class="form-control" id="buscaFuncionario" 
+                                           placeholder="Nome ou matrícula..." onkeyup="filtrarFolha()">
+                                </div>
+                                <div class="filter-group">
+                                    <label class="form-label">Departamento</label>
+                                    <select class="form-select" id="filtroDepartamento" onchange="filtrarFolha()">
+                                        <option value="">Todos</option>
+                                        <option th:each="dept : ${departamentos}" th:value="${dept.id}" th:text="${dept.nome}">Dept</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Table -->
+                        <div class="card">
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-hover mb-0" id="tabelaFolha">
+                                        <thead>
+                                            <tr>
+                                                <th>Funcionário</th>
+                                                <th class="hide-mobile">Departamento</th>
+                                                <th class="text-end">Salário Base</th>
+                                                <th class="text-end hide-mobile">Proventos</th>
+                                                <th class="text-end hide-mobile">Descontos</th>
+                                                <th class="text-end">Líquido</th>
+                                                <th style="width: 100px;">Ações</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr th:each="item : ${folha}">
+                                                <td>
+                                                    <div class="cell-with-avatar">
+                                                        <div class="cell-avatar" th:text="${#strings.substring(item.funcionario.nomeCompleto, 0, 1)}">J</div>
+                                                        <div class="cell-info">
+                                                            <span class="cell-title" th:text="${item.funcionario.nomeCompleto}">João Silva</span>
+                                                            <span class="cell-subtitle" th:text="${item.funcionario.matricula}">000001</span>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td class="hide-mobile" th:text="${item.funcionario.departamento?.nome}">TI</td>
+                                                <td class="text-end" th:text="${#numbers.formatCurrency(item.salarioBase)}">R$ 5.000,00</td>
+                                                <td class="text-end hide-mobile text-success" th:text="${#numbers.formatCurrency(item.totalProventos)}">R$ 5.500,00</td>
+                                                <td class="text-end hide-mobile text-danger" th:text="${#numbers.formatCurrency(item.totalDescontos)}">R$ 1.200,00</td>
+                                                <td class="text-end fw-semibold" th:text="${#numbers.formatCurrency(item.salarioLiquido)}">R$ 4.300,00</td>
+                                                <td>
+                                                    <div class="table-actions">
+                                                        <button type="button" class="btn-table-action view" 
+                                                                th:onclick="'verHolerite(' + ${item.id} + ')'" title="Ver Holerite">
+                                                            <i class="bi bi-eye"></i>
+                                                        </button>
+                                                        <button type="button" class="btn-table-action" 
+                                                                th:onclick="'gerarHoleritePdf(' + ${item.id} + ')'" title="Download PDF">
+                                                            <i class="bi bi-file-pdf"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr th:if="${folha == null || folha.isEmpty()}">
+                                                <td colspan="7">
+                                                    <div class="empty-state">
+                                                        <i class="bi bi-cash-stack empty-state-icon"></i>
+                                                        <h3 class="empty-state-title">Folha não processada</h3>
+                                                        <p class="empty-state-text">Clique em "Calcular Folha" para processar a folha de pagamento.</p>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                        <tfoot th:if="${folha != null && !folha.isEmpty()}">
+                                            <tr class="table-light fw-semibold">
+                                                <td colspan="2">TOTAL</td>
+                                                <td class="text-end" th:text="${#numbers.formatCurrency(resumo.totalSalarioBase)}">R$ 500.000,00</td>
+                                                <td class="text-end hide-mobile text-success" th:text="${#numbers.formatCurrency(resumo.totalProventos)}">R$ 520.000,00</td>
+                                                <td class="text-end hide-mobile text-danger" th:text="${#numbers.formatCurrency(resumo.totalDescontos)}">R$ 105.000,00</td>
+                                                <td class="text-end" th:text="${#numbers.formatCurrency(resumo.totalLiquido)}">R$ 415.000,00</td>
+                                                <td></td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tab Resumo -->
+                    <div class="tab-pane fade" id="tabResumo">
+                        <div class="row">
+                            <div class="col-lg-6 mb-4">
+                                <div class="card h-100">
+                                    <div class="card-header">
+                                        <i class="bi bi-plus-circle me-2 text-success"></i>Proventos
+                                    </div>
+                                    <div class="card-body p-0">
+                                        <table class="table mb-0">
+                                            <tbody>
+                                                <tr th:each="provento : ${resumoProventos}">
+                                                    <td th:text="${provento.descricao}">Salário Base</td>
+                                                    <td class="text-end" th:text="${#numbers.formatCurrency(provento.valor)}">R$ 500.000,00</td>
+                                                </tr>
+                                            </tbody>
+                                            <tfoot class="table-light">
+                                                <tr class="fw-semibold">
+                                                    <td>Total Proventos</td>
+                                                    <td class="text-end text-success" th:text="${#numbers.formatCurrency(resumo.totalProventos)}">R$ 520.000,00</td>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 mb-4">
+                                <div class="card h-100">
+                                    <div class="card-header">
+                                        <i class="bi bi-dash-circle me-2 text-danger"></i>Descontos
+                                    </div>
+                                    <div class="card-body p-0">
+                                        <table class="table mb-0">
+                                            <tbody>
+                                                <tr th:each="desconto : ${resumoDescontos}">
+                                                    <td th:text="${desconto.descricao}">INSS</td>
+                                                    <td class="text-end" th:text="${#numbers.formatCurrency(desconto.valor)}">R$ 50.000,00</td>
+                                                </tr>
+                                            </tbody>
+                                            <tfoot class="table-light">
+                                                <tr class="fw-semibold">
+                                                    <td>Total Descontos</td>
+                                                    <td class="text-end text-danger" th:text="${#numbers.formatCurrency(resumo.totalDescontos)}">R$ 105.000,00</td>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Gráfico por Departamento -->
+                        <div class="card">
+                            <div class="card-header">
+                                <i class="bi bi-bar-chart me-2"></i>Folha por Departamento
+                            </div>
+                            <div class="card-body">
+                                <canvas id="chartDepartamentos" height="300"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tab Encargos -->
+                    <div class="tab-pane fade" id="tabEncargos">
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <i class="bi bi-building me-2"></i>Encargos Patronais
+                                    </div>
+                                    <div class="card-body p-0">
+                                        <table class="table mb-0">
+                                            <tbody>
+                                                <tr>
+                                                    <td>INSS Patronal (20%)</td>
+                                                    <td class="text-end" th:text="${#numbers.formatCurrency(encargos?.inssPatronal)}">R$ 100.000,00</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>RAT/SAT (1-3%)</td>
+                                                    <td class="text-end" th:text="${#numbers.formatCurrency(encargos?.rat)}">R$ 10.000,00</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Terceiros (5,8%)</td>
+                                                    <td class="text-end" th:text="${#numbers.formatCurrency(encargos?.terceiros)}">R$ 29.000,00</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>FGTS (8%)</td>
+                                                    <td class="text-end" th:text="${#numbers.formatCurrency(encargos?.fgts)}">R$ 40.000,00</td>
+                                                </tr>
+                                            </tbody>
+                                            <tfoot class="table-light">
+                                                <tr class="fw-semibold">
+                                                    <td>Total Encargos</td>
+                                                    <td class="text-end" th:text="${#numbers.formatCurrency(encargos?.total)}">R$ 179.000,00</td>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <i class="bi bi-calculator me-2"></i>Custo Total
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between mb-3 pb-3 border-bottom">
+                                            <span>Folha Bruta</span>
+                                            <span class="fw-semibold" th:text="${#numbers.formatCurrency(resumo?.totalBruto)}">R$ 500.000,00</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between mb-3 pb-3 border-bottom">
+                                            <span>Encargos Patronais</span>
+                                            <span class="fw-semibold" th:text="${#numbers.formatCurrency(encargos?.total)}">R$ 179.000,00</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between mb-3 pb-3 border-bottom">
+                                            <span>Provisão de Férias</span>
+                                            <span class="fw-semibold" th:text="${#numbers.formatCurrency(provisoes?.ferias)}">R$ 41.667,00</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between mb-3 pb-3 border-bottom">
+                                            <span>Provisão 13º Salário</span>
+                                            <span class="fw-semibold" th:text="${#numbers.formatCurrency(provisoes?.decimoTerceiro)}">R$ 41.667,00</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between pt-2">
+                                            <span class="fw-bold fs-5">Custo Total</span>
+                                            <span class="fw-bold fs-5 text-primary" th:text="${#numbers.formatCurrency(custoTotal)}">R$ 762.334,00</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Modal Holerite -->
+    <div class="modal fade" id="modalHolerite" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Holerite</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="holeriteContent">
+                    <!-- Conteúdo carregado via AJAX -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                    <button type="button" class="btn btn-primary" onclick="imprimirHolerite()">
+                        <i class="bi bi-printer me-1"></i> Imprimir
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Scripts -->
+    <div th:replace="~{fragments/scripts :: scripts}"></div>
+    
+    <script th:inline="javascript">
+        // Dados para o gráfico
+        const dadosDepartamentos = /*[[${dadosDepartamentos}]]*/ {
+            labels: ['TI', 'RH', 'Financeiro', 'Comercial'],
+            valores: [150000, 80000, 120000, 150000]
+        };
+        
+        // Gráfico por Departamento
+        const ctxDept = document.getElementById('chartDepartamentos');
+        if (ctxDept) {
+            new Chart(ctxDept, {
+                type: 'bar',
+                data: {
+                    labels: dadosDepartamentos.labels,
+                    datasets: [{
+                        label: 'Total da Folha',
+                        data: dadosDepartamentos.valores,
+                        backgroundColor: 'rgba(44, 62, 80, 0.8)',
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: (value) => 'R$ ' + value.toLocaleString('pt-BR')
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Calcular folha
+        function calcularFolha() {
+            Confirm.show({
+                title: 'Calcular Folha',
+                message: 'Deseja calcular a folha de pagamento para a competência selecionada?',
+                confirmText: 'Calcular',
+                confirmClass: 'btn-primary',
+                onConfirm: () => {
+                    Loading.show();
+                    const competencia = document.getElementById('competencia').value;
+                    window.location.href = `/folha-pagamento/calcular?competencia=${competencia}`;
+                }
+            });
+        }
+        
+        // Fechar folha
+        function fecharFolha() {
+            Confirm.show({
+                title: 'Fechar Folha',
+                message: '<strong class="text-danger">Atenção!</strong> Após fechar a folha, não será possível fazer alterações. Deseja continuar?',
+                confirmText: 'Fechar Folha',
+                confirmClass: 'btn-success',
+                onConfirm: () => {
+                    Loading.show();
+                    const competencia = document.getElementById('competencia').value;
+                    window.location.href = `/folha-pagamento/fechar?competencia=${competencia}`;
+                }
+            });
+        }
+        
+        // Ver holerite
+        async function verHolerite(id) {
+            try {
+                const response = await fetch(`/folha-pagamento/holerite/${id}`);
+                const html = await response.text();
+                document.getElementById('holeriteContent').innerHTML = html;
+                new bootstrap.Modal(document.getElementById('modalHolerite')).show();
+            } catch (error) {
+                Toast.error('Erro ao carregar holerite');
+            }
+        }
+        
+        // Gerar PDF do holerite
+        function gerarHoleritePdf(id) {
+            window.open(`/folha-pagamento/holerite/${id}/pdf`, '_blank');
+        }
+        
+        // Imprimir holerite
+        function imprimirHolerite() {
+            const content = document.getElementById('holeriteContent').innerHTML;
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                <head><title>Holerite</title>
+                <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+                </head>
+                <body onload="window.print();window.close();">${content}</body>
+                </html>
+            `);
+        }
+        
+        // Filtrar folha
+        function filtrarFolha() {
+            const busca = document.getElementById('buscaFuncionario').value.toLowerCase();
+            const departamento = document.getElementById('filtroDepartamento').value;
+            
+            document.querySelectorAll('#tabelaFolha tbody tr').forEach(row => {
+                const nome = row.querySelector('.cell-title')?.textContent.toLowerCase() || '';
+                const matricula = row.querySelector('.cell-subtitle')?.textContent.toLowerCase() || '';
+                const dept = row.querySelector('td:nth-child(2)')?.textContent || '';
+                
+                const matchBusca = nome.includes(busca) || matricula.includes(busca);
+                const matchDept = !departamento || dept === departamento;
+                
+                row.style.display = matchBusca && matchDept ? '' : 'none';
+            });
+        }
+        
+        // Carregar folha de outra competência
+        function carregarFolha() {
+            const competencia = document.getElementById('competencia').value;
+            window.location.href = `/folha-pagamento?competencia=${competencia}`;
+        }
+    </script>
+</body>
+</html>

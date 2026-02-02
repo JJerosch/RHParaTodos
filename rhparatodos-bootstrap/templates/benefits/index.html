@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/head :: head('Benefícios')}"></head>
+<body>
+    <div class="app-wrapper">
+        <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+        
+        <main class="main-content">
+            <div th:replace="~{fragments/header :: header(${breadcrumbs})}"></div>
+            <div th:replace="~{fragments/header :: alerts}"></div>
+            
+            <div class="content-wrapper">
+                <!-- Stats -->
+                <div class="stats-grid">
+                    <div class="card stat-card card-border-left">
+                        <div class="card-body">
+                            <i class="bi bi-gift stat-icon"></i>
+                            <div class="stat-value" th:text="${stats?.totalBeneficios ?: 0}">8</div>
+                            <div class="stat-label">Benefícios Ativos</div>
+                        </div>
+                    </div>
+                    <div class="card stat-card card-border-left success">
+                        <div class="card-body">
+                            <i class="bi bi-people stat-icon"></i>
+                            <div class="stat-value" th:text="${stats?.funcionariosComBeneficios ?: 0}">152</div>
+                            <div class="stat-label">Funcionários Cobertos</div>
+                        </div>
+                    </div>
+                    <div class="card stat-card card-border-left warning">
+                        <div class="card-body">
+                            <i class="bi bi-currency-dollar stat-icon"></i>
+                            <div class="stat-value" th:text="${stats?.custoMensal != null ? #numbers.formatCurrency(stats.custoMensal) : 'R$ 0'}">R$ 85.000</div>
+                            <div class="stat-label">Custo Mensal</div>
+                        </div>
+                    </div>
+                    <div class="card stat-card card-border-left info">
+                        <div class="card-body">
+                            <i class="bi bi-calculator stat-icon"></i>
+                            <div class="stat-value" th:text="${stats?.custoMedioPorFuncionario != null ? #numbers.formatCurrency(stats.custoMedioPorFuncionario) : 'R$ 0'}">R$ 559</div>
+                            <div class="stat-label">Custo Médio/Funcionário</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Page Header -->
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Gestão de Benefícios</h1>
+                        <p class="page-subtitle">Administre os benefícios oferecidos aos funcionários</p>
+                    </div>
+                    <div class="page-actions" sec:authorize="hasAnyRole('ADMIN', 'RH_CHEFE', 'DP_CHEFE')">
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalBeneficio">
+                            <i class="bi bi-plus-lg me-1"></i> Novo Benefício
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Tabs -->
+                <ul class="nav nav-tabs mb-4" role="tablist">
+                    <li class="nav-item">
+                        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tabBeneficios">
+                            <i class="bi bi-gift me-1"></i> Benefícios
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabAdesoes">
+                            <i class="bi bi-person-check me-1"></i> Adesões
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabFornecedores">
+                            <i class="bi bi-building me-1"></i> Fornecedores
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabCustos">
+                            <i class="bi bi-bar-chart me-1"></i> Custos
+                        </button>
+                    </li>
+                </ul>
+                
+                <div class="tab-content">
+                    <!-- Tab Benefícios -->
+                    <div class="tab-pane fade show active" id="tabBeneficios">
+                        <div class="row">
+                            <div th:each="beneficio : ${beneficios}" class="col-lg-4 col-md-6 mb-4">
+                                <div class="card h-100">
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="rounded-circle p-2" th:style="'background-color: ' + ${beneficio.cor ?: '#2c3e50'} + '20'">
+                                                <i class="bi" th:classappend="${beneficio.icone ?: 'bi-gift'}" 
+                                                   th:style="'color: ' + ${beneficio.cor ?: '#2c3e50'}" style="font-size: 1.25rem;"></i>
+                                            </div>
+                                            <span class="fw-semibold" th:text="${beneficio.nome}">Vale Refeição</span>
+                                        </div>
+                                        <div class="dropdown" sec:authorize="hasAnyRole('ADMIN', 'RH_CHEFE', 'DP_CHEFE')">
+                                            <button class="btn btn-sm btn-link" data-bs-toggle="dropdown">
+                                                <i class="bi bi-three-dots-vertical"></i>
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-end">
+                                                <li><a class="dropdown-item" href="#" th:onclick="'editarBeneficio(' + ${beneficio.id} + ')'"><i class="bi bi-pencil me-2"></i>Editar</a></li>
+                                                <li><a class="dropdown-item" th:href="@{/beneficios/{id}/adesoes(id=${beneficio.id})}"><i class="bi bi-people me-2"></i>Ver Adesões</a></li>
+                                                <li><hr class="dropdown-divider"></li>
+                                                <li><a class="dropdown-item text-danger" href="#"><i class="bi bi-x-circle me-2"></i>Desativar</a></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="text-muted small mb-3" th:text="${beneficio.descricao}">
+                                            Descrição do benefício
+                                        </p>
+                                        
+                                        <div class="row text-center mb-3">
+                                            <div class="col-6 border-end">
+                                                <div class="fs-5 fw-bold text-primary" th:text="${beneficio.adesoes}">142</div>
+                                                <small class="text-muted">Adesões</small>
+                                            </div>
+                                            <div class="col-6">
+                                                <div class="fs-5 fw-bold" th:text="${#numbers.formatCurrency(beneficio.custoMensal)}">R$ 45.000</div>
+                                                <small class="text-muted">Custo/Mês</small>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="d-flex justify-content-between align-items-center small text-muted mb-2">
+                                            <span>Valor por funcionário:</span>
+                                            <span class="fw-semibold" th:text="${#numbers.formatCurrency(beneficio.valorPorFuncionario)}">R$ 600,00</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between align-items-center small text-muted">
+                                            <span>Fornecedor:</span>
+                                            <span th:text="${beneficio.fornecedor?.nome ?: 'N/A'}">Alelo</span>
+                                        </div>
+                                    </div>
+                                    <div class="card-footer bg-transparent">
+                                        <span class="badge" th:classappend="${beneficio.ativo ? 'bg-success' : 'bg-secondary'}"
+                                              th:text="${beneficio.ativo ? 'Ativo' : 'Inativo'}">Ativo</span>
+                                        <span class="badge bg-light text-dark ms-1" th:text="${beneficio.tipoDescricao}">Obrigatório</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tab Adesões -->
+                    <div class="tab-pane fade" id="tabAdesoes">
+                        <div class="filters-card mb-4">
+                            <div class="filters-row">
+                                <div class="filter-group search">
+                                    <label class="form-label">Buscar</label>
+                                    <input type="text" class="form-control" placeholder="Nome do funcionário...">
+                                </div>
+                                <div class="filter-group">
+                                    <label class="form-label">Benefício</label>
+                                    <select class="form-select">
+                                        <option value="">Todos</option>
+                                        <option th:each="b : ${beneficios}" th:value="${b.id}" th:text="${b.nome}">Benefício</option>
+                                    </select>
+                                </div>
+                                <div class="filter-group">
+                                    <label class="form-label">Status</label>
+                                    <select class="form-select">
+                                        <option value="">Todos</option>
+                                        <option value="ATIVO">Ativo</option>
+                                        <option value="SUSPENSO">Suspenso</option>
+                                        <option value="CANCELADO">Cancelado</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-hover mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Funcionário</th>
+                                                <th>Benefício</th>
+                                                <th>Data Adesão</th>
+                                                <th>Valor</th>
+                                                <th>Dependentes</th>
+                                                <th>Status</th>
+                                                <th>Ações</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr th:each="adesao : ${adesoes}">
+                                                <td>
+                                                    <div class="cell-with-avatar">
+                                                        <div class="cell-avatar" th:text="${#strings.substring(adesao.funcionario.nomeCompleto, 0, 1)}">J</div>
+                                                        <div class="cell-info">
+                                                            <span class="cell-title" th:text="${adesao.funcionario.nomeCompleto}">João Silva</span>
+                                                            <span class="cell-subtitle" th:text="${adesao.funcionario.departamento?.nome}">TI</span>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td th:text="${adesao.beneficio.nome}">Plano de Saúde</td>
+                                                <td th:text="${#temporals.format(adesao.dataAdesao, 'dd/MM/yyyy')}">15/01/2024</td>
+                                                <td th:text="${#numbers.formatCurrency(adesao.valor)}">R$ 850,00</td>
+                                                <td th:text="${adesao.quantidadeDependentes}">2</td>
+                                                <td>
+                                                    <span class="badge badge-status"
+                                                          th:classappend="${adesao.status == 'ATIVO' ? 'badge-ativo' : (adesao.status == 'SUSPENSO' ? 'badge-afastado' : 'badge-desligado')}"
+                                                          th:text="${adesao.statusDescricao}">Ativo</span>
+                                                </td>
+                                                <td>
+                                                    <div class="table-actions">
+                                                        <button class="btn-table-action view" title="Detalhes">
+                                                            <i class="bi bi-eye"></i>
+                                                        </button>
+                                                        <button class="btn-table-action edit" title="Editar"
+                                                                sec:authorize="hasAnyRole('ADMIN', 'RH_CHEFE', 'DP_CHEFE')">
+                                                            <i class="bi bi-pencil"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tab Fornecedores -->
+                    <div class="tab-pane fade" id="tabFornecedores">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <span><i class="bi bi-building me-2"></i>Fornecedores Parceiros</span>
+                                <button type="button" class="btn btn-sm btn-primary" 
+                                        sec:authorize="hasAnyRole('ADMIN', 'RH_CHEFE')">
+                                    <i class="bi bi-plus"></i> Novo Fornecedor
+                                </button>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-hover mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Fornecedor</th>
+                                                <th>CNPJ</th>
+                                                <th>Tipo de Benefício</th>
+                                                <th>Contato</th>
+                                                <th>Contrato até</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr th:each="forn : ${fornecedores}">
+                                                <td class="fw-semibold" th:text="${forn.nome}">Alelo</td>
+                                                <td th:text="${forn.cnpj}">00.000.000/0001-00</td>
+                                                <td th:text="${forn.tipoBeneficio}">Vale Alimentação/Refeição</td>
+                                                <td th:text="${forn.email}">contato@alelo.com.br</td>
+                                                <td th:text="${#temporals.format(forn.contratoAte, 'dd/MM/yyyy')}">31/12/2026</td>
+                                                <td>
+                                                    <span class="badge" th:classappend="${forn.ativo ? 'bg-success' : 'bg-secondary'}"
+                                                          th:text="${forn.ativo ? 'Ativo' : 'Inativo'}">Ativo</span>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tab Custos -->
+                    <div class="tab-pane fade" id="tabCustos">
+                        <div class="row">
+                            <div class="col-lg-8 mb-4">
+                                <div class="card h-100">
+                                    <div class="card-header">
+                                        <i class="bi bi-graph-up me-2"></i>Evolução de Custos (12 meses)
+                                    </div>
+                                    <div class="card-body">
+                                        <canvas id="chartCustos" height="300"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 mb-4">
+                                <div class="card h-100">
+                                    <div class="card-header">
+                                        <i class="bi bi-pie-chart me-2"></i>Distribuição por Benefício
+                                    </div>
+                                    <div class="card-body">
+                                        <canvas id="chartDistribuicao" height="300"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <div class="card-header">
+                                <i class="bi bi-table me-2"></i>Custos Detalhados por Mês
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-hover mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Benefício</th>
+                                                <th class="text-end">Jan</th>
+                                                <th class="text-end">Fev</th>
+                                                <th class="text-end">Mar</th>
+                                                <th class="text-end">Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr th:each="custo : ${custosDetalhados}">
+                                                <td th:text="${custo.beneficio}">Vale Refeição</td>
+                                                <td class="text-end" th:text="${#numbers.formatCurrency(custo.jan)}">R$ 42.000</td>
+                                                <td class="text-end" th:text="${#numbers.formatCurrency(custo.fev)}">R$ 43.000</td>
+                                                <td class="text-end" th:text="${#numbers.formatCurrency(custo.mar)}">R$ 44.000</td>
+                                                <td class="text-end fw-semibold" th:text="${#numbers.formatCurrency(custo.total)}">R$ 129.000</td>
+                                            </tr>
+                                        </tbody>
+                                        <tfoot class="table-light">
+                                            <tr class="fw-bold">
+                                                <td>TOTAL</td>
+                                                <td class="text-end" th:text="${#numbers.formatCurrency(totais?.jan)}">R$ 85.000</td>
+                                                <td class="text-end" th:text="${#numbers.formatCurrency(totais?.fev)}">R$ 87.000</td>
+                                                <td class="text-end" th:text="${#numbers.formatCurrency(totais?.mar)}">R$ 89.000</td>
+                                                <td class="text-end" th:text="${#numbers.formatCurrency(totais?.total)}">R$ 261.000</td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Modal Novo Benefício -->
+    <div class="modal fade" id="modalBeneficio" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form th:action="@{/beneficios/salvar}" method="post">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                    <div class="modal-header">
+                        <h5 class="modal-title">Novo Benefício</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label required">Nome do Benefício</label>
+                            <input type="text" class="form-control" name="nome" required>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Tipo</label>
+                                <select class="form-select" name="tipo">
+                                    <option value="OBRIGATORIO">Obrigatório</option>
+                                    <option value="OPCIONAL">Opcional</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Valor por Funcionário</label>
+                                <input type="text" class="form-control" name="valorPorFuncionario" data-mask="currency">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Fornecedor</label>
+                                <select class="form-select" name="fornecedorId">
+                                    <option value="">Selecione</option>
+                                    <option th:each="f : ${fornecedores}" th:value="${f.id}" th:text="${f.nome}">Fornecedor</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Elegibilidade</label>
+                                <select class="form-select" name="elegibilidade">
+                                    <option value="TODOS">Todos os funcionários</option>
+                                    <option value="CLT">Apenas CLT</option>
+                                    <option value="CARGO">Por cargo</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Descrição</label>
+                            <textarea class="form-control" name="descricao" rows="2"></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Ícone</label>
+                                <select class="form-select" name="icone">
+                                    <option value="bi-cash-coin">💵 Dinheiro</option>
+                                    <option value="bi-basket">🛒 Alimentação</option>
+                                    <option value="bi-cup-hot">☕ Refeição</option>
+                                    <option value="bi-heart-pulse">❤️ Saúde</option>
+                                    <option value="bi-bus-front">🚌 Transporte</option>
+                                    <option value="bi-mortarboard">🎓 Educação</option>
+                                    <option value="bi-building">🏢 Outros</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Cor</label>
+                                <input type="color" class="form-control form-control-color w-100" name="cor" value="#2c3e50">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Salvar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div th:replace="~{fragments/scripts :: scripts}"></div>
+    
+    <script th:inline="javascript">
+        const dadosCustos = /*[[${dadosCustosMensal}]]*/ {
+            labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
+            valores: [82000, 83500, 85000, 84000, 86000, 87500]
+        };
+        
+        const dadosDistribuicao = /*[[${dadosDistribuicao}]]*/ {
+            labels: ['VR', 'VA', 'Saúde', 'VT', 'Outros'],
+            valores: [35, 25, 25, 10, 5]
+        };
+        
+        // Gráfico Custos
+        new Chart(document.getElementById('chartCustos'), {
+            type: 'line',
+            data: {
+                labels: dadosCustos.labels,
+                datasets: [{
+                    label: 'Custo Total',
+                    data: dadosCustos.valores,
+                    borderColor: '#2c3e50',
+                    backgroundColor: 'rgba(44, 62, 80, 0.1)',
+                    fill: true,
+                    tension: 0.3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: {
+                        ticks: { callback: (v) => 'R$ ' + (v/1000) + 'k' }
+                    }
+                }
+            }
+        });
+        
+        // Gráfico Distribuição
+        new Chart(document.getElementById('chartDistribuicao'), {
+            type: 'doughnut',
+            data: {
+                labels: dadosDistribuicao.labels,
+                datasets: [{
+                    data: dadosDistribuicao.valores,
+                    backgroundColor: ['#2c3e50', '#34495e', '#27ae60', '#f39c12', '#95a5a6']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom' } },
+                cutout: '60%'
+            }
+        });
+    </script>
+</body>
+</html>
