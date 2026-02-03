@@ -40,6 +40,11 @@ const USER_PROFILES = {
     permissions: ["payroll-entry", "benefits-read"],
     dashboard: "dashboard.html",
   },
+  "funcionario": {
+    name: "Funcionário",
+    permissions: [],
+    dashboard: "employee-dashboard.html",
+  },
 };
 
 // Funções de autenticação
@@ -52,7 +57,7 @@ const Auth = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         // Backend aceita tanto "email" quanto "username" via @JsonAlias
-        body: JSON.stringify({ email, password, profile })
+        body: JSON.stringify({ email, password, ...(profile ? { profile } : {}) })
       });
 
       if (response.ok) {
@@ -77,14 +82,15 @@ const Auth = {
   loginSimulado(email, password, profile) {
     return new Promise((resolve) => {
       setTimeout(() => {
-        if (email && password && profile && USER_PROFILES[profile]) {
+        const selectedProfile = profile && USER_PROFILES[profile] ? profile : 'funcionario';
+      if (email && password && USER_PROFILES[selectedProfile]) {
           const userData = {
             id: Date.now(),
             username: email, // Usando email como username
             email: email,
-            profile: profile,
-            profileName: USER_PROFILES[profile].name,
-            permissions: USER_PROFILES[profile].permissions,
+            profile: selectedProfile,
+            profileName: USER_PROFILES[selectedProfile].name,
+            permissions: USER_PROFILES[selectedProfile].permissions,
             token: "jwt_token_" + Math.random().toString(36).substr(2, 9),
             refreshToken: "refresh_token_" + Math.random().toString(36).substr(2, 9),
             loginTime: new Date().toISOString(),

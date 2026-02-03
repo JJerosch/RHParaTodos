@@ -388,18 +388,7 @@
         </div>
       </div>
 
-      <div class="form-group">
-        <label class="form-label" for="profile">Perfil de Acesso</label>
-        <select id="profile" class="form-select" required>
-          <option value="">Selecione seu perfil</option>
-          <option value="admin">Administrador do Sistema</option>
-          <option value="rh-chefe">RH - Chefe</option>
-          <option value="rh-assistente">RH - Assistente</option>
-          <option value="dp-chefe">DP - Chefe</option>
-          <option value="dp-assistente">DP - Assistente</option>
-          <option value="funcionario">Outro Cargo</option>
-        </select>
-      </div>
+
 
       <button type="submit" class="btn-login" id="btnLogin"><span>Entrar</span></button>
       <div class="form-footer"><a href="#" onclick="forgotPassword()">Esqueceu sua senha?</a></div>
@@ -411,29 +400,7 @@
     document.addEventListener('DOMContentLoaded', () => {
       if (Auth.isAuthenticated()) window.location.href = 'dashboard.html';
 
-      // Impede que o usuário volte para a opção vazia "Selecione seu perfil" após escolher um perfil
-      const profileSelect = document.getElementById('profile');
-      if (profileSelect) {
-        // armazena valor anterior para evitar retorno
-        profileSelect._previousValue = profileSelect.value;
-        profileSelect.addEventListener('change', (e) => {
-          const select = e.target;
-          const placeholder = select.querySelector('option[value=""]');
-
-          if (select.value !== '') {
-            if (placeholder) { placeholder.disabled = true; placeholder.hidden = true; }
-          } else {
-            // Se tentar voltar para vazio, restaura o valor anterior e mostra alerta
-            if (select._previousValue && select._previousValue !== '') {
-              select.value = select._previousValue;
-              showAlert('error', 'Não é possível voltar para "Selecione seu perfil".');
-              return;
-            }
-          }
-
-          select._previousValue = select.value;
-        });
-      }
+  
     });
 
     function togglePassword() {
@@ -456,21 +423,21 @@
       e.preventDefault();
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value;
-      const profile = document.getElementById('profile').value;
 
-      if (!email || !password || !profile) { showAlert('error', 'Por favor, preencha todos os campos.'); return; }
+
+      if (!email || !password) { showAlert('error', 'Por favor, preencha todos os campos.'); return; }
 
       const btn = document.getElementById('btnLogin');
       btn.classList.add('loading');
       btn.innerHTML = '<div class="spinner"></div><span>Entrando...</span>';
 
       try {
-        const result = await Auth.login(email, password, profile);
+        const result = await Auth.login(email, password);
         if (result.success) {
           showAlert('success', 'Login realizado com sucesso! Redirecionando...');
-          setTimeout(() => window.location.href = 'dashboard.html', 1000);
+          setTimeout(() => window.location.href = 'employee-dashboard.html', 1000); // aqui mudo o redirecionamento do hardcoded dashboard para employee-dashboard.html
         } else {
-          showAlert('error', result.message || 'Email, senha ou perfil incorretos.');
+          showAlert('error', result.message || 'Email ou senha incorretos.');
           btn.classList.remove('loading');
           btn.innerHTML = '<span>Entrar</span>';
         }
