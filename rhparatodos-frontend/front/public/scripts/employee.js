@@ -7,25 +7,15 @@
     const user = Auth.getCurrentUser();
     if (!user) { Auth.logout(); return; }
 
-    // Permitir apenas EMPLOYEE (e ADMIN para debug) nesta página
-    const role = Auth.getCurrentRole();
-    if (!(role === 'EMPLOYEE' || role === 'ADMIN')) {
-      window.location.href = Auth.redirectAfterLogin(user);
+    // Permitir apenas funcionários (perfil 'funcionario') nesta página
+    if (user.profile !== 'funcionario') {
+      const target = (window.USER_PROFILES && window.USER_PROFILES[user.profile]) ? window.USER_PROFILES[user.profile].dashboard : 'dashboard.html';
+      window.location.href = target;
       return;
     }
 
-    const displayName = user.username || user.email || 'Funcionário';
-    const displayProfile = Auth.getProfileDisplayName(user);
-
-    const userNameEl = document.getElementById('userName');
-    if (userNameEl) userNameEl.textContent = displayName;
-    const userNameInlineEl = document.getElementById('userNameInline');
-    if (userNameInlineEl) userNameInlineEl.textContent = displayName;
-
-    const userProfileEl = document.getElementById('userProfile');
-    if (userProfileEl) userProfileEl.textContent = displayProfile;
-    const userProfileInlineEl = document.getElementById('userProfileInline');
-    if (userProfileInlineEl) userProfileInlineEl.textContent = displayProfile;
+    document.getElementById('userName').textContent = user.username || user.email || 'Funcionário';
+    document.getElementById('userProfile').textContent = user.profileName || user.profile;
 
     document.getElementById('btnLogout').addEventListener('click', () => Auth.logout());
     document.getElementById('btnPunch').addEventListener('click', punch);

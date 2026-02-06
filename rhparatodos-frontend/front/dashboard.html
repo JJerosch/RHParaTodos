@@ -20,51 +20,51 @@
     </div>
 
     <nav class="sidebar-nav">
-      <a href="dashboard.html" class="nav-item active" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE,DP_CHEFE,DP_ASSISTENTE">
+      <a href="dashboard.html" class="nav-item active">
         <span class="nav-text">Dashboard</span>
       </a>
 
-      <div class="nav-section" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE">Gestão de Pessoas</div>
-      <a href="employees.html" class="nav-item" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE">
+      <div class="nav-section">Gestão de Pessoas</div>
+      <a href="employees.html" class="nav-item">
         <span class="nav-text">Funcionários</span>
       </a>
-      <a href="departments.html" class="nav-item" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE">
+      <a href="departments.html" class="nav-item">
         <span class="nav-text">Departamentos</span>
       </a>
-      <a href="positions.html" class="nav-item" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE">
+      <a href="positions.html" class="nav-item">
         <span class="nav-text">Cargos</span>
       </a>
 
-      <div class="nav-section" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE">Recursos Humanos</div>
-      <a href="recruitment.html" class="nav-item" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE">
+      <div class="nav-section">Recursos Humanos</div>
+      <a href="recruitment.html" class="nav-item">
         <span class="nav-text">Recrutamento</span>
       </a>
-      <a href="training.html" class="nav-item" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE">
+      <a href="training.html" class="nav-item">
         <span class="nav-text">Treinamentos</span>
       </a>
-      <a href="performance.html" class="nav-item" data-roles="ADMIN,RH_CHEFE">
+      <a href="performance.html" class="nav-item">
         <span class="nav-text">Avaliações</span>
       </a>
 
-      <div class="nav-section" data-roles="ADMIN,DP_CHEFE,DP_ASSISTENTE">Departamento Pessoal</div>
-      <a href="payroll.html" class="nav-item" data-roles="ADMIN,DP_CHEFE,DP_ASSISTENTE">
+      <div class="nav-section">Departamento Pessoal</div>
+      <a href="payroll.html" class="nav-item">
         <span class="nav-text">Folha de Pagamento</span>
       </a>
-      <a href="benefits.html" class="nav-item" data-roles="ADMIN,DP_CHEFE,DP_ASSISTENTE">
+      <a href="benefits.html" class="nav-item">
         <span class="nav-text">Benefícios</span>
       </a>
-      <a href="vacation.html" class="nav-item" data-roles="ADMIN,DP_CHEFE,DP_ASSISTENTE">
+      <a href="vacation.html" class="nav-item">
         <span class="nav-text">Férias</span>
       </a>
-      <a href="timesheet.html" class="nav-item" data-roles="ADMIN,DP_CHEFE,DP_ASSISTENTE">
+      <a href="timesheet.html" class="nav-item">
         <span class="nav-text">Ponto</span>
       </a>
 
-      <div class="nav-section" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE,DP_CHEFE,DP_ASSISTENTE">Administração</div>
-      <a href="reports.html" class="nav-item" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE,DP_CHEFE,DP_ASSISTENTE">
+      <div class="nav-section">Administração</div>
+      <a href="reports.html" class="nav-item">
         <span class="nav-text">Relatórios</span>
       </a>
-      <a href="settings.html" class="nav-item" data-roles="ADMIN">
+      <a href="settings.html" class="nav-item">
         <span class="nav-text">Configurações</span>
       </a>
     </nav>
@@ -165,22 +165,22 @@
       <div class="quick-actions-bar">
         <h3>Ações Rápidas</h3>
         <div class="quick-actions-grid">
-          <a href="employees.html" class="quick-action-item" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE">
+          <a href="employees.html" class="quick-action-item">
             <span class="quick-action-icon"><img src="/front/public/assets/plus (1).png"
                 alt="icone_add_funcionarios"></span>
             <span>Novo Funcionário</span>
           </a>
-          <a href="vacation.html" class="quick-action-item" data-roles="ADMIN,DP_CHEFE,DP_ASSISTENTE">
+          <a href="vacation.html" class="quick-action-item">
             <span class="quick-action-icon"><img src="/front/public/assets/tree-palm (1).png"
                 alt="icone_solicitar_ferias_funcionarios"></span>
             <span>Solicitar Férias</span>
           </a>
-          <a href="recruitment.html" class="quick-action-item" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE">
+          <a href="recruitment.html" class="quick-action-item">
             <span class="quick-action-icon"><img src="/front/public/assets/notebook (1).png"
                 alt="icone_abrir_vaga"></span>
             <span>Abrir Vaga</span>
           </a>
-          <a href="reports.html" class="quick-action-item" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE,DP_CHEFE,DP_ASSISTENTE">
+          <a href="reports.html" class="quick-action-item">
             <span class="quick-action-icon"><img src="/front/public/assets/chart-column (1).png"
                 alt="icone_gerar_relatorio"></span>
             <span>Gerar Relatório</span>
@@ -486,12 +486,11 @@
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       // Verificar autenticação
-      if (!Auth.requireRole(["ADMIN","RH_CHEFE","RH_ASSISTENTE","DP_CHEFE","DP_ASSISTENTE"], "employee-dashboard.html")) return;
+      if (!Auth.requireAuth()) return;
 
       // Inicializar interface
       initUserMenu();
       initSidebar();
-      Auth.applyRoleVisibility(document);
       updateDateTime();
     });
 
@@ -503,7 +502,7 @@
 
         document.getElementById('userName').textContent = capitalizedName;
         document.getElementById('userFullName').textContent = user.email || user.username;
-        document.getElementById('userProfile').textContent = Auth.getProfileDisplayName(user);
+        document.getElementById('userProfile').textContent = user.profileName || user.profile;
         document.getElementById('userAvatar').textContent = capitalizedName[0].toUpperCase();
 
         // Welcome message based on time
