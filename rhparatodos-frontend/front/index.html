@@ -398,7 +398,10 @@
   <script src="public/scripts/auth.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      if (Auth.isAuthenticated()) window.location.href = 'dashboard.html';
+      if (Auth.isAuthenticated()) {
+        const next = Auth.redirectAfterLogin(Auth.getCurrentUser());
+        window.location.href = next;
+      }
 
   
     });
@@ -435,7 +438,10 @@
         const result = await Auth.login(email, password);
         if (result.success) {
           showAlert('success', 'Login realizado com sucesso! Redirecionando...');
-          setTimeout(() => window.location.href = 'employee-dashboard.html', 1000); // aqui mudo o redirecionamento do hardcoded dashboard para employee-dashboard.html
+          setTimeout(() => {
+            const next = Auth.redirectAfterLogin(Auth.getCurrentUser());
+            window.location.href = next;
+          }, 800); // aqui mudo o redirecionamento do hardcoded dashboard para employee-dashboard.html
         } else {
           showAlert('error', result.message || 'Email ou senha incorretos.');
           btn.classList.remove('loading');
