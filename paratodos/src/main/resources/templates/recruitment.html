@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recrutamento - Sistema RH</title>
+  <link rel="stylesheet" href="public/styles/global.css">
+  <link rel="stylesheet" href="public/styles/dashboard.css">
+  <link rel="stylesheet" href="public/styles/components.css">
+  <style>
+    .kanban-board {
+      display: flex;
+      gap: var(--spacing-4);
+      overflow-x: auto;
+      padding-bottom: var(--spacing-4);
+    }
+
+    .kanban-column {
+      min-width: 280px;
+      flex: 1;
+      background: var(--gray-100);
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-4);
+    }
+
+    .kanban-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--spacing-4);
+      padding-bottom: var(--spacing-3);
+      border-bottom: 2px solid var(--gray-200);
+    }
+
+    .kanban-title {
+      font-weight: 600;
+      color: var(--gray-700);
+    }
+
+    .kanban-count {
+      background: var(--gray-300);
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: var(--font-size-sm);
+    }
+
+    .kanban-cards {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-3);
+      min-height: 200px;
+    }
+
+    .candidate-card {
+      background: white;
+      border-radius: var(--radius-md);
+      padding: var(--spacing-4);
+      box-shadow: var(--shadow-sm);
+      cursor: grab;
+      transition: all 0.2s;
+    }
+
+    .candidate-card:hover {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+    }
+
+    .candidate-name {
+      font-weight: 600;
+      margin-bottom: var(--spacing-1);
+    }
+
+    .candidate-position {
+      font-size: var(--font-size-sm);
+      color: var(--gray-500);
+      margin-bottom: var(--spacing-2);
+    }
+
+    .candidate-meta {
+      display: flex;
+      gap: var(--spacing-3);
+      font-size: var(--font-size-xs);
+      color: var(--gray-400);
+    }
+
+    .job-card {
+      background: white;
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-5);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--gray-200);
+    }
+
+    .job-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: var(--spacing-3);
+    }
+
+    .job-title {
+      font-size: var(--font-size-lg);
+      font-weight: 600;
+    }
+
+    .job-meta {
+      display: flex;
+      gap: var(--spacing-4);
+      font-size: var(--font-size-sm);
+      color: var(--gray-500);
+      margin-bottom: var(--spacing-3);
+    }
+
+    .job-stats {
+      display: flex;
+      gap: var(--spacing-6);
+      padding-top: var(--spacing-3);
+      border-top: 1px solid var(--gray-100);
+    }
+
+    .job-stat {
+      text-align: center;
+    }
+
+    .job-stat-value {
+      font-size: var(--font-size-xl);
+      font-weight: 700;
+      color: var(--primary-dark);
+    }
+
+    .job-stat-label {
+      font-size: var(--font-size-xs);
+      color: var(--gray-500);
+    }
+  </style>
+</head>
+
+<body>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <img src="public/assets/gruporhpaint.png" alt="logo_menu_lateral" height="60">
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="dashboard.html" class="nav-item">
+        <span class="nav-text">Dashboard</span>
+      </a>
+
+      <div class="nav-section">Gestão de Pessoas</div>
+      <a href="employees.html" class="nav-item">
+        <span class="nav-text">Funcionários</span>
+      </a>
+      <a href="departments.html" class="nav-item">
+        <span class="nav-text">Departamentos</span>
+      </a>
+      <a href="positions.html" class="nav-item">
+        <span class="nav-text">Cargos</span>
+      </a>
+
+      <div class="nav-section">Recursos Humanos</div>
+      <a href="recruitment.html" class="nav-item active">
+        <span class="nav-text">Recrutamento</span>
+      </a>
+      <a href="training.html" class="nav-item">
+        <span class="nav-text">Treinamentos</span>
+      </a>
+      <a href="performance.html" class="nav-item">
+        <span class="nav-text">Avaliações</span>
+      </a>
+
+      <div class="nav-section">Departamento Pessoal</div>
+      <a href="payroll.html" class="nav-item">
+        <span class="nav-text">Folha de Pagamento</span>
+      </a>
+      <a href="benefits.html" class="nav-item">
+        <span class="nav-text">Benefícios</span>
+      </a>
+      <a href="vacation.html" class="nav-item">
+        <span class="nav-text">Férias</span>
+      </a>
+      <a href="timesheet.html" class="nav-item">
+        <span class="nav-text">Ponto</span>
+      </a>
+
+      <div class="nav-section">Administração</div>
+      <a href="reports.html" class="nav-item">
+        <span class="nav-text">Relatórios</span>
+      </a>
+      <a href="settings.html" class="nav-item">
+        <span class="nav-text">Configurações</span>
+      </a>
+    </nav>
+  </aside>
+  <div class="main-content">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
+        <h1>Recrutamento e Seleção</h1>
+      </div>
+      <div class="topbar-right">
+        <div class="user-menu">
+          <button class="user-button" id="userMenuButton">
+            <span class="user-avatar" id="userAvatar">U</span>
+            <span class="user-name" id="userName">Usuário</span>
+            <span class="user-arrow">▼</span>
+          </button>
+          <div class="user-dropdown" id="userDropdown">
+            <div class="user-info">
+              <strong id="userFullName">Nome do Usuário</strong>
+              <small id="userProfile">Perfil</small>
+            </div>
+            <hr>
+            <a href="#" class="dropdown-item">Meu Perfil</a>
+            <a href="settings.html" class="dropdown-item">Configurações</a>
+            <hr>
+            <a href="#" class="dropdown-item" id="logoutButton">Sair</a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="content-area">
+      <div class="stats-row">
+        <div class="stat-box">
+          <div class="stat-box-icon" style="background: rgba(44, 62, 80, 0.1);"><img
+              src="public/assets/file-text.png" alt="icone_vagas_abertas"></div>
+          <div class="stat-box-value">8</div>
+          <div class="stat-box-label">Vagas Abertas</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-box-icon" style="background: rgba(39, 174, 96, 0.1);"><img
+              src="public/assets/file-user.png" alt="icone_candidatos_ativos"></div>
+          <div class="stat-box-value">156</div>
+          <div class="stat-box-label">Candidatos Ativos</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-box-icon" style="background: rgba(243, 156, 18, 0.1);"><img
+              src="public/assets/calendar-check.png" alt="icone_entrevistas_agendadas"></div>
+          <div class="stat-box-value">12</div>
+          <div class="stat-box-label">Entrevistas Agendadas</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-box-icon" style="background: rgba(231, 76, 60, 0.1);"><img
+              src="public/assets/check (1).png" alt="icone_contratacoes"></div>
+          <div class="stat-box-value">3</div>
+          <div class="stat-box-label">Contratações (mês)</div>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs" style="margin-bottom: var(--spacing-6);">
+        <button class="tab-btn active" onclick="showTab('vagas')">Vagas</button>
+        <button class="tab-btn" onclick="showTab('candidatos')">Pipeline de Candidatos</button>
+        <button class="tab-btn" onclick="showTab('entrevistas')">Entrevistas</button>
+      </div>
+
+      <!-- Tab Vagas -->
+      <div id="tabVagas">
+        <div class="page-header">
+          <div>
+            <h2 class="page-title">Vagas Abertas</h2>
+          </div>
+          <button class="btn btn-primary" onclick="openJobModal()">+ Nova Vaga</button>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: var(--spacing-4);"
+          id="jobsGrid"></div>
+      </div>
+
+      <!-- Tab Candidatos (Kanban) -->
+      <div id="tabCandidatos" style="display: none;">
+        <div class="page-header">
+          <div>
+            <h2 class="page-title">Pipeline de Candidatos</h2>
+            <p class="page-subtitle">Arraste os cards para mover candidatos entre etapas</p>
+          </div>
+          <button class="btn btn-primary" onclick="openCandidateModal()">+ Novo Candidato</button>
+        </div>
+
+        <div class="kanban-board" id="kanbanBoard"></div>
+      </div>
+
+      <!-- Tab Entrevistas -->
+      <div id="tabEntrevistas" style="display: none;">
+        <div class="page-header">
+          <div>
+            <h2 class="page-title">Agenda de Entrevistas</h2>
+          </div>
+          <button class="btn btn-primary" onclick="scheduleInterview()">+ Agendar Entrevista</button>
+        </div>
+
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Candidato</th>
+                <th>Vaga</th>
+                <th>Data/Hora</th>
+                <th>Entrevistador</th>
+                <th>Tipo</th>
+                <th>Status</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="interviewsBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Nova Vaga -->
+  <div class="modal" id="jobModal">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-header">
+        <h3 class="modal-title">Nova Vaga</h3><button class="modal-close"
+          onclick="Modal.close('jobModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="jobForm">
+          <div class="form-row form-row-2">
+            <div class="form-group"><label class="form-label">Título da Vaga *</label><input type="text"
+                class="form-input" name="titulo" required></div>
+            <div class="form-group"><label class="form-label">Departamento *</label><select class="form-select"
+                name="departamento" required>
+                <option value="">Selecione</option>
+                <option>Tecnologia</option>
+                <option>RH</option>
+                <option>Financeiro</option>
+                <option>Comercial</option>
+              </select></div>
+          </div>
+          <div class="form-row form-row-3">
+            <div class="form-group"><label class="form-label">Tipo</label><select class="form-select" name="tipo">
+                <option>CLT</option>
+                <option>PJ</option>
+                <option>Estágio</option>
+              </select></div>
+            <div class="form-group"><label class="form-label">Nível</label><select class="form-select" name="nivel">
+                <option>Junior</option>
+                <option>Pleno</option>
+                <option>Senior</option>
+                <option>Gestão</option>
+              </select></div>
+            <div class="form-group"><label class="form-label">Modalidade</label><select class="form-select"
+                name="modalidade">
+                <option>Presencial</option>
+                <option>Híbrido</option>
+                <option>Remoto</option>
+              </select></div>
+          </div>
+          <div class="form-row form-row-2">
+            <div class="form-group"><label class="form-label">Faixa Salarial (de)</label><input type="text"
+                class="form-input" name="salario_min" data-mask="currency"></div>
+            <div class="form-group"><label class="form-label">Faixa Salarial (até)</label><input type="text"
+                class="form-input" name="salario_max" data-mask="currency"></div>
+          </div>
+          <div class="form-group"><label class="form-label">Descrição da Vaga</label><textarea class="form-input"
+              name="descricao" rows="4"></textarea></div>
+          <div class="form-group"><label class="form-label">Requisitos</label><textarea class="form-input"
+              name="requisitos" rows="3"></textarea></div>
+        </form>
+      </div>
+      <div class="modal-footer"><button class="btn btn-secondary"
+          onclick="Modal.close('jobModal')">Cancelar</button><button class="btn btn-primary"
+          onclick="saveJob()">Publicar Vaga</button></div>
+    </div>
+  </div>
+
+  <script src="public/scripts/auth.js"></script>
+  <script src="public/scripts/components.js"></script>
+  <script>
+    const jobs = [
+      { id: 1, titulo: "Desenvolvedor Backend Senior", departamento: "Tecnologia", tipo: "CLT", nivel: "Senior", modalidade: "Híbrido", candidatos: 45, entrevistas: 8, dias: 15 },
+      { id: 2, titulo: "Analista de RH Pleno", departamento: "RH", tipo: "CLT", nivel: "Pleno", modalidade: "Presencial", candidatos: 32, entrevistas: 5, dias: 10 },
+      { id: 3, titulo: "Designer UX/UI", departamento: "Tecnologia", tipo: "CLT", nivel: "Pleno", modalidade: "Remoto", candidatos: 28, entrevistas: 4, dias: 7 },
+      { id: 4, titulo: "Analista Financeiro", departamento: "Financeiro", tipo: "CLT", nivel: "Junior", modalidade: "Presencial", candidatos: 51, entrevistas: 6, dias: 20 }
+    ];
+
+    const candidates = {
+      triagem: [
+        { id: 1, nome: "Carlos Mendes", vaga: "Dev Backend", data: "10/01" },
+        { id: 2, nome: "Juliana Reis", vaga: "Dev Backend", data: "11/01" },
+        { id: 3, nome: "Roberto Lima", vaga: "Analista RH", data: "12/01" }
+      ],
+      entrevista_rh: [
+        { id: 4, nome: "Marina Costa", vaga: "Designer UX", data: "08/01" },
+        { id: 5, nome: "Felipe Santos", vaga: "Dev Backend", data: "09/01" }
+      ],
+      entrevista_tecnica: [
+        { id: 6, nome: "Amanda Oliveira", vaga: "Dev Backend", data: "05/01" },
+        { id: 7, nome: "Lucas Ferreira", vaga: "Designer UX", data: "06/01" }
+      ],
+      proposta: [
+        { id: 8, nome: "Beatriz Almeida", vaga: "Analista RH", data: "03/01" }
+      ],
+      contratado: [
+        { id: 9, nome: "Pedro Henrique", vaga: "Dev Backend", data: "01/01" }
+      ]
+    };
+
+    const interviews = [
+      { id: 1, candidato: "Marina Costa", vaga: "Designer UX/UI", data: "15/01/2026 14:00", entrevistador: "Maria Santos", tipo: "RH", status: "AGENDADA" },
+      { id: 2, candidato: "Felipe Santos", vaga: "Dev Backend", data: "15/01/2026 15:30", entrevistador: "João Silva", tipo: "Técnica", status: "AGENDADA" },
+      { id: 3, candidato: "Amanda Oliveira", vaga: "Dev Backend", data: "16/01/2026 10:00", entrevistador: "Pedro Costa", tipo: "Final", status: "AGENDADA" },
+      { id: 4, candidato: "Carlos Mendes", vaga: "Dev Backend", data: "14/01/2026 11:00", entrevistador: "Ana Paula", tipo: "RH", status: "REALIZADA" }
+    ];
+
+    document.addEventListener("DOMContentLoaded", () => {
+      if (!Auth.requireAuth()) return;
+      initUI();
+      initSidebar();
+      renderJobs();
+      renderKanban();
+      renderInterviews();
+      Mask.initAll();
+    });
+
+    function initUI() {
+      const user = Auth.getCurrentUser();
+      document.getElementById("userName").textContent = user?.email?.split("@")[0] || "Usuário";
+      document.getElementById("userAvatar").textContent = (user?.email || "U")[0].toUpperCase();
+      document.getElementById("userMenuButton").onclick = () => document.getElementById("userDropdown").classList.toggle("active");
+      document.getElementById("logoutButton").onclick = (e) => { e.preventDefault(); Auth.logout(); };
+    }
+
+    function initSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const mobileBtn = document.getElementById('mobileMenuBtn');
+
+      mobileBtn?.addEventListener('click', () => {
+        sidebar.classList.toggle('mobile-open');
+      });
+
+      document.addEventListener('click', (e) => {
+        if (window.innerWidth <= 768) {
+          if (!e.target.closest('.sidebar') && !e.target.closest('.mobile-menu-btn')) {
+            sidebar.classList.remove('mobile-open');
+          }
+        }
+      });
+    }
+
+    function showTab(tab) {
+      document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', ['vagas', 'candidatos', 'entrevistas'][i] === tab));
+      document.getElementById('tabVagas').style.display = tab === 'vagas' ? 'block' : 'none';
+      document.getElementById('tabCandidatos').style.display = tab === 'candidatos' ? 'block' : 'none';
+      document.getElementById('tabEntrevistas').style.display = tab === 'entrevistas' ? 'block' : 'none';
+    }
+
+    function renderJobs() {
+      document.getElementById("jobsGrid").innerHTML = jobs.map(j => `
+        <div class="job-card">
+          <div class="job-header">
+            <h3 class="job-title">${j.titulo}</h3>
+            <div class="cell-actions">
+              <button class="btn-icon edit" onclick="editJob(${j.id})"><img src="public/assets/pencil (1).png" alt="icone_editar"></button>
+              <button class="btn-icon delete" onclick="closeJob(${j.id})"><img src="public/assets/x.png" alt="icone_excluir"></button>
+            </div>
+          </div>
+          <div class="job-meta">
+            <span>${j.departamento}</span>
+            <span>${j.modalidade}</span>
+            <span>${j.nivel}</span>
+          </div>
+          <span class="badge badge-success">${j.tipo}</span>
+          <div class="job-stats">
+            <div class="job-stat"><div class="job-stat-value">${j.candidatos}</div><div class="job-stat-label">Candidatos</div></div>
+            <div class="job-stat"><div class="job-stat-value">${j.entrevistas}</div><div class="job-stat-label">Entrevistas</div></div>
+            <div class="job-stat"><div class="job-stat-value">${j.dias}d</div><div class="job-stat-label">Aberta há</div></div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderKanban() {
+      const stages = [
+        { key: 'triagem', title: 'Triagem', color: 'var(--gray-500)' },
+        { key: 'entrevista_rh', title: 'Entrevista RH', color: 'var(--warning-orange)' },
+        { key: 'entrevista_tecnica', title: 'Entrevista Técnica', color: 'var(--info-gray)' },
+        { key: 'proposta', title: 'Proposta', color: 'var(--primary-dark)' },
+        { key: 'contratado', title: 'Contratado', color: 'var(--success-green)' }
+      ];
+
+      document.getElementById("kanbanBoard").innerHTML = stages.map(s => `
+        <div class="kanban-column">
+          <div class="kanban-header">
+            <span class="kanban-title" style="border-left: 3px solid ${s.color}; padding-left: 8px;">${s.title}</span>
+            <span class="kanban-count">${candidates[s.key].length}</span>
+          </div>
+          <div class="kanban-cards">
+            ${candidates[s.key].map(c => `
+              <div class="candidate-card" draggable="true">
+                <div class="candidate-name">${c.nome}</div>
+                <div class="candidate-position">${c.vaga}</div>
+                <div class="candidate-meta"><span>${c.data}</span></div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderInterviews() {
+      document.getElementById("interviewsBody").innerHTML = interviews.map(i => `
+        <tr>
+          <td><strong>${i.candidato}</strong></td>
+          <td>${i.vaga}</td>
+          <td>${i.data}</td>
+          <td>${i.entrevistador}</td>
+          <td><span class="badge badge-info">${i.tipo}</span></td>
+          <td><span class="badge ${i.status === 'AGENDADA' ? 'badge-warning' : 'badge-success'}">${i.status === 'AGENDADA' ? 'Agendada' : 'Realizada'}</span></td>
+          <td>
+            <div class="cell-actions">
+              <button class="btn-icon view" onclick="viewInterview(${i.id})"><img src="public/assets/eye.png" alt="icone_visualizar"></button>
+              <button class="btn-icon edit" onclick="editInterview(${i.id})"><img src="public/assets/pencil (1).png" alt="icone_editar"></button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function openJobModal() { document.getElementById('jobForm').reset(); Modal.open('jobModal'); Mask.initAll(); }
+    function saveJob() { Toast.success('Vaga publicada com sucesso!'); Modal.close('jobModal'); }
+    function editJob(id) { openJobModal(); }
+    function closeJob(id) { Confirm.show('Encerrar esta vaga?', () => Toast.success('Vaga encerrada')); }
+    function openCandidateModal() { Toast.info('Modal de candidato'); }
+    function scheduleInterview() { Toast.info('Agendar entrevista'); }
+    function viewInterview(id) { Toast.info('Ver detalhes da entrevista'); }
+    function editInterview(id) { Toast.info('Editar entrevista'); }
+  </script>
+</body>
+
+</html>

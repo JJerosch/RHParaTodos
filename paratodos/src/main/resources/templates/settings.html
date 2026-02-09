@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Configurações - Sistema RH</title>
+  <link rel="stylesheet" href="public/styles/global.css">
+  <link rel="stylesheet" href="public/styles/dashboard.css">
+  <link rel="stylesheet" href="public/styles/components.css">
+</head>
+
+<body>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <img src="public/assets/gruporhpaint.png" alt="logo_menu_lateral" height="60">
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="dashboard.html" class="nav-item">
+        <span class="nav-text">Dashboard</span>
+      </a>
+
+      <div class="nav-section">Gestão de Pessoas</div>
+      <a href="employees.html" class="nav-item">
+        <span class="nav-text">Funcionários</span>
+      </a>
+      <a href="departments.html" class="nav-item">
+        <span class="nav-text">Departamentos</span>
+      </a>
+      <a href="positions.html" class="nav-item">
+        <span class="nav-text">Cargos</span>
+      </a>
+
+      <div class="nav-section">Recursos Humanos</div>
+      <a href="recruitment.html" class="nav-item">
+        <span class="nav-text">Recrutamento</span>
+      </a>
+      <a href="training.html" class="nav-item">
+        <span class="nav-text">Treinamentos</span>
+      </a>
+      <a href="performance.html" class="nav-item">
+        <span class="nav-text">Avaliações</span>
+      </a>
+
+      <div class="nav-section">Departamento Pessoal</div>
+      <a href="payroll.html" class="nav-item">
+        <span class="nav-text">Folha de Pagamento</span>
+      </a>
+      <a href="benefits.html" class="nav-item">
+        <span class="nav-text">Benefícios</span>
+      </a>
+      <a href="vacation.html" class="nav-item">
+        <span class="nav-text">Férias</span>
+      </a>
+      <a href="timesheet.html" class="nav-item">
+        <span class="nav-text">Ponto</span>
+      </a>
+
+      <div class="nav-section">Administração</div>
+      <a href="reports.html" class="nav-item">
+        <span class="nav-text">Relatórios</span>
+      </a>
+      <a href="settings.html" class="nav-item active">
+        <span class="nav-text">Configurações</span>
+      </a>
+    </nav>
+  </aside>
+
+
+  <div class="main-content">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
+        <h1>Configurações</h1>
+      </div>
+      <div class="topbar-right">
+        <div class="user-menu">
+          <button class="user-button" id="userMenuButton">
+            <span class="user-avatar" id="userAvatar">U</span>
+            <span class="user-name" id="userName">Usuário</span>
+            <span class="user-arrow">▼</span>
+          </button>
+          <div class="user-dropdown" id="userDropdown">
+            <div class="user-info">
+              <strong id="userFullName">Nome do Usuário</strong>
+              <small id="userProfile">Perfil</small>
+            </div>
+            <hr>
+            <a href="#" class="dropdown-item">Meu Perfil</a>
+            <a href="settings.html" class="dropdown-item">Configurações</a>
+            <hr>
+            <a href="#" class="dropdown-item" id="logoutButton">Sair</a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="content-area">
+      <div class="page-header">
+        <div>
+          <h2 class="page-title">Configurações do Sistema</h2>
+          <p class="page-subtitle">Gerencie as configurações gerais e preferências</p>
+        </div>
+      </div>
+
+      <div class="settings-container">
+        <!-- Sidebar de Navegação -->
+        <div class="settings-nav">
+          <a href="#empresa" class="settings-nav-item active" onclick="showSection('empresa')">
+            <span>🏢</span> Dados da Empresa
+          </a>
+          <a href="#usuarios" class="settings-nav-item" onclick="showSection('usuarios')">
+            <span>👥</span> Usuários e Permissões
+          </a>
+          <a href="#notificacoes" class="settings-nav-item" onclick="showSection('notificacoes')">
+            <span>🔔</span> Notificações
+          </a>
+          <a href="#folha" class="settings-nav-item" onclick="showSection('folha')">
+            <span>💰</span> Folha de Pagamento
+          </a>
+          <a href="#integracao" class="settings-nav-item" onclick="showSection('integracao')">
+            <span>🔗</span> Integrações
+          </a>
+          <a href="#seguranca" class="settings-nav-item" onclick="showSection('seguranca')">
+            <span>🔒</span> Segurança
+          </a>
+          <a href="#backup" class="settings-nav-item" onclick="showSection('backup')">
+            <span>💾</span> Backup
+          </a>
+        </div>
+
+        <!-- Conteúdo -->
+        <div class="settings-content">
+          <!-- Empresa -->
+          <div class="settings-section active" id="section-empresa">
+            <h3>Dados da Empresa</h3>
+            <form id="empresaForm">
+              <div class="form-row form-row-2">
+                <div class="form-group">
+                  <label class="form-label">Razão Social</label>
+                  <input type="text" class="form-input" name="razao_social" value="RH Para Todos Ltda">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Nome Fantasia</label>
+                  <input type="text" class="form-input" name="nome_fantasia" value="RH Para Todos">
+                </div>
+              </div>
+              <div class="form-row form-row-2">
+                <div class="form-group">
+                  <label class="form-label">CNPJ</label>
+                  <input type="text" class="form-input" name="cnpj" value="12.345.678/0001-90">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Inscrição Estadual</label>
+                  <input type="text" class="form-input" name="ie" value="123.456.789.012">
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Endereço</label>
+                <input type="text" class="form-input" name="endereco"
+                  value="Av. Paulista, 1000 - Bela Vista, São Paulo - SP">
+              </div>
+              <div class="form-row form-row-2">
+                <div class="form-group">
+                  <label class="form-label">Email</label>
+                  <input type="email" class="form-input" name="email" value="contato@rhparatodos.com.br">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Telefone</label>
+                  <input type="text" class="form-input" name="telefone" value="(11) 3456-7890">
+                </div>
+              </div>
+              <button type="button" class="btn btn-primary" onclick="saveSettings('empresa')">Salvar Alterações</button>
+            </form>
+          </div>
+
+          <!-- Usuários -->
+          <div class="settings-section" id="section-usuarios">
+            <h3>Usuários e Permissões</h3>
+            <div class="page-actions" style="margin-bottom: var(--spacing-4);">
+              <button class="btn btn-primary" onclick="openUserModal()">+ Novo Usuário</button>
+            </div>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Usuário</th>
+                  <th>Perfil</th>
+                  <th>Status</th>
+                  <th>Último Acesso</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="usersTableBody"></tbody>
+            </table>
+          </div>
+
+          <!-- Notificações -->
+          <div class="settings-section" id="section-notificacoes">
+            <h3>Configurações de Notificações</h3>
+            <form id="notificacoesForm">
+              <div class="form-section">
+                <h4 class="form-section-title">Email</h4>
+                <div class="checkbox-group">
+                  <label class="checkbox-label"><input type="checkbox" name="email_ferias" checked><span>Notificar sobre
+                      férias vencendo</span></label>
+                  <label class="checkbox-label"><input type="checkbox" name="email_aniversarios" checked><span>Lembrete
+                      de aniversários</span></label>
+                  <label class="checkbox-label"><input type="checkbox" name="email_avaliacoes" checked><span>Avaliações
+                      pendentes</span></label>
+                  <label class="checkbox-label"><input type="checkbox" name="email_folha"><span>Fechamento da
+                      folha</span></label>
+                </div>
+              </div>
+              <div class="form-section">
+                <h4 class="form-section-title">Sistema</h4>
+                <div class="checkbox-group">
+                  <label class="checkbox-label"><input type="checkbox" name="sys_aprovacoes" checked><span>Solicitações
+                      pendentes de aprovação</span></label>
+                  <label class="checkbox-label"><input type="checkbox" name="sys_documentos"><span>Documentos
+                      vencendo</span></label>
+                  <label class="checkbox-label"><input type="checkbox" name="sys_ponto" checked><span>Irregularidades de
+                      ponto</span></label>
+                </div>
+              </div>
+              <button type="button" class="btn btn-primary" onclick="saveSettings('notificacoes')">Salvar
+                Preferências</button>
+            </form>
+          </div>
+
+          <!-- Folha de Pagamento -->
+          <div class="settings-section" id="section-folha">
+            <h3>Configurações da Folha</h3>
+            <form id="folhaForm">
+              <div class="form-row form-row-3">
+                <div class="form-group">
+                  <label class="form-label">Dia de Fechamento</label>
+                  <select class="form-select" name="dia_fechamento">
+                    <option value="25">Dia 25</option>
+                    <option value="30" selected>Dia 30</option>
+                    <option value="ultimo">Último dia do mês</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Dia de Pagamento</label>
+                  <select class="form-select" name="dia_pagamento">
+                    <option value="5" selected>Dia 5</option>
+                    <option value="10">Dia 10</option>
+                    <option value="15">Dia 15</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Adiantamento</label>
+                  <select class="form-select" name="adiantamento">
+                    <option value="nao">Não possui</option>
+                    <option value="15" selected>Dia 15 (40%)</option>
+                    <option value="20">Dia 20 (40%)</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-section">
+                <h4 class="form-section-title">Valores Padrão</h4>
+                <div class="form-row form-row-2">
+                  <div class="form-group">
+                    <label class="form-label">Vale Transporte (%)</label>
+                    <input type="number" class="form-input" name="vt_percentual" value="6" min="0" max="6">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Vale Refeição (R$)</label>
+                    <input type="text" class="form-input" name="vr_valor" value="800,00">
+                  </div>
+                </div>
+              </div>
+              <button type="button" class="btn btn-primary" onclick="saveSettings('folha')">Salvar
+                Configurações</button>
+            </form>
+          </div>
+
+          <!-- Integrações -->
+          <div class="settings-section" id="section-integracao">
+            <h3>Integrações</h3>
+            <div class="integrations-grid">
+              <div class="integration-card">
+                <div class="integration-icon">📧</div>
+                <div class="integration-info">
+                  <h4>Email (SMTP)</h4>
+                  <p>Configurado: smtp.gmail.com</p>
+                  <span class="badge badge-success">Conectado</span>
+                </div>
+                <button class="btn btn-secondary">Configurar</button>
+              </div>
+              <div class="integration-card">
+                <div class="integration-icon">🏦</div>
+                <div class="integration-info">
+                  <h4>eSocial</h4>
+                  <p>Transmissão automática de eventos</p>
+                  <span class="badge badge-success">Ativo</span>
+                </div>
+                <button class="btn btn-secondary">Configurar</button>
+              </div>
+              <div class="integration-card">
+                <div class="integration-icon">⏰</div>
+                <div class="integration-info">
+                  <h4>REP (Ponto)</h4>
+                  <p>Integração com relógio de ponto</p>
+                  <span class="badge badge-warning">Pendente</span>
+                </div>
+                <button class="btn btn-secondary">Configurar</button>
+              </div>
+              <div class="integration-card">
+                <div class="integration-icon">📊</div>
+                <div class="integration-info">
+                  <h4>Contabilidade</h4>
+                  <p>Exportação para sistema contábil</p>
+                  <span class="badge badge-info">Desativado</span>
+                </div>
+                <button class="btn btn-secondary">Configurar</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Segurança -->
+          <div class="settings-section" id="section-seguranca">
+            <h3>Configurações de Segurança</h3>
+            <form id="segurancaForm">
+              <div class="form-section">
+                <h4 class="form-section-title">Política de Senhas</h4>
+                <div class="form-row form-row-2">
+                  <div class="form-group">
+                    <label class="form-label">Tamanho Mínimo</label>
+                    <input type="number" class="form-input" name="senha_min" value="8" min="6" max="20">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Expiração (dias)</label>
+                    <input type="number" class="form-input" name="senha_expira" value="90" min="30" max="365">
+                  </div>
+                </div>
+                <div class="checkbox-group">
+                  <label class="checkbox-label"><input type="checkbox" name="senha_maiuscula" checked><span>Exigir letra
+                      maiúscula</span></label>
+                  <label class="checkbox-label"><input type="checkbox" name="senha_numero" checked><span>Exigir
+                      número</span></label>
+                  <label class="checkbox-label"><input type="checkbox" name="senha_especial" checked><span>Exigir
+                      caractere especial</span></label>
+                </div>
+              </div>
+              <div class="form-section">
+                <h4 class="form-section-title">Autenticação</h4>
+                <div class="checkbox-group">
+                  <label class="checkbox-label"><input type="checkbox" name="2fa"><span>Habilitar autenticação de dois
+                      fatores (2FA)</span></label>
+                  <label class="checkbox-label"><input type="checkbox" name="sessao_unica" checked><span>Permitir apenas
+                      uma sessão por usuário</span></label>
+                </div>
+                <div class="form-group" style="margin-top: var(--spacing-4);">
+                  <label class="form-label">Timeout de Sessão (minutos)</label>
+                  <input type="number" class="form-input" name="timeout" value="30" min="5" max="120"
+                    style="max-width: 150px;">
+                </div>
+              </div>
+              <button type="button" class="btn btn-primary" onclick="saveSettings('seguranca')">Salvar
+                Configurações</button>
+            </form>
+          </div>
+
+          <!-- Backup -->
+          <div class="settings-section" id="section-backup">
+            <h3>Backup e Restauração</h3>
+            <div class="backup-status card" style="margin-bottom: var(--spacing-6);">
+              <h4>Status do Backup</h4>
+              <p><strong>Último backup:</strong> 12/01/2026 às 03:00</p>
+              <p><strong>Tamanho:</strong> 2.4 GB</p>
+              <p><strong>Próximo backup:</strong> 13/01/2026 às 03:00</p>
+              <span class="badge badge-success">Backup Automático Ativo</span>
+            </div>
+            <div class="form-section">
+              <h4 class="form-section-title">Configurações de Backup</h4>
+              <div class="form-row form-row-2">
+                <div class="form-group">
+                  <label class="form-label">Frequência</label>
+                  <select class="form-select" name="backup_freq">
+                    <option value="diario" selected>Diário</option>
+                    <option value="semanal">Semanal</option>
+                    <option value="mensal">Mensal</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Horário</label>
+                  <input type="time" class="form-input" name="backup_hora" value="03:00">
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Retenção (dias)</label>
+                <input type="number" class="form-input" name="backup_retencao" value="30" min="7" max="365"
+                  style="max-width: 150px;">
+              </div>
+            </div>
+            <div class="page-actions">
+              <button class="btn btn-secondary" onclick="downloadBackup()">📥 Baixar Backup</button>
+              <button class="btn btn-primary" onclick="createBackup()">🔄 Criar Backup Agora</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Usuário -->
+  <div class="modal" id="userModal">
+    <div class="modal-dialog modal-md">
+      <div class="modal-header">
+        <h3 class="modal-title">Novo Usuário</h3><button class="modal-close"
+          onclick="Modal.close('userModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="userForm">
+          <div class="form-group"><label class="form-label">Nome Completo</label><input type="text" class="form-input"
+              name="nome" required></div>
+          <div class="form-group"><label class="form-label">Email</label><input type="email" class="form-input"
+              name="email" required></div>
+          <div class="form-group">
+            <label class="form-label">Perfil</label>
+            <select class="form-select" name="perfil" required>
+              <option value="">Selecione</option>
+              <option value="ADMIN">Administrador</option>
+              <option value="RH_CHEFE">RH - Chefe</option>
+              <option value="RH_ASSISTENTE">RH - Assistente</option>
+              <option value="DP_CHEFE">DP - Chefe</option>
+              <option value="DP_ASSISTENTE">DP - Assistente</option>
+            </select>
+          </div>
+          <div class="form-group"><label class="checkbox-label"><input type="checkbox" name="ativo"
+                checked><span>Usuário Ativo</span></label></div>
+        </form>
+      </div>
+      <div class="modal-footer"><button class="btn btn-secondary"
+          onclick="Modal.close('userModal')">Cancelar</button><button class="btn btn-primary"
+          onclick="saveUser()">Salvar</button></div>
+    </div>
+  </div>
+
+  <style>
+    .settings-container {
+      display: grid;
+      grid-template-columns: 250px 1fr;
+      gap: var(--spacing-6);
+    }
+
+    .settings-nav {
+      background: white;
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-4);
+      box-shadow: var(--shadow-sm);
+      height: fit-content;
+      position: sticky;
+      top: var(--spacing-4);
+    }
+
+    .settings-nav-item {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-3);
+      padding: var(--spacing-3);
+      border-radius: var(--radius-md);
+      color: var(--gray-600);
+      text-decoration: none;
+      transition: all 0.2s;
+      margin-bottom: var(--spacing-1);
+    }
+
+    .settings-nav-item:hover {
+      background: var(--gray-50);
+      color: var(--gray-800);
+    }
+
+    .settings-nav-item.active {
+      background: var(--primary-dark);
+      color: white;
+    }
+
+    .settings-content {
+      background: white;
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-6);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .settings-section {
+      display: none;
+    }
+
+    .settings-section.active {
+      display: block;
+    }
+
+    .settings-section h3 {
+      margin-bottom: var(--spacing-6);
+      padding-bottom: var(--spacing-3);
+      border-bottom: 2px solid var(--gray-200);
+    }
+
+    .integrations-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: var(--spacing-4);
+    }
+
+    .integration-card {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-4);
+      padding: var(--spacing-4);
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius-md);
+    }
+
+    .integration-icon {
+      font-size: 32px;
+    }
+
+    .integration-info {
+      flex: 1;
+    }
+
+    .integration-info h4 {
+      margin: 0 0 var(--spacing-1);
+    }
+
+    .integration-info p {
+      margin: 0;
+      font-size: var(--font-size-sm);
+      color: var(--gray-500);
+    }
+
+    @media (max-width: 768px) {
+      .settings-container {
+        grid-template-columns: 1fr;
+      }
+
+      .settings-nav {
+        position: static;
+      }
+    }
+  </style>
+
+  <script src="public/scripts/auth.js"></script>
+  <script src="public/scripts/components.js"></script>
+  <script>
+    const users = [
+      { id: 1, nome: "Admin Sistema", email: "admin@rhparatodos.com.br", perfil: "ADMIN", ativo: true, ultimo_acesso: "2026-01-12 14:30" },
+      { id: 2, nome: "Maria Costa", email: "maria.costa@rhparatodos.com.br", perfil: "RH_CHEFE", ativo: true, ultimo_acesso: "2026-01-12 10:15" },
+      { id: 3, nome: "João Silva", email: "joao.silva@rhparatodos.com.br", perfil: "RH_ASSISTENTE", ativo: true, ultimo_acesso: "2026-01-11 16:45" },
+      { id: 4, nome: "Carlos Santos", email: "carlos.santos@rhparatodos.com.br", perfil: "DP_CHEFE", ativo: true, ultimo_acesso: "2026-01-12 09:00" },
+      { id: 5, nome: "Ana Oliveira", email: "ana.oliveira@rhparatodos.com.br", perfil: "DP_ASSISTENTE", ativo: false, ultimo_acesso: "2025-12-20 11:30" }
+    ];
+
+    document.addEventListener("DOMContentLoaded", () => {
+      if (!Auth.requireAuth()) return;
+      initUI();
+      initSidebar();
+      renderUsers();
+    });
+
+    function initUI() {
+      const user = Auth.getCurrentUser();
+      document.getElementById("userName").textContent = user?.email?.split("@")[0] || "Usuário";
+      document.getElementById("userAvatar").textContent = (user?.email || "U")[0].toUpperCase();
+      document.getElementById("userMenuButton").onclick = () => document.getElementById("userDropdown").classList.toggle("active");
+      document.getElementById("logoutButton").onclick = (e) => { e.preventDefault(); Auth.logout(); };
+    }
+
+    function initSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const mobileBtn = document.getElementById('mobileMenuBtn');
+
+      mobileBtn?.addEventListener('click', () => {
+        sidebar.classList.toggle('mobile-open');
+      });
+
+      document.addEventListener('click', (e) => {
+        if (window.innerWidth <= 768) {
+          if (!e.target.closest('.sidebar') && !e.target.closest('.mobile-menu-btn')) {
+            sidebar.classList.remove('mobile-open');
+          }
+        }
+      });
+    }
+
+    function showSection(section) {
+      document.querySelectorAll('.settings-section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.settings-nav-item').forEach(n => n.classList.remove('active'));
+      document.getElementById(`section-${section}`)?.classList.add('active');
+      document.querySelector(`[onclick="showSection('${section}')"]`)?.classList.add('active');
+    }
+
+    function renderUsers() {
+      const perfilLabels = { ADMIN: 'Administrador', RH_CHEFE: 'RH - Chefe', RH_ASSISTENTE: 'RH - Assistente', DP_CHEFE: 'DP - Chefe', DP_ASSISTENTE: 'DP - Assistente' };
+      document.getElementById("usersTableBody").innerHTML = users.map(u => `
+        <tr>
+          <td>
+            <div class="cell-avatar">
+              <div class="avatar">${u.nome.split(' ').map(n => n[0]).slice(0, 2).join('')}</div>
+              <div class="cell-info"><span class="cell-primary">${u.nome}</span><span class="cell-secondary">${u.email}</span></div>
+            </div>
+          </td>
+          <td><span class="badge badge-info">${perfilLabels[u.perfil] || u.perfil}</span></td>
+          <td><span class="badge ${u.ativo ? 'badge-success' : 'badge-danger'}">${u.ativo ? 'Ativo' : 'Inativo'}</span></td>
+          <td>${u.ultimo_acesso}</td>
+          <td>
+            <div class="cell-actions">
+              <button class="btn-icon edit" onclick="editUser(${u.id})">✏️</button>
+              <button class="btn-icon delete" onclick="deleteUser(${u.id})">🗑️</button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function openUserModal() { document.getElementById("userForm").reset(); Modal.open('userModal'); }
+    function editUser(id) { Toast.info('Editar usuário'); }
+    function deleteUser(id) { Confirm.show('Excluir este usuário?', () => { Toast.success('Usuário excluído!'); }); }
+    function saveUser() { Toast.success('Usuário criado com sucesso!'); Modal.close('userModal'); }
+    function saveSettings(section) { Toast.success('Configurações salvas com sucesso!'); }
+    function createBackup() { Toast.success('Backup iniciado!'); }
+    function downloadBackup() { Toast.info('Download iniciado...'); }
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Treinamentos - Sistema RH</title>
+  <link rel="stylesheet" href="public/styles/global.css">
+  <link rel="stylesheet" href="public/styles/dashboard.css">
+  <link rel="stylesheet" href="public/styles/components.css">
+  <style>
+    .training-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: var(--spacing-4);
+    }
+
+    .training-card {
+      background: white;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--gray-200);
+      transition: all 0.2s;
+    }
+
+    .training-card:hover {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+    }
+
+    .training-banner {
+      height: 120px;
+      background: linear-gradient(135deg, var(--primary-dark), var(--primary-gray));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+    }
+
+    .training-body {
+      padding: var(--spacing-5);
+    }
+
+    .training-category {
+      font-size: var(--font-size-xs);
+      text-transform: uppercase;
+      color: var(--gray-500);
+      margin-bottom: var(--spacing-2);
+    }
+
+    .training-title {
+      font-size: var(--font-size-lg);
+      font-weight: 600;
+      margin-bottom: var(--spacing-2);
+    }
+
+    .training-desc {
+      font-size: var(--font-size-sm);
+      color: var(--gray-500);
+      margin-bottom: var(--spacing-4);
+    }
+
+    .training-meta {
+      display: flex;
+      gap: var(--spacing-4);
+      font-size: var(--font-size-sm);
+      color: var(--gray-500);
+      margin-bottom: var(--spacing-4);
+    }
+
+    .training-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: var(--spacing-3);
+      border-top: 1px solid var(--gray-100);
+    }
+
+    .training-progress {
+      flex: 1;
+      margin-right: var(--spacing-4);
+    }
+
+    .progress-bar {
+      height: 8px;
+      background: var(--gray-200);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--success-green);
+      border-radius: 4px;
+      transition: width 0.3s;
+    }
+
+    .progress-text {
+      font-size: var(--font-size-xs);
+      color: var(--gray-500);
+      margin-top: 4px;
+    }
+  </style>
+</head>
+
+<body>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <img src="public/assets/gruporhpaint.png" alt="logo_menu_lateral" height="60">
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="dashboard.html" class="nav-item">
+        <span class="nav-text">Dashboard</span>
+      </a>
+
+      <div class="nav-section">Gestão de Pessoas</div>
+      <a href="employees.html" class="nav-item">
+        <span class="nav-text">Funcionários</span>
+      </a>
+      <a href="departments.html" class="nav-item">
+        <span class="nav-text">Departamentos</span>
+      </a>
+      <a href="positions.html" class="nav-item">
+        <span class="nav-text">Cargos</span>
+      </a>
+
+      <div class="nav-section">Recursos Humanos</div>
+      <a href="recruitment.html" class="nav-item">
+        <span class="nav-text">Recrutamento</span>
+      </a>
+      <a href="training.html" class="nav-item active">
+        <span class="nav-text">Treinamentos</span>
+      </a>
+      <a href="performance.html" class="nav-item">
+        <span class="nav-text">Avaliações</span>
+      </a>
+
+      <div class="nav-section">Departamento Pessoal</div>
+      <a href="payroll.html" class="nav-item">
+        <span class="nav-text">Folha de Pagamento</span>
+      </a>
+      <a href="benefits.html" class="nav-item">
+        <span class="nav-text">Benefícios</span>
+      </a>
+      <a href="vacation.html" class="nav-item">
+        <span class="nav-text">Férias</span>
+      </a>
+      <a href="timesheet.html" class="nav-item">
+        <span class="nav-text">Ponto</span>
+      </a>
+
+      <div class="nav-section">Administração</div>
+      <a href="reports.html" class="nav-item">
+        <span class="nav-text">Relatórios</span>
+      </a>
+      <a href="settings.html" class="nav-item">
+        <span class="nav-text">Configurações</span>
+      </a>
+    </nav>
+  </aside>
+
+
+  <div class="main-content">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
+        <h1>Treinamentos</h1>
+      </div>
+      <div class="topbar-right">
+        <div class="user-menu">
+          <button class="user-button" id="userMenuButton">
+            <span class="user-avatar" id="userAvatar">U</span>
+            <span class="user-name" id="userName">Usuário</span>
+            <span class="user-arrow">▼</span>
+          </button>
+          <div class="user-dropdown" id="userDropdown">
+            <div class="user-info">
+              <strong id="userFullName">Nome do Usuário</strong>
+              <small id="userProfile">Perfil</small>
+            </div>
+            <hr>
+            <a href="#" class="dropdown-item">Meu Perfil</a>
+            <a href="settings.html" class="dropdown-item">Configurações</a>
+            <hr>
+            <a href="#" class="dropdown-item" id="logoutButton">Sair</a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="content-area">
+      <div class="stats-row">
+        <div class="stat-box">
+          <div class="stat-box-icon" style="background: rgba(44, 62, 80, 0.1);"><img
+              src="public/assets/graduation-cap.png" alt="icone_treinamentos_disponiveis"></div>
+          <div class="stat-box-value">24</div>
+          <div class="stat-box-label">Treinamentos Disponíveis</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-box-icon" style="background: rgba(39, 174, 96, 0.1);"><img
+              src="public/assets/check (1).png" alt="icone_conclusoes"></div>
+          <div class="stat-box-value">156</div>
+          <div class="stat-box-label">Conclusões (mês)</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-box-icon" style="background: rgba(243, 156, 18, 0.1);"><img
+              src="public/assets/hourglass.png" alt="icone_em_andamento"></div>
+          <div class="stat-box-value">89</div>
+          <div class="stat-box-label">Em Andamento</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-box-icon" style="background: rgba(231, 76, 60, 0.1);"><img
+              src="public/assets/chart-column (1).png" alt="icone_taxa_conclusao"></div>
+          <div class="stat-box-value">78%</div>
+          <div class="stat-box-label">Taxa de Conclusão</div>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs" style="margin-bottom: var(--spacing-6);">
+        <button class="tab-btn active" onclick="showTab('catalogo')">Catálogo</button>
+        <button class="tab-btn" onclick="showTab('meus')">Meus Treinamentos</button>
+        <button class="tab-btn" onclick="showTab('gestao')">Gestão</button>
+      </div>
+
+      <!-- Tab Catálogo -->
+      <div id="tabCatalogo">
+        <div class="page-header">
+          <div>
+            <h2 class="page-title">Catálogo de Treinamentos</h2>
+            <p class="page-subtitle">Explore e inscreva-se nos treinamentos disponíveis</p>
+          </div>
+          <button class="btn btn-primary" onclick="openTrainingModal()">+ Novo Treinamento</button>
+        </div>
+
+        <div class="filters-bar">
+          <div class="search-box"><input type="text" id="search" placeholder="Buscar treinamento..." onkeyup="filter()">
+          </div>
+          <div class="filter-group"><label>Categoria:</label><select id="filterCat" onchange="filter()">
+              <option value="">Todas</option>
+              <option>Técnico</option>
+              <option>Liderança</option>
+              <option>Compliance</option>
+              <option>Soft Skills</option>
+            </select></div>
+          <div class="filter-group"><label>Modalidade:</label><select id="filterMod" onchange="filter()">
+              <option value="">Todas</option>
+              <option>Online</option>
+              <option>Presencial</option>
+              <option>Híbrido</option>
+            </select></div>
+        </div>
+
+        <div class="training-grid" id="trainingGrid"></div>
+      </div>
+
+      <!-- Tab Meus Treinamentos -->
+      <div id="tabMeus" style="display: none;">
+        <div class="page-header">
+          <h2 class="page-title">Meus Treinamentos</h2>
+        </div>
+        <div class="training-grid" id="myTrainingGrid"></div>
+      </div>
+
+      <!-- Tab Gestão -->
+      <div id="tabGestao" style="display: none;">
+        <div class="page-header">
+          <h2 class="page-title">Gestão de Treinamentos</h2>
+        </div>
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Treinamento</th>
+                <th>Inscritos</th>
+                <th>Em Andamento</th>
+                <th>Concluídos</th>
+                <th>Taxa</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="managementBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Novo Treinamento -->
+  <div class="modal" id="trainingModal">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-header">
+        <h3 class="modal-title">Novo Treinamento</h3><button class="modal-close"
+          onclick="Modal.close('trainingModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="trainingForm">
+          <div class="form-row form-row-2">
+            <div class="form-group"><label class="form-label">Título *</label><input type="text" class="form-input"
+                name="titulo" required></div>
+            <div class="form-group"><label class="form-label">Categoria *</label><select class="form-select"
+                name="categoria" required>
+                <option value="">Selecione</option>
+                <option>Técnico</option>
+                <option>Liderança</option>
+                <option>Compliance</option>
+                <option>Soft Skills</option>
+              </select></div>
+          </div>
+          <div class="form-row form-row-3">
+            <div class="form-group"><label class="form-label">Modalidade</label><select class="form-select"
+                name="modalidade">
+                <option>Online</option>
+                <option>Presencial</option>
+                <option>Híbrido</option>
+              </select></div>
+            <div class="form-group"><label class="form-label">Carga Horária</label><input type="number"
+                class="form-input" name="carga_horaria" placeholder="horas"></div>
+            <div class="form-group"><label class="form-label">Prazo (dias)</label><input type="number"
+                class="form-input" name="prazo" placeholder="dias"></div>
+          </div>
+          <div class="form-group"><label class="form-label">Descrição</label><textarea class="form-input"
+              name="descricao" rows="3"></textarea></div>
+          <div class="form-group"><label class="form-label">Conteúdo Programático</label><textarea class="form-input"
+              name="conteudo" rows="4"></textarea></div>
+          <div class="form-group"><label class="checkbox-label"><input type="checkbox"
+                name="obrigatorio"><span>Treinamento Obrigatório</span></label></div>
+        </form>
+      </div>
+      <div class="modal-footer"><button class="btn btn-secondary"
+          onclick="Modal.close('trainingModal')">Cancelar</button><button class="btn btn-primary"
+          onclick="saveTraining()">Salvar</button></div>
+    </div>
+  </div>
+
+  <script src="public/scripts/auth.js"></script>
+  <script src="public/scripts/components.js"></script>
+  <script>
+    const trainings = [
+      { id: 1, titulo: "Segurança da Informação", categoria: "Compliance", modalidade: "Online", carga: 4, prazo: 30, inscritos: 248, icon: "", obrigatorio: true },
+      { id: 2, titulo: "Liderança e Gestão de Equipes", categoria: "Liderança", modalidade: "Presencial", carga: 16, prazo: 60, inscritos: 45, icon: "", obrigatorio: false },
+      { id: 3, titulo: "Excel Avançado", categoria: "Técnico", modalidade: "Online", carga: 8, prazo: 45, inscritos: 89, icon: "", obrigatorio: false },
+      { id: 4, titulo: "Comunicação Assertiva", categoria: "Soft Skills", modalidade: "Híbrido", carga: 6, prazo: 30, inscritos: 67, icon: "", obrigatorio: false },
+      { id: 5, titulo: "LGPD - Lei Geral de Proteção de Dados", categoria: "Compliance", modalidade: "Online", carga: 3, prazo: 15, inscritos: 248, icon: "", obrigatorio: true },
+      { id: 6, titulo: "Metodologias Ágeis", categoria: "Técnico", modalidade: "Online", carga: 12, prazo: 45, inscritos: 56, icon: "", obrigatorio: false }
+    ];
+
+    const myTrainings = [
+      { id: 1, titulo: "Segurança da Informação", categoria: "Compliance", progresso: 75, icon: "" },
+      { id: 5, titulo: "LGPD", categoria: "Compliance", progresso: 100, icon: "" },
+      { id: 3, titulo: "Excel Avançado", categoria: "Técnico", progresso: 30, icon: "" }
+    ];
+
+    let filtered = [...trainings];
+
+    document.addEventListener("DOMContentLoaded", () => {
+      if (!Auth.requireAuth()) return;
+      initUI();
+      initSidebar();
+      render();
+    });
+
+    function initUI() {
+      const user = Auth.getCurrentUser();
+      document.getElementById("userName").textContent = user?.email?.split("@")[0] || "Usuário";
+      document.getElementById("userAvatar").textContent = (user?.email || "U")[0].toUpperCase();
+      document.getElementById("userMenuButton").onclick = () => document.getElementById("userDropdown").classList.toggle("active");
+      document.getElementById("logoutButton").onclick = (e) => { e.preventDefault(); Auth.logout(); };
+    }
+
+    function initSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const mobileBtn = document.getElementById('mobileMenuBtn');
+
+      mobileBtn?.addEventListener('click', () => {
+        sidebar.classList.toggle('mobile-open');
+      });
+
+      document.addEventListener('click', (e) => {
+        if (window.innerWidth <= 768) {
+          if (!e.target.closest('.sidebar') && !e.target.closest('.mobile-menu-btn')) {
+            sidebar.classList.remove('mobile-open');
+          }
+        }
+      });
+    }
+
+    function showTab(tab) {
+      document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', ['catalogo', 'meus', 'gestao'][i] === tab));
+      document.getElementById('tabCatalogo').style.display = tab === 'catalogo' ? 'block' : 'none';
+      document.getElementById('tabMeus').style.display = tab === 'meus' ? 'block' : 'none';
+      document.getElementById('tabGestao').style.display = tab === 'gestao' ? 'block' : 'none';
+    }
+
+    function filter() {
+      const search = document.getElementById("search").value.toLowerCase();
+      const cat = document.getElementById("filterCat").value;
+      const mod = document.getElementById("filterMod").value;
+      filtered = trainings.filter(t => (!search || t.titulo.toLowerCase().includes(search)) && (!cat || t.categoria === cat) && (!mod || t.modalidade === mod));
+      render();
+    }
+
+    function render() {
+      document.getElementById("trainingGrid").innerHTML = filtered.map(t => `
+        <div class="training-card">
+          <div class="training-banner"></div>
+          <div class="training-body">
+            <div class="training-category">${t.categoria} ${t.obrigatorio ? '<span class="badge badge-danger" style="font-size: 10px;">Obrigatório</span>' : ''}</div>
+            <h3 class="training-title">${t.titulo}</h3>
+            <div class="training-meta">
+              <span> ${t.carga}h</span>
+              <span> ${t.prazo} dias</span>
+              <span> ${t.modalidade}</span>
+            </div>
+            <div class="training-footer">
+              <span style="font-size: var(--font-size-sm); color: var(--gray-500);">${t.inscritos} inscritos</span>
+              <button class="btn btn-primary btn-sm" onclick="enroll(${t.id})">Inscrever-se</button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+
+      document.getElementById("myTrainingGrid").innerHTML = myTrainings.map(t => `
+        <div class="training-card">
+          <div class="training-banner">${t.icon}</div>
+          <div class="training-body">
+            <div class="training-category">${t.categoria}</div>
+            <h3 class="training-title">${t.titulo}</h3>
+            <div class="training-footer" style="flex-direction: column; align-items: stretch;">
+              <div class="training-progress">
+                <div class="progress-bar"><div class="progress-fill" style="width: ${t.progresso}%;"></div></div>
+                <div class="progress-text">${t.progresso}% concluído</div>
+              </div>
+              <button class="btn ${t.progresso === 100 ? 'btn-success' : 'btn-primary'} btn-sm" style="margin-top: var(--spacing-3);" onclick="continueTraining(${t.id})">
+                ${t.progresso === 100 ? '✓ Concluído' : 'Continuar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+
+      document.getElementById("managementBody").innerHTML = trainings.map(t => {
+        const andamento = Math.floor(t.inscritos * 0.3);
+        const concluidos = Math.floor(t.inscritos * 0.5);
+        const taxa = Math.round((concluidos / t.inscritos) * 100);
+        return `
+          <tr>
+            <td><strong>${t.titulo}</strong><br><small class="text-muted">${t.categoria}</small></td>
+            <td>${t.inscritos}</td>
+            <td>${andamento}</td>
+            <td>${concluidos}</td>
+            <td><span class="badge ${taxa >= 70 ? 'badge-success' : 'badge-warning'}">${taxa}%</span></td>
+            <td><div class="cell-actions"><button class="btn-icon view" onclick="viewReport(${t.id})">📊</button><button class="btn-icon edit" onclick="editTraining(${t.id})">✏️</button></div></td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function openTrainingModal() { document.getElementById('trainingForm').reset(); Modal.open('trainingModal'); }
+    function saveTraining() { Toast.success('Treinamento criado com sucesso!'); Modal.close('trainingModal'); }
+    function enroll(id) { Toast.success('Inscrição realizada com sucesso!'); }
+    function continueTraining(id) { Toast.info('Abrindo treinamento...'); }
+    function viewReport(id) { Toast.info('Visualizando relatório...'); }
+    function editTraining(id) { openTrainingModal(); }
+  </script>
+</body>
+
+</html>

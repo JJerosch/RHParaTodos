@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Painel - Funcionário</title>
+  <link rel="stylesheet" href="public/styles/global.css">
+  <link rel="stylesheet" href="public/styles/dashboard.css">
+  <link rel="stylesheet" href="public/styles/components.css">
+  <style>
+    .container { max-width: 980px; margin: 2rem auto; padding: 1.5rem; }
+    .header { display:flex; align-items:center; justify-content:space-between; gap:1rem; margin-bottom:1rem }
+    .card { background: white; padding:1rem; border-radius:10px; box-shadow:0 6px 18px rgba(0,0,0,0.06); }
+    .punch-actions { display:flex; gap:1rem; margin-bottom:1rem }
+    .btn { padding:0.75rem 1rem; border-radius:8px; border:none; cursor:pointer; font-weight:600 }
+    .btn-primary { background:var(--primary-dark); color:white }
+    .btn-secondary { background:var(--gray-50); color:var(--gray-800) }
+    table { width:100%; border-collapse:collapse; margin-top:0.5rem }
+    th,td { text-align:left; padding:0.75rem; border-bottom:1px solid #efefef }
+    .muted { color:var(--gray-500); font-size:0.9rem }
+    .last-punch { font-weight:700 }
+
+    /* Employee specific tweaks */
+    .employee-card { padding: 1rem; }
+    .punch-actions .btn { padding: 0.6rem 1rem; }
+    .payslip-table td, .payslip-table th { padding: 0.6rem }
+  </style>
+</head>
+
+<body>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <img src="public/assets/gruporhpaint.png" alt="logo_menu_lateral" height="60">
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="employee-dashboard.html" class="nav-item active" id="nav-timesheet">
+        <span class="nav-text">Ponto</span>
+      </a>
+      <a href="payslips.html" class="nav-item" id="nav-payslips">
+        <span class="nav-text">Holerites</span>
+      </a>
+    </nav>
+  </aside>
+
+  <div class="main-content">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
+        <h1>Ponto</h1>
+      </div>
+      <div class="topbar-right">
+        <div class="user-menu">
+          <button class="user-button" id="userMenuButton">
+            <span class="user-avatar" id="userAvatar">U</span>
+            <span class="user-name" id="userName">Usuário</span>
+            <span class="user-arrow">▼</span>
+          </button>
+          <div class="user-dropdown" id="userDropdown">
+            <div class="user-info">
+              <strong id="userFullName">Nome do Usuário</strong>
+              <small id="userProfile">Perfil</small>
+            </div>
+            <hr>
+            <a href="#" class="dropdown-item">Meu Perfil</a>
+            <a href="settings.html" class="dropdown-item">Configurações</a>
+            <hr>
+            <a href="#" class="dropdown-item" id="logoutButton">Sair</a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="content-area">
+      <div class="container">
+    <div class="header">
+      <div>
+        <h2>Painel - Funcionário</h2>
+        <div class="muted">Bem-vindo, <span id="userNameInline">Usuário</span> — <small id="userProfileInline">Perfil</small></div>
+      </div>
+      <div>
+        <button class="btn btn-secondary" id="btnLogout">Sair</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap">
+        <div>
+          <div class="muted">Último registro</div>
+          <div class="last-punch" id="lastPunch">—</div>
+        </div>
+        <div class="punch-actions">
+          <button class="btn btn-primary" id="btnPunch">Bater Ponto</button>
+          <button class="btn btn-secondary" id="btnRefresh">Atualizar</button>
+        </div>
+      </div>
+    </div>
+
+    <div style="height:1rem"></div>
+
+    <div class="card">
+      <h3>Histórico de Ponto — Mês Atual</h3>
+      <div class="muted">Registros de entrada/saída do mês atual</div>
+      <table aria-label="Histórico de Ponto">
+        <thead>
+          <tr><th>Data</th><th>Hora</th><th>Tipo</th></tr>
+        </thead>
+        <tbody id="punchTableBody">
+          <tr><td colspan="3">Carregando...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div style="height:1rem"></div>
+
+    <div id="alertSuccess" class="alert alert-success" style="display:none"></div>
+    <div id="alertError" class="alert alert-error" style="display:none"></div>
+      </div> <!-- end container -->
+    </div> <!-- end content-area -->
+  </div> <!-- end main-content -->
+
+  <!-- Modal: Meus Holerites -->
+  <div id="payslipModal" class="modal" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+      <div class="modal-header">
+        <h3 class="modal-title">Meus Holerites</h3>
+        <button class="modal-close" id="closePayslipModal" aria-label="Fechar">×</button>
+      </div>
+      <div class="modal-body" id="payslipList">Carregando...</div>
+    </div>
+  </div>
+
+  <script src="public/scripts/auth.js"></script>
+  <script src="public/scripts/employee.js"></script>
+</body>
+
+</html>

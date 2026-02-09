@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Folha de Pagamento - Sistema RH</title>
+  <link rel="stylesheet" href="public/styles/global.css">
+  <link rel="stylesheet" href="public/styles/dashboard.css">
+  <link rel="stylesheet" href="public/styles/components.css">
+</head>
+
+<body>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <img src="public/assets/gruporhpaint.png" alt="logo_menu_lateral" height="60">
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="dashboard.html" class="nav-item">
+        <span class="nav-text">Dashboard</span>
+      </a>
+
+      <div class="nav-section">Gestão de Pessoas</div>
+      <a href="employees.html" class="nav-item">
+        <span class="nav-text">Funcionários</span>
+      </a>
+      <a href="departments.html" class="nav-item">
+        <span class="nav-text">Departamentos</span>
+      </a>
+      <a href="positions.html" class="nav-item">
+        <span class="nav-text">Cargos</span>
+      </a>
+
+      <div class="nav-section">Recursos Humanos</div>
+      <a href="recruitment.html" class="nav-item">
+        <span class="nav-text">Recrutamento</span>
+      </a>
+      <a href="training.html" class="nav-item">
+        <span class="nav-text">Treinamentos</span>
+      </a>
+      <a href="performance.html" class="nav-item">
+        <span class="nav-text">Avaliações</span>
+      </a>
+
+      <div class="nav-section">Departamento Pessoal</div>
+      <a href="payroll.html" class="nav-item active">
+        <span class="nav-text">Folha de Pagamento</span>
+      </a>
+      <a href="benefits.html" class="nav-item">
+        <span class="nav-text">Benefícios</span>
+      </a>
+      <a href="vacation.html" class="nav-item">
+        <span class="nav-text">Férias</span>
+      </a>
+      <a href="timesheet.html" class="nav-item">
+        <span class="nav-text">Ponto</span>
+      </a>
+
+      <div class="nav-section">Administração</div>
+      <a href="reports.html" class="nav-item">
+        <span class="nav-text">Relatórios</span>
+      </a>
+      <a href="settings.html" class="nav-item">
+        <span class="nav-text">Configurações</span>
+      </a>
+    </nav>
+  </aside>
+
+
+  <div class="main-content">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
+        <h1>Folha de Pagamento</h1>
+      </div>
+      <div class="topbar-right">
+        <div class="user-menu">
+          <button class="user-button" id="userMenuButton">
+            <span class="user-avatar" id="userAvatar">U</span>
+            <span class="user-name" id="userName">Usuário</span>
+            <span class="user-arrow">▼</span>
+          </button>
+          <div class="user-dropdown" id="userDropdown">
+            <div class="user-info">
+              <strong id="userFullName">Nome do Usuário</strong>
+              <small id="userProfile">Perfil</small>
+            </div>
+            <hr>
+            <a href="#" class="dropdown-item">Meu Perfil</a>
+            <a href="settings.html" class="dropdown-item">Configurações</a>
+            <hr>
+            <a href="#" class="dropdown-item" id="logoutButton">Sair</a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="content-area">
+      <!-- Stats -->
+      <div class="stats-row">
+        <div class="stat-box">
+          <div class="stat-box-icon" style="background: rgba(44, 62, 80, 0.1); color: var(--primary-dark);"><img
+              src="public/assets/scroll.png" alt="icone_total_folha"></div>
+          <div class="stat-box-value" id="statTotal">R$ 0</div>
+          <div class="stat-box-label">Total da Folha</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-box-icon" style="background: rgba(39, 174, 96, 0.1); color: var(--success-green);"><img
+              src="public/assets/dollar-sign.png" alt="icone_total_liquido"></div>
+          <div class="stat-box-value" id="statLiquido">R$ 0</div>
+          <div class="stat-box-label">Total Líquido</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-box-icon" style="background: rgba(231, 76, 60, 0.1); color: var(--error-red);"><img
+              src="public/assets/percent.png" alt="icone_total_descontos"></div>
+          <div class="stat-box-value" id="statDescontos">R$ 0</div>
+          <div class="stat-box-label">Total Descontos</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-box-icon" style="background: rgba(243, 156, 18, 0.1); color: var(--warning-orange);"><img
+              src="public/assets/users (1).png" alt="icone_funcionarios"></div>
+          <div class="stat-box-value" id="statFuncionarios">0</div>
+          <div class="stat-box-label">Funcionários</div>
+        </div>
+      </div>
+
+      <div class="page-header">
+        <div>
+          <h2 class="page-title">Folha de Pagamento</h2>
+          <p class="page-subtitle">Competência: <strong id="competencia">Janeiro/2026</strong></p>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-secondary" onclick="exportPayroll()"><img src="public/assets/folder-output.png"
+              alt="icone_exportar"> Exportar</button>
+          <button class="btn btn-secondary" onclick="generatePayroll()"><img src="public/assets/file-plus-corner (1).png" alt="icone_gerar_folha"> Gerar Folha</button>
+          <button class="btn btn-primary" onclick="approvePayroll()">✓ Aprovar Folha</button>
+        </div>
+      </div>
+
+      <div class="filters-bar">
+        <div class="filter-group">
+          <label>Mês:</label>
+          <select id="filterMonth" onchange="filter()">
+            <option value="01">Janeiro</option>
+            <option value="02">Fevereiro</option>
+            <option value="03">Março</option>
+            <option value="04">Abril</option>
+            <option value="05">Maio</option>
+            <option value="06">Junho</option>
+            <option value="07">Julho</option>
+            <option value="08">Agosto</option>
+            <option value="09">Setembro</option>
+            <option value="10">Outubro</option>
+            <option value="11">Novembro</option>
+            <option value="12">Dezembro</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>Ano:</label>
+          <select id="filterYear" onchange="filter()">
+            <option value="2026">2026</option>
+            <option value="2025">2025</option>
+            <option value="2024">2024</option>
+          </select>
+        </div>
+        <div class="search-box">
+          <input type="text" id="search" placeholder="Buscar funcionário..." onkeyup="filter()">
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Funcionário</th>
+              <th class="hide-mobile">Departamento</th>
+              <th>Salário Base</th>
+              <th class="hide-mobile">Proventos</th>
+              <th class="hide-mobile">Descontos</th>
+              <th>Líquido</th>
+              <th>Status</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Detalhes -->
+  <div class="modal" id="detailModal">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-header">
+        <h3 class="modal-title">Detalhes do Holerite</h3>
+        <button class="modal-close" onclick="Modal.close('detailModal')">&times;</button>
+      </div>
+      <div class="modal-body" id="detailContent"></div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="Modal.close('detailModal')">Fechar</button>
+        <button class="btn btn-primary" onclick="printPayslip()"><img src="public/assets/printer (2).png" alt="icone_imprimir"> Imprimir</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="public/scripts/auth.js"></script>
+  <script src="public/scripts/components.js"></script>
+  <script>
+    const payrollData = [
+      { id: 1, matricula: "001234", nome: "João Silva Santos", departamento: "Tecnologia", salario_base: 12500, proventos: 1250, descontos: 2875, liquido: 10875, status: "PENDENTE" },
+      { id: 2, matricula: "001235", nome: "Maria Oliveira Costa", departamento: "RH", salario_base: 9800, proventos: 980, descontos: 2156, liquido: 8624, status: "APROVADO" },
+      { id: 3, matricula: "001236", nome: "Pedro Henrique Almeida", departamento: "Financeiro", salario_base: 6500, proventos: 650, descontos: 1495, liquido: 5655, status: "PENDENTE" },
+      { id: 4, matricula: "001237", nome: "Ana Paula Ferreira", departamento: "Comercial", salario_base: 15000, proventos: 3500, descontos: 4625, liquido: 13875, status: "APROVADO" },
+      { id: 5, matricula: "001238", nome: "Carlos Eduardo Lima", departamento: "Operações", salario_base: 5200, proventos: 520, descontos: 1196, liquido: 4524, status: "PENDENTE" }
+    ];
+    let filtered = [...payrollData];
+
+    document.addEventListener("DOMContentLoaded", () => {
+      if (!Auth.requireAuth()) return;
+      initUI();
+      initSidebar();
+      render();
+      updateStats();
+    });
+
+    function initUI() {
+      const user = Auth.getCurrentUser();
+      document.getElementById("userName").textContent = user?.email?.split("@")[0] || "Usuário";
+      document.getElementById("userAvatar").textContent = (user?.email || "U")[0].toUpperCase();
+      document.getElementById("userMenuButton").onclick = () => document.getElementById("userDropdown").classList.toggle("active");
+      document.getElementById("logoutButton").onclick = (e) => { e.preventDefault(); Auth.logout(); };
+    }
+
+    function initSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const mobileBtn = document.getElementById('mobileMenuBtn');
+
+      mobileBtn?.addEventListener('click', () => {
+        sidebar.classList.toggle('mobile-open');
+      });
+
+      document.addEventListener('click', (e) => {
+        if (window.innerWidth <= 768) {
+          if (!e.target.closest('.sidebar') && !e.target.closest('.mobile-menu-btn')) {
+            sidebar.classList.remove('mobile-open');
+          }
+        }
+      });
+    }
+
+    function updateStats() {
+      const total = payrollData.reduce((sum, p) => sum + p.salario_base + p.proventos, 0);
+      const liquido = payrollData.reduce((sum, p) => sum + p.liquido, 0);
+      const descontos = payrollData.reduce((sum, p) => sum + p.descontos, 0);
+
+      document.getElementById("statTotal").textContent = formatCurrency(total);
+      document.getElementById("statLiquido").textContent = formatCurrency(liquido);
+      document.getElementById("statDescontos").textContent = formatCurrency(descontos);
+      document.getElementById("statFuncionarios").textContent = payrollData.length;
+    }
+
+    function filter() {
+      const search = document.getElementById("search").value.toLowerCase();
+      filtered = payrollData.filter(p => !search || p.nome.toLowerCase().includes(search) || p.matricula.includes(search));
+      render();
+    }
+
+    function render() {
+      document.getElementById("tableBody").innerHTML = filtered.map(p => `
+        <tr>
+          <td>
+            <div class="cell-avatar">
+              <div class="avatar">${p.nome.split(' ').map(n => n[0]).slice(0, 2).join('')}</div>
+              <div class="cell-info">
+                <span class="cell-primary">${p.nome}</span>
+                <span class="cell-secondary">${p.matricula}</span>
+              </div>
+            </div>
+          </td>
+          <td class="hide-mobile">${p.departamento}</td>
+          <td>${formatCurrency(p.salario_base)}</td>
+          <td class="hide-mobile" style="color: var(--success-green);">+${formatCurrency(p.proventos)}</td>
+          <td class="hide-mobile" style="color: var(--error-red);">-${formatCurrency(p.descontos)}</td>
+          <td><strong>${formatCurrency(p.liquido)}</strong></td>
+          <td><span class="badge ${p.status === 'APROVADO' ? 'badge-success' : 'badge-warning'}">${p.status}</span></td>
+          <td>
+            <div class="cell-actions">
+              <button class="btn-icon view" onclick="viewDetails(${p.id})" title="Ver Holerite"><img src="public/assets/eye.png" alt="icone_ver_holerite"></button>
+              <button class="btn-icon edit" onclick="editPayroll(${p.id})" title="Editar"><img src="public/assets/pencil (1).png" alt="icone_editar"></button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function viewDetails(id) {
+      const p = payrollData.find(x => x.id === id);
+      if (!p) return;
+
+      document.getElementById("detailContent").innerHTML = `
+        <div style="border-bottom: 2px solid var(--gray-200); padding-bottom: var(--spacing-4); margin-bottom: var(--spacing-4);">
+          <h2 style="margin: 0;">${p.nome}</h2>
+          <p style="color: var(--gray-500);">Matrícula: ${p.matricula} | ${p.departamento}</p>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-6);">
+          <div>
+            <h4 style="color: var(--success-green); margin-bottom: var(--spacing-3);">Proventos</h4>
+            <table style="width: 100%;">
+              <tr><td>Salário Base</td><td style="text-align: right;">${formatCurrency(p.salario_base)}</td></tr>
+              <tr><td>Hora Extra (10h)</td><td style="text-align: right;">${formatCurrency(p.proventos * 0.5)}</td></tr>
+              <tr><td>Adicional Noturno</td><td style="text-align: right;">${formatCurrency(p.proventos * 0.3)}</td></tr>
+              <tr><td>Outros</td><td style="text-align: right;">${formatCurrency(p.proventos * 0.2)}</td></tr>
+              <tr style="font-weight: bold; border-top: 1px solid var(--gray-200);"><td>Total Proventos</td><td style="text-align: right;">${formatCurrency(p.salario_base + p.proventos)}</td></tr>
+            </table>
+          </div>
+          
+          <div>
+            <h4 style="color: var(--error-red); margin-bottom: var(--spacing-3);">Descontos</h4>
+            <table style="width: 100%;">
+              <tr><td>INSS</td><td style="text-align: right;">${formatCurrency(p.descontos * 0.4)}</td></tr>
+              <tr><td>IRRF</td><td style="text-align: right;">${formatCurrency(p.descontos * 0.35)}</td></tr>
+              <tr><td>Vale Transporte</td><td style="text-align: right;">${formatCurrency(p.descontos * 0.15)}</td></tr>
+              <tr><td>Plano de Saúde</td><td style="text-align: right;">${formatCurrency(p.descontos * 0.1)}</td></tr>
+              <tr style="font-weight: bold; border-top: 1px solid var(--gray-200);"><td>Total Descontos</td><td style="text-align: right;">${formatCurrency(p.descontos)}</td></tr>
+            </table>
+          </div>
+        </div>
+        
+        <div style="background: var(--gray-50); padding: var(--spacing-4); border-radius: var(--radius-md); margin-top: var(--spacing-6); text-align: center;">
+          <h3 style="margin: 0; color: var(--primary-dark);">Salário Líquido: ${formatCurrency(p.liquido)}</h3>
+        </div>
+      `;
+
+      Modal.open('detailModal');
+    }
+
+    function editPayroll(id) { Toast.info('Funcionalidade em desenvolvimento'); }
+    function generatePayroll() { Toast.success('Folha gerada com sucesso!'); }
+    function approvePayroll() { Toast.success('Folha aprovada com sucesso!'); }
+    function exportPayroll() { Toast.success('Exportação iniciada!'); }
+    function printPayslip() { window.print(); }
+    function formatCurrency(val) { return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val || 0); }
+  </script>
+</body>
+
+</html>
