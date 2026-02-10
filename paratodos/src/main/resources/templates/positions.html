@@ -5,16 +5,16 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cargos - Sistema RH</title>
-  <link rel="stylesheet" href="public/styles/global.css">
-  <link rel="stylesheet" href="public/styles/dashboard.css">
-  <link rel="stylesheet" href="public/styles/components.css">
+  <link rel="stylesheet" href="../static/styles/global.css">
+  <link rel="stylesheet" href="../static/styles/dashboard.css">
+  <link rel="stylesheet" href="../static/styles/components.css">
 </head>
 
 <body>
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
       <div class="logo">
-        <img src="public/assets/gruporhpaint.png" alt="logo_menu_lateral" height="60">
+        <img src="../static/assets/gruporhpaint.png" alt="logo_menu_lateral" height="60">
       </div>
     </div>
     <nav class="sidebar-nav">
@@ -214,8 +214,8 @@
     </div>
   </div>
 
-  <script src="public/scripts/auth.js"></script>
-  <script src="public/scripts/components.js"></script>
+  <script src="../static/scripts/auth.js"></script>
+  <script src="../static/scripts/components.js"></script>
   <script>
     let data = [
       { id: 1, titulo: "Desenvolvedor Backend", departamento: "Tecnologia", nivel: "Senior", salario_minimo: 10000, salario_maximo: 15000, ocupantes: 8, ativo: true },
@@ -285,8 +285,8 @@
           <td><span class="badge ${item.ativo ? 'badge-success' : 'badge-danger'}">${item.ativo ? 'Ativo' : 'Inativo'}</span></td>
           <td>
             <div class="cell-actions">
-              <button class="btn-icon edit" onclick="edit(${item.id})"><img src="public/assets/pencil (1).png" alt="icone_editar_cargo"></button>
-              <button class="btn-icon delete" onclick="remove(${item.id})"><img src="public/assets/trash-2 (1).png" alt="icone_excluir_cargo"></button>
+              <button class="btn-icon edit" onclick="edit(${item.id})"><img src="../static/assets/pencil (1).png" alt="icone_editar_cargo"></button>
+              <button class="btn-icon delete" onclick="remove(${item.id})"><img src="../static/assets/trash-2 (1).png" alt="icone_excluir_cargo"></button>
             </div>
           </td>
         </tr>

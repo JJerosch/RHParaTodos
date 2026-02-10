@@ -5,16 +5,16 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Benefícios - Sistema RH</title>
-  <link rel="stylesheet" href="public/styles/global.css">
-  <link rel="stylesheet" href="public/styles/dashboard.css">
-  <link rel="stylesheet" href="public/styles/components.css">
+  <link rel="stylesheet" href="../static/styles/global.css">
+  <link rel="stylesheet" href="../static/styles/dashboard.css">
+  <link rel="stylesheet" href="../static/styles/components.css">
 </head>
 
 <body>
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
       <div class="logo">
-        <img src="public/assets/gruporhpaint.png" alt="logo_menu_lateral" height="60">
+        <img src="../static/assets/gruporhpaint.png" alt="logo_menu_lateral" height="60">
       </div>
     </div>
     <nav class="sidebar-nav">
@@ -70,25 +70,25 @@
       <div class="stats-row">
         <div class="stat-box">
           <div class="stat-box-icon" style="background: rgba(44, 62, 80, 0.1);"><img
-              src="public/assets/gift (2).png" alt="icone_tipos_beneficios"></div>
+              src="../static/assets/gift (2).png" alt="icone_tipos_beneficios"></div>
           <div class="stat-box-value">6</div>
           <div class="stat-box-label">Tipos de Benefícios</div>
         </div>
         <div class="stat-box">
           <div class="stat-box-icon" style="background: rgba(39, 174, 96, 0.1);"><img
-              src="public/assets/users (1).png" alt="icone_beneficiarios"></div>
+              src="../static/assets/users (1).png" alt="icone_beneficiarios"></div>
           <div class="stat-box-value">248</div>
           <div class="stat-box-label">Beneficiários</div>
         </div>
         <div class="stat-box">
           <div class="stat-box-icon" style="background: rgba(243, 156, 18, 0.1);"><img
-              src="public/assets/banknote (1).png" alt="icone_custo_mensal"></div>
+              src="../static/assets/banknote (1).png" alt="icone_custo_mensal"></div>
           <div class="stat-box-value">R$ 185K</div>
           <div class="stat-box-label">Custo Mensal</div>
         </div>
         <div class="stat-box">
           <div class="stat-box-icon" style="background: rgba(231, 76, 60, 0.1);"><img
-              src="public/assets/chart-column (1).png" alt="icone_custo_funcionario"></div>
+              src="../static/assets/chart-column (1).png" alt="icone_custo_funcionario"></div>
           <div class="stat-box-value">R$ 745</div>
           <div class="stat-box-label">Custo/Funcionário</div>
         </div>
@@ -191,8 +191,8 @@
     }
   </style>
 
-  <script src="public/scripts/auth.js"></script>
-  <script src="public/scripts/components.js"></script>
+  <script src="../static/scripts/auth.js"></script>
+  <script src="../static/scripts/components.js"></script>
   <script>
     const benefits = [
       { id: 1, nome: "Vale Refeição", descricao: "Cartão para refeições diárias", valor: 800, beneficiarios: 235, ativo: true },
@@ -264,8 +264,8 @@
         <div class="benefit-card">
           <div class="benefit-header">
             <div class="cell-actions">
-              <button class="btn-icon edit" onclick="edit(${b.id})"><img src="public/assets/pencil (1).png" alt="icone_editar"></button>
-              <button class="btn-icon delete" onclick="remove(${b.id})"><img src="public/assets/trash-2 (1).png" alt="icone_excluir"></button>
+              <button class="btn-icon edit" onclick="edit(${b.id})"><img src="../static/assets/pencil (1).png" alt="icone_editar"></button>
+              <button class="btn-icon delete" onclick="remove(${b.id})"><img src="../static/assets/trash-2 (1).png" alt="icone_excluir"></button>
             </div>
           </div>
           <h3 class="benefit-name">${b.nome}</h3>
@@ -291,7 +291,7 @@
     function remove(id) { Confirm.show('Excluir este benefício?', () => { const idx = benefits.findIndex(b => b.id === id); if (idx > -1) benefits.splice(idx, 1); Toast.success('Benefício excluído!'); render(); }); }
     function formatCurrency(val) { return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val || 0); }
   </script>
-  <script src="public/scripts/dashboard.js"></script>
+  <script src="../static/scripts/dashboard.js"></script>
 </body>
 
 </html>

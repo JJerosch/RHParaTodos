@@ -5,9 +5,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Treinamentos - Sistema RH</title>
-  <link rel="stylesheet" href="public/styles/global.css">
-  <link rel="stylesheet" href="public/styles/dashboard.css">
-  <link rel="stylesheet" href="public/styles/components.css">
+  <link rel="stylesheet" href="../static/styles/global.css">
+  <link rel="stylesheet" href="../static/styles/dashboard.css">
+  <link rel="stylesheet" href="../static/styles/components.css">
   <style>
     .training-grid {
       display: grid;
@@ -108,7 +108,7 @@
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
       <div class="logo">
-        <img src="public/assets/gruporhpaint.png" alt="logo_menu_lateral" height="60">
+        <img src="../static/assets/gruporhpaint.png" alt="logo_menu_lateral" height="60">
       </div>
     </div>
     <nav class="sidebar-nav">
@@ -195,25 +195,25 @@
       <div class="stats-row">
         <div class="stat-box">
           <div class="stat-box-icon" style="background: rgba(44, 62, 80, 0.1);"><img
-              src="public/assets/graduation-cap.png" alt="icone_treinamentos_disponiveis"></div>
+              src="../static/assets/graduation-cap.png" alt="icone_treinamentos_disponiveis"></div>
           <div class="stat-box-value">24</div>
           <div class="stat-box-label">Treinamentos Disponíveis</div>
         </div>
         <div class="stat-box">
           <div class="stat-box-icon" style="background: rgba(39, 174, 96, 0.1);"><img
-              src="public/assets/check (1).png" alt="icone_conclusoes"></div>
+              src="../static/assets/check (1).png" alt="icone_conclusoes"></div>
           <div class="stat-box-value">156</div>
           <div class="stat-box-label">Conclusões (mês)</div>
         </div>
         <div class="stat-box">
           <div class="stat-box-icon" style="background: rgba(243, 156, 18, 0.1);"><img
-              src="public/assets/hourglass.png" alt="icone_em_andamento"></div>
+              src="../static/assets/hourglass.png" alt="icone_em_andamento"></div>
           <div class="stat-box-value">89</div>
           <div class="stat-box-label">Em Andamento</div>
         </div>
         <div class="stat-box">
           <div class="stat-box-icon" style="background: rgba(231, 76, 60, 0.1);"><img
-              src="public/assets/chart-column (1).png" alt="icone_taxa_conclusao"></div>
+              src="../static/assets/chart-column (1).png" alt="icone_taxa_conclusao"></div>
           <div class="stat-box-value">78%</div>
           <div class="stat-box-label">Taxa de Conclusão</div>
         </div>
@@ -336,8 +336,8 @@
     </div>
   </div>
 
-  <script src="public/scripts/auth.js"></script>
-  <script src="public/scripts/components.js"></script>
+  <script src="../static/scripts/auth.js"></script>
+  <script src="../static/scripts/components.js"></script>
   <script>
     const trainings = [
       { id: 1, titulo: "Segurança da Informação", categoria: "Compliance", modalidade: "Online", carga: 4, prazo: 30, inscritos: 248, icon: "", obrigatorio: true },

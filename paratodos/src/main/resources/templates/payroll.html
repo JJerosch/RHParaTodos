@@ -5,16 +5,16 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Folha de Pagamento - Sistema RH</title>
-  <link rel="stylesheet" href="public/styles/global.css">
-  <link rel="stylesheet" href="public/styles/dashboard.css">
-  <link rel="stylesheet" href="public/styles/components.css">
+  <link rel="stylesheet" href="../static/styles/global.css">
+  <link rel="stylesheet" href="../static/styles/dashboard.css">
+  <link rel="stylesheet" href="../static/styles/components.css">
 </head>
 
 <body>
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
       <div class="logo">
-        <img src="public/assets/gruporhpaint.png" alt="logo_menu_lateral" height="60">
+        <img src="../static/assets/gruporhpaint.png" alt="logo_menu_lateral" height="60">
       </div>
     </div>
     <nav class="sidebar-nav">
@@ -102,25 +102,25 @@
       <div class="stats-row">
         <div class="stat-box">
           <div class="stat-box-icon" style="background: rgba(44, 62, 80, 0.1); color: var(--primary-dark);"><img
-              src="public/assets/scroll.png" alt="icone_total_folha"></div>
+              src="../static/assets/scroll.png" alt="icone_total_folha"></div>
           <div class="stat-box-value" id="statTotal">R$ 0</div>
           <div class="stat-box-label">Total da Folha</div>
         </div>
         <div class="stat-box">
           <div class="stat-box-icon" style="background: rgba(39, 174, 96, 0.1); color: var(--success-green);"><img
-              src="public/assets/dollar-sign.png" alt="icone_total_liquido"></div>
+              src="../static/assets/dollar-sign.png" alt="icone_total_liquido"></div>
           <div class="stat-box-value" id="statLiquido">R$ 0</div>
           <div class="stat-box-label">Total Líquido</div>
         </div>
         <div class="stat-box">
           <div class="stat-box-icon" style="background: rgba(231, 76, 60, 0.1); color: var(--error-red);"><img
-              src="public/assets/percent.png" alt="icone_total_descontos"></div>
+              src="../static/assets/percent.png" alt="icone_total_descontos"></div>
           <div class="stat-box-value" id="statDescontos">R$ 0</div>
           <div class="stat-box-label">Total Descontos</div>
         </div>
         <div class="stat-box">
           <div class="stat-box-icon" style="background: rgba(243, 156, 18, 0.1); color: var(--warning-orange);"><img
-              src="public/assets/users (1).png" alt="icone_funcionarios"></div>
+              src="../static/assets/users (1).png" alt="icone_funcionarios"></div>
           <div class="stat-box-value" id="statFuncionarios">0</div>
           <div class="stat-box-label">Funcionários</div>
         </div>
@@ -132,9 +132,9 @@
           <p class="page-subtitle">Competência: <strong id="competencia">Janeiro/2026</strong></p>
         </div>
         <div class="page-actions">
-          <button class="btn btn-secondary" onclick="exportPayroll()"><img src="public/assets/folder-output.png"
+          <button class="btn btn-secondary" onclick="exportPayroll()"><img src="../static/assets/folder-output.png"
               alt="icone_exportar"> Exportar</button>
-          <button class="btn btn-secondary" onclick="generatePayroll()"><img src="public/assets/file-plus-corner (1).png" alt="icone_gerar_folha"> Gerar Folha</button>
+          <button class="btn btn-secondary" onclick="generatePayroll()"><img src="../static/assets/file-plus-corner (1).png" alt="icone_gerar_folha"> Gerar Folha</button>
           <button class="btn btn-primary" onclick="approvePayroll()">✓ Aprovar Folha</button>
         </div>
       </div>
@@ -200,13 +200,13 @@
       <div class="modal-body" id="detailContent"></div>
       <div class="modal-footer">
         <button class="btn btn-secondary" onclick="Modal.close('detailModal')">Fechar</button>
-        <button class="btn btn-primary" onclick="printPayslip()"><img src="public/assets/printer (2).png" alt="icone_imprimir"> Imprimir</button>
+        <button class="btn btn-primary" onclick="printPayslip()"><img src="../static/assets/printer (2).png" alt="icone_imprimir"> Imprimir</button>
       </div>
     </div>
   </div>
 
-  <script src="public/scripts/auth.js"></script>
-  <script src="public/scripts/components.js"></script>
+  <script src="../static/scripts/auth.js"></script>
+  <script src="../static/scripts/components.js"></script>
   <script>
     const payrollData = [
       { id: 1, matricula: "001234", nome: "João Silva Santos", departamento: "Tecnologia", salario_base: 12500, proventos: 1250, descontos: 2875, liquido: 10875, status: "PENDENTE" },
@@ -287,8 +287,8 @@
           <td><span class="badge ${p.status === 'APROVADO' ? 'badge-success' : 'badge-warning'}">${p.status}</span></td>
           <td>
             <div class="cell-actions">
-              <button class="btn-icon view" onclick="viewDetails(${p.id})" title="Ver Holerite"><img src="public/assets/eye.png" alt="icone_ver_holerite"></button>
-              <button class="btn-icon edit" onclick="editPayroll(${p.id})" title="Editar"><img src="public/assets/pencil (1).png" alt="icone_editar"></button>
+              <button class="btn-icon view" onclick="viewDetails(${p.id})" title="Ver Holerite"><img src="../static/assets/eye.png" alt="icone_ver_holerite"></button>
+              <button class="btn-icon edit" onclick="editPayroll(${p.id})" title="Editar"><img src="../static/assets/pencil (1).png" alt="icone_editar"></button>
             </div>
           </td>
         </tr>

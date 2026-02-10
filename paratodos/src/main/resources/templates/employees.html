@@ -5,9 +5,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Funcionários - Sistema RH</title>
-  <link rel="stylesheet" href="public/styles/global.css">
-  <link rel="stylesheet" href="public/styles/dashboard.css">
-  <link rel="stylesheet" href="public/styles/components.css">
+  <link rel="stylesheet" href="../static/styles/global.css">
+  <link rel="stylesheet" href="../static/styles/dashboard.css">
+  <link rel="stylesheet" href="../static/styles/components.css">
 </head>
 
 <body>
@@ -15,7 +15,7 @@
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
       <div class="logo">
-        <img src="public/assets/gruporhpaint.png" alt="logo_menu_lateral" height="60">
+        <img src="../static/assets/gruporhpaint.png" alt="logo_menu_lateral" height="60">
       </div>
     </div>
 
@@ -107,7 +107,7 @@
         <div class="stat-box">
           <div class="stat-box-header">
             <div class="stat-box-icon" style="background: rgba(44, 62, 80, 0.1); color: var(--primary-dark);"><img
-                src="public/assets/id-card-lanyard (1).png" alt="icone_funcionarios"></div>
+                src="../static/assets/id-card-lanyard (1).png" alt="icone_funcionarios"></div>
           </div>
           <div class="stat-box-value" id="statTotal">0</div>
           <div class="stat-box-label">Total de Funcionários</div>
@@ -115,7 +115,7 @@
         <div class="stat-box">
           <div class="stat-box-header">
             <div class="stat-box-icon" style="background: rgba(39, 174, 96, 0.1); color: var(--success-green);"><img
-                src="public/assets/check (1).png" alt="icone_funcionarios_ativos"></div>
+                src="../static/assets/check (1).png" alt="icone_funcionarios_ativos"></div>
           </div>
           <div class="stat-box-value" id="statAtivos">0</div>
           <div class="stat-box-label">Ativos</div>
@@ -123,7 +123,7 @@
         <div class="stat-box">
           <div class="stat-box-header">
             <div class="stat-box-icon" style="background: rgba(243, 156, 18, 0.1); color: var(--warning-orange);"><img
-                src="public/assets/hourglass.png" alt="icone_funcionarios_ferias"></div>
+                src="../static/assets/hourglass.png" alt="icone_funcionarios_ferias"></div>
           </div>
           <div class="stat-box-value" id="statFerias">0</div>
           <div class="stat-box-label">Em Férias</div>
@@ -131,7 +131,7 @@
         <div class="stat-box">
           <div class="stat-box-header">
             <div class="stat-box-icon" style="background: rgba(231, 76, 60, 0.1); color: var(--error-red);"><img
-                src="public/assets/door-open.png" alt="icone_funcionarios_desligados"></div>
+                src="../static/assets/door-open.png" alt="icone_funcionarios_desligados"></div>
           </div>
           <div class="stat-box-value" id="statDesligados">0</div>
           <div class="stat-box-label">Desligados (mês)</div>
@@ -146,10 +146,10 @@
         </div>
         <div class="page-actions">
           <button class="btn btn-secondary" onclick="exportEmployees()">
-            <img src="public/assets/folder-output.png" alt="icone_exportar"> Exportar
+            <img src="../static/assets/folder-output.png" alt="icone_exportar"> Exportar
           </button>
           <button class="btn btn-primary" onclick="openEmployeeModal()">
-            <img src="public/assets/plus.png" alt="icone_novo_funcionarios"> Novo Funcionário
+            <img src="../static/assets/plus.png" alt="icone_novo_funcionarios"> Novo Funcionário
           </button>
         </div>
       </div>
@@ -542,9 +542,9 @@
     </div>
   </div>
 
-  <script src="public/scripts/auth.js"></script>
-  <script src="public/scripts/components.js"></script>
-  <script src="public/scripts/employees.js"></script>
+  <script src="../static/scripts/auth.js"></script>
+  <script src="../static/scripts/components.js"></script>
+  <script src="../static/scripts/employees.js"></script>
 </body>
 
 </html>

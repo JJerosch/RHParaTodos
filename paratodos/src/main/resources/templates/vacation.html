@@ -5,16 +5,16 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Férias - Sistema RH</title>
-  <link rel="stylesheet" href="public/styles/global.css">
-  <link rel="stylesheet" href="public/styles/dashboard.css">
-  <link rel="stylesheet" href="public/styles/components.css">
+  <link rel="stylesheet" href="../static/styles/global.css">
+  <link rel="stylesheet" href="../static/styles/dashboard.css">
+  <link rel="stylesheet" href="../static/styles/components.css">
 </head>
 
 <body>
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
       <div class="logo">
-        <img src="public/assets/gruporhpaint.png" alt="logo_menu_lateral" height="60">
+        <img src="../static/assets/gruporhpaint.png" alt="logo_menu_lateral" height="60">
       </div>
     </div>
     <nav class="sidebar-nav">
@@ -101,25 +101,25 @@
       <div class="stats-row">
         <div class="stat-box">
           <div class="stat-box-icon" style="background: rgba(39, 174, 96, 0.1); color: var(--success-green);"><img
-              src="public/assets/check (1).png" alt="icone_ferias_aprovadas"></div>
+              src="../static/assets/check (1).png" alt="icone_ferias_aprovadas"></div>
           <div class="stat-box-value" id="statAprovadas">8</div>
           <div class="stat-box-label">Férias Aprovadas</div>
         </div>
         <div class="stat-box">
           <div class="stat-box-icon" style="background: rgba(243, 156, 18, 0.1); color: var(--warning-orange);"><img
-              src="public/assets/hourglass.png" alt="icone_pendentes"></div>
+              src="../static/assets/hourglass.png" alt="icone_pendentes"></div>
           <div class="stat-box-value" id="statPendentes">5</div>
           <div class="stat-box-label">Pendentes</div>
         </div>
         <div class="stat-box">
           <div class="stat-box-icon" style="background: rgba(44, 62, 80, 0.1); color: var(--primary-dark);"><img
-              src="public/assets/tree-palm (1).png" alt="icone_em_ferias"></div>
+              src="../static/assets/tree-palm (1).png" alt="icone_em_ferias"></div>
           <div class="stat-box-value" id="statEmFerias">3</div>
           <div class="stat-box-label">Em Férias Agora</div>
         </div>
         <div class="stat-box">
           <div class="stat-box-icon" style="background: rgba(231, 76, 60, 0.1); color: var(--error-red);"><img
-              src="public/assets/triangle-alert.png" alt="icone_ferias_vencidas"></div>
+              src="../static/assets/triangle-alert.png" alt="icone_ferias_vencidas"></div>
           <div class="stat-box-value" id="statVencidas">12</div>
           <div class="stat-box-label">Férias Vencidas</div>
         </div>
@@ -131,7 +131,7 @@
           <p class="page-subtitle">Gerencie as solicitações e programações de férias</p>
         </div>
         <div class="page-actions">
-          <button class="btn btn-primary" onclick="openModal()"><img src="public/assets/plus.png"
+          <button class="btn btn-primary" onclick="openModal()"><img src="../static/assets/plus.png"
               alt="icone_nova_solicitacao"> Nova Solicitação</button>
         </div>
       </div>
@@ -259,8 +259,8 @@
     </div>
   </div>
 
-  <script src="public/scripts/auth.js"></script>
-  <script src="public/scripts/components.js"></script>
+  <script src="../static/scripts/auth.js"></script>
+  <script src="../static/scripts/components.js"></script>
   <script>
     const solicitacoes = [
       { id: 1, nome: "João Silva Santos", inicio: "2026-02-01", fim: "2026-02-28", dias: 28, solicitado: "2026-01-05", status: "PENDENTE" },
@@ -338,9 +338,9 @@
           <td>
             <div class="cell-actions">
               ${s.status === 'PENDENTE' ? `
-                <button class="btn-icon" onclick="approve(${s.id})" title="Aprovar" style="color: var(--success-green);"><img src="public/assets/check (1).png" alt="icone_aprovar"></button>
-                <button class="btn-icon" onclick="reject(${s.id})" title="Rejeitar" style="color: var(--error-red);"><img src="public/assets/x.png" alt="icone_rejeitar"></button>
-              ` : `<button class="btn-icon view" onclick="viewDetails(${s.id})"><img src="public/assets/eye.png" alt="icone_ver_detalhes"></button>`}
+                <button class="btn-icon" onclick="approve(${s.id})" title="Aprovar" style="color: var(--success-green);"><img src="../static/assets/check (1).png" alt="icone_aprovar"></button>
+                <button class="btn-icon" onclick="reject(${s.id})" title="Rejeitar" style="color: var(--error-red);"><img src="../static/assets/x.png" alt="icone_rejeitar"></button>
+              ` : `<button class="btn-icon view" onclick="viewDetails(${s.id})"><img src="../static/assets/eye.png" alt="icone_ver_detalhes"></button>`}
             </div>
           </td>
         </tr>

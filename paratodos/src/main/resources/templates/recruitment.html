@@ -5,9 +5,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Recrutamento - Sistema RH</title>
-  <link rel="stylesheet" href="public/styles/global.css">
-  <link rel="stylesheet" href="public/styles/dashboard.css">
-  <link rel="stylesheet" href="public/styles/components.css">
+  <link rel="stylesheet" href="../static/styles/global.css">
+  <link rel="stylesheet" href="../static/styles/dashboard.css">
+  <link rel="stylesheet" href="../static/styles/components.css">
   <style>
     .kanban-board {
       display: flex;
@@ -139,7 +139,7 @@
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
       <div class="logo">
-        <img src="public/assets/gruporhpaint.png" alt="logo_menu_lateral" height="60">
+        <img src="../static/assets/gruporhpaint.png" alt="logo_menu_lateral" height="60">
       </div>
     </div>
     <nav class="sidebar-nav">
@@ -224,25 +224,25 @@
       <div class="stats-row">
         <div class="stat-box">
           <div class="stat-box-icon" style="background: rgba(44, 62, 80, 0.1);"><img
-              src="public/assets/file-text.png" alt="icone_vagas_abertas"></div>
+              src="../static/assets/file-text.png" alt="icone_vagas_abertas"></div>
           <div class="stat-box-value">8</div>
           <div class="stat-box-label">Vagas Abertas</div>
         </div>
         <div class="stat-box">
           <div class="stat-box-icon" style="background: rgba(39, 174, 96, 0.1);"><img
-              src="public/assets/file-user.png" alt="icone_candidatos_ativos"></div>
+              src="../static/assets/file-user.png" alt="icone_candidatos_ativos"></div>
           <div class="stat-box-value">156</div>
           <div class="stat-box-label">Candidatos Ativos</div>
         </div>
         <div class="stat-box">
           <div class="stat-box-icon" style="background: rgba(243, 156, 18, 0.1);"><img
-              src="public/assets/calendar-check.png" alt="icone_entrevistas_agendadas"></div>
+              src="../static/assets/calendar-check.png" alt="icone_entrevistas_agendadas"></div>
           <div class="stat-box-value">12</div>
           <div class="stat-box-label">Entrevistas Agendadas</div>
         </div>
         <div class="stat-box">
           <div class="stat-box-icon" style="background: rgba(231, 76, 60, 0.1);"><img
-              src="public/assets/check (1).png" alt="icone_contratacoes"></div>
+              src="../static/assets/check (1).png" alt="icone_contratacoes"></div>
           <div class="stat-box-value">3</div>
           <div class="stat-box-label">Contratações (mês)</div>
         </div>
@@ -368,8 +368,8 @@
     </div>
   </div>
 
-  <script src="public/scripts/auth.js"></script>
-  <script src="public/scripts/components.js"></script>
+  <script src="../static/scripts/auth.js"></script>
+  <script src="../static/scripts/components.js"></script>
   <script>
     const jobs = [
       { id: 1, titulo: "Desenvolvedor Backend Senior", departamento: "Tecnologia", tipo: "CLT", nivel: "Senior", modalidade: "Híbrido", candidatos: 45, entrevistas: 8, dias: 15 },
@@ -455,8 +455,8 @@
           <div class="job-header">
             <h3 class="job-title">${j.titulo}</h3>
             <div class="cell-actions">
-              <button class="btn-icon edit" onclick="editJob(${j.id})"><img src="public/assets/pencil (1).png" alt="icone_editar"></button>
-              <button class="btn-icon delete" onclick="closeJob(${j.id})"><img src="public/assets/x.png" alt="icone_excluir"></button>
+              <button class="btn-icon edit" onclick="editJob(${j.id})"><img src="../static/assets/pencil (1).png" alt="icone_editar"></button>
+              <button class="btn-icon delete" onclick="closeJob(${j.id})"><img src="../static/assets/x.png" alt="icone_excluir"></button>
             </div>
           </div>
           <div class="job-meta">
@@ -513,8 +513,8 @@
           <td><span class="badge ${i.status === 'AGENDADA' ? 'badge-warning' : 'badge-success'}">${i.status === 'AGENDADA' ? 'Agendada' : 'Realizada'}</span></td>
           <td>
             <div class="cell-actions">
-              <button class="btn-icon view" onclick="viewInterview(${i.id})"><img src="public/assets/eye.png" alt="icone_visualizar"></button>
-              <button class="btn-icon edit" onclick="editInterview(${i.id})"><img src="public/assets/pencil (1).png" alt="icone_editar"></button>
+              <button class="btn-icon view" onclick="viewInterview(${i.id})"><img src="../static/assets/eye.png" alt="icone_visualizar"></button>
+              <button class="btn-icon edit" onclick="editInterview(${i.id})"><img src="../static/assets/pencil (1).png" alt="icone_editar"></button>
             </div>
           </td>
         </tr>
