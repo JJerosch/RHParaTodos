@@ -9,5 +9,4 @@ public class ParatodosApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(ParatodosApplication.class, args);
 	}
-
 }
