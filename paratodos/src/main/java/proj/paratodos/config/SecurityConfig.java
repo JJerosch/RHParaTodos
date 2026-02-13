@@ -20,14 +20,15 @@ public class SecurityConfig {
     }
 
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http,
-                                            DatabaseAuthenticationProvider authProvider,
-                                            TwoFactorLoginSuccessHandler successHandler) throws Exception {
-
+    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login", "/error", "/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
-                        .requestMatchers("/2fa", "/2fa/**").authenticated()
+                        .requestMatchers(
+                                "/login", "/error",
+                                "/static/**",      // se você estiver usando /static/ no HTML
+                                "/styles/**", "/scripts/**", "/assets/**", // se usar sem /static
+                                "/favicon.ico"
+                        ).permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
@@ -35,18 +36,9 @@ public class SecurityConfig {
                         .loginProcessingUrl("/login")
                         .usernameParameter("email")
                         .passwordParameter("senha")
-                        .successHandler(successHandler)
-                        .failureUrl("/login?error")
                         .permitAll()
                 )
-                .logout(logout -> logout
-                        .logoutUrl("/logout")
-                        .logoutSuccessUrl("/login?logout")
-                        .invalidateHttpSession(true)
-                        .deleteCookies("JSESSIONID")
-                )
-                .authenticationProvider(authProvider)
-                .addFilterAfter(new TwoFactorEnforcementFilter(), UsernamePasswordAuthenticationFilter.class);
+                .logout(l -> l.logoutSuccessUrl("/login?logout").permitAll());
 
         return http.build();
     }

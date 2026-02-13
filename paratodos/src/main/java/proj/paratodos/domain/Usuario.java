@@ -25,7 +25,7 @@ public class Usuario {
     @Column(nullable = false)
     private Boolean ativo;
 
-    @Column(name = "autenticacao_2fa")
+    @Column(name = "autenticacao_2fa", nullable = false)
     private Boolean autenticacao2fa;
 
     @Column(name = "tipo_2fa")
@@ -34,7 +34,7 @@ public class Usuario {
     @Column(name = "segredo_2fa")
     private String segredo2fa;
 
-    @Column(name = "tentativas_login")
+    @Column(name = "tentativas_login", nullable = false)
     private Integer tentativasLogin;
 
     @Column(name = "bloqueado_ate")
@@ -43,6 +43,6 @@ public class Usuario {
     @Column(name = "ultimo_login")
     private LocalDateTime ultimoLogin;
 
-    @Column(name = "role")
+    @Column(name = "role", nullable = false, length = 50)
     private String role; // ex: "ADMIN"
 }

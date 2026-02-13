@@ -18,40 +18,40 @@ public class TwoFactorCodeStore {
         em.createNativeQuery("""
                 UPDATE usuarios_2fa_codes
                 SET usado = true
-                WHERE usuario_id = :uid AND usado = false
+                WHERE usuario_id = :uid
+                  AND usado = false
                 """)
-                .setParameter("uid", userId)
-                .executeUpdate();
+          .setParameter("uid", userId)
+          .executeUpdate();
     }
 
     @Transactional
     public void insertCode(Long userId, String codeHash, LocalDateTime expiraEm) {
         em.createNativeQuery("""
-                INSERT INTO usuarios_2fa_codes (usuario_id, codigo_hash, expira_em, usado, criado_em)
-                VALUES (:uid, :hash, :exp, false, now())
+                INSERT INTO usuarios_2fa_codes (usuario_id, codigo, codigo_hash, expira_em, usado, criado_em)
+                VALUES (:uid, :hash, :hash, :exp, false, now())
                 """)
-                .setParameter("uid", userId)
-                .setParameter("hash", codeHash)
-                .setParameter("exp", expiraEm)
-                .executeUpdate();
+        .setParameter("uid", userId)
+        .setParameter("hash", codeHash)
+        .setParameter("exp", expiraEm)
+        .executeUpdate();
     }
 
     public String findLatestValidHash(Long userId) {
-        Object result = em.createNativeQuery("""
+        var rows = em.createNativeQuery("""
                 SELECT codigo_hash
                 FROM usuarios_2fa_codes
                 WHERE usuario_id = :uid
-                  AND usado = false
-                  AND expira_em > now()
+                AND usado = false
+                AND expira_em > now()
                 ORDER BY criado_em DESC
                 LIMIT 1
                 """)
-                .setParameter("uid", userId)
-                .getResultStream()
-                .findFirst()
-                .orElse(null);
+        .setParameter("uid", userId)
+        .getResultList();
 
-        return result == null ? null : result.toString();
+        if (rows.isEmpty()) return null;
+        return rows.get(0).toString();
     }
 
     @Transactional
@@ -63,8 +63,8 @@ public class TwoFactorCodeStore {
                   AND codigo_hash = :hash
                   AND usado = false
                 """)
-                .setParameter("uid", userId)
-                .setParameter("hash", codeHash)
-                .executeUpdate();
+          .setParameter("uid", userId)
+          .setParameter("hash", codeHash)
+          .executeUpdate();
     }
 }

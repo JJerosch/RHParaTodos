@@ -1,4 +1,4 @@
-package proj.paratodos.service;
+package proj.paratodos.security;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

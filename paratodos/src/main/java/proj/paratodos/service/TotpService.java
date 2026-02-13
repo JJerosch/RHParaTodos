@@ -25,19 +25,23 @@ public class TotpService {
         String cleaned = code.replaceAll("\\s+", "");
         if (!cleaned.matches("\\d{6}")) return false;
 
-        byte[] keyBytes = new Base32().decode(base32Secret);
-        SecretKey key = new SecretKeySpec(keyBytes, totp.getAlgorithm());
+        try {
+            byte[] keyBytes = new Base32().decode(base32Secret);
+            SecretKey key = new SecretKeySpec(keyBytes, totp.getAlgorithm());
 
-        // tolerância: janela -1, 0, +1 step (±30s)
-        Instant now = Instant.now();
-        for (int i = -1; i <= 1; i++) {
-            Instant t = now.plusSeconds(30L * i);
-            int otp = totp.generateOneTimePassword(key, t);
-            String expected = String.format("%06d", otp);
-            if (expected.equals(cleaned)) return true;
+            Instant now = Instant.now();
+            for (int i = -1; i <= 1; i++) {
+                Instant t = now.plusSeconds(30L * i);
+
+                int otp = totp.generateOneTimePassword(key, t); // aqui pode lançar exceção
+                String expected = String.format("%06d", otp);
+
+                if (expected.equals(cleaned)) return true;
+            }
+
+            return false;
+        } catch (Exception e) {
+            return false;
         }
-
-        return false;
     }
 }
-
