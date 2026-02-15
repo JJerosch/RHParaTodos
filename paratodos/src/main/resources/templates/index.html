@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -371,27 +372,28 @@
     <div class="alert alert-error" id="alertError"></div>
     <div class="alert alert-success" id="alertSuccess"></div>
 
-    <form id="loginForm" onsubmit="handleLogin(event)">
+    <form th:action="@{/login}" method="post">
       <div class="form-group">
         <label class="form-label" for="email">Email</label>
-        <input type="email" id="email" class="form-input" placeholder="seu.email@empresa.com.br" required
-          autocomplete="email">
+        <input type="email" id="email" name="email" class="form-input" required autocomplete="email">
       </div>
 
       <div class="form-group">
         <label class="form-label" for="password">Senha</label>
         <div class="password-field">
-          <input type="password" id="password" class="form-input" placeholder="Digite sua senha" required
-            autocomplete="current-password">
+          <input type="password" id="password" name="senha" class="form-input" required autocomplete="current-password">
           <button type="button" class="password-toggle" onclick="togglePassword()">Show</button>
         </div>
       </div>
 
+      <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
+      <button type="submit" class="btn-login"><span>Entrar</span></button>
 
-      <button type="submit" class="btn-login" id="btnLogin"><span>Entrar</span></button>
-      <div class="form-footer"><a href="#" onclick="forgotPassword()">Esqueceu sua senha?</a></div>
+      <p th:if="${param.error}">Email ou senha inválidos.</p>
+      <p th:if="${param.logout}">Você saiu do sistema.</p>
     </form>
+
   </div>
 
   <script th:src="@{/scripts/auth.js}"></script>
@@ -402,7 +404,7 @@
         window.location.href = next;
       }
 
-  
+
     });
 
     function togglePassword() {
@@ -436,18 +438,18 @@
       try {
         // Primeira etapa: fazer login no backend
         const loginResult = await Auth.login(email, password);
-        
+
         if (loginResult.success) {
           showAlert('success', 'Login realizado com sucesso!');
-          
+
           // Verificar se o usuário tem 2FA habilitado
           const twoFACheckResult = await Auth.check2FAStatus(email);
-          
+
           if (twoFACheckResult.is2FAEnabled) {
             // Se 2FA está habilitado, salvar dados temporários e redirecionar para página de 2FA
             const tempToken = loginResult.data.token || localStorage.getItem('token');
             Auth.set2FAPending(email, tempToken);
-            
+
             showAlert('success', 'Redirecionando para autenticação de dois fatores...');
             setTimeout(() => {
               window.location.href = 'two-factor-auth.html';
