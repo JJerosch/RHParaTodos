@@ -392,12 +392,14 @@
                th:value="${_csrf.token}" />
 
       <button type="submit" class="btn-login"><span>Entrar</span></button>
+    </form>
 
-        <!-- ... seu HTML igual até o </form> -->
-
-        <p th:if="${param.error}">Email ou senha inválidos.</p>
-        <p th:if="${param.logout}">Você saiu do sistema.</p>
-
+    <div class="alert alert-error show" th:if="${param.error}" style="margin-top: 1rem;">
+      Email ou senha inválidos.
+    </div>
+    <div class="alert alert-success show" th:if="${param.logout}" style="margin-top: 1rem;">
+      Você saiu do sistema.
+    </div>
   </div>
 
   <script>

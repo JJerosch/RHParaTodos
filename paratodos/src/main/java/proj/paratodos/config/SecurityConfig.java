@@ -47,13 +47,40 @@ public class SecurityConfig {
                                 "/login", "/2fa", "/error",
                                 "/styles/**", "/scripts/**", "/assets/**", "/favicon.ico"
                         ).permitAll()
-                        .requestMatchers(
-                                "/dashboard/**", "/employees/**", "/departments/**",
-                                "/positions/**", "/recruitment/**", "/training/**",
-                                "/performance/**", "/payroll/**", "/benefits/**",
-                                "/vacation/**", "/timesheet/**", "/reports/**",
-                                "/settings/**"
-                        ).hasAnyRole("ADMIN", "RH_CHEFE", "RH_ASSISTENTE", "DP_CHEFE", "DP_ASSISTENTE")
+
+                        // Settings: only ADMIN
+                        .requestMatchers("/settings/**")
+                            .hasRole("ADMIN")
+
+                        // DP modules: payroll, benefits, vacation
+                        .requestMatchers("/payroll/**", "/benefits/**", "/vacation/**")
+                            .hasAnyRole("ADMIN", "DP_CHEFE", "DP_ASSISTENTE")
+
+                        // RH modules: employees, departments, positions, recruitment, training
+                        .requestMatchers("/employees/**", "/departments/**", "/positions/**",
+                                         "/recruitment/**", "/training/**")
+                            .hasAnyRole("ADMIN", "RH_CHEFE", "RH_ASSISTENTE")
+
+                        // Performance: only ADMIN and RH_CHEFE
+                        .requestMatchers("/performance/**")
+                            .hasAnyRole("ADMIN", "RH_CHEFE")
+
+                        // Reports: strategic roles
+                        .requestMatchers("/reports/**")
+                            .hasAnyRole("ADMIN", "RH_CHEFE", "DP_CHEFE")
+
+                        // Timesheet management
+                        .requestMatchers("/timesheet/**")
+                            .hasAnyRole("ADMIN", "DP_CHEFE", "DP_ASSISTENTE")
+
+                        // Employee self-service: dashboard and payslips
+                        .requestMatchers("/employee-dashboard/**", "/payslips/**")
+                            .hasAnyRole("ADMIN", "EMPLOYEE")
+
+                        // Dashboard: all management roles
+                        .requestMatchers("/dashboard/**")
+                            .hasAnyRole("ADMIN", "RH_CHEFE", "RH_ASSISTENTE", "DP_CHEFE", "DP_ASSISTENTE")
+
                         .anyRequest().authenticated()
                 )
 

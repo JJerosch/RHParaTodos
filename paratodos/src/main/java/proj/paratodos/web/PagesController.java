@@ -35,6 +35,10 @@ public class PagesController {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth != null && auth.isAuthenticated()
                 && !(auth.getPrincipal() instanceof String)) {
+            if (auth.getPrincipal() instanceof UserPrincipal p
+                    && "EMPLOYEE".equalsIgnoreCase(p.getRole())) {
+                return "redirect:/employee-dashboard";
+            }
             return "redirect:/dashboard";
         }
         return "redirect:/login";
@@ -45,6 +49,10 @@ public class PagesController {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth != null && auth.isAuthenticated()
                 && !(auth.getPrincipal() instanceof String)) {
+            if (auth.getPrincipal() instanceof UserPrincipal p
+                    && "EMPLOYEE".equalsIgnoreCase(p.getRole())) {
+                return "redirect:/employee-dashboard";
+            }
             return "redirect:/dashboard";
         }
         return "index"; // templates/index.html
@@ -143,10 +151,10 @@ public class PagesController {
         return "settings";
     }
 
-    @GetMapping("/profile")
+    @GetMapping({"/profile", "/meu-perfil"})
     public String profilePage(Model model) {
         injectCurrentUser(model);
-        return "profile";
+        return "meu-perfil";
     }
 
     @GetMapping("/payslips")
