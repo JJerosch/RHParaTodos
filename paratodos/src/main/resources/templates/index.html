@@ -409,6 +409,21 @@
         if (input.type === 'password') { input.type = 'text'; btn.textContent = 'Hide'; }
         else { input.type = 'password'; btn.textContent = 'Show'; }
       }
+
+      // Limpa ?error / ?logout da URL para não persistir no histórico
+      (function() {
+        const url = new URL(window.location);
+        if (url.searchParams.has('error') || url.searchParams.has('logout')) {
+          // Auto-esconde após 5 segundos
+          document.querySelectorAll('.alert.show').forEach(function(el) {
+            setTimeout(function() { el.classList.remove('show'); el.style.display = 'none'; }, 5000);
+          });
+          // Remove os parâmetros da URL sem recarregar
+          url.searchParams.delete('error');
+          url.searchParams.delete('logout');
+          window.history.replaceState({}, '', url.pathname);
+        }
+      })();
   </script>
 
 </body>

@@ -41,50 +41,67 @@
 
     <nav class="sidebar-nav">
         <a th:href="@{/dashboard}" class="nav-item active" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE,DP_CHEFE,DP_ASSISTENTE">
+            <span class="nav-icon"><img th:src="@{/assets/chart-column (1).png}" alt="" width="20" height="20"></span>
             <span class="nav-text">Dashboard</span>
         </a>
 
+        <!-- Gestão de Pessoas: RH gerencia funcionários, departamentos e cargos -->
         <div class="nav-section" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE">Gestão de Pessoas</div>
         <a th:href="@{/employees}" class="nav-item" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE">
+            <span class="nav-icon"><img th:src="@{/assets/id-card-lanyard (1).png}" alt="" width="20" height="20"></span>
             <span class="nav-text">Funcionários</span>
         </a>
-        <a th:href="@{/departments}" class="nav-item" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE">
+        <a th:href="@{/departments}" class="nav-item" data-roles="ADMIN,RH_CHEFE">
+            <span class="nav-icon"><img th:src="@{/assets/building-2.png}" alt="" width="20" height="20"></span>
             <span class="nav-text">Departamentos</span>
         </a>
-        <a th:href="@{/positions}" class="nav-item" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE">
+        <a th:href="@{/positions}" class="nav-item" data-roles="ADMIN,RH_CHEFE">
+            <span class="nav-icon"><img th:src="@{/assets/scroll.png}" alt="" width="20" height="20"></span>
             <span class="nav-text">Cargos</span>
         </a>
 
+        <!-- Recursos Humanos: recrutamento, treinamento, avaliações -->
         <div class="nav-section" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE">Recursos Humanos</div>
         <a th:href="@{/recruitment}" class="nav-item" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE">
+            <span class="nav-icon"><img th:src="@{/assets/search.png}" alt="" width="20" height="20"></span>
             <span class="nav-text">Recrutamento</span>
         </a>
         <a th:href="@{/training}" class="nav-item" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE">
+            <span class="nav-icon"><img th:src="@{/assets/graduation-cap.png}" alt="" width="20" height="20"></span>
             <span class="nav-text">Treinamentos</span>
         </a>
         <a th:href="@{/performance}" class="nav-item" data-roles="ADMIN,RH_CHEFE">
+            <span class="nav-icon"><img th:src="@{/assets/scan-heart (1).png}" alt="" width="20" height="20"></span>
             <span class="nav-text">Avaliações</span>
         </a>
 
-        <div class="nav-section" data-roles="ADMIN,DP_CHEFE,DP_ASSISTENTE">Departamento Pessoal</div>
+        <!-- Departamento Pessoal: folha, férias, benefícios, ponto -->
+        <div class="nav-section" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE,DP_CHEFE,DP_ASSISTENTE">Departamento Pessoal</div>
         <a th:href="@{/payroll}" class="nav-item" data-roles="ADMIN,DP_CHEFE,DP_ASSISTENTE">
+            <span class="nav-icon"><img th:src="@{/assets/banknote (1).png}" alt="" width="20" height="20"></span>
             <span class="nav-text">Folha de Pagamento</span>
         </a>
-        <a th:href="@{/benefits}" class="nav-item" data-roles="ADMIN,DP_CHEFE,DP_ASSISTENTE">
-            <span class="nav-text">Benefícios</span>
-        </a>
-        <a th:href="@{/vacation}" class="nav-item" data-roles="ADMIN,DP_CHEFE,DP_ASSISTENTE">
+        <a th:href="@{/vacation}" class="nav-item" data-roles="ADMIN,RH_CHEFE,DP_CHEFE,DP_ASSISTENTE">
+            <span class="nav-icon"><img th:src="@{/assets/tree-palm (1).png}" alt="" width="20" height="20"></span>
             <span class="nav-text">Férias</span>
         </a>
-        <a th:href="@{/timesheet}" class="nav-item" data-roles="ADMIN,DP_CHEFE,DP_ASSISTENTE">
+        <a th:href="@{/benefits}" class="nav-item" data-roles="ADMIN,RH_CHEFE,DP_CHEFE,DP_ASSISTENTE">
+            <span class="nav-icon"><img th:src="@{/assets/gift (2).png}" alt="" width="20" height="20"></span>
+            <span class="nav-text">Benefícios</span>
+        </a>
+        <a th:href="@{/timesheet}" class="nav-item" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE,DP_CHEFE,DP_ASSISTENTE">
+            <span class="nav-icon"><img th:src="@{/assets/hourglass.png}" alt="" width="20" height="20"></span>
             <span class="nav-text">Ponto</span>
         </a>
 
-        <div class="nav-section" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE,DP_CHEFE,DP_ASSISTENTE">Administração</div>
-        <a th:href="@{/reports}" class="nav-item" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE,DP_CHEFE,DP_ASSISTENTE">
+        <!-- Administração: relatórios e configurações -->
+        <div class="nav-section" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE,DP_CHEFE">Administração</div>
+        <a th:href="@{/reports}" class="nav-item" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE,DP_CHEFE">
+            <span class="nav-icon"><img th:src="@{/assets/file-text.png}" alt="" width="20" height="20"></span>
             <span class="nav-text">Relatórios</span>
         </a>
         <a th:href="@{/settings}" class="nav-item" data-roles="ADMIN">
+            <span class="nav-icon"><img th:src="@{/assets/shield (1).png}" alt="" width="20" height="20"></span>
             <span class="nav-text">Configurações</span>
         </a>
     </nav>
