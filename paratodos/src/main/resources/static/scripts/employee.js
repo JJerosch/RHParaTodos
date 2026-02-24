@@ -27,7 +27,6 @@
     const userProfileInlineEl = document.getElementById('userProfileInline');
     if (userProfileInlineEl) userProfileInlineEl.textContent = displayProfile;
 
-    document.getElementById('btnLogout').addEventListener('click', () => Auth.logout());
     document.getElementById('btnPunch').addEventListener('click', punch);
     document.getElementById('btnRefresh').addEventListener('click', render);
 
