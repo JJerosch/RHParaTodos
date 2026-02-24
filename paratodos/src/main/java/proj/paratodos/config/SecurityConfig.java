@@ -7,38 +7,73 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import proj.paratodos.security.DatabaseAuthenticationProvider;
-import proj.paratodos.security.TwoFactorEnforcementFilter;
-import proj.paratodos.security.TwoFactorLoginSuccessHandler;
+import proj.paratodos.repository.UsuarioRepository;
+import proj.paratodos.security.*;
+import proj.paratodos.service.JwtService;
 
 @Configuration
 public class SecurityConfig {
 
     @Bean
-    PasswordEncoder passwordEncoder() {
+    public static PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public JwtCookieFilter jwtCookieFilter(JwtService jwtService, UsuarioRepository usuarioRepository) {
+        return new JwtCookieFilter(jwtService, usuarioRepository);
+    }
+
+    @Bean
+    public TwoFactorEnforcementFilter twoFactorEnforcementFilter() {
+        return new TwoFactorEnforcementFilter();
+    }
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(
+            HttpSecurity http,
+            DatabaseAuthenticationProvider databaseAuthenticationProvider,
+            JwtCookieFilter jwtCookieFilter,
+            TwoFactorEnforcementFilter twoFactorEnforcementFilter,
+            TwoFactorLoginSuccessHandler twoFactorLoginSuccessHandler) throws Exception {
+
         http
+                .authenticationProvider(databaseAuthenticationProvider)
+                .addFilterBefore(jwtCookieFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(twoFactorEnforcementFilter, JwtCookieFilter.class)
+
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/login", "/error",
-                                "/static/**",      // se você estiver usando /static/ no HTML
-                                "/styles/**", "/scripts/**", "/assets/**", // se usar sem /static
-                                "/favicon.ico"
+                                "/login", "/2fa", "/error",
+                                "/styles/**", "/scripts/**", "/assets/**", "/favicon.ico"
                         ).permitAll()
+                        .requestMatchers(
+                                "/dashboard/**", "/employees/**", "/departments/**",
+                                "/positions/**", "/recruitment/**", "/training/**",
+                                "/performance/**", "/payroll/**", "/benefits/**",
+                                "/vacation/**", "/timesheet/**", "/reports/**",
+                                "/settings/**"
+                        ).hasAnyRole("ADMIN", "RH_CHEFE", "RH_ASSISTENTE", "DP_CHEFE", "DP_ASSISTENTE")
                         .anyRequest().authenticated()
                 )
+
                 .formLogin(form -> form
                         .loginPage("/login")
                         .loginProcessingUrl("/login")
                         .usernameParameter("email")
                         .passwordParameter("senha")
+                        .successHandler(twoFactorLoginSuccessHandler)
+                        .failureUrl("/login?error")
                         .permitAll()
                 )
-                .logout(l -> l.logoutSuccessUrl("/login?logout").permitAll());
+
+                .logout(l -> l
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/login?logout")
+                        .deleteCookies(JwtCookieFilter.COOKIE_NAME)
+                        .invalidateHttpSession(true)
+                        .permitAll()
+                );
 
         return http.build();
     }

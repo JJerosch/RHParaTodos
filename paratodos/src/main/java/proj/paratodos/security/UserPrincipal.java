@@ -15,9 +15,9 @@ public class UserPrincipal implements UserDetails {
     private final String senhaHash;
     private final boolean ativo;
     private final boolean twoFactorEnabled;
-    private final String twoFactorType;   // "TOTP" | "CODIGO" | null
-    private final String twoFactorSecret; // pode ser null
-    private final String role;            // ex: "ADMIN"
+    private final String twoFactorType;
+    private final String twoFactorSecret;
+    private final String role;
 
     public UserPrincipal(Usuario u) {
         this.id = u.getId();
@@ -27,34 +27,24 @@ public class UserPrincipal implements UserDetails {
         this.twoFactorEnabled = Boolean.TRUE.equals(u.getAutenticacao2fa());
         this.twoFactorType = u.getTipo2fa();
         this.twoFactorSecret = u.getSegredo2fa();
-        this.role = (u.getRole() == null || u.getRole().isBlank()) ? "USER" : u.getRole();
+        this.role = (u.getRole() == null || u.getRole().isBlank()) ? "EMPLOYEE" : u.getRole();
     }
 
-    public Long getId() { return id; }
-    public boolean isTwoFactorEnabled() { return twoFactorEnabled; }
-    public String getTwoFactorType() { return twoFactorType; }
-    public String getTwoFactorSecret() { return twoFactorSecret; }
+    public Long getId()                  { return id; }
+    public String getRole()              { return role; }
+    public boolean isTwoFactorEnabled()  { return twoFactorEnabled; }
+    public String getTwoFactorType()     { return twoFactorType; }
+    public String getTwoFactorSecret()   { return twoFactorSecret; }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_" + role.toUpperCase()));
     }
 
-    @Override
-    public String getPassword() { return senhaHash; }
-
-    @Override
-    public String getUsername() { return email; }
-
-    @Override
-    public boolean isAccountNonExpired() { return true; }
-
-    @Override
-    public boolean isAccountNonLocked() { return true; } // lock real via provider
-
-    @Override
-    public boolean isCredentialsNonExpired() { return true; }
-
-    @Override
-    public boolean isEnabled() { return ativo; }
+    @Override public String getPassword()              { return senhaHash; }
+    @Override public String getUsername()              { return email; }
+    @Override public boolean isAccountNonExpired()     { return true; }
+    @Override public boolean isAccountNonLocked()      { return true; }
+    @Override public boolean isCredentialsNonExpired() { return true; }
+    @Override public boolean isEnabled()               { return ativo; }
 }

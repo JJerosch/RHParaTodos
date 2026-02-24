@@ -386,99 +386,28 @@
         </div>
       </div>
 
-      <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+        <input type="hidden"
+               th:if="${_csrf != null}"
+               th:name="${_csrf.parameterName}"
+               th:value="${_csrf.token}" />
 
       <button type="submit" class="btn-login"><span>Entrar</span></button>
 
-      <p th:if="${param.error}">Email ou senha inválidos.</p>
-      <p th:if="${param.logout}">Você saiu do sistema.</p>
-    </form>
+        <!-- ... seu HTML igual até o </form> -->
+
+        <p th:if="${param.error}">Email ou senha inválidos.</p>
+        <p th:if="${param.logout}">Você saiu do sistema.</p>
 
   </div>
 
-  <script th:src="@{/scripts/auth.js}"></script>
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      if (Auth.isAuthenticated()) {
-        const next = Auth.redirectAfterLogin(Auth.getCurrentUser());
-        window.location.href = next;
+      function togglePassword() {
+        const input = document.getElementById('password');
+        const btn = document.querySelector('.password-toggle');
+        if (input.type === 'password') { input.type = 'text'; btn.textContent = 'Hide'; }
+        else { input.type = 'password'; btn.textContent = 'Show'; }
       }
-
-
-    });
-
-    function togglePassword() {
-      const input = document.getElementById('password');
-      const btn = document.querySelector('.password-toggle');
-      if (input.type === 'password') { input.type = 'text'; btn.textContent = 'Hide'; }
-      else { input.type = 'password'; btn.textContent = 'Show'; }
-    }
-
-    function showAlert(type, message) {
-      const alertEl = document.getElementById(type === 'error' ? 'alertError' : 'alertSuccess');
-      const otherAlert = document.getElementById(type === 'error' ? 'alertSuccess' : 'alertError');
-      otherAlert.classList.remove('show');
-      alertEl.textContent = message;
-      alertEl.classList.add('show');
-      if (type === 'success') setTimeout(() => alertEl.classList.remove('show'), 3000);
-    }
-
-    async function handleLogin(e) {
-      e.preventDefault();
-      const email = document.getElementById('email').value.trim();
-      const password = document.getElementById('password').value;
-
-
-      if (!email || !password) { showAlert('error', 'Por favor, preencha todos os campos.'); return; }
-
-      const btn = document.getElementById('btnLogin');
-      btn.classList.add('loading');
-      btn.innerHTML = '<div class="spinner"></div><span>Entrando...</span>';
-
-      try {
-        // Primeira etapa: fazer login no backend
-        const loginResult = await Auth.login(email, password);
-
-        if (loginResult.success) {
-          showAlert('success', 'Login realizado com sucesso!');
-
-          // Verificar se o usuário tem 2FA habilitado
-          const twoFACheckResult = await Auth.check2FAStatus(email);
-
-          if (twoFACheckResult.is2FAEnabled) {
-            // Se 2FA está habilitado, salvar dados temporários e redirecionar para página de 2FA
-            const tempToken = loginResult.data.token || localStorage.getItem('token');
-            Auth.set2FAPending(email, tempToken);
-
-            showAlert('success', 'Redirecionando para autenticação de dois fatores...');
-            setTimeout(() => {
-              window.location.href = 'two-factor-auth.html';
-            }, 800);
-          } else {
-            // Se 2FA não está habilitado, ir direto para o dashboard
-            setTimeout(() => {
-              const next = Auth.redirectAfterLogin(Auth.getCurrentUser());
-              window.location.href = next;
-            }, 800);
-          }
-        } else {
-          showAlert('error', loginResult.message || 'Email ou senha incorretos.');
-          btn.classList.remove('loading');
-          btn.innerHTML = '<span>Entrar</span>';
-        }
-      } catch (error) {
-        showAlert('error', 'Erro ao conectar com o servidor. Tente novamente.');
-        btn.classList.remove('loading');
-        btn.innerHTML = '<span>Entrar</span>';
-      }
-    }
-
-    function forgotPassword() {
-      const email = document.getElementById('email').value.trim();
-      if (email) showAlert('success', `Um link de recuperação foi enviado para ${email}`);
-      else showAlert('error', 'Digite seu email para recuperar a senha.');
-    }
   </script>
-</body>
 
+</body>
 </html>

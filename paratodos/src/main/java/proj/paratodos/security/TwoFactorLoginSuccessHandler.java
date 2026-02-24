@@ -1,6 +1,5 @@
 package proj.paratodos.security;
 
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -17,32 +16,42 @@ public class TwoFactorLoginSuccessHandler implements AuthenticationSuccessHandle
     public static final String SESSION_2FA_OK = "TWO_FACTOR_VERIFIED";
 
     private final TwoFactorService twoFactorService;
+    private final RoleJwtSuccessHandler roleJwtSuccessHandler;
 
-    public TwoFactorLoginSuccessHandler(TwoFactorService twoFactorService) {
+    public TwoFactorLoginSuccessHandler(TwoFactorService twoFactorService,
+                                        RoleJwtSuccessHandler roleJwtSuccessHandler) {
         this.twoFactorService = twoFactorService;
+        this.roleJwtSuccessHandler = roleJwtSuccessHandler;
     }
 
     @Override
-    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
-                                        Authentication authentication) throws IOException, ServletException {
+    public void onAuthenticationSuccess(HttpServletRequest request,
+                                        HttpServletResponse response,
+                                        Authentication authentication) throws IOException {
 
-        UserPrincipal p = (UserPrincipal) authentication.getPrincipal();
+        UserPrincipal principal = (UserPrincipal) authentication.getPrincipal();
         HttpSession session = request.getSession(true);
 
-        if (twoFactorService.needsTwoFactor(p)) {
+        if (twoFactorService.needsTwoFactor(principal)) {
+            // Não emite JWT ainda — aguarda verificação 2FA
             session.setAttribute(SESSION_2FA_OK, false);
 
-            String tipo = (p.getTwoFactorType() == null ? "CODIGO" : p.getTwoFactorType().toUpperCase());
+            String tipo = principal.getTwoFactorType() == null
+                    ? "CODIGO"
+                    : principal.getTwoFactorType().toUpperCase();
+
             if (!"TOTP".equals(tipo)) {
-                String code = twoFactorService.startCodeChallenge(p);
-                System.out.println("DEBUG 2FA (usuario=" + p.getUsername() + "): código = " + code);
+                String code = twoFactorService.startCodeChallenge(principal);
+                System.out.println("[DEBUG 2FA] usuario=" + principal.getUsername() + " código=" + code);
             }
 
             response.sendRedirect("/2fa");
             return;
         }
 
+        // Sem 2FA: emite JWT e redireciona
         session.setAttribute(SESSION_2FA_OK, true);
-        response.sendRedirect("/dashboard");
+        roleJwtSuccessHandler.issueJwtCookie(principal, response);
+        response.sendRedirect(roleJwtSuccessHandler.resolveRedirect(principal));
     }
 }
