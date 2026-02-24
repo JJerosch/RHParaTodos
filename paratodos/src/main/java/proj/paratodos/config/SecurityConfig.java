@@ -48,36 +48,43 @@ public class SecurityConfig {
                                 "/styles/**", "/scripts/**", "/assets/**", "/favicon.ico"
                         ).permitAll()
 
-                        // Settings: only ADMIN
+                        // Configurações: apenas ADMIN
                         .requestMatchers("/settings/**")
                             .hasRole("ADMIN")
 
-                        // DP modules: payroll, benefits, vacation
-                        .requestMatchers("/payroll/**", "/benefits/**", "/vacation/**")
+                        // Folha de pagamento: DP
+                        .requestMatchers("/payroll/**")
                             .hasAnyRole("ADMIN", "DP_CHEFE", "DP_ASSISTENTE")
 
-                        // RH modules: employees, departments, positions, recruitment, training
-                        .requestMatchers("/employees/**", "/departments/**", "/positions/**",
-                                         "/recruitment/**", "/training/**")
+                        // Férias e benefícios: DP + RH_CHEFE (aprova políticas)
+                        .requestMatchers("/benefits/**", "/vacation/**")
+                            .hasAnyRole("ADMIN", "RH_CHEFE", "DP_CHEFE", "DP_ASSISTENTE")
+
+                        // Funcionários, recrutamento, treinamentos: RH
+                        .requestMatchers("/employees/**", "/recruitment/**", "/training/**")
                             .hasAnyRole("ADMIN", "RH_CHEFE", "RH_ASSISTENTE")
 
-                        // Performance: only ADMIN and RH_CHEFE
+                        // Departamentos e cargos: somente chefia RH
+                        .requestMatchers("/departments/**", "/positions/**")
+                            .hasAnyRole("ADMIN", "RH_CHEFE")
+
+                        // Avaliações de desempenho: chefia RH
                         .requestMatchers("/performance/**")
                             .hasAnyRole("ADMIN", "RH_CHEFE")
 
-                        // Reports: strategic roles
+                        // Relatórios: estratégicos + operacionais
                         .requestMatchers("/reports/**")
-                            .hasAnyRole("ADMIN", "RH_CHEFE", "DP_CHEFE")
+                            .hasAnyRole("ADMIN", "RH_CHEFE", "RH_ASSISTENTE", "DP_CHEFE")
 
-                        // Timesheet management
+                        // Ponto: todos os perfis de gestão
                         .requestMatchers("/timesheet/**")
-                            .hasAnyRole("ADMIN", "DP_CHEFE", "DP_ASSISTENTE")
+                            .hasAnyRole("ADMIN", "RH_CHEFE", "RH_ASSISTENTE", "DP_CHEFE", "DP_ASSISTENTE")
 
-                        // Employee self-service: dashboard and payslips
+                        // Self-service funcionário
                         .requestMatchers("/employee-dashboard/**", "/payslips/**")
                             .hasAnyRole("ADMIN", "EMPLOYEE")
 
-                        // Dashboard: all management roles
+                        // Dashboard gerencial
                         .requestMatchers("/dashboard/**")
                             .hasAnyRole("ADMIN", "RH_CHEFE", "RH_ASSISTENTE", "DP_CHEFE", "DP_ASSISTENTE")
 
