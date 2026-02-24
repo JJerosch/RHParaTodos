@@ -1,353 +1,364 @@
-<!DOCTYPE html >
+<!DOCTYPE html>
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard - Sistema RH Para Todos</title>
-  <link rel="stylesheet" href="../static/styles/global.css">
-  <link rel="stylesheet" href="../static/styles/dashboard.css">
-  <link rel="stylesheet" href="../static/styles/components.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Sistema RH Para Todos</title>
+
+    <!-- CSRF para o logout via form POST -->
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+
+    <link rel="stylesheet" th:href="@{/styles/global.css}">
+    <link rel="stylesheet" th:href="@{/styles/dashboard.css}">
+    <link rel="stylesheet" th:href="@{/styles/components.css}">
 </head>
 
 <body>
-  <!-- Sidebar -->
-  <aside class="sidebar" id="sidebar">
+
+<!--
+  ============================================================
+  INJEÇÃO DO USUÁRIO ATUAL
+  O Spring injeta o objeto no modelo com nome "currentUser".
+  O JS lê de window.__CURRENT_USER__.
+  ============================================================
+-->
+<script th:inline="javascript">
+    window.__CURRENT_USER__ = {
+      email: /*[[${currentUser.email}]]*/ 'usuario@local',
+      role:  /*[[${currentUser.role}]]*/ 'EMPLOYEE'
+    };
+</script>
+
+<!-- Sidebar -->
+<aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
-      <div class="logo">
-        <img src="../static/assets/gruporhpaint.png" alt="logo_menu_lateral" height="60">
-      </div>
+        <div class="logo">
+            <img th:src="@{/assets/gruporhpaint.png}" alt="logo_menu_lateral" height="60">
+        </div>
     </div>
 
     <nav class="sidebar-nav">
-      <a href="dashboard.html" class="nav-item active" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE,DP_CHEFE,DP_ASSISTENTE">
-        <span class="nav-text">Dashboard</span>
-      </a>
+        <a th:href="@{/dashboard}" class="nav-item active" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE,DP_CHEFE,DP_ASSISTENTE">
+            <span class="nav-text">Dashboard</span>
+        </a>
 
-      <div class="nav-section" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE">Gestão de Pessoas</div>
-      <a href="employees.html" class="nav-item" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE">
-        <span class="nav-text">Funcionários</span>
-      </a>
-      <a href="departments.html" class="nav-item" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE">
-        <span class="nav-text">Departamentos</span>
-      </a>
-      <a href="positions.html" class="nav-item" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE">
-        <span class="nav-text">Cargos</span>
-      </a>
+        <div class="nav-section" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE">Gestão de Pessoas</div>
+        <a th:href="@{/employees}" class="nav-item" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE">
+            <span class="nav-text">Funcionários</span>
+        </a>
+        <a th:href="@{/departments}" class="nav-item" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE">
+            <span class="nav-text">Departamentos</span>
+        </a>
+        <a th:href="@{/positions}" class="nav-item" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE">
+            <span class="nav-text">Cargos</span>
+        </a>
 
-      <div class="nav-section" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE">Recursos Humanos</div>
-      <a href="recruitment.html" class="nav-item" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE">
-        <span class="nav-text">Recrutamento</span>
-      </a>
-      <a href="training.html" class="nav-item" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE">
-        <span class="nav-text">Treinamentos</span>
-      </a>
-      <a href="performance.html" class="nav-item" data-roles="ADMIN,RH_CHEFE">
-        <span class="nav-text">Avaliações</span>
-      </a>
+        <div class="nav-section" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE">Recursos Humanos</div>
+        <a th:href="@{/recruitment}" class="nav-item" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE">
+            <span class="nav-text">Recrutamento</span>
+        </a>
+        <a th:href="@{/training}" class="nav-item" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE">
+            <span class="nav-text">Treinamentos</span>
+        </a>
+        <a th:href="@{/performance}" class="nav-item" data-roles="ADMIN,RH_CHEFE">
+            <span class="nav-text">Avaliações</span>
+        </a>
 
-      <div class="nav-section" data-roles="ADMIN,DP_CHEFE,DP_ASSISTENTE">Departamento Pessoal</div>
-      <a href="payroll.html" class="nav-item" data-roles="ADMIN,DP_CHEFE,DP_ASSISTENTE">
-        <span class="nav-text">Folha de Pagamento</span>
-      </a>
-      <a href="benefits.html" class="nav-item" data-roles="ADMIN,DP_CHEFE,DP_ASSISTENTE">
-        <span class="nav-text">Benefícios</span>
-      </a>
-      <a href="vacation.html" class="nav-item" data-roles="ADMIN,DP_CHEFE,DP_ASSISTENTE">
-        <span class="nav-text">Férias</span>
-      </a>
-      <a href="timesheet.html" class="nav-item" data-roles="ADMIN,DP_CHEFE,DP_ASSISTENTE">
-        <span class="nav-text">Ponto</span>
-      </a>
+        <div class="nav-section" data-roles="ADMIN,DP_CHEFE,DP_ASSISTENTE">Departamento Pessoal</div>
+        <a th:href="@{/payroll}" class="nav-item" data-roles="ADMIN,DP_CHEFE,DP_ASSISTENTE">
+            <span class="nav-text">Folha de Pagamento</span>
+        </a>
+        <a th:href="@{/benefits}" class="nav-item" data-roles="ADMIN,DP_CHEFE,DP_ASSISTENTE">
+            <span class="nav-text">Benefícios</span>
+        </a>
+        <a th:href="@{/vacation}" class="nav-item" data-roles="ADMIN,DP_CHEFE,DP_ASSISTENTE">
+            <span class="nav-text">Férias</span>
+        </a>
+        <a th:href="@{/timesheet}" class="nav-item" data-roles="ADMIN,DP_CHEFE,DP_ASSISTENTE">
+            <span class="nav-text">Ponto</span>
+        </a>
 
-      <div class="nav-section" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE,DP_CHEFE,DP_ASSISTENTE">Administração</div>
-      <a href="reports.html" class="nav-item" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE,DP_CHEFE,DP_ASSISTENTE">
-        <span class="nav-text">Relatórios</span>
-      </a>
-      <a href="settings.html" class="nav-item" data-roles="ADMIN">
-        <span class="nav-text">Configurações</span>
-      </a>
+        <div class="nav-section" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE,DP_CHEFE,DP_ASSISTENTE">Administração</div>
+        <a th:href="@{/reports}" class="nav-item" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE,DP_CHEFE,DP_ASSISTENTE">
+            <span class="nav-text">Relatórios</span>
+        </a>
+        <a th:href="@{/settings}" class="nav-item" data-roles="ADMIN">
+            <span class="nav-text">Configurações</span>
+        </a>
     </nav>
-  </aside>
+</aside>
 
-  <!-- Main Content -->
-  <div class="main-content">
+<!-- Main Content -->
+<div class="main-content">
     <!-- Topbar -->
     <header class="topbar">
-      <div class="topbar-left">
-        <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
-        <h1>Dashboard</h1>
-      </div>
-      <div class="topbar-right">
-        <div class="user-menu">
-          <button class="user-button" id="userMenuButton">
-            <span class="user-avatar" id="userAvatar">U</span>
-            <span class="user-name" id="userName">Usuário</span>
-            <span class="user-arrow">▼</span>
-          </button>
-          <div class="user-dropdown" id="userDropdown">
-            <div class="user-info">
-              <strong id="userFullName">Nome do Usuário</strong>
-              <small id="userProfile">Perfil</small>
-            </div>
-            <hr>
-            <a href="meu-perfil.html" class="dropdown-item">Meu Perfil</a>
-            <a href="settings.html" class="dropdown-item">Configurações</a>
-            <hr>
-            <a href="#" class="dropdown-item" id="logoutButton">Sair</a>
-          </div>
+        <div class="topbar-left">
+            <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
+            <h1>Dashboard</h1>
         </div>
-      </div>
+        <div class="topbar-right">
+            <div class="user-menu">
+                <button class="user-button" id="userMenuButton">
+                    <span class="user-avatar" id="userAvatar">U</span>
+                    <span class="user-name" id="userName">Usuário</span>
+                    <span class="user-arrow">▼</span>
+                </button>
+                <div class="user-dropdown" id="userDropdown">
+                    <div class="user-info">
+                        <strong id="userFullName">Nome do Usuário</strong>
+                        <small id="userProfile">Perfil</small>
+                    </div>
+                    <hr>
+                    <a th:href="@{/profile}" class="dropdown-item">Meu Perfil</a>
+                    <a th:href="@{/settings}" class="dropdown-item" data-roles="ADMIN">Configurações</a>
+                    <hr>
+                    <a href="#" class="dropdown-item" id="logoutButton">Sair</a>
+                </div>
+            </div>
+        </div>
     </header>
 
     <!-- Dashboard Content -->
     <div class="content-area">
-      <!-- Welcome Banner -->
-      <div class="welcome-banner">
-        <div class="welcome-content">
-          <h2 id="welcomeMessage">Bom dia, Usuário!</h2>
-          <p>Aqui está um resumo das atividades do sistema.</p>
-        </div>
-        <div class="welcome-date">
-          <span id="currentDate"></span>
-        </div>
-      </div>
-
-      <!-- Stats Grid -->
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-icon" style="background-color: rgba(44, 62, 80, 0.1);">
-            <span style="color: var(--primary-dark);"><img src="../static/assets/id-card-lanyard (1).png"
-                alt="icone_funcionarios"></span>
-          </div>
-          <div class="stat-content">
-            <h3>Total de Funcionários</h3>
-            <p class="stat-value">248</p>
-            <small class="stat-change positive">+5 este mês</small>
-          </div>
+        <!-- Welcome Banner -->
+        <div class="welcome-banner">
+            <div class="welcome-content">
+                <h2 id="welcomeMessage">Bom dia, Usuário!</h2>
+                <p>Aqui está um resumo das atividades do sistema.</p>
+            </div>
+            <div class="welcome-date">
+                <span id="currentDate"></span>
+            </div>
         </div>
 
-        <div class="stat-card">
-          <div class="stat-icon" style="background-color: rgba(40, 167, 69, 0.1);">
-            <img src="../static/assets/check (1).png" alt="icone_funcionarios_ativos">
-          </div>
-          <div class="stat-content">
-            <h3>Funcionários Ativos</h3>
-            <p class="stat-value">235</p>
-            <small class="stat-change positive">94.8% do total</small>
-          </div>
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon" style="background-color: rgba(44, 62, 80, 0.1);">
+                    <img th:src="@{/assets/id-card-lanyard (1).png}" alt="icone_funcionarios">
+                </div>
+                <div class="stat-content">
+                    <h3>Total de Funcionários</h3>
+                    <p class="stat-value">248</p>
+                    <small class="stat-change positive">+5 este mês</small>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon" style="background-color: rgba(40, 167, 69, 0.1);">
+                    <img th:src="@{/assets/check (1).png}" alt="icone_funcionarios_ativos">
+                </div>
+                <div class="stat-content">
+                    <h3>Funcionários Ativos</h3>
+                    <p class="stat-value">235</p>
+                    <small class="stat-change positive">94.8% do total</small>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon" style="background-color: rgba(243, 156, 18, 0.1);">
+                    <img th:src="@{/assets/notebook (1).png}" alt="icone_vagas_abertas">
+                </div>
+                <div class="stat-content">
+                    <h3>Vagas Abertas</h3>
+                    <p class="stat-value">12</p>
+                    <small class="stat-change neutral">3 em andamento</small>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon" style="background-color: rgba(231, 76, 60, 0.1);">
+                    <img th:src="@{/assets/chart-column-decreasing (1).png}" alt="icone_turnover">
+                </div>
+                <div class="stat-content">
+                    <h3>Taxa de Turnover</h3>
+                    <p class="stat-value">5.2%</p>
+                    <small class="stat-change negative">+0.3% no trimestre</small>
+                </div>
+            </div>
         </div>
 
-        <div class="stat-card">
-          <div class="stat-icon" style="background-color: rgba(243, 156, 18, 0.1);">
-            <img src="../static/assets/notebook (1).png" alt="icone_vagas_abertas">
-          </div>
-          <div class="stat-content">
-            <h3>Vagas Abertas</h3>
-            <p class="stat-value">12</p>
-            <small class="stat-change neutral">3 em andamento</small>
-          </div>
+        <!-- Quick Actions -->
+        <div class="quick-actions-bar">
+            <h3>Ações Rápidas</h3>
+            <div class="quick-actions-grid">
+                <a th:href="@{/employees}" class="quick-action-item" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE">
+                    <span class="quick-action-icon"><img th:src="@{/assets/plus (1).png}" alt="icone_add_funcionarios"></span>
+                    <span>Novo Funcionário</span>
+                </a>
+                <a th:href="@{/vacation}" class="quick-action-item" data-roles="ADMIN,DP_CHEFE,DP_ASSISTENTE">
+                    <span class="quick-action-icon"><img th:src="@{/assets/tree-palm (1).png}" alt="icone_solicitar_ferias"></span>
+                    <span>Solicitar Férias</span>
+                </a>
+                <a th:href="@{/recruitment}" class="quick-action-item" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE">
+                    <span class="quick-action-icon"><img th:src="@{/assets/notebook (1).png}" alt="icone_abrir_vaga"></span>
+                    <span>Abrir Vaga</span>
+                </a>
+                <a th:href="@{/reports}" class="quick-action-item" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE,DP_CHEFE,DP_ASSISTENTE">
+                    <span class="quick-action-icon"><img th:src="@{/assets/chart-column (1).png}" alt="icone_gerar_relatorio"></span>
+                    <span>Gerar Relatório</span>
+                </a>
+            </div>
         </div>
 
-        <div class="stat-card">
-          <div class="stat-icon" style="background-color: rgba(231, 76, 60, 0.1);">
-            <img src="../static/assets/chart-column-decreasing (1).png" alt="icone_turnover">
-          </div>
-          <div class="stat-content">
-            <h3>Taxa de Turnover</h3>
-            <p class="stat-value">5.2%</p>
-            <small class="stat-change negative">+0.3% no trimestre</small>
-          </div>
-        </div>
-      </div>
+        <!-- Dashboard Grid -->
+        <div class="dashboard-grid">
+            <!-- Contratações Recentes -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h2>Contratações Recentes</h2>
+                    <a th:href="@{/employees}" class="card-link">Ver todos →</a>
+                </div>
+                <div class="recent-list">
+                    <div class="recent-item">
+                        <div class="recent-avatar">JS</div>
+                        <div class="recent-info">
+                            <strong>João Silva</strong>
+                            <small>Desenvolvedor Senior • TI</small>
+                        </div>
+                        <span class="badge badge-success">Ativo</span>
+                    </div>
+                    <div class="recent-item">
+                        <div class="recent-avatar">MS</div>
+                        <div class="recent-info">
+                            <strong>Maria Santos</strong>
+                            <small>Analista de RH • RH</small>
+                        </div>
+                        <span class="badge badge-success">Ativo</span>
+                    </div>
+                    <div class="recent-item">
+                        <div class="recent-avatar">PC</div>
+                        <div class="recent-info">
+                            <strong>Pedro Costa</strong>
+                            <small>Designer UX/UI • TI</small>
+                        </div>
+                        <span class="badge badge-warning">Onboarding</span>
+                    </div>
+                    <div class="recent-item">
+                        <div class="recent-avatar">AF</div>
+                        <div class="recent-info">
+                            <strong>Ana Ferreira</strong>
+                            <small>Analista Financeiro • Finanças</small>
+                        </div>
+                        <span class="badge badge-success">Ativo</span>
+                    </div>
+                </div>
+            </div>
 
-      <!-- Quick Actions -->
-      <div class="quick-actions-bar">
-        <h3>Ações Rápidas</h3>
-        <div class="quick-actions-grid">
-          <a href="employees.html" class="quick-action-item" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE">
-            <span class="quick-action-icon"><img src="../static/assets/plus (1).png"
-                alt="icone_add_funcionarios"></span>
-            <span>Novo Funcionário</span>
-          </a>
-          <a href="vacation.html" class="quick-action-item" data-roles="ADMIN,DP_CHEFE,DP_ASSISTENTE">
-            <span class="quick-action-icon"><img src="../static/assets/tree-palm (1).png"
-                alt="icone_solicitar_ferias_funcionarios"></span>
-            <span>Solicitar Férias</span>
-          </a>
-          <a href="recruitment.html" class="quick-action-item" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE">
-            <span class="quick-action-icon"><img src="../static/assets/notebook (1).png"
-                alt="icone_abrir_vaga"></span>
-            <span>Abrir Vaga</span>
-          </a>
-          <a href="reports.html" class="quick-action-item" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE,DP_CHEFE,DP_ASSISTENTE">
-            <span class="quick-action-icon"><img src="../static/assets/chart-column (1).png"
-                alt="icone_gerar_relatorio"></span>
-            <span>Gerar Relatório</span>
-          </a>
-        </div>
-      </div>
+            <!-- Pendências -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h2>Pendências</h2>
+                    <span class="badge badge-warning">8 itens</span>
+                </div>
+                <div class="pending-list">
+                    <div class="pending-item" data-roles="ADMIN,DP_CHEFE,DP_ASSISTENTE">
+                        <div class="pending-info">
+                            <strong>Aprovar Férias</strong>
+                            <small>3 solicitações aguardando</small>
+                        </div>
+                        <a th:href="@{/vacation}" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.875rem;">Revisar</a>
+                    </div>
+                    <div class="pending-item" data-roles="ADMIN,RH_CHEFE">
+                        <div class="pending-info">
+                            <strong>Avaliações Pendentes</strong>
+                            <small>5 avaliações a concluir</small>
+                        </div>
+                        <a th:href="@{/performance}" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.875rem;">Revisar</a>
+                    </div>
+                    <div class="pending-item" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE">
+                        <div class="pending-info">
+                            <strong>Documentos Vencendo</strong>
+                            <small>2 ASOs próximos do vencimento</small>
+                        </div>
+                        <a th:href="@{/employees}" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.875rem;">Revisar</a>
+                    </div>
+                </div>
+            </div>
 
-      <!-- Dashboard Grid -->
-      <div class="dashboard-grid">
-        <!-- Contratações Recentes -->
-        <div class="dashboard-card">
-          <div class="card-header">
-            <h2>Contratações Recentes</h2>
-            <a href="employees.html" class="card-link">Ver todos →</a>
-          </div>
-          <div class="recent-list">
-            <div class="recent-item">
-              <div class="recent-avatar">JS</div>
-              <div class="recent-info">
-                <strong>João Silva</strong>
-                <small>Desenvolvedor Senior • TI</small>
-              </div>
-              <span class="badge badge-success">Ativo</span>
+            <!-- Aniversariantes -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h2>🎉 Aniversariantes do Mês</h2>
+                </div>
+                <div class="birthday-list">
+                    <div class="birthday-item">
+                        <div class="birthday-info">
+                            <strong>Ana Paula Oliveira</strong>
+                            <small>15/01 • Analista Financeiro</small>
+                        </div>
+                    </div>
+                    <div class="birthday-item">
+                        <div class="birthday-info">
+                            <strong>Carlos Eduardo</strong>
+                            <small>18/01 • Gerente de Projetos</small>
+                        </div>
+                    </div>
+                    <div class="birthday-item">
+                        <div class="birthday-info">
+                            <strong>Juliana Lima</strong>
+                            <small>22/01 • Coordenadora RH</small>
+                        </div>
+                    </div>
+                    <div class="birthday-item">
+                        <div class="birthday-info">
+                            <strong>Roberto Martins</strong>
+                            <small>28/01 • Desenvolvedor</small>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="recent-item">
-              <div class="recent-avatar">MS</div>
-              <div class="recent-info">
-                <strong>Maria Santos</strong>
-                <small>Analista de RH • RH</small>
-              </div>
-              <span class="badge badge-success">Ativo</span>
-            </div>
-            <div class="recent-item">
-              <div class="recent-avatar">PC</div>
-              <div class="recent-info">
-                <strong>Pedro Costa</strong>
-                <small>Designer UX/UI • TI</small>
-              </div>
-              <span class="badge badge-warning">Onboarding</span>
-            </div>
-            <div class="recent-item">
-              <div class="recent-avatar">AF</div>
-              <div class="recent-info">
-                <strong>Ana Ferreira</strong>
-                <small>Analista Financeiro • Finanças</small>
-              </div>
-              <span class="badge badge-success">Ativo</span>
-            </div>
-          </div>
-        </div>
 
-        <!-- Pendências -->
-        <div class="dashboard-card">
-          <div class="card-header">
-            <h2>Pendências</h2>
-            <span class="badge badge-warning">8 itens</span>
-          </div>
-          <div class="pending-list">
-            <div class="pending-item">
-              <div class="pending-info">
-                <strong>Aprovar Férias</strong>
-                <small>3 solicitações aguardando</small>
-              </div>
-              <a href="vacation.html" class="btn btn-secondary"
-                style="padding: 0.5rem 1rem; font-size: 0.875rem;">Revisar</a>
+            <!-- Distribuição por Departamento -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h2>Distribuição por Departamento</h2>
+                </div>
+                <div class="department-chart">
+                    <div class="chart-bar">
+                        <span class="chart-label">Tecnologia</span>
+                        <div class="chart-progress">
+                            <div class="chart-fill" style="width: 45%; background: var(--primary-dark);"></div>
+                        </div>
+                        <span class="chart-value">45</span>
+                    </div>
+                    <div class="chart-bar">
+                        <span class="chart-label">Comercial</span>
+                        <div class="chart-progress">
+                            <div class="chart-fill" style="width: 35%; background: var(--success-green);"></div>
+                        </div>
+                        <span class="chart-value">35</span>
+                    </div>
+                    <div class="chart-bar">
+                        <span class="chart-label">Operações</span>
+                        <div class="chart-progress">
+                            <div class="chart-fill" style="width: 52%; background: var(--warning-orange);"></div>
+                        </div>
+                        <span class="chart-value">52</span>
+                    </div>
+                    <div class="chart-bar">
+                        <span class="chart-label">Financeiro</span>
+                        <div class="chart-progress">
+                            <div class="chart-fill" style="width: 18%; background: var(--info-gray);"></div>
+                        </div>
+                        <span class="chart-value">18</span>
+                    </div>
+                    <div class="chart-bar">
+                        <span class="chart-label">RH</span>
+                        <div class="chart-progress">
+                            <div class="chart-fill" style="width: 12%; background: var(--error-red);"></div>
+                        </div>
+                        <span class="chart-value">12</span>
+                    </div>
+                </div>
             </div>
-            <div class="pending-item">
-              <div class="pending-info">
-                <strong>Avaliações Pendentes</strong>
-                <small>5 avaliações a concluir</small>
-              </div>
-              <a href="performance.html" class="btn btn-secondary"
-                style="padding: 0.5rem 1rem; font-size: 0.875rem;">Revisar</a>
-            </div>
-            <div class="pending-item">
-              <div class="pending-info">
-                <strong>Documentos Vencendo</strong>
-                <small>2 ASOs próximos do vencimento</small>
-              </div>
-              <a href="employees.html" class="btn btn-secondary"
-                style="padding: 0.5rem 1rem; font-size: 0.875rem;">Revisar</a>
-            </div>
-          </div>
         </div>
-
-        <!-- Aniversariantes -->
-        <div class="dashboard-card">
-          <div class="card-header">
-            <h2>🎉 Aniversariantes do Mês</h2>
-          </div>
-          <div class="birthday-list">
-            <div class="birthday-item">
-              <div class="birthday-info">
-                <strong>Ana Paula Oliveira</strong>
-                <small>15/01 • Analista Financeiro</small>
-              </div>
-            </div>
-            <div class="birthday-item">
-              <div class="birthday-info">
-                <strong>Carlos Eduardo</strong>
-                <small>18/01 • Gerente de Projetos</small>
-              </div>
-            </div>
-            <div class="birthday-item">
-              <div class="birthday-info">
-                <strong>Juliana Lima</strong>
-                <small>22/01 • Coordenadora RH</small>
-              </div>
-            </div>
-            <div class="birthday-item">
-              <div class="birthday-info">
-                <strong>Roberto Martins</strong>
-                <small>28/01 • Desenvolvedor</small>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Distribuição por Departamento -->
-        <div class="dashboard-card">
-          <div class="card-header">
-            <h2>Distribuição por Departamento</h2>
-          </div>
-          <div class="department-chart">
-            <div class="chart-bar">
-              <span class="chart-label">Tecnologia</span>
-              <div class="chart-progress">
-                <div class="chart-fill" style="width: 45%; background: var(--primary-dark);"></div>
-              </div>
-              <span class="chart-value">45</span>
-            </div>
-            <div class="chart-bar">
-              <span class="chart-label">Comercial</span>
-              <div class="chart-progress">
-                <div class="chart-fill" style="width: 35%; background: var(--success-green);"></div>
-              </div>
-              <span class="chart-value">35</span>
-            </div>
-            <div class="chart-bar">
-              <span class="chart-label">Operações</span>
-              <div class="chart-progress">
-                <div class="chart-fill" style="width: 52%; background: var(--warning-orange);"></div>
-              </div>
-              <span class="chart-value">52</span>
-            </div>
-            <div class="chart-bar">
-              <span class="chart-label">Financeiro</span>
-              <div class="chart-progress">
-                <div class="chart-fill" style="width: 18%; background: var(--info-gray);"></div>
-              </div>
-              <span class="chart-value">18</span>
-            </div>
-            <div class="chart-bar">
-              <span class="chart-label">RH</span>
-              <div class="chart-progress">
-                <div class="chart-fill" style="width: 12%; background: var(--error-red);"></div>
-              </div>
-              <span class="chart-value">12</span>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
-  </div>
+</div>
 
-  <style>
-    /* Welcome Banner */
+<style>
     .welcome-banner {
       background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-gray) 100%);
       color: white;
@@ -358,175 +369,89 @@
       justify-content: space-between;
       align-items: center;
     }
-
-    .welcome-content h2 {
-      font-size: var(--font-size-2xl);
-      margin-bottom: var(--spacing-2);
-    }
-
-    .welcome-content p {
-      opacity: 0.9;
-    }
-
+    .welcome-content h2 { font-size: var(--font-size-2xl); margin-bottom: var(--spacing-2); }
+    .welcome-content p  { opacity: 0.9; }
     .welcome-date {
-      background: rgba(255, 255, 255, 0.1);
+      background: rgba(255,255,255,0.1);
       padding: var(--spacing-3) var(--spacing-4);
       border-radius: var(--radius-md);
       font-size: var(--font-size-sm);
     }
-
-    /* Quick Actions Bar */
-    .quick-actions-bar {
-      margin-bottom: var(--spacing-6);
-    }
-
-    .quick-actions-bar h3 {
-      font-size: var(--font-size-lg);
-      color: var(--gray-700);
-      margin-bottom: var(--spacing-4);
-    }
-
+    .quick-actions-bar { margin-bottom: var(--spacing-6); }
+    .quick-actions-bar h3 { font-size: var(--font-size-lg); color: var(--gray-700); margin-bottom: var(--spacing-4); }
     .quick-actions-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
       gap: var(--spacing-3);
     }
-
     .quick-action-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      display: flex; flex-direction: column; align-items: center;
       padding: var(--spacing-4);
-      background: white;
-      border-radius: var(--radius-md);
-      text-decoration: none;
-      color: var(--gray-700);
+      background: white; border-radius: var(--radius-md);
+      text-decoration: none; color: var(--gray-700);
       border: 1px solid var(--gray-200);
       transition: all 0.2s;
     }
-
     .quick-action-item:hover {
       border-color: var(--primary-dark);
       box-shadow: var(--shadow-md);
       transform: translateY(-2px);
     }
-
-    .quick-action-icon {
-      font-size: 24px;
-      margin-bottom: var(--spacing-2);
-    }
-
-    .quick-action-item span:last-child {
-      font-size: var(--font-size-sm);
-      text-align: center;
-    }
-
-    /* Department Chart */
-    .department-chart {
-      display: flex;
-      flex-direction: column;
-      gap: var(--spacing-4);
-    }
-
-    .chart-bar {
-      display: grid;
-      grid-template-columns: 100px 1fr 40px;
-      align-items: center;
-      gap: var(--spacing-3);
-    }
-
-    .chart-label {
-      font-size: var(--font-size-sm);
-      color: var(--gray-600);
-    }
-
-    .chart-progress {
-      height: 8px;
-      background: var(--gray-100);
-      border-radius: 4px;
-      overflow: hidden;
-    }
-
-    .chart-fill {
-      height: 100%;
-      border-radius: 4px;
-      transition: width 0.5s ease;
-    }
-
-    .chart-value {
-      font-weight: 600;
-      color: var(--gray-800);
-      text-align: right;
-    }
-
-    /* Stat change neutral */
-    .stat-change.neutral {
-      color: var(--gray-500);
-    }
-
+    .quick-action-icon { font-size: 24px; margin-bottom: var(--spacing-2); }
+    .quick-action-item span:last-child { font-size: var(--font-size-sm); text-align: center; }
+    .department-chart { display: flex; flex-direction: column; gap: var(--spacing-4); }
+    .chart-bar { display: grid; grid-template-columns: 100px 1fr 40px; align-items: center; gap: var(--spacing-3); }
+    .chart-label { font-size: var(--font-size-sm); color: var(--gray-600); }
+    .chart-progress { height: 8px; background: var(--gray-100); border-radius: 4px; overflow: hidden; }
+    .chart-fill { height: 100%; border-radius: 4px; transition: width 0.5s ease; }
+    .chart-value { font-weight: 600; color: var(--gray-800); text-align: right; }
+    .stat-change.neutral { color: var(--gray-500); }
     @media (max-width: 768px) {
-      .welcome-banner {
-        flex-direction: column;
-        text-align: center;
-        gap: var(--spacing-4);
-      }
-
-      .quick-actions-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-
-      .chart-bar {
-        grid-template-columns: 80px 1fr 30px;
-      }
+      .welcome-banner { flex-direction: column; text-align: center; gap: var(--spacing-4); }
+      .quick-actions-grid { grid-template-columns: repeat(2, 1fr); }
+      .chart-bar { grid-template-columns: 80px 1fr 30px; }
     }
-  </style>
+</style>
 
-  <script src="../static/scripts/auth.js"></script>
-  <script src="../static/scripts/components.js"></script>
-  <script>
+<script th:src="@{/scripts/auth.js}"></script>
+<script th:src="@{/scripts/components.js}"></script>
+<script>
     document.addEventListener('DOMContentLoaded', () => {
-      // Verificar autenticação
-      if (!Auth.requireRole(["ADMIN","RH_CHEFE","RH_ASSISTENTE","DP_CHEFE","DP_ASSISTENTE"], "employee-dashboard.html")) return;
+      // Verificar autenticação e permissão de acesso ao dashboard
+      if (!Auth.requireRole(["ADMIN","RH_CHEFE","RH_ASSISTENTE","DP_CHEFE","DP_ASSISTENTE"], "/employee-dashboard")) return;
 
-      // Inicializar interface
       initUserMenu();
       initSidebar();
       Auth.applyRoleVisibility(document);
+      Auth.applyActionVisibility(document);
       updateDateTime();
     });
 
     function initUserMenu() {
       const user = Auth.getCurrentUser();
       if (user) {
-        const firstName = (user.email || user.username).split('@')[0].split('.')[0];
-        const capitalizedName = firstName.charAt(0).toUpperCase() + firstName.slice(1);
+        const namePart = (user.email || '').split('@')[0].split('.')[0];
+        const displayName = namePart.charAt(0).toUpperCase() + namePart.slice(1);
 
-        document.getElementById('userName').textContent = capitalizedName;
-        document.getElementById('userFullName').textContent = user.email || user.username;
-        document.getElementById('userProfile').textContent = Auth.getProfileDisplayName(user);
-        document.getElementById('userAvatar').textContent = capitalizedName[0].toUpperCase();
+        document.getElementById('userName').textContent     = displayName;
+        document.getElementById('userFullName').textContent = user.email;
+        document.getElementById('userProfile').textContent  = Auth.getProfileDisplayName(user);
+        document.getElementById('userAvatar').textContent   = displayName[0].toUpperCase();
 
-        // Welcome message based on time
         const hour = new Date().getHours();
-        let greeting = 'Bom dia';
-        if (hour >= 12 && hour < 18) greeting = 'Boa tarde';
-        else if (hour >= 18) greeting = 'Boa noite';
-
-        document.getElementById('welcomeMessage').textContent = `${greeting}, ${capitalizedName}!`;
+        const greeting = hour < 12 ? 'Bom dia' : hour < 18 ? 'Boa tarde' : 'Boa noite';
+        document.getElementById('welcomeMessage').textContent = `${greeting}, ${displayName}!`;
       }
 
-      // Toggle dropdown
       document.getElementById('userMenuButton').addEventListener('click', () => {
         document.getElementById('userDropdown').classList.toggle('active');
       });
 
-      // Logout
       document.getElementById('logoutButton').addEventListener('click', (e) => {
         e.preventDefault();
         Auth.logout();
       });
 
-      // Close dropdown on click outside
       document.addEventListener('click', (e) => {
         if (!e.target.closest('.user-menu')) {
           document.getElementById('userDropdown').classList.remove('active');
@@ -536,35 +461,25 @@
 
     function initSidebar() {
       const sidebar = document.getElementById('sidebar');
-      const mobileBtn = document.getElementById('mobileMenuBtn');
-
-      mobileBtn?.addEventListener('click', () => {
+      document.getElementById('mobileMenuBtn')?.addEventListener('click', () => {
         sidebar.classList.toggle('mobile-open');
       });
-
-      // Close sidebar when clicking outside on mobile
       document.addEventListener('click', (e) => {
-        if (window.innerWidth <= 768) {
-          if (!e.target.closest('.sidebar') && !e.target.closest('.mobile-menu-btn')) {
-            sidebar.classList.remove('mobile-open');
-          }
+        if (window.innerWidth <= 768
+          && !e.target.closest('.sidebar')
+          && !e.target.closest('.mobile-menu-btn')) {
+          sidebar.classList.remove('mobile-open');
         }
       });
     }
 
     function updateDateTime() {
-      const options = {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      };
-      const date = new Date().toLocaleDateString('pt-BR', options);
-      // Capitalize first letter
-      const capitalizedDate = date.charAt(0).toUpperCase() + date.slice(1);
-      document.getElementById('currentDate').textContent = capitalizedDate;
+      const date = new Date().toLocaleDateString('pt-BR', {
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+      });
+      document.getElementById('currentDate').textContent =
+        date.charAt(0).toUpperCase() + date.slice(1);
     }
-  </script>
+</script>
 </body>
-
-</html
+</html>
