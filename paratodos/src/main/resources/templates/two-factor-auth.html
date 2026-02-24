@@ -283,7 +283,7 @@
     <div class="alert alert-error" th:if="${error}" th:text="${error}"></div>
 
     <div class="auth-info">
-      Um codigo de verificacao foi enviado ou gerado no seu autenticador. Insira o codigo abaixo para prosseguir.
+      Um codigo de verificacao de 6 digitos foi enviado para o seu email. Insira o codigo abaixo para prosseguir.
     </div>
 
     <form th:action="@{/2fa}" method="post">
@@ -310,7 +310,7 @@
 
     <div class="form-footer">
       <p>
-        Nao recebeu o codigo? Verifique seu app autenticador ou o console do servidor.
+        Nao recebeu o codigo? Verifique sua caixa de spam ou aguarde alguns instantes.
       </p>
     </div>
   </div>

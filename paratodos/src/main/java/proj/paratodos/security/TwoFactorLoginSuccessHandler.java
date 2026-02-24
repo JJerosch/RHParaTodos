@@ -33,18 +33,9 @@ public class TwoFactorLoginSuccessHandler implements AuthenticationSuccessHandle
         HttpSession session = request.getSession(true);
 
         if (twoFactorService.needsTwoFactor(principal)) {
-            // Não emite JWT ainda — aguarda verificação 2FA
+            // Nao emite JWT ainda — gera codigo e envia por email
             session.setAttribute(SESSION_2FA_OK, false);
-
-            String tipo = principal.getTwoFactorType() == null
-                    ? "CODIGO"
-                    : principal.getTwoFactorType().toUpperCase();
-
-            if (!"TOTP".equals(tipo)) {
-                String code = twoFactorService.startCodeChallenge(principal);
-                System.out.println("[DEBUG 2FA] usuario=" + principal.getUsername() + " código=" + code);
-            }
-
+            twoFactorService.startCodeChallenge(principal);
             response.sendRedirect("/2fa");
             return;
         }
