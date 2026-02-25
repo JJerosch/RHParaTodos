@@ -1,4 +1,21 @@
-﻿--
+﻿-- V1__baseline_adjusted.sql
+-- Baseline (somente schema): tabelas, sequences, constraints, functions, triggers, índices
+-- Sistema RH Para Todos
+--
+-- Ajustes incluídos:
+-- - Auditoria LGPD tolerante a sessão sem app.usuario_id (NULLIF + user_agent)
+-- - Função divisor_mensal_funcionario + cálculo de valor-hora sem hardcode 220
+-- - Multiplicador de hora extra configurável via app.multiplicador_hextra (fallback 1.5)
+-- - Validação de eventos FERIAS/FERIAS_1_3 no trigger de férias
+-- - Proteção contra recursão em trg_recalcular_folha_lancamentos (pg_trigger_depth)
+-- - Limpeza de mojibake em comentários
+
+-- V1__baseline_final.sql
+-- Baseline único (schema + functions + triggers + seeds) para o Sistema RH Para Todos
+-- Gerado ao consolidar V1..V5 + seeds essenciais (DEV/DEMO)
+
+
+--
 -- PostgreSQL database dump
 --
 
@@ -11,7 +28,7 @@ SET idle_in_transaction_session_timeout = 0;
 SET transaction_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
-SELECT pg_catalog.set_config('search_path', '', false);
+SET search_path = public;
 SET check_function_bodies = false;
 SET xmloption = content;
 SET client_min_messages = warning;
@@ -172,7 +189,7 @@ BEGIN
   WHERE id = p_folha_id;
 
   IF v_status IS NULL THEN
-    RAISE EXCEPTION 'Folha % nÃ£o encontrada.', p_folha_id;
+    RAISE EXCEPTION 'Folha % não encontrada.', p_folha_id;
   END IF;
 
   IF v_status = 'FECHADA' THEN
@@ -206,7 +223,7 @@ BEGIN
   WHERE id = p_folha_id;
 
   IF v_status IS NULL THEN
-    RAISE EXCEPTION 'Folha % nÃ£o encontrada.', p_folha_id;
+    RAISE EXCEPTION 'Folha % não encontrada.', p_folha_id;
   END IF;
 
   IF v_status = 'FECHADA' THEN
@@ -242,11 +259,11 @@ BEGIN
   FOR UPDATE;
 
   IF v_status IS NULL THEN
-    RAISE EXCEPTION 'Folha % nÃ£o encontrada.', p_folha_id;
+    RAISE EXCEPTION 'Folha % não encontrada.', p_folha_id;
   END IF;
 
   IF v_status = 'FECHADA' THEN
-    RAISE EXCEPTION 'Folha % jÃ¡ estÃ¡ FECHADA.', p_folha_id;
+    RAISE EXCEPTION 'Folha % já está FECHADA.', p_folha_id;
   END IF;
 
   PERFORM public.recalcular_folha(p_folha_id);
@@ -267,33 +284,74 @@ $$;
 CREATE FUNCTION public.fn_auditoria_lgpd() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
+DECLARE
+  v_usuario_id bigint;
+  v_perfil text;
+  v_user_agent text;
 BEGIN
-    INSERT INTO auditoria_lgpd (
-        tabela_afetada,
-        registro_id,
-        operacao,
-        usuario_id,
-        perfil_usuario,
-        dados_antes,
-        dados_depois,
-        ip_origem,
-        criado_em
-    )
-    VALUES (
-        TG_TABLE_NAME,
-        COALESCE(NEW.id, OLD.id),
-        TG_OP,
-        current_setting('app.usuario_id', true)::bigint,
-        current_setting('app.perfil_usuario', true),
-        CASE WHEN TG_OP IN ('UPDATE','DELETE') THEN to_jsonb(OLD) END,
-        CASE WHEN TG_OP IN ('INSERT','UPDATE') THEN to_jsonb(NEW) END,
-        inet_client_addr(),
-        now()
-    );
+  v_usuario_id := NULLIF(current_setting('app.usuario_id', true), '')::bigint;
+  v_perfil     := NULLIF(current_setting('app.perfil_usuario', true), '');
+  v_user_agent := NULLIF(current_setting('app.user_agent', true), '');
 
-    RETURN NEW;
+  INSERT INTO public.auditoria_lgpd (
+      tabela_afetada,
+      registro_id,
+      operacao,
+      usuario_id,
+      perfil_usuario,
+      dados_antes,
+      dados_depois,
+      ip_origem,
+      user_agent,
+      criado_em
+  )
+  VALUES (
+      TG_TABLE_NAME,
+      COALESCE(NEW.id, OLD.id),
+      TG_OP,
+      v_usuario_id,
+      v_perfil,
+      CASE WHEN TG_OP IN ('UPDATE','DELETE') THEN to_jsonb(OLD) END,
+      CASE WHEN TG_OP IN ('INSERT','UPDATE') THEN to_jsonb(NEW) END,
+      inet_client_addr(),
+      v_user_agent,
+      now()
+  );
+
+  RETURN NEW;
 END;
 $$;
+
+
+
+--
+-- Name: divisor_mensal_funcionario(bigint); Type: FUNCTION; Schema: public; Owner: -
+--
+-- Calcula o divisor mensal para valor-hora com base na jornada:
+-- divisor = carga_horaria_diaria * 25 (assumindo 5 dias/semana: horas_semanais*5).
+-- Ex.: 8h/dia -> 200; 8,8h/dia -> 220; 6h/dia -> 150.
+-- Se não houver jornada/salário, usa fallback 220.
+--
+CREATE FUNCTION public.divisor_mensal_funcionario(p_funcionario_id bigint) RETURNS numeric
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+  v_divisor numeric;
+BEGIN
+  SELECT
+    CASE
+      WHEN j.carga_horaria_diaria IS NOT NULL THEN (j.carga_horaria_diaria * 25)
+      ELSE 220
+    END
+  INTO v_divisor
+  FROM public.funcionarios f
+  LEFT JOIN public.ponto_jornadas j ON j.id = f.jornada_id
+  WHERE f.id = p_funcionario_id;
+
+  RETURN COALESCE(v_divisor, 220);
+END;
+$$;
+
 
 
 --
@@ -306,17 +364,44 @@ CREATE FUNCTION public.gerar_eventos_ponto_folha(p_folha_id bigint, p_funcionari
 DECLARE
     v_horas_extras numeric := 0;
     v_horas_faltas numeric := 0;
+
+    v_salario numeric;
+    v_divisor numeric;
     v_valor_hora numeric;
+
+    v_mult_hextra numeric := 1.5;
+
     v_evt_hextra bigint;
     v_evt_falta bigint;
 BEGIN
-    SELECT salario_atual / 220
-    INTO v_valor_hora
-    FROM funcionarios
+    -- divisor/multiplicadores configuráveis via sessão (opcional)
+    v_divisor := public.divisor_mensal_funcionario(p_funcionario_id);
+
+    -- permite override por sessão (ex.: sindicato/contrato). Se não definido, usa 1.5.
+    v_mult_hextra := COALESCE(NULLIF(current_setting('app.multiplicador_hextra', true), '')::numeric, 1.5);
+
+    SELECT salario_atual
+      INTO v_salario
+    FROM public.funcionarios
     WHERE id = p_funcionario_id;
 
+    IF v_salario IS NULL THEN
+      -- sem salário -> sem cálculo de valor-hora
+      RETURN;
+    END IF;
+
+    v_valor_hora := ROUND(v_salario / NULLIF(v_divisor, 0), 6);
+
     SELECT id INTO v_evt_hextra FROM public.folha_eventos_catalogo WHERE codigo='HEXTRA';
-    SELECT id INTO v_evt_falta FROM public.folha_eventos_catalogo WHERE codigo='FALTA';
+    SELECT id INTO v_evt_falta  FROM public.folha_eventos_catalogo WHERE codigo='FALTA';
+
+    IF v_evt_hextra IS NULL THEN
+      RAISE EXCEPTION 'Evento de folha "HEXTRA" não encontrado em folha_eventos_catalogo.';
+    END IF;
+
+    IF v_evt_falta IS NULL THEN
+      RAISE EXCEPTION 'Evento de folha "FALTA" não encontrado em folha_eventos_catalogo.';
+    END IF;
 
     SELECT
         COALESCE(SUM(horas_extras), 0),
@@ -324,12 +409,12 @@ BEGIN
     INTO
         v_horas_extras,
         v_horas_faltas
-    FROM ponto_apuracao_diaria
+    FROM public.ponto_apuracao_diaria
     WHERE funcionario_id = p_funcionario_id
       AND date_trunc('month', data) = date_trunc('month', p_competencia);
 
     IF v_horas_extras > 0 THEN
-        INSERT INTO folha_lancamentos (
+        INSERT INTO public.folha_lancamentos (
             folha_id, tipo, codigo, descricao, referencia, valor, origem, evento_id
         )
         VALUES (
@@ -338,14 +423,14 @@ BEGIN
             'HEXTRA',
             'Horas Extras',
             v_horas_extras,
-            ROUND(v_horas_extras * v_valor_hora * 1.5, 2),
+            ROUND(v_horas_extras * v_valor_hora * v_mult_hextra, 2),
             'PONTO',
             v_evt_hextra
         );
     END IF;
 
     IF v_horas_faltas > 0 THEN
-        INSERT INTO folha_lancamentos (
+        INSERT INTO public.folha_lancamentos (
             folha_id, tipo, codigo, descricao, referencia, valor, origem, evento_id
         )
         VALUES (
@@ -361,6 +446,7 @@ BEGIN
     END IF;
 END;
 $$;
+
 
 
 --
@@ -416,18 +502,18 @@ BEGIN
   WHERE id = p_folha_id;
 
   IF v_competencia IS NULL THEN
-    RAISE EXCEPTION 'Folha % nÃ£o encontrada.', p_folha_id;
+    RAISE EXCEPTION 'Folha % não encontrada.', p_folha_id;
   END IF;
 
   v_ano := EXTRACT(YEAR FROM v_competencia)::int;
   v_base := public.base_inss_folha(p_folha_id);
 
-  -- se nÃ£o tiver faixa para o ano da competÃªncia, usa o maior ano existente (ex.: 2026)
+  -- se não tiver faixa para o ano da competência, usa o maior ano existente (ex.: 2026)
   IF NOT EXISTS (SELECT 1 FROM public.inss_faixas WHERE ano = v_ano) THEN
     SELECT MAX(ano) INTO v_ano_usado FROM public.inss_faixas;
 
     IF v_ano_usado IS NULL THEN
-      RAISE EXCEPTION 'Tabela INSS (inss_faixas) estÃ¡ vazia.';
+      RAISE EXCEPTION 'Tabela INSS (inss_faixas) está vazia.';
     END IF;
   ELSE
     v_ano_usado := v_ano;
@@ -486,12 +572,12 @@ BEGIN
   WHERE fp.id = p_folha_id;
 
   IF v_competencia IS NULL THEN
-    RAISE EXCEPTION 'Folha % nÃ£o encontrada.', p_folha_id;
+    RAISE EXCEPTION 'Folha % não encontrada.', p_folha_id;
   END IF;
 
   v_ano_comp := EXTRACT(YEAR FROM v_competencia)::int;
 
-  -- 1) escolher ano de parÃ¢metros (fallback -> MAX)
+  -- 1) escolher ano de parâmetros (fallback -> MAX)
   IF EXISTS (SELECT 1 FROM public.irrf_parametros WHERE ano = v_ano_comp) THEN
     v_ano_param := v_ano_comp;
   ELSE
@@ -499,10 +585,10 @@ BEGIN
   END IF;
 
   IF v_ano_param IS NULL THEN
-    RAISE EXCEPTION 'Tabela IRRF (irrf_parametros) estÃ¡ vazia.';
+    RAISE EXCEPTION 'Tabela IRRF (irrf_parametros) está vazia.';
   END IF;
 
-  -- 2) escolher vigÃªncia da tabela (fallback -> MAX)
+  -- 2) escolher vigência da tabela (fallback -> MAX)
   SELECT MAX(vigente_desde)
     INTO v_ref_vigencia
   FROM public.irrf_tabela
@@ -536,7 +622,7 @@ BEGIN
   v_deducao_dep := COALESCE(v_dependentes,0) * COALESCE(v_valor_dep,0);
   v_base_liquida := GREATEST(v_base_bruta - v_inss - v_deducao_dep, 0);
 
-  -- chama usando a vigÃªncia escolhida (ex.: 2026-01-01)
+  -- chama usando a vigência escolhida (ex.: 2026-01-01)
   v_valor_irrf := public.calcular_irrf_progressivo(v_base_liquida, v_ref_vigencia);
 
   SELECT id INTO v_evento_id
@@ -615,6 +701,9 @@ DECLARE
   v_valor_dia numeric(10,2);
   v_total_ferias numeric(10,2);
   v_um_terco numeric(10,2);
+
+  v_evt_ferias bigint;
+  v_evt_ferias_terco bigint;
 BEGIN
   IF TG_OP <> 'INSERT' THEN
     RETURN NEW;
@@ -630,7 +719,7 @@ BEGIN
   LIMIT 1;
 
   IF v_folha_id IS NULL THEN
-    RAISE EXCEPTION 'NÃ£o existe folha ABERTA para o funcionÃ¡rio % na competÃªncia %',
+    RAISE EXCEPTION 'Não existe folha ABERTA para o funcionário % na competência %',
       NEW.funcionario_id, v_competencia;
   END IF;
 
@@ -638,20 +727,38 @@ BEGIN
   FROM public.funcionarios
   WHERE id = NEW.funcionario_id;
 
+  IF v_salario IS NULL THEN
+    RAISE EXCEPTION 'Funcionário % sem salário_atual para cálculo de férias.', NEW.funcionario_id;
+  END IF;
+
+  -- valida se eventos existem no catálogo (evita inserts "soltos" por código)
+  SELECT id INTO v_evt_ferias FROM public.folha_eventos_catalogo WHERE codigo='FERIAS';
+  SELECT id INTO v_evt_ferias_terco FROM public.folha_eventos_catalogo WHERE codigo='FERIAS_1_3';
+
+  IF v_evt_ferias IS NULL THEN
+    RAISE EXCEPTION 'Evento de folha "FERIAS" não encontrado em folha_eventos_catalogo.';
+  END IF;
+
+  IF v_evt_ferias_terco IS NULL THEN
+    RAISE EXCEPTION 'Evento de folha "FERIAS_1_3" não encontrado em folha_eventos_catalogo.';
+  END IF;
+
+  -- regra simplificada (mês comercial de 30 dias)
   v_valor_dia := ROUND(v_salario / 30.0, 2);
   v_total_ferias := ROUND(v_valor_dia * NEW.dias_gozados, 2);
   v_um_terco := ROUND(v_total_ferias / 3.0, 2);
 
-  INSERT INTO public.folha_lancamentos (folha_id, tipo, codigo, descricao, valor, origem)
-  VALUES (v_folha_id, 'PROVENTO', 'FERIAS', 'FÃ©rias gozadas', v_total_ferias, 'FERIAS');
+  INSERT INTO public.folha_lancamentos (folha_id, tipo, codigo, descricao, valor, origem, evento_id)
+  VALUES (v_folha_id, 'PROVENTO', 'FERIAS', 'Férias gozadas', v_total_ferias, 'FERIAS', v_evt_ferias);
 
-  INSERT INTO public.folha_lancamentos (folha_id, tipo, codigo, descricao, valor, origem)
-  VALUES (v_folha_id, 'PROVENTO', 'FERIAS_1_3', '1/3 Constitucional de FÃ©rias', v_um_terco, 'FERIAS');
+  INSERT INTO public.folha_lancamentos (folha_id, tipo, codigo, descricao, valor, origem, evento_id)
+  VALUES (v_folha_id, 'PROVENTO', 'FERIAS_1_3', '1/3 Constitucional de Férias', v_um_terco, 'FERIAS', v_evt_ferias_terco);
 
-  -- caminho B: NÃƒO recalcula impostos automaticamente aqui
+  -- NÃO recalcula impostos automaticamente aqui; a folha recalcula no fluxo normal (processar_folha)
   RETURN NEW;
 END;
 $$;
+
 
 
 --
@@ -662,7 +769,7 @@ CREATE FUNCTION public.processar_beneficios_e_recalcular(p_folha_id bigint) RETU
     LANGUAGE plpgsql
     AS $$
 BEGIN
-    -- 1. Gera lanÃ§amentos de benefÃ­cios
+    -- 1. Gera lançamentos de benefícios
     PERFORM gerar_lancamentos_beneficios(p_folha_id);
 
     -- 2. Recalcula totais da folha
@@ -691,7 +798,7 @@ BEGIN
   WHERE codigo = 'SALARIO';
 
   INSERT INTO public.folha_lancamentos (folha_id, tipo, codigo, descricao, valor, origem, evento_id)
-  SELECT p_folha_id, 'PROVENTO', 'SALARIO', 'SalÃ¡rio Base', salario_atual, 'CONTRATO', v_evt_salario
+  SELECT p_folha_id, 'PROVENTO', 'SALARIO', 'Salário Base', salario_atual, 'CONTRATO', v_evt_salario
   FROM public.funcionarios
   WHERE id = p_funcionario_id;
 
@@ -723,7 +830,7 @@ BEGIN
   WHERE id = p_folha_id;
 
   IF v_status IS NULL THEN
-    RAISE EXCEPTION 'Folha % nÃ£o encontrada.', p_folha_id;
+    RAISE EXCEPTION 'Folha % não encontrada.', p_folha_id;
   END IF;
 
   IF v_status <> 'FECHADA' THEN
@@ -749,18 +856,18 @@ CREATE FUNCTION public.recalcular_folha(p_folha_id bigint) RETURNS void
 DECLARE
   v_status text;
 BEGIN
-  -- trava a linha da folha (evita concorrÃªncia simples)
+  -- trava a linha da folha (evita concorrência simples)
   SELECT status INTO v_status
   FROM public.folha_pagamentos
   WHERE id = p_folha_id
   FOR UPDATE;
 
   IF v_status IS NULL THEN
-    RAISE EXCEPTION 'Folha % nÃ£o encontrada.', p_folha_id;
+    RAISE EXCEPTION 'Folha % não encontrada.', p_folha_id;
   END IF;
 
   IF v_status = 'FECHADA' THEN
-    RAISE EXCEPTION 'Folha % estÃ¡ FECHADA. Recalcular nÃ£o Ã© permitido.', p_folha_id;
+    RAISE EXCEPTION 'Folha % está FECHADA. Recalcular não é permitido.', p_folha_id;
   END IF;
 
   -- Ordem correta: IRRF depende do INSS
@@ -845,7 +952,7 @@ BEGIN
   WHERE id = COALESCE(NEW.folha_id, OLD.folha_id);
 
   IF v_status = 'FECHADA' THEN
-    RAISE EXCEPTION 'Folha % estÃ¡ FECHADA. NÃ£o Ã© permitido alterar lanÃ§amentos.', COALESCE(NEW.folha_id, OLD.folha_id);
+    RAISE EXCEPTION 'Folha % está FECHADA. Não é permitido alterar lançamentos.', COALESCE(NEW.folha_id, OLD.folha_id);
   END IF;
 
   RETURN COALESCE(NEW, OLD);
@@ -936,10 +1043,16 @@ CREATE FUNCTION public.trg_recalcular_folha_lancamentos() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
 BEGIN
-    PERFORM recalcular_totais_folha(NEW.folha_id);
+  -- proteção para evitar recursão caso este trigger seja usado no futuro junto de rotinas que gerem novos lançamentos
+  IF pg_trigger_depth() > 1 THEN
     RETURN NEW;
+  END IF;
+
+  PERFORM public.recalcular_totais_folha(NEW.folha_id);
+  RETURN NEW;
 END;
 $$;
+
 
 
 --
@@ -1316,8 +1429,7 @@ CREATE TABLE public.folha_eventos_catalogo (
     criado_em timestamp without time zone DEFAULT now(),
     CONSTRAINT chk_folha_eventos_catalogo_natureza CHECK (((natureza)::text = ANY (ARRAY[('PROVENTO'::character varying)::text, ('DESCONTO'::character varying)::text, ('INFORMATIVO'::character varying)::text]))),
     CONSTRAINT chk_folha_eventos_catalogo_tipo CHECK (((tipo)::text = ANY (ARRAY[('SALARIAL'::character varying)::text, ('IMPOSTO'::character varying)::text, ('ENCARGO'::character varying)::text]))),
-    CONSTRAINT chk_natureza CHECK (((natureza)::text = ANY (ARRAY[('PROVENTO'::character varying)::text, ('DESCONTO'::character varying)::text, ('INFORMATIVO'::character varying)::text]))),
-    CONSTRAINT chk_tipo CHECK (((tipo)::text = ANY (ARRAY[('SALARIAL'::character varying)::text, ('NAO_SALARIAL'::character varying)::text, ('ENCARGO'::character varying)::text, ('IMPOSTO'::character varying)::text, ('BENEFICIO'::character varying)::text])))
+CONSTRAINT chk_tipo CHECK (((tipo)::text = ANY (ARRAY[('SALARIAL'::character varying)::text, ('NAO_SALARIAL'::character varying)::text, ('ENCARGO'::character varying)::text, ('IMPOSTO'::character varying)::text, ('BENEFICIO'::character varying)::text])))
 );
 
 
@@ -3736,4 +3848,54 @@ ALTER TABLE ONLY public.usuario_roles
 --
 
 
+
+
+
+
+-- =====================================================================
+--
+-- Triggers para manter atualizado_em automaticamente
+--
+CREATE OR REPLACE FUNCTION public.trg_set_atualizado_em() RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  NEW.atualizado_em := now();
+  RETURN NEW;
+END;
+$$;
+
+DO $$
+BEGIN
+  -- cria triggers apenas onde a coluna existe (idempotente)
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='cargos' AND column_name='atualizado_em') THEN
+    EXECUTE 'DROP TRIGGER IF EXISTS tg_set_updated_cargos ON public.cargos';
+    EXECUTE 'CREATE TRIGGER tg_set_updated_cargos BEFORE UPDATE ON public.cargos FOR EACH ROW EXECUTE FUNCTION public.trg_set_atualizado_em()';
+  END IF;
+
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='departamentos' AND column_name='atualizado_em') THEN
+    EXECUTE 'DROP TRIGGER IF EXISTS tg_set_updated_departamentos ON public.departamentos';
+    EXECUTE 'CREATE TRIGGER tg_set_updated_departamentos BEFORE UPDATE ON public.departamentos FOR EACH ROW EXECUTE FUNCTION public.trg_set_atualizado_em()';
+  END IF;
+
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='funcionarios' AND column_name='atualizado_em') THEN
+    EXECUTE 'DROP TRIGGER IF EXISTS tg_set_updated_funcionarios ON public.funcionarios';
+    EXECUTE 'CREATE TRIGGER tg_set_updated_funcionarios BEFORE UPDATE ON public.funcionarios FOR EACH ROW EXECUTE FUNCTION public.trg_set_atualizado_em()';
+  END IF;
+
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='tipos_beneficios' AND column_name='atualizado_em') THEN
+    EXECUTE 'DROP TRIGGER IF EXISTS tg_set_updated_tipos_beneficios ON public.tipos_beneficios';
+    EXECUTE 'CREATE TRIGGER tg_set_updated_tipos_beneficios BEFORE UPDATE ON public.tipos_beneficios FOR EACH ROW EXECUTE FUNCTION public.trg_set_atualizado_em()';
+  END IF;
+
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='tipos_documentos' AND column_name='atualizado_em') THEN
+    EXECUTE 'DROP TRIGGER IF EXISTS tg_set_updated_tipos_documentos ON public.tipos_documentos';
+    EXECUTE 'CREATE TRIGGER tg_set_updated_tipos_documentos BEFORE UPDATE ON public.tipos_documentos FOR EACH ROW EXECUTE FUNCTION public.trg_set_atualizado_em()';
+  END IF;
+
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='usuarios' AND column_name='atualizado_em') THEN
+    EXECUTE 'DROP TRIGGER IF EXISTS tg_set_updated_usuarios ON public.usuarios';
+    EXECUTE 'CREATE TRIGGER tg_set_updated_usuarios BEFORE UPDATE ON public.usuarios FOR EACH ROW EXECUTE FUNCTION public.trg_set_atualizado_em()';
+  END IF;
+END $$;
 
