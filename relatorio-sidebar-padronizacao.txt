@@ -1,0 +1,176 @@
+================================================================================
+  RELATORIO: PADRONIZACAO DA BARRA DE MENU LATERAL (SIDEBAR) DO DASHBOARD
+  Projeto: RH Para Todos
+  Data: 2026-02-25
+================================================================================
+
+1. SITUACAO ATUAL
+-----------------
+
+O projeto possui 16 templates com sidebar. NAO existe nenhum fragment
+Thymeleaf compartilhado -- cada template duplica o HTML da sidebar inteiro.
+O unico template que esta "completo" (com icones, roles, URLs Thymeleaf)
+eh o dashboard.html. Todos os outros estao desatualizados.
+
+Templates COM sidebar (16):
+  - dashboard.html           (PADRAO DE REFERENCIA - completo)
+  - benefits.html
+  - employees.html
+  - departments.html
+  - positions.html
+  - recruitment.html
+  - training.html
+  - performance.html
+  - payroll.html
+  - vacation.html
+  - timesheet.html
+  - reports.html
+  - settings.html
+  - employee-dashboard.html  (sidebar simplificada: 2 itens)
+  - payslips.html            (sidebar simplificada: 2 itens)
+  - meu-perfil.html          (SEM sidebar)
+
+Templates SEM sidebar (nao aplicavel):
+  - index.html               (pagina de login)
+  - two-factor-auth.html     (pagina de 2FA)
+
+
+2. O QUE JA FOI FEITO (dashboard.html como referencia)
+-------------------------------------------------------
+
+O template dashboard.html ja possui a versao padronizada com:
+
+  [OK] Icones em todos os itens de menu (via <img> dentro de <span class="nav-icon">)
+  [OK] Atributos data-roles para controle de visibilidade por perfil
+  [OK] URLs usando th:href="@{/...}" (Thymeleaf)
+  [OK] Organizacao em secoes:
+       - Dashboard (todos os perfis)
+       - Gestao de Pessoas: Funcionarios, Departamentos, Cargos
+       - Recursos Humanos: Recrutamento, Treinamentos, Avaliacoes
+       - Departamento Pessoal: Folha, Beneficios, Ferias, Ponto
+       - Administracao: Relatorios, Configuracoes
+  [OK] Classe "active" no item da pagina atual
+  [OK] Responsividade mobile (hamburger menu, off-canvas)
+  [OK] JavaScript auth.js com Auth.applyRoleVisibility()
+
+
+3. O QUE FALTA FAZER (inconsistencias nos demais templates)
+------------------------------------------------------------
+
+3.1 SEM ICONES (14 templates)
+    Todos os templates exceto dashboard.html usam apenas <span class="nav-text">
+    sem nenhum <span class="nav-icon"> com imagem. Falta copiar o padrao de
+    icones do dashboard.html para:
+      - benefits.html
+      - employees.html
+      - departments.html
+      - positions.html
+      - recruitment.html
+      - training.html
+      - performance.html
+      - payroll.html
+      - vacation.html
+      - timesheet.html
+      - reports.html
+      - settings.html
+      - employee-dashboard.html
+      - payslips.html
+
+3.2 SEM CONTROLE DE ROLES (14 templates)
+    Nenhum template alem do dashboard.html possui atributos data-roles.
+    Todos os itens de menu ficam visiveis para qualquer usuario.
+
+3.3 URLs ESTATICAS em vez de Thymeleaf (14 templates)
+    Os templates usam href="dashboard.html" (estatico) em vez de
+    th:href="@{/dashboard}" (Thymeleaf). Isso causa problemas quando
+    o context-path muda ou quando se usa resolucao de rotas do Spring.
+
+3.4 NAO EXISTE FRAGMENT COMPARTILHADO
+    Cada template copia/cola o sidebar inteiro. Qualquer alteracao
+    no menu precisa ser replicada manualmente em 16 arquivos.
+    Nao existe pasta fragments/ nem arquivo sidebar.html reutilizavel.
+
+3.5 meu-perfil.html SEM SIDEBAR
+    A pagina de perfil do usuario nao possui sidebar alguma.
+
+
+4. MAPA DE ROLES POR ITEM DE MENU (referencia dashboard.html)
+--------------------------------------------------------------
+
+  Item                   | Roles permitidas
+  -----------------------|--------------------------------------------------
+  Dashboard              | ADMIN, RH_CHEFE, RH_ASSISTENTE, DP_CHEFE, DP_ASSISTENTE
+  Funcionarios           | ADMIN, RH_CHEFE, RH_ASSISTENTE, DP_CHEFE, DP_ASSISTENTE
+  Departamentos          | ADMIN, RH_CHEFE
+  Cargos                 | ADMIN, RH_CHEFE
+  Recrutamento           | ADMIN, RH_CHEFE, RH_ASSISTENTE
+  Treinamentos           | ADMIN, RH_CHEFE, RH_ASSISTENTE
+  Avaliacoes             | ADMIN, RH_CHEFE, RH_ASSISTENTE
+  Folha de Pagamento     | ADMIN, DP_CHEFE, DP_ASSISTENTE
+  Beneficios             | ADMIN, DP_CHEFE, DP_ASSISTENTE, RH_CHEFE
+  Ferias                 | ADMIN, DP_CHEFE, DP_ASSISTENTE, RH_CHEFE, RH_ASSISTENTE
+  Ponto                  | ADMIN, DP_CHEFE, DP_ASSISTENTE
+  Relatorios             | ADMIN, RH_CHEFE, DP_CHEFE
+  Configuracoes          | ADMIN
+
+
+5. SIDEBAR DO PORTAL DO FUNCIONARIO (employee-dashboard / payslips)
+--------------------------------------------------------------------
+
+  Itens:
+    - Ponto (timesheet)
+    - Holerites (payslips)
+
+  Pendencias:
+    - Faltam icones
+    - Faltam URLs Thymeleaf
+    - Avaliar se deve ter mais itens (ex: Minhas Ferias, Meu Perfil)
+
+
+6. ARQUIVOS CSS E JS RELACIONADOS
+----------------------------------
+
+  CSS:
+    /static/styles/global.css      -> Variaveis CSS (cores, espacamento)
+    /static/styles/dashboard.css   -> Estilos do sidebar (.sidebar, .nav-item, etc.)
+    /static/styles/components.css  -> Componentes reutilizaveis
+
+  JS:
+    /static/scripts/auth.js        -> Auth.applyRoleVisibility() (controle de roles)
+    /static/scripts/components.js  -> initSidebar() (hamburger mobile)
+    /static/scripts/dashboard.js   -> Logica especifica do dashboard
+
+  CSS do sidebar (dashboard.css):
+    .sidebar            -> 260px fixo, fundo escuro, z-index 100
+    .nav-item           -> flex, padding, hover
+    .nav-item.active    -> fundo claro + borda esquerda 3px branca
+    .nav-section        -> uppercase, opacidade reduzida, separador
+    .nav-icon           -> container de icone
+    .nav-text           -> texto do item
+
+  Responsividade (breakpoint 768px):
+    Desktop: sidebar fixa, main-content com margin-left 260px
+    Mobile:  sidebar escondida (translateX -100%), botao hamburger visivel
+
+
+7. PLANO DE ACAO RECOMENDADO (proximo passo)
+----------------------------------------------
+
+  Prioridade 1 - Criar fragment Thymeleaf compartilhado
+    -> Criar templates/fragments/sidebar.html
+    -> Parametrizar pagina ativa via th:classappend
+    -> Incluir icones + data-roles + th:href
+    -> Substituir sidebar inline em todos os 16 templates por th:replace
+
+  Prioridade 2 - Garantir consistencia
+    -> Unificar itens de menu (mesmo conjunto em todos os templates admin)
+    -> Garantir que Auth.applyRoleVisibility() roda em todas as paginas
+    -> Adicionar sidebar ao meu-perfil.html
+
+  Prioridade 3 - Portal do funcionario
+    -> Criar fragment separado para sidebar do EMPLOYEE
+    -> Avaliar adicao de itens: Minhas Ferias, Meu Perfil, Meus Beneficios
+
+================================================================================
+  FIM DO RELATORIO
+================================================================================
