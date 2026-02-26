@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<!--
+  ============================================================
+  FRAGMENT: Sidebar (Menu Lateral)
+  Uso nos templates:
+    Admin:      th:replace="~{fragments/sidebar :: admin('dashboard')}"
+    Employee:   th:replace="~{fragments/sidebar :: employee('employee-dashboard')}"
+  O parâmetro é o nome da página ativa (sem .html).
+  ============================================================
+-->
+<body>
+
+<!-- ==================== SIDEBAR ADMIN ==================== -->
+<aside th:fragment="admin(activePage)" class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <div class="logo">
+            <img th:src="@{/assets/gruporhpaint.png}" alt="logo_menu_lateral" height="60">
+        </div>
+    </div>
+
+    <nav class="sidebar-nav">
+        <a th:href="@{/dashboard}" class="nav-item"
+           th:classappend="${activePage == 'dashboard'} ? ' active'"
+           data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE,DP_CHEFE,DP_ASSISTENTE">
+            <span class="nav-icon"><img th:src="@{/assets/chart-column (1).png}" alt="" width="20" height="20"></span>
+            <span class="nav-text">Dashboard</span>
+        </a>
+
+        <!-- Gestão de Pessoas -->
+        <div class="nav-section" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE">Gestão de Pessoas</div>
+        <a th:href="@{/employees}" class="nav-item"
+           th:classappend="${activePage == 'employees'} ? ' active'"
+           data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE">
+            <span class="nav-icon"><img th:src="@{/assets/id-card-lanyard (1).png}" alt="" width="20" height="20"></span>
+            <span class="nav-text">Funcionários</span>
+        </a>
+        <a th:href="@{/departments}" class="nav-item"
+           th:classappend="${activePage == 'departments'} ? ' active'"
+           data-roles="ADMIN,RH_CHEFE">
+            <span class="nav-icon"><img th:src="@{/assets/building-2.png}" alt="" width="20" height="20"></span>
+            <span class="nav-text">Departamentos</span>
+        </a>
+        <a th:href="@{/positions}" class="nav-item"
+           th:classappend="${activePage == 'positions'} ? ' active'"
+           data-roles="ADMIN,RH_CHEFE">
+            <span class="nav-icon"><img th:src="@{/assets/scroll.png}" alt="" width="20" height="20"></span>
+            <span class="nav-text">Cargos</span>
+        </a>
+
+        <!-- Recursos Humanos -->
+        <div class="nav-section" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE">Recursos Humanos</div>
+        <a th:href="@{/recruitment}" class="nav-item"
+           th:classappend="${activePage == 'recruitment'} ? ' active'"
+           data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE">
+            <span class="nav-icon"><img th:src="@{/assets/search.png}" alt="" width="20" height="20"></span>
+            <span class="nav-text">Recrutamento</span>
+        </a>
+        <a th:href="@{/training}" class="nav-item"
+           th:classappend="${activePage == 'training'} ? ' active'"
+           data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE">
+            <span class="nav-icon"><img th:src="@{/assets/graduation-cap.png}" alt="" width="20" height="20"></span>
+            <span class="nav-text">Treinamentos</span>
+        </a>
+        <a th:href="@{/performance}" class="nav-item"
+           th:classappend="${activePage == 'performance'} ? ' active'"
+           data-roles="ADMIN,RH_CHEFE">
+            <span class="nav-icon"><img th:src="@{/assets/scan-heart (1).png}" alt="" width="20" height="20"></span>
+            <span class="nav-text">Avaliações</span>
+        </a>
+
+        <!-- Departamento Pessoal -->
+        <div class="nav-section" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE,DP_CHEFE,DP_ASSISTENTE">Departamento Pessoal</div>
+        <a th:href="@{/payroll}" class="nav-item"
+           th:classappend="${activePage == 'payroll'} ? ' active'"
+           data-roles="ADMIN,DP_CHEFE,DP_ASSISTENTE">
+            <span class="nav-icon"><img th:src="@{/assets/banknote (1).png}" alt="" width="20" height="20"></span>
+            <span class="nav-text">Folha de Pagamento</span>
+        </a>
+        <a th:href="@{/vacation}" class="nav-item"
+           th:classappend="${activePage == 'vacation'} ? ' active'"
+           data-roles="ADMIN,RH_CHEFE,DP_CHEFE,DP_ASSISTENTE">
+            <span class="nav-icon"><img th:src="@{/assets/tree-palm (1).png}" alt="" width="20" height="20"></span>
+            <span class="nav-text">Férias</span>
+        </a>
+        <a th:href="@{/benefits}" class="nav-item"
+           th:classappend="${activePage == 'benefits'} ? ' active'"
+           data-roles="ADMIN,RH_CHEFE,DP_CHEFE,DP_ASSISTENTE">
+            <span class="nav-icon"><img th:src="@{/assets/gift (2).png}" alt="" width="20" height="20"></span>
+            <span class="nav-text">Benefícios</span>
+        </a>
+        <a th:href="@{/timesheet}" class="nav-item"
+           th:classappend="${activePage == 'timesheet'} ? ' active'"
+           data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE,DP_CHEFE,DP_ASSISTENTE">
+            <span class="nav-icon"><img th:src="@{/assets/hourglass.png}" alt="" width="20" height="20"></span>
+            <span class="nav-text">Ponto</span>
+        </a>
+
+        <!-- Administração -->
+        <div class="nav-section" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE,DP_CHEFE">Administração</div>
+        <a th:href="@{/reports}" class="nav-item"
+           th:classappend="${activePage == 'reports'} ? ' active'"
+           data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE,DP_CHEFE">
+            <span class="nav-icon"><img th:src="@{/assets/file-text.png}" alt="" width="20" height="20"></span>
+            <span class="nav-text">Relatórios</span>
+        </a>
+        <a th:href="@{/settings}" class="nav-item"
+           th:classappend="${activePage == 'settings'} ? ' active'"
+           data-roles="ADMIN">
+            <span class="nav-icon"><img th:src="@{/assets/shield (1).png}" alt="" width="20" height="20"></span>
+            <span class="nav-text">Configurações</span>
+        </a>
+    </nav>
+</aside>
+
+
+<!-- ==================== SIDEBAR EMPLOYEE ==================== -->
+<aside th:fragment="employee(activePage)" class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <div class="logo">
+            <img th:src="@{/assets/gruporhpaint.png}" alt="logo_menu_lateral" height="60">
+        </div>
+    </div>
+
+    <nav class="sidebar-nav">
+        <a th:href="@{/employee-dashboard}" class="nav-item"
+           th:classappend="${activePage == 'employee-dashboard'} ? ' active'">
+            <span class="nav-icon"><img th:src="@{/assets/hourglass.png}" alt="" width="20" height="20"></span>
+            <span class="nav-text">Ponto</span>
+        </a>
+        <a th:href="@{/payslips}" class="nav-item"
+           th:classappend="${activePage == 'payslips'} ? ' active'">
+            <span class="nav-icon"><img th:src="@{/assets/banknote (1).png}" alt="" width="20" height="20"></span>
+            <span class="nav-text">Holerites</span>
+        </a>
+    </nav>
+</aside>
+
+</body>
+</html>

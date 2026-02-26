@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<!--
+  ============================================================
+  FRAGMENT: Scripts comuns (auth.js + components.js + init)
+  Uso no final do <body>:
+    <div th:replace="~{fragments/scripts :: common}"></div>
+
+  Inicializa: initUserMenu(), initSidebar(),
+              Auth.applyRoleVisibility(), Auth.applyActionVisibility()
+  ============================================================
+-->
+<body>
+
+<div th:fragment="common" th:remove="tag">
+    <script th:src="@{/scripts/auth.js}"></script>
+    <script th:src="@{/scripts/components.js}"></script>
+    <script>
+        /* ---- Funções compartilhadas de inicialização ---- */
+
+        function initUserMenu() {
+            var user = Auth.getCurrentUser();
+            if (user) {
+                var namePart = (user.email || '').split('@')[0].split('.')[0];
+                var displayName = namePart.charAt(0).toUpperCase() + namePart.slice(1);
+
+                var el;
+                el = document.getElementById('userName');      if (el) el.textContent = displayName;
+                el = document.getElementById('userFullName');  if (el) el.textContent = user.email;
+                el = document.getElementById('userProfile');   if (el) el.textContent = Auth.getProfileDisplayName(user);
+                el = document.getElementById('userAvatar');    if (el) el.textContent = displayName[0].toUpperCase();
+            }
+
+            var menuBtn = document.getElementById('userMenuButton');
+            if (menuBtn) {
+                menuBtn.addEventListener('click', function () {
+                    document.getElementById('userDropdown').classList.toggle('active');
+                });
+            }
+
+            var logoutBtn = document.getElementById('logoutButton');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    Auth.logout();
+                });
+            }
+
+            document.addEventListener('click', function (e) {
+                if (!e.target.closest('.user-menu')) {
+                    var dd = document.getElementById('userDropdown');
+                    if (dd) dd.classList.remove('active');
+                }
+            });
+        }
+
+        function initSidebar() {
+            var sidebar = document.getElementById('sidebar');
+            var mobileBtn = document.getElementById('mobileMenuBtn');
+            if (mobileBtn) {
+                mobileBtn.addEventListener('click', function () {
+                    sidebar.classList.toggle('mobile-open');
+                });
+            }
+            document.addEventListener('click', function (e) {
+                if (window.innerWidth <= 768
+                    && !e.target.closest('.sidebar')
+                    && !e.target.closest('.mobile-menu-btn')) {
+                    sidebar.classList.remove('mobile-open');
+                }
+            });
+        }
+    </script>
+</div>
+
+</body>
+</html>

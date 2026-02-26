@@ -1,29 +1,13 @@
 <!DOCTYPE html>
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<head th:replace="~{fragments/head :: head('Dashboard')}">
     <title>Dashboard - Sistema RH Para Todos</title>
-
-    <!-- CSRF para o logout via form POST -->
-    <meta name="_csrf" th:content="${_csrf.token}"/>
-    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
-
-    <link rel="stylesheet" th:href="@{/styles/global.css}">
-    <link rel="stylesheet" th:href="@{/styles/dashboard.css}">
-    <link rel="stylesheet" th:href="@{/styles/components.css}">
 </head>
 
 <body>
 
-<!--
-  ============================================================
-  INJEÇÃO DO USUÁRIO ATUAL
-  O Spring injeta o objeto no modelo com nome "currentUser".
-  O JS lê de window.__CURRENT_USER__.
-  ============================================================
--->
+<!-- Injeção do usuário atual -->
 <script th:inline="javascript">
     window.__CURRENT_USER__ = {
       email: /*[[${currentUser.email}]]*/ 'usuario@local',
@@ -32,110 +16,12 @@
 </script>
 
 <!-- Sidebar -->
-<aside class="sidebar" id="sidebar">
-    <div class="sidebar-header">
-        <div class="logo">
-            <img th:src="@{/assets/gruporhpaint.png}" alt="logo_menu_lateral" height="60">
-        </div>
-    </div>
-
-    <nav class="sidebar-nav">
-        <a th:href="@{/dashboard}" class="nav-item active" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE,DP_CHEFE,DP_ASSISTENTE">
-            <span class="nav-icon"><img th:src="@{/assets/chart-column (1).png}" alt="" width="20" height="20"></span>
-            <span class="nav-text">Dashboard</span>
-        </a>
-
-        <!-- Gestão de Pessoas: RH gerencia funcionários, departamentos e cargos -->
-        <div class="nav-section" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE">Gestão de Pessoas</div>
-        <a th:href="@{/employees}" class="nav-item" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE">
-            <span class="nav-icon"><img th:src="@{/assets/id-card-lanyard (1).png}" alt="" width="20" height="20"></span>
-            <span class="nav-text">Funcionários</span>
-        </a>
-        <a th:href="@{/departments}" class="nav-item" data-roles="ADMIN,RH_CHEFE">
-            <span class="nav-icon"><img th:src="@{/assets/building-2.png}" alt="" width="20" height="20"></span>
-            <span class="nav-text">Departamentos</span>
-        </a>
-        <a th:href="@{/positions}" class="nav-item" data-roles="ADMIN,RH_CHEFE">
-            <span class="nav-icon"><img th:src="@{/assets/scroll.png}" alt="" width="20" height="20"></span>
-            <span class="nav-text">Cargos</span>
-        </a>
-
-        <!-- Recursos Humanos: recrutamento, treinamento, avaliações -->
-        <div class="nav-section" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE">Recursos Humanos</div>
-        <a th:href="@{/recruitment}" class="nav-item" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE">
-            <span class="nav-icon"><img th:src="@{/assets/search.png}" alt="" width="20" height="20"></span>
-            <span class="nav-text">Recrutamento</span>
-        </a>
-        <a th:href="@{/training}" class="nav-item" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE">
-            <span class="nav-icon"><img th:src="@{/assets/graduation-cap.png}" alt="" width="20" height="20"></span>
-            <span class="nav-text">Treinamentos</span>
-        </a>
-        <a th:href="@{/performance}" class="nav-item" data-roles="ADMIN,RH_CHEFE">
-            <span class="nav-icon"><img th:src="@{/assets/scan-heart (1).png}" alt="" width="20" height="20"></span>
-            <span class="nav-text">Avaliações</span>
-        </a>
-
-        <!-- Departamento Pessoal: folha, férias, benefícios, ponto -->
-        <div class="nav-section" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE,DP_CHEFE,DP_ASSISTENTE">Departamento Pessoal</div>
-        <a th:href="@{/payroll}" class="nav-item" data-roles="ADMIN,DP_CHEFE,DP_ASSISTENTE">
-            <span class="nav-icon"><img th:src="@{/assets/banknote (1).png}" alt="" width="20" height="20"></span>
-            <span class="nav-text">Folha de Pagamento</span>
-        </a>
-        <a th:href="@{/vacation}" class="nav-item" data-roles="ADMIN,RH_CHEFE,DP_CHEFE,DP_ASSISTENTE">
-            <span class="nav-icon"><img th:src="@{/assets/tree-palm (1).png}" alt="" width="20" height="20"></span>
-            <span class="nav-text">Férias</span>
-        </a>
-        <a th:href="@{/benefits}" class="nav-item" data-roles="ADMIN,RH_CHEFE,DP_CHEFE,DP_ASSISTENTE">
-            <span class="nav-icon"><img th:src="@{/assets/gift (2).png}" alt="" width="20" height="20"></span>
-            <span class="nav-text">Benefícios</span>
-        </a>
-        <a th:href="@{/timesheet}" class="nav-item" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE,DP_CHEFE,DP_ASSISTENTE">
-            <span class="nav-icon"><img th:src="@{/assets/hourglass.png}" alt="" width="20" height="20"></span>
-            <span class="nav-text">Ponto</span>
-        </a>
-
-        <!-- Administração: relatórios e configurações -->
-        <div class="nav-section" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE,DP_CHEFE">Administração</div>
-        <a th:href="@{/reports}" class="nav-item" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE,DP_CHEFE">
-            <span class="nav-icon"><img th:src="@{/assets/file-text.png}" alt="" width="20" height="20"></span>
-            <span class="nav-text">Relatórios</span>
-        </a>
-        <a th:href="@{/settings}" class="nav-item" data-roles="ADMIN">
-            <span class="nav-icon"><img th:src="@{/assets/shield (1).png}" alt="" width="20" height="20"></span>
-            <span class="nav-text">Configurações</span>
-        </a>
-    </nav>
-</aside>
+<aside th:replace="~{fragments/sidebar :: admin('dashboard')}"></aside>
 
 <!-- Main Content -->
 <div class="main-content">
     <!-- Topbar -->
-    <header class="topbar">
-        <div class="topbar-left">
-            <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
-            <h1>Dashboard</h1>
-        </div>
-        <div class="topbar-right">
-            <div class="user-menu">
-                <button class="user-button" id="userMenuButton">
-                    <span class="user-avatar" id="userAvatar">U</span>
-                    <span class="user-name" id="userName">Usuário</span>
-                    <span class="user-arrow">▼</span>
-                </button>
-                <div class="user-dropdown" id="userDropdown">
-                    <div class="user-info">
-                        <strong id="userFullName">Nome do Usuário</strong>
-                        <small id="userProfile">Perfil</small>
-                    </div>
-                    <hr>
-                    <a th:href="@{/profile}" class="dropdown-item">Meu Perfil</a>
-                    <a th:href="@{/settings}" class="dropdown-item" data-roles="ADMIN">Configurações</a>
-                    <hr>
-                    <a href="#" class="dropdown-item" id="logoutButton">Sair</a>
-                </div>
-            </div>
-        </div>
-    </header>
+    <header th:replace="~{fragments/topbar :: topbar('Dashboard')}"></header>
 
     <!-- Dashboard Content -->
     <div class="content-area">
@@ -226,14 +112,14 @@
             <div class="dashboard-card">
                 <div class="card-header">
                     <h2>Contratações Recentes</h2>
-                    <a th:href="@{/employees}" class="card-link">Ver todos →</a>
+                    <a th:href="@{/employees}" class="card-link">Ver todos &#8594;</a>
                 </div>
                 <div class="recent-list">
                     <div class="recent-item">
                         <div class="recent-avatar">JS</div>
                         <div class="recent-info">
                             <strong>João Silva</strong>
-                            <small>Desenvolvedor Senior • TI</small>
+                            <small>Desenvolvedor Senior - TI</small>
                         </div>
                         <span class="badge badge-success">Ativo</span>
                     </div>
@@ -241,7 +127,7 @@
                         <div class="recent-avatar">MS</div>
                         <div class="recent-info">
                             <strong>Maria Santos</strong>
-                            <small>Analista de RH • RH</small>
+                            <small>Analista de RH - RH</small>
                         </div>
                         <span class="badge badge-success">Ativo</span>
                     </div>
@@ -249,7 +135,7 @@
                         <div class="recent-avatar">PC</div>
                         <div class="recent-info">
                             <strong>Pedro Costa</strong>
-                            <small>Designer UX/UI • TI</small>
+                            <small>Designer UX/UI - TI</small>
                         </div>
                         <span class="badge badge-warning">Onboarding</span>
                     </div>
@@ -257,7 +143,7 @@
                         <div class="recent-avatar">AF</div>
                         <div class="recent-info">
                             <strong>Ana Ferreira</strong>
-                            <small>Analista Financeiro • Finanças</small>
+                            <small>Analista Financeiro - Finanças</small>
                         </div>
                         <span class="badge badge-success">Ativo</span>
                     </div>
@@ -298,31 +184,31 @@
             <!-- Aniversariantes -->
             <div class="dashboard-card">
                 <div class="card-header">
-                    <h2>🎉 Aniversariantes do Mês</h2>
+                    <h2>Aniversariantes do Mês</h2>
                 </div>
                 <div class="birthday-list">
                     <div class="birthday-item">
                         <div class="birthday-info">
                             <strong>Ana Paula Oliveira</strong>
-                            <small>15/01 • Analista Financeiro</small>
+                            <small>15/01 - Analista Financeiro</small>
                         </div>
                     </div>
                     <div class="birthday-item">
                         <div class="birthday-info">
                             <strong>Carlos Eduardo</strong>
-                            <small>18/01 • Gerente de Projetos</small>
+                            <small>18/01 - Gerente de Projetos</small>
                         </div>
                     </div>
                     <div class="birthday-item">
                         <div class="birthday-info">
                             <strong>Juliana Lima</strong>
-                            <small>22/01 • Coordenadora RH</small>
+                            <small>22/01 - Coordenadora RH</small>
                         </div>
                     </div>
                     <div class="birthday-item">
                         <div class="birthday-info">
                             <strong>Roberto Martins</strong>
-                            <small>28/01 • Desenvolvedor</small>
+                            <small>28/01 - Desenvolvedor</small>
                         </div>
                     </div>
                 </div>
@@ -430,73 +316,33 @@
     }
 </style>
 
-<script th:src="@{/scripts/auth.js}"></script>
-<script th:src="@{/scripts/components.js}"></script>
+<!-- Scripts comuns (auth.js, components.js, initUserMenu, initSidebar) -->
+<div th:replace="~{fragments/scripts :: common}"></div>
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      // Verificar autenticação e permissão de acesso ao dashboard
+    document.addEventListener('DOMContentLoaded', function () {
       if (!Auth.requireRole(["ADMIN","RH_CHEFE","RH_ASSISTENTE","DP_CHEFE","DP_ASSISTENTE"], "/employee-dashboard")) return;
 
       initUserMenu();
       initSidebar();
       Auth.applyRoleVisibility(document);
       Auth.applyActionVisibility(document);
-      updateDateTime();
-    });
 
-    function initUserMenu() {
-      const user = Auth.getCurrentUser();
+      // Dashboard-specific: welcome message + date
+      var user = Auth.getCurrentUser();
       if (user) {
-        const namePart = (user.email || '').split('@')[0].split('.')[0];
-        const displayName = namePart.charAt(0).toUpperCase() + namePart.slice(1);
-
-        document.getElementById('userName').textContent     = displayName;
-        document.getElementById('userFullName').textContent = user.email;
-        document.getElementById('userProfile').textContent  = Auth.getProfileDisplayName(user);
-        document.getElementById('userAvatar').textContent   = displayName[0].toUpperCase();
-
-        const hour = new Date().getHours();
-        const greeting = hour < 12 ? 'Bom dia' : hour < 18 ? 'Boa tarde' : 'Boa noite';
-        document.getElementById('welcomeMessage').textContent = `${greeting}, ${displayName}!`;
+        var namePart = (user.email || '').split('@')[0].split('.')[0];
+        var displayName = namePart.charAt(0).toUpperCase() + namePart.slice(1);
+        var hour = new Date().getHours();
+        var greeting = hour < 12 ? 'Bom dia' : hour < 18 ? 'Boa tarde' : 'Boa noite';
+        document.getElementById('welcomeMessage').textContent = greeting + ', ' + displayName + '!';
       }
 
-      document.getElementById('userMenuButton').addEventListener('click', () => {
-        document.getElementById('userDropdown').classList.toggle('active');
-      });
-
-      document.getElementById('logoutButton').addEventListener('click', (e) => {
-        e.preventDefault();
-        Auth.logout();
-      });
-
-      document.addEventListener('click', (e) => {
-        if (!e.target.closest('.user-menu')) {
-          document.getElementById('userDropdown').classList.remove('active');
-        }
-      });
-    }
-
-    function initSidebar() {
-      const sidebar = document.getElementById('sidebar');
-      document.getElementById('mobileMenuBtn')?.addEventListener('click', () => {
-        sidebar.classList.toggle('mobile-open');
-      });
-      document.addEventListener('click', (e) => {
-        if (window.innerWidth <= 768
-          && !e.target.closest('.sidebar')
-          && !e.target.closest('.mobile-menu-btn')) {
-          sidebar.classList.remove('mobile-open');
-        }
-      });
-    }
-
-    function updateDateTime() {
-      const date = new Date().toLocaleDateString('pt-BR', {
+      var date = new Date().toLocaleDateString('pt-BR', {
         weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
       });
       document.getElementById('currentDate').textContent =
         date.charAt(0).toUpperCase() + date.slice(1);
-    }
+    });
 </script>
 </body>
 </html>

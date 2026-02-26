@@ -1,28 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 
-<head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <title>Painel - Funcionário</title>
-
-    <meta name="_csrf"        th:content="${_csrf.token}"/>
-    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
-
-    <link rel="stylesheet" th:href="@{/styles/global.css}">
-    <link rel="stylesheet" th:href="@{/styles/dashboard.css}">
-    <link rel="stylesheet" th:href="@{/styles/components.css}">
-
-    <style>
-        .container { max-width: 980px; margin: 2rem auto; padding: 1.5rem; }
-        .header { display:flex; align-items:center; justify-content:space-between; gap:1rem; margin-bottom:1rem; }
-        .punch-actions { display:flex; gap:1rem; margin-bottom:1rem; }
-        table { width:100%; border-collapse:collapse; margin-top:0.5rem; }
-        th,td { text-align:left; padding:0.75rem; border-bottom:1px solid #efefef; }
-        .muted { color:var(--gray-500); font-size:0.9rem; }
-        .last-punch { font-weight:700; }
-    </style>
-</head>
+<head th:replace="~{fragments/head :: head('Painel - Funcionário')}"><title>Painel - Funcionário</title></head>
 
 <body>
 
@@ -33,49 +12,20 @@
     };
 </script>
 
-<aside class="sidebar" id="sidebar">
-    <div class="sidebar-header">
-        <div class="logo">
-            <img th:src="@{/assets/gruporhpaint.png}" alt="logo_menu_lateral" height="60">
-        </div>
-    </div>
-    <nav class="sidebar-nav">
-        <a th:href="@{/employee-dashboard}" class="nav-item active" id="nav-timesheet">
-            <span class="nav-text">Ponto</span>
-        </a>
-        <a th:href="@{/payslips}" class="nav-item" id="nav-payslips">
-            <span class="nav-text">Holerites</span>
-        </a>
-    </nav>
-</aside>
+<style>
+    .container { max-width: 980px; margin: 2rem auto; padding: 1.5rem; }
+    .header { display:flex; align-items:center; justify-content:space-between; gap:1rem; margin-bottom:1rem; }
+    .punch-actions { display:flex; gap:1rem; margin-bottom:1rem; }
+    table { width:100%; border-collapse:collapse; margin-top:0.5rem; }
+    th,td { text-align:left; padding:0.75rem; border-bottom:1px solid #efefef; }
+    .muted { color:var(--gray-500); font-size:0.9rem; }
+    .last-punch { font-weight:700; }
+</style>
+
+<aside th:replace="~{fragments/sidebar :: employee('employee-dashboard')}"></aside>
 
 <div class="main-content">
-    <header class="topbar">
-        <div class="topbar-left">
-            <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
-            <h1>Ponto</h1>
-        </div>
-        <div class="topbar-right">
-            <div class="user-menu">
-                <button class="user-button" id="userMenuButton">
-                    <span class="user-avatar" id="userAvatar">U</span>
-                    <span class="user-name"   id="userName">Usuário</span>
-                    <span class="user-arrow">▼</span>
-                </button>
-                <div class="user-dropdown" id="userDropdown">
-                    <div class="user-info">
-                        <strong id="userFullName">Nome do Usuário</strong>
-                        <small   id="userProfile">Perfil</small>
-                    </div>
-                    <hr>
-                    <a th:href="@{/profile}"     class="dropdown-item">Meu Perfil</a>
-                    <a th:href="@{/settings}"   class="dropdown-item" data-roles="ADMIN">Configurações</a>
-                    <hr>
-                    <a href="#" class="dropdown-item" id="logoutButton">Sair</a>
-                </div>
-            </div>
-        </div>
-    </header>
+    <header th:replace="~{fragments/topbar :: topbar('Ponto')}"></header>
 
     <div class="content-area">
         <div class="container">
@@ -135,7 +85,7 @@
     </div>
 </div>
 
-<script th:src="@{/scripts/auth.js}"></script>
+<div th:replace="~{fragments/scripts :: common}"></div>
 <script th:src="@{/scripts/employee.js}"></script>
 </body>
 </html>

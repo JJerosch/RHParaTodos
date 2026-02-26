@@ -1,103 +1,23 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Departamentos - Sistema RH</title>
-  <link rel="stylesheet" href="../static/styles/global.css">
-  <link rel="stylesheet" href="../static/styles/dashboard.css">
-  <link rel="stylesheet" href="../static/styles/components.css">
-</head>
+<head th:replace="~{fragments/head :: head('Departamentos')}"><title>Departamentos</title></head>
 
 <body>
+  <script th:inline="javascript">
+    window.__CURRENT_USER__ = {
+      email: /*[[${currentUser.email}]]*/ 'usuario@local',
+      role:  /*[[${currentUser.role}]]*/ 'EMPLOYEE'
+    };
+  </script>
+
   <!-- Sidebar -->
-  <aside class="sidebar" id="sidebar">
-    <div class="sidebar-header">
-      <div class="logo">
-        <img src="../static/assets/gruporhpaint.png" alt="logo_menu_lateral" height="60">
-      </div>
-    </div>
-    <nav class="sidebar-nav">
-      <a href="dashboard.html" class="nav-item">
-        <span class="nav-text">Dashboard</span>
-      </a>
-
-      <div class="nav-section">Gestão de Pessoas</div>
-      <a href="employees.html" class="nav-item">
-        <span class="nav-text">Funcionários</span>
-      </a>
-      <a href="departments.html" class="nav-item active">
-        <span class="nav-text">Departamentos</span>
-      </a>
-      <a href="positions.html" class="nav-item">
-        <span class="nav-text">Cargos</span>
-      </a>
-
-      <div class="nav-section">Recursos Humanos</div>
-      <a href="recruitment.html" class="nav-item">
-        <span class="nav-text">Recrutamento</span>
-      </a>
-      <a href="training.html" class="nav-item">
-        <span class="nav-text">Treinamentos</span>
-      </a>
-      <a href="performance.html" class="nav-item">
-        <span class="nav-text">Avaliações</span>
-      </a>
-
-      <div class="nav-section">Departamento Pessoal</div>
-      <a href="payroll.html" class="nav-item">
-        <span class="nav-text">Folha de Pagamento</span>
-      </a>
-      <a href="benefits.html" class="nav-item">
-        <span class="nav-text">Benefícios</span>
-      </a>
-      <a href="vacation.html" class="nav-item">
-        <span class="nav-text">Férias</span>
-      </a>
-      <a href="timesheet.html" class="nav-item">
-        <span class="nav-text">Ponto</span>
-      </a>
-
-      <div class="nav-section">Administração</div>
-      <a href="reports.html" class="nav-item">
-        <span class="nav-text">Relatórios</span>
-      </a>
-      <a href="settings.html" class="nav-item">
-        <span class="nav-text">Configurações</span>
-      </a>
-    </nav>
-  </aside>
+  <aside th:replace="~{fragments/sidebar :: admin('departments')}"></aside>
 
 
   <!-- Main Content -->
   <div class="main-content">
-    <header class="topbar">
-      <div class="topbar-left">
-        <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
-        <h1>Departamentos</h1>
-      </div>
-      <div class="topbar-right">
-        <div class="user-menu">
-          <button class="user-button" id="userMenuButton">
-            <span class="user-avatar" id="userAvatar">U</span>
-            <span class="user-name" id="userName">Usuário</span>
-            <span class="user-arrow">▼</span>
-          </button>
-          <div class="user-dropdown" id="userDropdown">
-            <div class="user-info">
-              <strong id="userFullName">Nome do Usuário</strong>
-              <small id="userProfile">Perfil</small>
-            </div>
-            <hr>
-            <a href="#" class="dropdown-item">Meu Perfil</a>
-            <a href="settings.html" class="dropdown-item">Configurações</a>
-            <hr>
-            <a href="#" class="dropdown-item" id="logoutButton">Sair</a>
-          </div>
-        </div>
-      </div>
-    </header>
+    <header th:replace="~{fragments/topbar :: topbar('Departamentos')}"></header>
 
     <div class="content-area">
       <!-- Stats -->
@@ -105,7 +25,7 @@
         <div class="stat-box">
           <div class="stat-box-header">
             <div class="stat-box-icon" style="background: rgba(44, 62, 80, 0.1); color: var(--primary-dark);"><img
-                src="../static/assets/building-2.png" alt="icone_departamentos"></div>
+                th:src="@{/assets/building-2.png}" alt="icone_departamentos"></div>
           </div>
           <div class="stat-box-value" id="statTotal">0</div>
           <div class="stat-box-label">Total de Departamentos</div>
@@ -113,7 +33,7 @@
         <div class="stat-box">
           <div class="stat-box-header">
             <div class="stat-box-icon" style="background: rgba(39, 174, 96, 0.1); color: var(--success-green);"><img
-                src="../static/assets/check (1).png" alt="icone_departamentos_ativos"></div>
+                th:src="@{/assets/check (1).png}" alt="icone_departamentos_ativos"></div>
           </div>
           <div class="stat-box-value" id="statAtivos">0</div>
           <div class="stat-box-label">Ativos</div>
@@ -121,7 +41,7 @@
         <div class="stat-box">
           <div class="stat-box-header">
             <div class="stat-box-icon" style="background: rgba(243, 156, 18, 0.1); color: var(--warning-orange);"><img
-                src="../static/assets/users (1).png" alt="icone_total_funcionarios"></div>
+                th:src="@{/assets/users (1).png}" alt="icone_total_funcionarios"></div>
           </div>
           <div class="stat-box-value" id="statFuncionarios">0</div>
           <div class="stat-box-label">Total de Funcionários</div>
@@ -129,7 +49,7 @@
         <div class="stat-box">
           <div class="stat-box-header">
             <div class="stat-box-icon" style="background: rgba(93, 109, 126, 0.1); color: var(--info-gray);"><img
-                src="../static/assets/scale.png" alt="icone_media_departamento"></div>
+                th:src="@{/assets/scale.png}" alt="icone_media_departamento"></div>
           </div>
           <div class="stat-box-value" id="statMedia">0</div>
           <div class="stat-box-label">Média por Departamento</div>
@@ -274,8 +194,7 @@
     }
   </style>
 
-  <script src="../static/scripts/auth.js"></script>
-  <script src="../static/scripts/components.js"></script>
+  <div th:replace="~{fragments/scripts :: common}"></div>
   <script>
     // Mock data
     const departments = [
@@ -293,37 +212,11 @@
       if (!Auth.requireAuth()) return;
       initUserMenu();
       initSidebar();
+      Auth.applyRoleVisibility(document);
+      Auth.applyActionVisibility(document);
       renderDepartments();
       updateStats();
     });
-
-    function initUserMenu() {
-      const user = Auth.getCurrentUser();
-      if (user) {
-        document.getElementById("userName").textContent = user.email?.split("@")[0] || user.username;
-        document.getElementById("userAvatar").textContent = (user.email || user.username)[0].toUpperCase();
-      }
-      document.getElementById("userMenuButton").onclick = () => document.getElementById("userDropdown").classList.toggle("active");
-      document.getElementById("logoutButton").onclick = (e) => { e.preventDefault(); Auth.logout(); };
-      document.addEventListener("click", (e) => { if (!e.target.closest(".user-menu")) document.getElementById("userDropdown").classList.remove("active"); });
-    }
-
-    function initSidebar() {
-      const sidebar = document.getElementById('sidebar');
-      const mobileBtn = document.getElementById('mobileMenuBtn');
-
-      mobileBtn?.addEventListener('click', () => {
-        sidebar.classList.toggle('mobile-open');
-      });
-
-      document.addEventListener('click', (e) => {
-        if (window.innerWidth <= 768) {
-          if (!e.target.closest('.sidebar') && !e.target.closest('.mobile-menu-btn')) {
-            sidebar.classList.remove('mobile-open');
-          }
-        }
-      });
-    }
 
     function updateStats() {
       const total = departments.length;
@@ -344,8 +237,8 @@
         <div class="department-card">
           <div class="department-header">
             <div class="department-actions">
-              <button class="btn-icon edit" onclick="editDepartment(${dept.id})" title="Editar"><img src="../static/assets/pencil (1).png" alt="icone_editar_departamento"></button>
-              <button class="btn-icon delete" onclick="deleteDepartment(${dept.id})" title="Excluir"><img src="../static/assets/trash-2 (1).png" alt="icone_excluir_departamento"></button>
+              <button class="btn-icon edit" onclick="editDepartment(${dept.id})" title="Editar"><img th:src="@{/assets/pencil (1).png}" src="/assets/pencil (1).png" alt="icone_editar_departamento"></button>
+              <button class="btn-icon delete" onclick="deleteDepartment(${dept.id})" title="Excluir"><img th:src="@{/assets/trash-2 (1).png}" src="/assets/trash-2 (1).png" alt="icone_excluir_departamento"></button>
             </div>
           </div>
           <h3 class="department-name">${dept.nome}</h3>
