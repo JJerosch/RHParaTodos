@@ -200,7 +200,7 @@ ON CONFLICT (codigo) DO UPDATE SET
 
 -- admin@local / Admin@123 (sem 2FA)
 INSERT INTO public.usuarios (email, senha_hash, ativo, role, autenticacao_2fa, tipo_2fa, tentativas_login)
-VALUES ('admin@local', '$2b$10$G9954sJQ/RwX22cQrL0KvOCS6m99H6dCInnlkSHxwK/dkPSzVBDfa', true, 'ADMIN', false, 'NENHUMA', 0)
+VALUES ('admin@local', '$2b$10$pyQa1YGxNkufoyPx2.DnP.jPuiyl0OEdIc8ePClQhoppqFb5IKVWG', true, 'ADMIN', false, 'NENHUMA', 0)
 ON CONFLICT (email) DO NOTHING;
 
 -- rh.chefe@local / RhChefe@123 (2FA por email)
