@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<!--
+  ============================================================
+  FRAGMENT: Head (meta tags comuns, CSS, CSRF, injeção do usuário)
+  Uso:
+    <head th:replace="~{fragments/head :: head('Título da Página')}">
+  ============================================================
+-->
+<head th:fragment="head(pageTitle)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle} + ' - Sistema RH Para Todos'">Página - Sistema RH Para Todos</title>
+
+    <!-- CSRF para o logout via form POST -->
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+
+    <link rel="stylesheet" th:href="@{/styles/global.css}">
+    <link rel="stylesheet" th:href="@{/styles/dashboard.css}">
+    <link rel="stylesheet" th:href="@{/styles/components.css}">
+</head>
+</html>

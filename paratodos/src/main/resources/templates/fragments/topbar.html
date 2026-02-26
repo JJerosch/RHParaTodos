@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<!--
+  ============================================================
+  FRAGMENT: Topbar (Barra superior com menu do usuário)
+  Uso: th:replace="~{fragments/topbar :: topbar('Dashboard')}"
+  O parâmetro é o título exibido na página.
+  ============================================================
+-->
+<body>
+
+<header th:fragment="topbar(pageTitle)" class="topbar">
+    <div class="topbar-left">
+        <button class="mobile-menu-btn" id="mobileMenuBtn">&#9776;</button>
+        <h1 th:text="${pageTitle}">Página</h1>
+    </div>
+    <div class="topbar-right">
+        <div class="user-menu">
+            <button class="user-button" id="userMenuButton">
+                <span class="user-avatar" id="userAvatar">U</span>
+                <span class="user-name" id="userName">Usuário</span>
+                <span class="user-arrow">&#9660;</span>
+            </button>
+            <div class="user-dropdown" id="userDropdown">
+                <div class="user-info">
+                    <strong id="userFullName">Nome do Usuário</strong>
+                    <small id="userProfile">Perfil</small>
+                </div>
+                <hr>
+                <a th:href="@{/profile}" class="dropdown-item">Meu Perfil</a>
+                <a th:href="@{/settings}" class="dropdown-item" data-roles="ADMIN">Configurações</a>
+                <hr>
+                <a href="#" class="dropdown-item" id="logoutButton">Sair</a>
+            </div>
+        </div>
+    </div>
+</header>
+
+</body>
+</html>

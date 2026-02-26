@@ -1,13 +1,16 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Recrutamento - Sistema RH</title>
-  <link rel="stylesheet" href="../static/styles/global.css">
-  <link rel="stylesheet" href="../static/styles/dashboard.css">
-  <link rel="stylesheet" href="../static/styles/components.css">
+<head th:replace="~{fragments/head :: head('Recrutamento')}"><title>Recrutamento</title></head>
+
+<body>
+  <script th:inline="javascript">
+    window.__CURRENT_USER__ = {
+      email: /*[[${currentUser.email}]]*/ 'usuario@local',
+      role:  /*[[${currentUser.role}]]*/ 'EMPLOYEE'
+    };
+  </script>
+
   <style>
     .kanban-board {
       display: flex;
@@ -133,116 +136,35 @@
       color: var(--gray-500);
     }
   </style>
-</head>
 
-<body>
-  <aside class="sidebar" id="sidebar">
-    <div class="sidebar-header">
-      <div class="logo">
-        <img src="../static/assets/gruporhpaint.png" alt="logo_menu_lateral" height="60">
-      </div>
-    </div>
-    <nav class="sidebar-nav">
-      <a href="dashboard.html" class="nav-item">
-        <span class="nav-text">Dashboard</span>
-      </a>
+  <aside th:replace="~{fragments/sidebar :: admin('recruitment')}"></aside>
 
-      <div class="nav-section">Gestão de Pessoas</div>
-      <a href="employees.html" class="nav-item">
-        <span class="nav-text">Funcionários</span>
-      </a>
-      <a href="departments.html" class="nav-item">
-        <span class="nav-text">Departamentos</span>
-      </a>
-      <a href="positions.html" class="nav-item">
-        <span class="nav-text">Cargos</span>
-      </a>
-
-      <div class="nav-section">Recursos Humanos</div>
-      <a href="recruitment.html" class="nav-item active">
-        <span class="nav-text">Recrutamento</span>
-      </a>
-      <a href="training.html" class="nav-item">
-        <span class="nav-text">Treinamentos</span>
-      </a>
-      <a href="performance.html" class="nav-item">
-        <span class="nav-text">Avaliações</span>
-      </a>
-
-      <div class="nav-section">Departamento Pessoal</div>
-      <a href="payroll.html" class="nav-item">
-        <span class="nav-text">Folha de Pagamento</span>
-      </a>
-      <a href="benefits.html" class="nav-item">
-        <span class="nav-text">Benefícios</span>
-      </a>
-      <a href="vacation.html" class="nav-item">
-        <span class="nav-text">Férias</span>
-      </a>
-      <a href="timesheet.html" class="nav-item">
-        <span class="nav-text">Ponto</span>
-      </a>
-
-      <div class="nav-section">Administração</div>
-      <a href="reports.html" class="nav-item">
-        <span class="nav-text">Relatórios</span>
-      </a>
-      <a href="settings.html" class="nav-item">
-        <span class="nav-text">Configurações</span>
-      </a>
-    </nav>
-  </aside>
   <div class="main-content">
-    <header class="topbar">
-      <div class="topbar-left">
-        <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
-        <h1>Recrutamento e Seleção</h1>
-      </div>
-      <div class="topbar-right">
-        <div class="user-menu">
-          <button class="user-button" id="userMenuButton">
-            <span class="user-avatar" id="userAvatar">U</span>
-            <span class="user-name" id="userName">Usuário</span>
-            <span class="user-arrow">▼</span>
-          </button>
-          <div class="user-dropdown" id="userDropdown">
-            <div class="user-info">
-              <strong id="userFullName">Nome do Usuário</strong>
-              <small id="userProfile">Perfil</small>
-            </div>
-            <hr>
-            <a href="#" class="dropdown-item">Meu Perfil</a>
-            <a href="settings.html" class="dropdown-item">Configurações</a>
-            <hr>
-            <a href="#" class="dropdown-item" id="logoutButton">Sair</a>
-          </div>
-        </div>
-      </div>
-    </header>
+    <header th:replace="~{fragments/topbar :: topbar('Recrutamento e Seleção')}"></header>
 
     <div class="content-area">
       <div class="stats-row">
         <div class="stat-box">
           <div class="stat-box-icon" style="background: rgba(44, 62, 80, 0.1);"><img
-              src="../static/assets/file-text.png" alt="icone_vagas_abertas"></div>
+              th:src="@{/assets/file-text.png}" alt="icone_vagas_abertas"></div>
           <div class="stat-box-value">8</div>
           <div class="stat-box-label">Vagas Abertas</div>
         </div>
         <div class="stat-box">
           <div class="stat-box-icon" style="background: rgba(39, 174, 96, 0.1);"><img
-              src="../static/assets/file-user.png" alt="icone_candidatos_ativos"></div>
+              th:src="@{/assets/file-user.png}" alt="icone_candidatos_ativos"></div>
           <div class="stat-box-value">156</div>
           <div class="stat-box-label">Candidatos Ativos</div>
         </div>
         <div class="stat-box">
           <div class="stat-box-icon" style="background: rgba(243, 156, 18, 0.1);"><img
-              src="../static/assets/calendar-check.png" alt="icone_entrevistas_agendadas"></div>
+              th:src="@{/assets/calendar-check.png}" alt="icone_entrevistas_agendadas"></div>
           <div class="stat-box-value">12</div>
           <div class="stat-box-label">Entrevistas Agendadas</div>
         </div>
         <div class="stat-box">
           <div class="stat-box-icon" style="background: rgba(231, 76, 60, 0.1);"><img
-              src="../static/assets/check (1).png" alt="icone_contratacoes"></div>
+              th:src="@{/assets/check (1).png}" alt="icone_contratacoes"></div>
           <div class="stat-box-value">3</div>
           <div class="stat-box-label">Contratações (mês)</div>
         </div>
@@ -368,8 +290,7 @@
     </div>
   </div>
 
-  <script src="../static/scripts/auth.js"></script>
-  <script src="../static/scripts/components.js"></script>
+  <div th:replace="~{fragments/scripts :: common}"></div>
   <script>
     const jobs = [
       { id: 1, titulo: "Desenvolvedor Backend Senior", departamento: "Tecnologia", tipo: "CLT", nivel: "Senior", modalidade: "Híbrido", candidatos: 45, entrevistas: 8, dias: 15 },
@@ -407,75 +328,31 @@
       { id: 4, candidato: "Carlos Mendes", vaga: "Dev Backend", data: "14/01/2026 11:00", entrevistador: "Ana Paula", tipo: "RH", status: "REALIZADA" }
     ];
 
-    document.addEventListener("DOMContentLoaded", () => {
+    document.addEventListener("DOMContentLoaded", function () {
       if (!Auth.requireAuth()) return;
-      initUI();
+      initUserMenu();
       initSidebar();
+      Auth.applyRoleVisibility(document);
+      Auth.applyActionVisibility(document);
       renderJobs();
       renderKanban();
       renderInterviews();
       Mask.initAll();
     });
 
-    function initUI() {
-      const user = Auth.getCurrentUser();
-      document.getElementById("userName").textContent = user?.email?.split("@")[0] || "Usuário";
-      document.getElementById("userAvatar").textContent = (user?.email || "U")[0].toUpperCase();
-      document.getElementById("userMenuButton").onclick = () => document.getElementById("userDropdown").classList.toggle("active");
-      document.getElementById("logoutButton").onclick = (e) => { e.preventDefault(); Auth.logout(); };
-    }
-
-    function initSidebar() {
-      const sidebar = document.getElementById('sidebar');
-      const mobileBtn = document.getElementById('mobileMenuBtn');
-
-      mobileBtn?.addEventListener('click', () => {
-        sidebar.classList.toggle('mobile-open');
-      });
-
-      document.addEventListener('click', (e) => {
-        if (window.innerWidth <= 768) {
-          if (!e.target.closest('.sidebar') && !e.target.closest('.mobile-menu-btn')) {
-            sidebar.classList.remove('mobile-open');
-          }
-        }
-      });
-    }
-
     function showTab(tab) {
-      document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', ['vagas', 'candidatos', 'entrevistas'][i] === tab));
+      document.querySelectorAll('.tab-btn').forEach(function (b, i) { b.classList.toggle('active', ['vagas', 'candidatos', 'entrevistas'][i] === tab); });
       document.getElementById('tabVagas').style.display = tab === 'vagas' ? 'block' : 'none';
       document.getElementById('tabCandidatos').style.display = tab === 'candidatos' ? 'block' : 'none';
       document.getElementById('tabEntrevistas').style.display = tab === 'entrevistas' ? 'block' : 'none';
     }
 
     function renderJobs() {
-      document.getElementById("jobsGrid").innerHTML = jobs.map(j => `
-        <div class="job-card">
-          <div class="job-header">
-            <h3 class="job-title">${j.titulo}</h3>
-            <div class="cell-actions">
-              <button class="btn-icon edit" onclick="editJob(${j.id})"><img src="../static/assets/pencil (1).png" alt="icone_editar"></button>
-              <button class="btn-icon delete" onclick="closeJob(${j.id})"><img src="../static/assets/x.png" alt="icone_excluir"></button>
-            </div>
-          </div>
-          <div class="job-meta">
-            <span>${j.departamento}</span>
-            <span>${j.modalidade}</span>
-            <span>${j.nivel}</span>
-          </div>
-          <span class="badge badge-success">${j.tipo}</span>
-          <div class="job-stats">
-            <div class="job-stat"><div class="job-stat-value">${j.candidatos}</div><div class="job-stat-label">Candidatos</div></div>
-            <div class="job-stat"><div class="job-stat-value">${j.entrevistas}</div><div class="job-stat-label">Entrevistas</div></div>
-            <div class="job-stat"><div class="job-stat-value">${j.dias}d</div><div class="job-stat-label">Aberta há</div></div>
-          </div>
-        </div>
-      `).join('');
+      document.getElementById("jobsGrid").innerHTML = jobs.map(function (j) { return '<div class="job-card"><div class="job-header"><h3 class="job-title">' + j.titulo + '</h3><div class="cell-actions"><button class="btn-icon edit" onclick="editJob(' + j.id + ')"><img src="/assets/pencil (1).png" alt="icone_editar"></button><button class="btn-icon delete" onclick="closeJob(' + j.id + ')"><img src="/assets/x.png" alt="icone_excluir"></button></div></div><div class="job-meta"><span>' + j.departamento + '</span><span>' + j.modalidade + '</span><span>' + j.nivel + '</span></div><span class="badge badge-success">' + j.tipo + '</span><div class="job-stats"><div class="job-stat"><div class="job-stat-value">' + j.candidatos + '</div><div class="job-stat-label">Candidatos</div></div><div class="job-stat"><div class="job-stat-value">' + j.entrevistas + '</div><div class="job-stat-label">Entrevistas</div></div><div class="job-stat"><div class="job-stat-value">' + j.dias + 'd</div><div class="job-stat-label">Aberta há</div></div></div></div>'; }).join('');
     }
 
     function renderKanban() {
-      const stages = [
+      var stages = [
         { key: 'triagem', title: 'Triagem', color: 'var(--gray-500)' },
         { key: 'entrevista_rh', title: 'Entrevista RH', color: 'var(--warning-orange)' },
         { key: 'entrevista_tecnica', title: 'Entrevista Técnica', color: 'var(--info-gray)' },
@@ -483,48 +360,21 @@
         { key: 'contratado', title: 'Contratado', color: 'var(--success-green)' }
       ];
 
-      document.getElementById("kanbanBoard").innerHTML = stages.map(s => `
-        <div class="kanban-column">
-          <div class="kanban-header">
-            <span class="kanban-title" style="border-left: 3px solid ${s.color}; padding-left: 8px;">${s.title}</span>
-            <span class="kanban-count">${candidates[s.key].length}</span>
-          </div>
-          <div class="kanban-cards">
-            ${candidates[s.key].map(c => `
-              <div class="candidate-card" draggable="true">
-                <div class="candidate-name">${c.nome}</div>
-                <div class="candidate-position">${c.vaga}</div>
-                <div class="candidate-meta"><span>${c.data}</span></div>
-              </div>
-            `).join('')}
-          </div>
-        </div>
-      `).join('');
+      document.getElementById("kanbanBoard").innerHTML = stages.map(function (s) {
+        return '<div class="kanban-column"><div class="kanban-header"><span class="kanban-title" style="border-left: 3px solid ' + s.color + '; padding-left: 8px;">' + s.title + '</span><span class="kanban-count">' + candidates[s.key].length + '</span></div><div class="kanban-cards">' + candidates[s.key].map(function (c) { return '<div class="candidate-card" draggable="true"><div class="candidate-name">' + c.nome + '</div><div class="candidate-position">' + c.vaga + '</div><div class="candidate-meta"><span>' + c.data + '</span></div></div>'; }).join('') + '</div></div>';
+      }).join('');
     }
 
     function renderInterviews() {
-      document.getElementById("interviewsBody").innerHTML = interviews.map(i => `
-        <tr>
-          <td><strong>${i.candidato}</strong></td>
-          <td>${i.vaga}</td>
-          <td>${i.data}</td>
-          <td>${i.entrevistador}</td>
-          <td><span class="badge badge-info">${i.tipo}</span></td>
-          <td><span class="badge ${i.status === 'AGENDADA' ? 'badge-warning' : 'badge-success'}">${i.status === 'AGENDADA' ? 'Agendada' : 'Realizada'}</span></td>
-          <td>
-            <div class="cell-actions">
-              <button class="btn-icon view" onclick="viewInterview(${i.id})"><img src="../static/assets/eye.png" alt="icone_visualizar"></button>
-              <button class="btn-icon edit" onclick="editInterview(${i.id})"><img src="../static/assets/pencil (1).png" alt="icone_editar"></button>
-            </div>
-          </td>
-        </tr>
-      `).join('');
+      document.getElementById("interviewsBody").innerHTML = interviews.map(function (i) {
+        return '<tr><td><strong>' + i.candidato + '</strong></td><td>' + i.vaga + '</td><td>' + i.data + '</td><td>' + i.entrevistador + '</td><td><span class="badge badge-info">' + i.tipo + '</span></td><td><span class="badge ' + (i.status === 'AGENDADA' ? 'badge-warning' : 'badge-success') + '">' + (i.status === 'AGENDADA' ? 'Agendada' : 'Realizada') + '</span></td><td><div class="cell-actions"><button class="btn-icon view" onclick="viewInterview(' + i.id + ')"><img src="/assets/eye.png" alt="icone_visualizar"></button><button class="btn-icon edit" onclick="editInterview(' + i.id + ')"><img src="/assets/pencil (1).png" alt="icone_editar"></button></div></td></tr>';
+      }).join('');
     }
 
     function openJobModal() { document.getElementById('jobForm').reset(); Modal.open('jobModal'); Mask.initAll(); }
     function saveJob() { Toast.success('Vaga publicada com sucesso!'); Modal.close('jobModal'); }
     function editJob(id) { openJobModal(); }
-    function closeJob(id) { Confirm.show('Encerrar esta vaga?', () => Toast.success('Vaga encerrada')); }
+    function closeJob(id) { Confirm.show('Encerrar esta vaga?', function () { Toast.success('Vaga encerrada'); }); }
     function openCandidateModal() { Toast.info('Modal de candidato'); }
     function scheduleInterview() { Toast.info('Agendar entrevista'); }
     function viewInterview(id) { Toast.info('Ver detalhes da entrevista'); }
