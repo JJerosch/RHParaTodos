@@ -63,7 +63,7 @@ public class SecurityConfig {
                             .hasAnyRole("ADMIN", "DP_CHEFE", "DP_ASSISTENTE")
 
                         // Férias e benefícios: DP + RH_CHEFE (aprova políticas)
-                        .requestMatchers("/benefits/**", "/vacation/**")
+                        .requestMatchers("/benefits/**", "/api/benefits/**", "/vacation/**")
                             .hasAnyRole("ADMIN", "RH_CHEFE", "DP_CHEFE", "DP_ASSISTENTE")
 
                         // Funcionários, recrutamento, treinamentos: RH
@@ -71,7 +71,7 @@ public class SecurityConfig {
                             .hasAnyRole("ADMIN", "RH_CHEFE", "RH_ASSISTENTE")
 
                         // Departamentos e cargos: somente chefia RH
-                        .requestMatchers("/departments/**", "/positions/**")
+                        .requestMatchers("/departments/**", "/api/departments/**", "/positions/**", "/api/positions/**")
                             .hasAnyRole("ADMIN", "RH_CHEFE")
 
                         // Avaliações de desempenho: chefia RH
