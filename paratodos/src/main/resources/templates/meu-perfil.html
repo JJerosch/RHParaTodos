@@ -1,14 +1,373 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+<head th:replace="~{fragments/head :: head('Meu Perfil')}">
   <title>Meu Perfil - Sistema RH Para Todos</title>
-  <link rel="stylesheet" href="../static/styles/global.css">
-  <link rel="stylesheet" href="../static/styles/dashboard.css">
-  <link rel="stylesheet" href="../static/styles/components.css">
-  <style>
+</head>
+
+<body>
+
+<!-- Injecao do usuario atual -->
+<script th:inline="javascript">
+    window.__CURRENT_USER__ = {
+      email: /*[[${currentUser.email}]]*/ 'usuario@local',
+      role:  /*[[${currentUser.role}]]*/ 'EMPLOYEE'
+    };
+</script>
+
+<!-- Sidebar -->
+<aside th:replace="~{fragments/sidebar :: admin('profile')}"></aside>
+
+<!-- Main Content -->
+<div class="main-content">
+    <!-- Topbar -->
+    <header th:replace="~{fragments/topbar :: topbar('Meu Perfil')}"></header>
+
+    <div class="content-area">
+      <div class="container">
+        <!-- Profile Header -->
+        <div class="profile-header">
+          <div class="profile-avatar-section">
+            <div class="profile-avatar-large" id="profileAvatarLarge">
+              <span id="avatarInitials">A</span>
+            </div>
+            <button class="avatar-upload-btn" id="avatarUploadBtn" title="Alterar foto">
+              <img th:src="@{/assets/pencil (1).png}" alt="editar" width="16" height="16">
+            </button>
+            <input type="file" id="avatarInput" accept="image/*" style="display: none;">
+          </div>
+          <div class="profile-header-info">
+            <h1 id="profileName">Perfil do Usuario</h1>
+            <div class="profile-role" id="profileRole">Cargo</div>
+            <div class="profile-email" id="profileEmail">email@local</div>
+          </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="profile-tabs">
+          <button class="profile-tab active" data-tab="overview">Visao Geral</button>
+          <button class="profile-tab" data-tab="edit">Editar Perfil</button>
+          <button class="profile-tab" data-tab="security">Seguranca</button>
+          <button class="profile-tab" data-tab="activity">Atividade</button>
+        </div>
+
+        <!-- Tab: Visao Geral -->
+        <div class="profile-tab-content active" id="tab-overview">
+          <div class="info-grid">
+            <!-- Informacoes Pessoais -->
+            <div class="info-section">
+              <h3>Informacoes Pessoais</h3>
+              <div class="info-row">
+                <span class="info-label">Nome Completo</span>
+                <span class="info-value" id="infoNome">---</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Email</span>
+                <span class="info-value" id="infoEmail">---</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Telefone</span>
+                <span class="info-value" id="infoTelefone">(11) 99999-9999</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Data de Nascimento</span>
+                <span class="info-value" id="infoNascimento">15/03/1985</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">CPF</span>
+                <span class="info-value" id="infoCpf">123.456.789-00</span>
+              </div>
+            </div>
+
+            <!-- Informacoes Profissionais -->
+            <div class="info-section">
+              <h3>Informacoes Profissionais</h3>
+              <div class="info-row">
+                <span class="info-label">Cargo</span>
+                <span class="info-value" id="infoCargo">---</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Departamento</span>
+                <span class="info-value" id="infoDepartamento">---</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Data de Admissao</span>
+                <span class="info-value" id="infoAdmissao">01/01/2020</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Matricula</span>
+                <span class="info-value" id="infoMatricula">ADM-001</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Status</span>
+                <span class="info-value"><span class="badge badge-success">Ativo</span></span>
+              </div>
+            </div>
+
+            <!-- Endereco -->
+            <div class="info-section">
+              <h3>Endereco</h3>
+              <div class="info-row">
+                <span class="info-label">CEP</span>
+                <span class="info-value" id="infoCep">01310-100</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Logradouro</span>
+                <span class="info-value" id="infoLogradouro">Avenida Paulista</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Numero</span>
+                <span class="info-value" id="infoNumero">1000</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Complemento</span>
+                <span class="info-value" id="infoComplemento">Sala 101</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Cidade/UF</span>
+                <span class="info-value" id="infoCidade">Sao Paulo - SP</span>
+              </div>
+            </div>
+
+            <!-- Informacoes de Emergencia -->
+            <div class="info-section">
+              <h3>Contato de Emergencia</h3>
+              <div class="info-row">
+                <span class="info-label">Nome</span>
+                <span class="info-value" id="infoEmergenciaNome">Maria Silva</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Parentesco</span>
+                <span class="info-value" id="infoEmergenciaParentesco">Conjuge</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Telefone</span>
+                <span class="info-value" id="infoEmergenciaTelefone">(11) 98888-8888</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab: Editar Perfil -->
+        <div class="profile-tab-content" id="tab-edit">
+          <form class="edit-form" id="editProfileForm">
+            <div class="form-section-title">Dados Pessoais</div>
+            <div class="form-row form-row-2">
+              <div class="form-group">
+                <label class="form-label" for="editNome">Nome Completo *</label>
+                <input type="text" id="editNome" class="form-input" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="editEmail">Email *</label>
+                <input type="email" id="editEmail" class="form-input" required>
+              </div>
+            </div>
+
+            <div class="form-row form-row-3">
+              <div class="form-group">
+                <label class="form-label" for="editTelefone">Telefone</label>
+                <input type="tel" id="editTelefone" class="form-input" value="(11) 99999-9999">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="editNascimento">Data de Nascimento</label>
+                <input type="date" id="editNascimento" class="form-input" value="1985-03-15">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="editCpf">CPF</label>
+                <input type="text" id="editCpf" class="form-input" value="123.456.789-00" disabled>
+              </div>
+            </div>
+
+            <div class="form-section-title" style="margin-top: 2rem;">Endereco</div>
+            <div class="form-row form-row-3">
+              <div class="form-group">
+                <label class="form-label" for="editCep">CEP</label>
+                <input type="text" id="editCep" class="form-input" value="01310-100">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="editLogradouro">Logradouro</label>
+                <input type="text" id="editLogradouro" class="form-input" value="Avenida Paulista">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="editNumero">Numero</label>
+                <input type="text" id="editNumero" class="form-input" value="1000">
+              </div>
+            </div>
+
+            <div class="form-row form-row-3">
+              <div class="form-group">
+                <label class="form-label" for="editComplemento">Complemento</label>
+                <input type="text" id="editComplemento" class="form-input" value="Sala 101">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="editBairro">Bairro</label>
+                <input type="text" id="editBairro" class="form-input" value="Bela Vista">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="editCidade">Cidade</label>
+                <input type="text" id="editCidade" class="form-input" value="Sao Paulo">
+              </div>
+            </div>
+
+            <div class="form-section-title" style="margin-top: 2rem;">Contato de Emergencia</div>
+            <div class="form-row form-row-3">
+              <div class="form-group">
+                <label class="form-label" for="editEmergenciaNome">Nome</label>
+                <input type="text" id="editEmergenciaNome" class="form-input" value="Maria Silva">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="editEmergenciaParentesco">Parentesco</label>
+                <input type="text" id="editEmergenciaParentesco" class="form-input" value="Conjuge">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="editEmergenciaTelefone">Telefone</label>
+                <input type="tel" id="editEmergenciaTelefone" class="form-input" value="(11) 98888-8888">
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">Salvar Alteracoes</button>
+              <button type="button" class="btn btn-secondary" id="btnCancelEdit">Cancelar</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Tab: Seguranca -->
+        <div class="profile-tab-content" id="tab-security">
+          <div class="edit-form">
+            <div class="form-section-title">Alterar Senha</div>
+            <form id="changePasswordForm">
+              <div class="form-row form-row-2">
+                <div class="form-group">
+                  <label class="form-label" for="currentPassword">Senha Atual *</label>
+                  <input type="password" id="currentPassword" class="form-input" required>
+                </div>
+              </div>
+              <div class="form-row form-row-2">
+                <div class="form-group">
+                  <label class="form-label" for="newPassword">Nova Senha *</label>
+                  <input type="password" id="newPassword" class="form-input" required>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="confirmPassword">Confirmar Nova Senha *</label>
+                  <input type="password" id="confirmPassword" class="form-input" required>
+                </div>
+              </div>
+              <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Alterar Senha</button>
+              </div>
+            </form>
+          </div>
+
+          <div style="height: 2rem;"></div>
+
+          <div class="edit-form">
+            <div class="form-section-title">Configuracoes de Seguranca</div>
+
+            <div class="security-item">
+              <div class="security-item-info">
+                <h4>Autenticacao de Dois Fatores</h4>
+                <p>Adicione uma camada extra de seguranca a sua conta</p>
+              </div>
+              <button class="btn btn-secondary" id="btn2FA">Ativar</button>
+            </div>
+
+            <div class="security-item">
+              <div class="security-item-info">
+                <h4>Sessoes Ativas</h4>
+                <p>Gerencie dispositivos conectados a sua conta</p>
+              </div>
+              <button class="btn btn-secondary" id="btnSessions">Ver Sessoes</button>
+            </div>
+
+            <div class="security-item">
+              <div class="security-item-info">
+                <h4>Historico de Login</h4>
+                <p>Visualize tentativas de acesso a sua conta</p>
+              </div>
+              <button class="btn btn-secondary" id="btnLoginHistory">Ver Historico</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab: Atividade -->
+        <div class="profile-tab-content" id="tab-activity">
+          <div class="edit-form">
+            <div class="form-section-title">Atividades Recentes</div>
+
+            <div class="activity-item">
+              <div class="activity-icon">
+                <img th:src="@{/assets/eye.png}" alt="" width="20" height="20">
+              </div>
+              <div class="activity-content">
+                <strong>Login realizado</strong>
+                <small>Acesso via navegador Chrome - Windows</small>
+              </div>
+              <div class="activity-time">Ha 2 horas</div>
+            </div>
+
+            <div class="activity-item">
+              <div class="activity-icon">
+                <img th:src="@{/assets/pencil (1).png}" alt="" width="20" height="20">
+              </div>
+              <div class="activity-content">
+                <strong>Perfil atualizado</strong>
+                <small>Informacoes pessoais foram modificadas</small>
+              </div>
+              <div class="activity-time">Ontem</div>
+            </div>
+
+            <div class="activity-item">
+              <div class="activity-icon">
+                <img th:src="@{/assets/shield (1).png}" alt="" width="20" height="20">
+              </div>
+              <div class="activity-content">
+                <strong>Senha alterada</strong>
+                <small>Senha foi modificada com sucesso</small>
+              </div>
+              <div class="activity-time">3 dias atras</div>
+            </div>
+
+            <div class="activity-item">
+              <div class="activity-icon">
+                <img th:src="@{/assets/users (1).png}" alt="" width="20" height="20">
+              </div>
+              <div class="activity-content">
+                <strong>Novo funcionario cadastrado</strong>
+                <small>Joao Silva adicionado ao departamento de TI</small>
+              </div>
+              <div class="activity-time">5 dias atras</div>
+            </div>
+
+            <div class="activity-item">
+              <div class="activity-icon">
+                <img th:src="@{/assets/chart-column (1).png}" alt="" width="20" height="20">
+              </div>
+              <div class="activity-content">
+                <strong>Relatorio gerado</strong>
+                <small>Relatorio de folha de pagamento - Janeiro 2026</small>
+              </div>
+              <div class="activity-time">1 semana atras</div>
+            </div>
+
+            <div class="activity-item">
+              <div class="activity-icon">
+                <img th:src="@{/assets/tree-palm (1).png}" alt="" width="20" height="20">
+              </div>
+              <div class="activity-content">
+                <strong>Ferias aprovadas</strong>
+                <small>Solicitacao de ferias para Maria Santos</small>
+              </div>
+              <div class="activity-time">2 semanas atras</div>
+            </div>
+          </div>
+        </div>
+
+      </div> <!-- end container -->
+    </div> <!-- end content-area -->
+</div> <!-- end main-content -->
+
+<style>
     .profile-header {
       background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-gray) 100%);
       padding: 2rem;
@@ -176,23 +535,6 @@
       box-shadow: var(--shadow-sm);
     }
 
-    .form-section-title {
-      font-size: var(--font-size-lg);
-      font-weight: 600;
-      color: var(--gray-800);
-      margin-bottom: var(--spacing-4);
-      padding-bottom: var(--spacing-3);
-      border-bottom: 2px solid var(--gray-200);
-    }
-
-    .form-actions {
-      display: flex;
-      gap: var(--spacing-3);
-      margin-top: var(--spacing-6);
-      padding-top: var(--spacing-4);
-      border-top: 1px solid var(--gray-200);
-    }
-
     .security-item {
       display: flex;
       justify-content: space-between;
@@ -278,483 +620,68 @@
         font-size: var(--font-size-sm);
       }
     }
-  </style>
-</head>
+</style>
 
-<body>
-  <aside class="sidebar" id="sidebar">
-    <div class="sidebar-header">
-      <div class="logo">
-        <img src="../static/assets/gruporhpaint.png" alt="logo_menu_lateral" height="60">
-      </div>
-    </div>
+<!-- Common scripts (auth.js + components.js + init) -->
+<div th:replace="~{fragments/scripts :: common}"></div>
 
-    <nav class="sidebar-nav">
-      <div class="nav-section">GESTÃO DE PESSOAS</div>
-      <a href="dashboard.html" class="nav-item">
-        <span class="nav-icon">📊</span>
-        <span class="nav-text">Dashboard</span>
-      </a>
-      <a href="funcionarios.html" class="nav-item">
-        <span class="nav-icon">👥</span>
-        <span class="nav-text">Funcionários</span>
-      </a>
-      <a href="departamentos.html" class="nav-item">
-        <span class="nav-icon">🏢</span>
-        <span class="nav-text">Departamentos</span>
-      </a>
-      <a href="cargos.html" class="nav-item">
-        <span class="nav-icon">💼</span>
-        <span class="nav-text">Cargos</span>
-      </a>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+      initUserMenu();
+      initSidebar();
+      Auth.applyRoleVisibility();
+      Auth.applyActionVisibility();
 
-      <div class="nav-section">RECURSOS HUMANOS</div>
-      <a href="recrutamento.html" class="nav-item">
-        <span class="nav-icon">📝</span>
-        <span class="nav-text">Recrutamento</span>
-      </a>
-      <a href="treinamentos.html" class="nav-item">
-        <span class="nav-icon">🎓</span>
-        <span class="nav-text">Treinamentos</span>
-      </a>
-      <a href="avaliacoes.html" class="nav-item">
-        <span class="nav-icon">⭐</span>
-        <span class="nav-text">Avaliações</span>
-      </a>
+      // Populate profile from current user
+      const user = Auth.getCurrentUser();
+      if (user) {
+        const namePart = (user.email || '').split('@')[0].split('.')[0];
+        const displayName = namePart.charAt(0).toUpperCase() + namePart.slice(1);
 
-      <div class="nav-section">DEPARTAMENTO PESSOAL</div>
-      <a href="folha-pagamento.html" class="nav-item">
-        <span class="nav-icon">💰</span>
-        <span class="nav-text">Folha de Pagamento</span>
-      </a>
-      <a href="beneficios.html" class="nav-item">
-        <span class="nav-icon">🎁</span>
-        <span class="nav-text">Benefícios</span>
-      </a>
-      <a href="ferias.html" class="nav-item">
-        <span class="nav-icon">🏖️</span>
-        <span class="nav-text">Férias</span>
-      </a>
-      <a href="ponto.html" class="nav-item">
-        <span class="nav-icon">⏰</span>
-        <span class="nav-text">Ponto</span>
-      </a>
+        const profileName = document.getElementById('profileName');
+        if (profileName) profileName.textContent = displayName;
 
-      <div class="nav-section">ADMINISTRAÇÃO</div>
-      <a href="configuracoes.html" class="nav-item">
-        <span class="nav-icon">⚙️</span>
-        <span class="nav-text">Configurações</span>
-      </a>
-      <a href="meu-perfil.html" class="nav-item active">
-        <span class="nav-icon">👤</span>
-        <span class="nav-text">Meu Perfil</span>
-      </a>
-    </nav>
-  </aside>
+        const profileEmail = document.getElementById('profileEmail');
+        if (profileEmail) profileEmail.textContent = user.email || '';
 
-  <div class="main-content">
-    <header class="topbar">
-      <div class="topbar-left">
-        <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
-        <h1>Meu Perfil</h1>
-      </div>
-      <div class="topbar-right">
-        <div class="user-menu">
-          <button class="user-button" id="userMenuButton">
-            <span class="user-avatar" id="userAvatar">A</span>
-            <span class="user-name" id="userName">Admin</span>
-            <span class="user-arrow">▼</span>
-          </button>
-          <div class="user-dropdown" id="userDropdown">
-            <div class="user-info">
-              <strong id="userFullName">Administrador do Sistema</strong>
-              <small id="userProfile">Administrador</small>
-            </div>
-            <hr>
-            <a href="meu-perfil.html" class="dropdown-item">Meu Perfil</a>
-            <a href="settings.html" class="dropdown-item">Configurações</a>
-            <hr>
-            <a href="#" class="dropdown-item" id="logoutButton">Sair</a>
-          </div>
-        </div>
-      </div>
-    </header>
+        const profileRole = document.getElementById('profileRole');
+        if (profileRole) profileRole.textContent = Auth.getProfileDisplayName(user);
 
-    <div class="content-area">
-      <div class="container">
-        <!-- Profile Header -->
-        <div class="profile-header">
-          <div class="profile-avatar-section">
-            <div class="profile-avatar-large" id="profileAvatarLarge">
-              <span id="avatarInitials">A</span>
-            </div>
-            <button class="avatar-upload-btn" id="avatarUploadBtn" title="Alterar foto">📷</button>
-            <input type="file" id="avatarInput" accept="image/*" style="display: none;">
-          </div>
-          <div class="profile-header-info">
-            <h1 id="profileName">Admin do Sistema</h1>
-            <div class="profile-role" id="profileRole">Administrador do Sistema</div>
-            <div class="profile-email" id="profileEmail">admin@local</div>
-          </div>
-        </div>
+        const infoNome = document.getElementById('infoNome');
+        if (infoNome) infoNome.textContent = displayName;
 
-        <!-- Tabs -->
-        <div class="profile-tabs">
-          <button class="profile-tab active" data-tab="overview">Visão Geral</button>
-          <button class="profile-tab" data-tab="edit">Editar Perfil</button>
-          <button class="profile-tab" data-tab="security">Segurança</button>
-          <button class="profile-tab" data-tab="activity">Atividade</button>
-        </div>
+        const infoEmail = document.getElementById('infoEmail');
+        if (infoEmail) infoEmail.textContent = user.email || '';
 
-        <!-- Tab: Visão Geral -->
-        <div class="profile-tab-content active" id="tab-overview">
-          <div class="info-grid">
-            <!-- Informações Pessoais -->
-            <div class="info-section">
-              <h3>Informações Pessoais</h3>
-              <div class="info-row">
-                <span class="info-label">Nome Completo</span>
-                <span class="info-value" id="infoNome">Admin do Sistema</span>
-              </div>
-              <div class="info-row">
-                <span class="info-label">Email</span>
-                <span class="info-value" id="infoEmail">admin@local</span>
-              </div>
-              <div class="info-row">
-                <span class="info-label">Telefone</span>
-                <span class="info-value" id="infoTelefone">(11) 99999-9999</span>
-              </div>
-              <div class="info-row">
-                <span class="info-label">Data de Nascimento</span>
-                <span class="info-value" id="infoNascimento">15/03/1985</span>
-              </div>
-              <div class="info-row">
-                <span class="info-label">CPF</span>
-                <span class="info-value" id="infoCpf">123.456.789-00</span>
-              </div>
-            </div>
+        const infoCargo = document.getElementById('infoCargo');
+        if (infoCargo) infoCargo.textContent = Auth.getProfileDisplayName(user);
 
-            <!-- Informações Profissionais -->
-            <div class="info-section">
-              <h3>Informações Profissionais</h3>
-              <div class="info-row">
-                <span class="info-label">Cargo</span>
-                <span class="info-value" id="infoCargo">Administrador do Sistema</span>
-              </div>
-              <div class="info-row">
-                <span class="info-label">Departamento</span>
-                <span class="info-value" id="infoDepartamento">Tecnologia da Informação</span>
-              </div>
-              <div class="info-row">
-                <span class="info-label">Data de Admissão</span>
-                <span class="info-value" id="infoAdmissao">01/01/2020</span>
-              </div>
-              <div class="info-row">
-                <span class="info-label">Matrícula</span>
-                <span class="info-value" id="infoMatricula">ADM-001</span>
-              </div>
-              <div class="info-row">
-                <span class="info-label">Status</span>
-                <span class="info-value"><span class="badge badge-success">Ativo</span></span>
-              </div>
-            </div>
+        const editNome = document.getElementById('editNome');
+        if (editNome) editNome.value = displayName;
 
-            <!-- Endereço -->
-            <div class="info-section">
-              <h3>Endereço</h3>
-              <div class="info-row">
-                <span class="info-label">CEP</span>
-                <span class="info-value" id="infoCep">01310-100</span>
-              </div>
-              <div class="info-row">
-                <span class="info-label">Logradouro</span>
-                <span class="info-value" id="infoLogradouro">Avenida Paulista</span>
-              </div>
-              <div class="info-row">
-                <span class="info-label">Número</span>
-                <span class="info-value" id="infoNumero">1000</span>
-              </div>
-              <div class="info-row">
-                <span class="info-label">Complemento</span>
-                <span class="info-value" id="infoComplemento">Sala 101</span>
-              </div>
-              <div class="info-row">
-                <span class="info-label">Cidade/UF</span>
-                <span class="info-value" id="infoCidade">São Paulo - SP</span>
-              </div>
-            </div>
+        const editEmail = document.getElementById('editEmail');
+        if (editEmail) editEmail.value = user.email || '';
 
-            <!-- Informações de Emergência -->
-            <div class="info-section">
-              <h3>Contato de Emergência</h3>
-              <div class="info-row">
-                <span class="info-label">Nome</span>
-                <span class="info-value" id="infoEmergenciaNome">Maria Silva</span>
-              </div>
-              <div class="info-row">
-                <span class="info-label">Parentesco</span>
-                <span class="info-value" id="infoEmergenciaParentesco">Cônjuge</span>
-              </div>
-              <div class="info-row">
-                <span class="info-label">Telefone</span>
-                <span class="info-value" id="infoEmergenciaTelefone">(11) 98888-8888</span>
-              </div>
-            </div>
-          </div>
-        </div>
+        const avatar = displayName[0].toUpperCase();
+        const avatarInitials = document.getElementById('avatarInitials');
+        if (avatarInitials) avatarInitials.textContent = avatar;
+      }
+    });
 
-        <!-- Tab: Editar Perfil -->
-        <div class="profile-tab-content" id="tab-edit">
-          <form class="edit-form" id="editProfileForm">
-            <div class="form-section-title">Dados Pessoais</div>
-            <div class="form-row form-row-2">
-              <div class="form-group">
-                <label class="form-label" for="editNome">Nome Completo *</label>
-                <input type="text" id="editNome" class="form-input" value="Admin do Sistema" required>
-              </div>
-              <div class="form-group">
-                <label class="form-label" for="editEmail">Email *</label>
-                <input type="email" id="editEmail" class="form-input" value="admin@local" required>
-              </div>
-            </div>
-
-            <div class="form-row form-row-3">
-              <div class="form-group">
-                <label class="form-label" for="editTelefone">Telefone</label>
-                <input type="tel" id="editTelefone" class="form-input" value="(11) 99999-9999">
-              </div>
-              <div class="form-group">
-                <label class="form-label" for="editNascimento">Data de Nascimento</label>
-                <input type="date" id="editNascimento" class="form-input" value="1985-03-15">
-              </div>
-              <div class="form-group">
-                <label class="form-label" for="editCpf">CPF</label>
-                <input type="text" id="editCpf" class="form-input" value="123.456.789-00" disabled>
-              </div>
-            </div>
-
-            <div class="form-section-title" style="margin-top: 2rem;">Endereço</div>
-            <div class="form-row form-row-3">
-              <div class="form-group">
-                <label class="form-label" for="editCep">CEP</label>
-                <input type="text" id="editCep" class="form-input" value="01310-100">
-              </div>
-              <div class="form-group">
-                <label class="form-label" for="editLogradouro">Logradouro</label>
-                <input type="text" id="editLogradouro" class="form-input" value="Avenida Paulista">
-              </div>
-              <div class="form-group">
-                <label class="form-label" for="editNumero">Número</label>
-                <input type="text" id="editNumero" class="form-input" value="1000">
-              </div>
-            </div>
-
-            <div class="form-row form-row-3">
-              <div class="form-group">
-                <label class="form-label" for="editComplemento">Complemento</label>
-                <input type="text" id="editComplemento" class="form-input" value="Sala 101">
-              </div>
-              <div class="form-group">
-                <label class="form-label" for="editBairro">Bairro</label>
-                <input type="text" id="editBairro" class="form-input" value="Bela Vista">
-              </div>
-              <div class="form-group">
-                <label class="form-label" for="editCidade">Cidade</label>
-                <input type="text" id="editCidade" class="form-input" value="São Paulo">
-              </div>
-            </div>
-
-            <div class="form-section-title" style="margin-top: 2rem;">Contato de Emergência</div>
-            <div class="form-row form-row-3">
-              <div class="form-group">
-                <label class="form-label" for="editEmergenciaNome">Nome</label>
-                <input type="text" id="editEmergenciaNome" class="form-input" value="Maria Silva">
-              </div>
-              <div class="form-group">
-                <label class="form-label" for="editEmergenciaParentesco">Parentesco</label>
-                <input type="text" id="editEmergenciaParentesco" class="form-input" value="Cônjuge">
-              </div>
-              <div class="form-group">
-                <label class="form-label" for="editEmergenciaTelefone">Telefone</label>
-                <input type="tel" id="editEmergenciaTelefone" class="form-input" value="(11) 98888-8888">
-              </div>
-            </div>
-
-            <div class="form-actions">
-              <button type="submit" class="btn btn-primary">Salvar Alterações</button>
-              <button type="button" class="btn btn-secondary" id="btnCancelEdit">Cancelar</button>
-            </div>
-          </form>
-        </div>
-
-        <!-- Tab: Segurança -->
-        <div class="profile-tab-content" id="tab-security">
-          <div class="edit-form">
-            <div class="form-section-title">Alterar Senha</div>
-            <form id="changePasswordForm">
-              <div class="form-row form-row-2">
-                <div class="form-group">
-                  <label class="form-label" for="currentPassword">Senha Atual *</label>
-                  <input type="password" id="currentPassword" class="form-input" required>
-                </div>
-              </div>
-              <div class="form-row form-row-2">
-                <div class="form-group">
-                  <label class="form-label" for="newPassword">Nova Senha *</label>
-                  <input type="password" id="newPassword" class="form-input" required>
-                </div>
-                <div class="form-group">
-                  <label class="form-label" for="confirmPassword">Confirmar Nova Senha *</label>
-                  <input type="password" id="confirmPassword" class="form-input" required>
-                </div>
-              </div>
-              <div class="form-actions">
-                <button type="submit" class="btn btn-primary">Alterar Senha</button>
-              </div>
-            </form>
-          </div>
-
-          <div style="height: 2rem;"></div>
-
-          <div class="edit-form">
-            <div class="form-section-title">Configurações de Segurança</div>
-            
-            <div class="security-item">
-              <div class="security-item-info">
-                <h4>Autenticação de Dois Fatores</h4>
-                <p>Adicione uma camada extra de segurança à sua conta</p>
-              </div>
-              <button class="btn btn-secondary" id="btn2FA">Ativar</button>
-            </div>
-
-            <div class="security-item">
-              <div class="security-item-info">
-                <h4>Sessões Ativas</h4>
-                <p>Gerencie dispositivos conectados à sua conta</p>
-              </div>
-              <button class="btn btn-secondary" id="btnSessions">Ver Sessões</button>
-            </div>
-
-            <div class="security-item">
-              <div class="security-item-info">
-                <h4>Histórico de Login</h4>
-                <p>Visualize tentativas de acesso à sua conta</p>
-              </div>
-              <button class="btn btn-secondary" id="btnLoginHistory">Ver Histórico</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Tab: Atividade -->
-        <div class="profile-tab-content" id="tab-activity">
-          <div class="edit-form">
-            <div class="form-section-title">Atividades Recentes</div>
-            
-            <div class="activity-item">
-              <div class="activity-icon">🔓</div>
-              <div class="activity-content">
-                <strong>Login realizado</strong>
-                <small>Acesso via navegador Chrome - Windows</small>
-              </div>
-              <div class="activity-time">Há 2 horas</div>
-            </div>
-
-            <div class="activity-item">
-              <div class="activity-icon">✏️</div>
-              <div class="activity-content">
-                <strong>Perfil atualizado</strong>
-                <small>Informações pessoais foram modificadas</small>
-              </div>
-              <div class="activity-time">Ontem</div>
-            </div>
-
-            <div class="activity-item">
-              <div class="activity-icon">🔑</div>
-              <div class="activity-content">
-                <strong>Senha alterada</strong>
-                <small>Senha foi modificada com sucesso</small>
-              </div>
-              <div class="activity-time">3 dias atrás</div>
-            </div>
-
-            <div class="activity-item">
-              <div class="activity-icon">👥</div>
-              <div class="activity-content">
-                <strong>Novo funcionário cadastrado</strong>
-                <small>João Silva adicionado ao departamento de TI</small>
-              </div>
-              <div class="activity-time">5 dias atrás</div>
-            </div>
-
-            <div class="activity-item">
-              <div class="activity-icon">📊</div>
-              <div class="activity-content">
-                <strong>Relatório gerado</strong>
-                <small>Relatório de folha de pagamento - Janeiro 2026</small>
-              </div>
-              <div class="activity-time">1 semana atrás</div>
-            </div>
-
-            <div class="activity-item">
-              <div class="activity-icon">🏖️</div>
-              <div class="activity-content">
-                <strong>Férias aprovadas</strong>
-                <small>Solicitação de férias para Maria Santos</small>
-              </div>
-              <div class="activity-time">2 semanas atrás</div>
-            </div>
-          </div>
-        </div>
-
-      </div> <!-- end container -->
-    </div> <!-- end content-area -->
-  </div> <!-- end main-content -->
-
-  <!-- Alert Messages -->
-  <div id="alertSuccess" class="alert alert-success" style="position: fixed; top: 80px; right: 20px; z-index: 1000; display: none;"></div>
-  <div id="alertError" class="alert alert-error" style="position: fixed; top: 80px; right: 20px; z-index: 1000; display: none;"></div>
-
-  <script src="../static/scripts/auth.js"></script>
-  <script>
     // Tab switching
     document.querySelectorAll('.profile-tab').forEach(tab => {
       tab.addEventListener('click', () => {
         const tabName = tab.getAttribute('data-tab');
-        
-        // Update active tab
+
         document.querySelectorAll('.profile-tab').forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
-        
-        // Update active content
+
         document.querySelectorAll('.profile-tab-content').forEach(content => {
           content.classList.remove('active');
         });
-        document.getElementById(`tab-${tabName}`).classList.add('active');
+        document.getElementById('tab-' + tabName).classList.add('active');
       });
     });
-
-    // Mobile menu
-    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-    const sidebar = document.getElementById('sidebar');
-    if (mobileMenuBtn) {
-      mobileMenuBtn.addEventListener('click', () => {
-        sidebar.classList.toggle('mobile-open');
-      });
-    }
-
-    // User menu dropdown
-    const userMenuButton = document.getElementById('userMenuButton');
-    const userDropdown = document.getElementById('userDropdown');
-    if (userMenuButton) {
-      userMenuButton.addEventListener('click', (e) => {
-        e.stopPropagation();
-        userDropdown.classList.toggle('active');
-      });
-
-      document.addEventListener('click', () => {
-        userDropdown.classList.remove('active');
-      });
-    }
 
     // Avatar upload
     const avatarUploadBtn = document.getElementById('avatarUploadBtn');
@@ -770,8 +697,8 @@
           const reader = new FileReader();
           reader.onload = (event) => {
             const avatarLarge = document.getElementById('profileAvatarLarge');
-            avatarLarge.innerHTML = `<img src="${event.target.result}" alt="Avatar">`;
-            showAlert('success', 'Foto de perfil atualizada com sucesso!');
+            avatarLarge.innerHTML = '<img src="' + event.target.result + '" alt="Avatar">';
+            Toast.success('Foto de perfil atualizada com sucesso!');
           };
           reader.readAsDataURL(file);
         }
@@ -783,8 +710,7 @@
     if (editProfileForm) {
       editProfileForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        
-        // Update info in overview tab
+
         document.getElementById('infoNome').textContent = document.getElementById('editNome').value;
         document.getElementById('infoEmail').textContent = document.getElementById('editEmail').value;
         document.getElementById('infoTelefone').textContent = document.getElementById('editTelefone').value;
@@ -798,13 +724,10 @@
         document.getElementById('infoEmergenciaParentesco').textContent = document.getElementById('editEmergenciaParentesco').value;
         document.getElementById('infoEmergenciaTelefone').textContent = document.getElementById('editEmergenciaTelefone').value;
 
-        // Update header
         document.getElementById('profileName').textContent = document.getElementById('editNome').value;
         document.getElementById('profileEmail').textContent = document.getElementById('editEmail').value;
 
-        showAlert('success', 'Perfil atualizado com sucesso!');
-        
-        // Switch to overview tab
+        Toast.success('Perfil atualizado com sucesso!');
         document.querySelector('[data-tab="overview"]').click();
       });
     }
@@ -822,93 +745,25 @@
     if (changePasswordForm) {
       changePasswordForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        
+
         const newPassword = document.getElementById('newPassword').value;
         const confirmPassword = document.getElementById('confirmPassword').value;
 
         if (newPassword !== confirmPassword) {
-          showAlert('error', 'As senhas não coincidem!');
+          Toast.error('As senhas nao coincidem!');
           return;
         }
 
         if (newPassword.length < 6) {
-          showAlert('error', 'A senha deve ter pelo menos 6 caracteres!');
+          Toast.error('A senha deve ter pelo menos 6 caracteres!');
           return;
         }
 
-        showAlert('success', 'Senha alterada com sucesso!');
+        Toast.success('Senha alterada com sucesso!');
         changePasswordForm.reset();
       });
     }
-
-    // Alert function
-    function showAlert(type, message) {
-      const alertEl = document.getElementById(type === 'error' ? 'alertError' : 'alertSuccess');
-      const otherAlert = document.getElementById(type === 'error' ? 'alertSuccess' : 'alertError');
-      
-      otherAlert.style.display = 'none';
-      alertEl.textContent = message;
-      alertEl.style.display = 'block';
-      
-      setTimeout(() => {
-        alertEl.style.display = 'none';
-      }, 3000);
-    }
-
-    // Logout
-    const logoutButton = document.getElementById('logoutButton');
-    if (logoutButton) {
-      logoutButton.addEventListener('click', (e) => {
-        e.preventDefault();
-        if (confirm('Deseja realmente sair?')) {
-          window.location.href = 'index.html';
-        }
-      });
-    }
-
-    // Load user data if Auth is available
-    document.addEventListener('DOMContentLoaded', () => {
-      if (typeof Auth !== 'undefined' && Auth.isAuthenticated()) {
-        const user = Auth.getCurrentUser();
-        if (user) {
-          // Update all user name references
-          const elements = ['userName', 'userFullName', 'profileName', 'userNameInline', 'infoNome', 'editNome'];
-          elements.forEach(id => {
-            const el = document.getElementById(id);
-            if (el) el.textContent = user.name || 'Usuário';
-          });
-
-          // Update email references
-          const emailElements = ['profileEmail', 'infoEmail', 'editEmail'];
-          emailElements.forEach(id => {
-            const el = document.getElementById(id);
-            if (el) {
-              if (el.tagName === 'INPUT') {
-                el.value = user.email || 'usuario@email.com';
-              } else {
-                el.textContent = user.email || 'usuario@email.com';
-              }
-            }
-          });
-
-          // Update avatar
-          const avatar = user.name ? user.name.charAt(0).toUpperCase() : 'U';
-          const avatarElements = ['userAvatar', 'avatarInitials'];
-          avatarElements.forEach(id => {
-            const el = document.getElementById(id);
-            if (el) el.textContent = avatar;
-          });
-
-          // Update profile
-          const profileElements = ['userProfile', 'userProfileInline', 'profileRole', 'infoCargo'];
-          profileElements.forEach(id => {
-            const el = document.getElementById(id);
-            if (el) el.textContent = user.profile || 'Usuário';
-          });
-        }
-      }
-    });
-  </script>
+</script>
 </body>
 
 </html>
