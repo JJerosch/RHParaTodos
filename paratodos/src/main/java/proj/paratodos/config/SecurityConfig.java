@@ -7,6 +7,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import proj.paratodos.repository.UsuarioRepository;
 import proj.paratodos.security.*;
 import proj.paratodos.service.JwtService;
@@ -42,6 +43,11 @@ public class SecurityConfig {
                 .addFilterBefore(jwtCookieFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterAfter(twoFactorEnforcementFilter, JwtCookieFilter.class)
 
+                // Desabilita CSRF para endpoints REST /api/** (chamadas fetch/AJAX com JSON)
+                .csrf(csrf -> csrf
+                        .ignoringRequestMatchers(new AntPathRequestMatcher("/api/**"))
+                )
+
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/login", "/2fa", "/error",
@@ -57,15 +63,15 @@ public class SecurityConfig {
                             .hasAnyRole("ADMIN", "DP_CHEFE", "DP_ASSISTENTE")
 
                         // Férias e benefícios: DP + RH_CHEFE (aprova políticas)
-                        .requestMatchers("/benefits/**", "/vacation/**")
+                        .requestMatchers("/benefits/**", "/api/benefits/**", "/vacation/**")
                             .hasAnyRole("ADMIN", "RH_CHEFE", "DP_CHEFE", "DP_ASSISTENTE")
 
                         // Funcionários, recrutamento, treinamentos: RH
-                        .requestMatchers("/employees/**", "/recruitment/**", "/training/**")
+                        .requestMatchers("/employees/**", "/api/employees/**", "/recruitment/**", "/training/**")
                             .hasAnyRole("ADMIN", "RH_CHEFE", "RH_ASSISTENTE")
 
                         // Departamentos e cargos: somente chefia RH
-                        .requestMatchers("/departments/**", "/positions/**")
+                        .requestMatchers("/departments/**", "/api/departments/**", "/positions/**", "/api/positions/**")
                             .hasAnyRole("ADMIN", "RH_CHEFE")
 
                         // Avaliações de desempenho: chefia RH

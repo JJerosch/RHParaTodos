@@ -36,20 +36,17 @@
           <label>Departamento:</label>
           <select id="filterDept" onchange="filter()">
             <option value="">Todos</option>
-            <option value="Tecnologia">Tecnologia</option>
-            <option value="RH">RH</option>
-            <option value="Financeiro">Financeiro</option>
-            <option value="Comercial">Comercial</option>
+            <!-- Sera preenchido dinamicamente -->
           </select>
         </div>
         <div class="filter-group">
           <label>Nível:</label>
           <select id="filterLevel" onchange="filter()">
             <option value="">Todos</option>
-            <option value="Junior">Junior</option>
-            <option value="Pleno">Pleno</option>
-            <option value="Senior">Senior</option>
-            <option value="Gestão">Gestão</option>
+            <option value="JUNIOR">Junior</option>
+            <option value="PLENO">Pleno</option>
+            <option value="SENIOR">Senior</option>
+            <option value="GESTAO">Gestão</option>
           </select>
         </div>
       </div>
@@ -89,13 +86,9 @@
             </div>
             <div class="form-group">
               <label class="form-label">Departamento *</label>
-              <select class="form-select" name="departamento" required>
+              <select class="form-select" name="departamentoId" id="formDeptSelect" required>
                 <option value="">Selecione</option>
-                <option value="Tecnologia">Tecnologia</option>
-                <option value="RH">RH</option>
-                <option value="Financeiro">Financeiro</option>
-                <option value="Comercial">Comercial</option>
-                <option value="Operações">Operações</option>
+                <!-- Sera preenchido dinamicamente -->
               </select>
             </div>
           </div>
@@ -103,19 +96,20 @@
             <div class="form-group">
               <label class="form-label">Nível</label>
               <select class="form-select" name="nivel">
-                <option value="Junior">Junior</option>
-                <option value="Pleno">Pleno</option>
-                <option value="Senior">Senior</option>
-                <option value="Gestão">Gestão</option>
+                <option value="">Selecione</option>
+                <option value="JUNIOR">Junior</option>
+                <option value="PLENO">Pleno</option>
+                <option value="SENIOR">Senior</option>
+                <option value="GESTAO">Gestão</option>
               </select>
             </div>
             <div class="form-group">
               <label class="form-label">Salário Mínimo</label>
-              <input type="text" class="form-input" name="salario_minimo" data-mask="currency">
+              <input type="text" class="form-input" name="salarioMinimo" data-mask="currency">
             </div>
             <div class="form-group">
               <label class="form-label">Salário Máximo</label>
-              <input type="text" class="form-input" name="salario_maximo" data-mask="currency">
+              <input type="text" class="form-input" name="salarioMaximo" data-mask="currency">
             </div>
           </div>
           <div class="form-group">
@@ -137,15 +131,25 @@
   <div th:replace="~{fragments/scripts :: common}"></div>
   <script>
     let data = [
-      { id: 1, titulo: "Desenvolvedor Backend", departamento: "Tecnologia", nivel: "Senior", salario_minimo: 10000, salario_maximo: 15000, ocupantes: 8, ativo: true },
-      { id: 2, titulo: "Desenvolvedor Frontend", departamento: "Tecnologia", nivel: "Pleno", salario_minimo: 7000, salario_maximo: 11000, ocupantes: 6, ativo: true },
-      { id: 3, titulo: "Analista de RH", departamento: "RH", nivel: "Pleno", salario_minimo: 5000, salario_maximo: 8000, ocupantes: 4, ativo: true },
-      { id: 4, titulo: "Gerente Financeiro", departamento: "Financeiro", nivel: "Gestão", salario_minimo: 15000, salario_maximo: 22000, ocupantes: 2, ativo: true },
-      { id: 5, titulo: "Vendedor", departamento: "Comercial", nivel: "Junior", salario_minimo: 3000, salario_maximo: 5000, ocupantes: 15, ativo: true },
-      { id: 6, titulo: "Tech Lead", departamento: "Tecnologia", nivel: "Gestão", salario_minimo: 18000, salario_maximo: 25000, ocupantes: 3, ativo: true }
+      { id: 1, titulo: "Desenvolvedor Backend", departamentoId: 3, departamentoNome: "Tecnologia", nivel: "SENIOR", salarioMinimo: 10000, salarioMaximo: 15000, ocupantes: 8, ativo: true },
+      { id: 2, titulo: "Desenvolvedor Frontend", departamentoId: 3, departamentoNome: "Tecnologia", nivel: "PLENO", salarioMinimo: 7000, salarioMaximo: 11000, ocupantes: 6, ativo: true },
+      { id: 3, titulo: "Analista de RH", departamentoId: 1, departamentoNome: "Recursos Humanos", nivel: "PLENO", salarioMinimo: 5000, salarioMaximo: 8000, ocupantes: 4, ativo: true },
+      { id: 4, titulo: "Gerente Financeiro", departamentoId: 4, departamentoNome: "Financeiro", nivel: "GESTAO", salarioMinimo: 15000, salarioMaximo: 22000, ocupantes: 2, ativo: true },
+      { id: 5, titulo: "Vendedor", departamentoId: null, departamentoNome: "Comercial", nivel: "JUNIOR", salarioMinimo: 3000, salarioMaximo: 5000, ocupantes: 15, ativo: true },
+      { id: 6, titulo: "Tech Lead", departamentoId: 3, departamentoNome: "Tecnologia", nivel: "GESTAO", salarioMinimo: 18000, salarioMaximo: 25000, ocupantes: 3, ativo: true }
     ];
     let filtered = [...data];
     let currentId = null;
+
+    // Departamentos para dropdowns (mock, sera carregado da API depois)
+    const departamentos = [
+      { id: 1, nome: "Recursos Humanos" },
+      { id: 2, nome: "Departamento Pessoal" },
+      { id: 3, nome: "Tecnologia" },
+      { id: 4, nome: "Financeiro" }
+    ];
+
+    const nivelLabels = { JUNIOR: 'Junior', PLENO: 'Pleno', SENIOR: 'Senior', GESTAO: 'Gestão' };
 
     document.addEventListener("DOMContentLoaded", () => {
       if (!Auth.requireAuth()) return;
@@ -153,9 +157,20 @@
       initSidebar();
       Auth.applyRoleVisibility(document);
       Auth.applyActionVisibility(document);
+      loadDepartamentos();
       render();
       Mask.initAll();
     });
+
+    function loadDepartamentos() {
+      const filterSelect = document.getElementById("filterDept");
+      const formSelect = document.getElementById("formDeptSelect");
+
+      departamentos.forEach(d => {
+        filterSelect.innerHTML += '<option value="' + d.id + '">' + d.nome + '</option>';
+        formSelect.innerHTML += '<option value="' + d.id + '">' + d.nome + '</option>';
+      });
+    }
 
     function filter() {
       const search = document.getElementById("search").value.toLowerCase();
@@ -164,7 +179,7 @@
 
       filtered = data.filter(item =>
         (!search || item.titulo.toLowerCase().includes(search)) &&
-        (!dept || item.departamento === dept) &&
+        (!dept || String(item.departamentoId) === dept) &&
         (!level || item.nivel === level)
       );
       render();
@@ -174,15 +189,15 @@
       document.getElementById("tableBody").innerHTML = filtered.map(item => `
         <tr>
           <td><strong>${item.titulo}</strong></td>
-          <td>${item.departamento}</td>
-          <td><span class="badge badge-info">${item.nivel}</span></td>
-          <td class="hide-mobile">${formatCurrency(item.salario_minimo)} - ${formatCurrency(item.salario_maximo)}</td>
+          <td>${item.departamentoNome || '-'}</td>
+          <td><span class="badge badge-info">${nivelLabels[item.nivel] || item.nivel || '-'}</span></td>
+          <td class="hide-mobile">${formatCurrency(item.salarioMinimo)} - ${formatCurrency(item.salarioMaximo)}</td>
           <td class="hide-mobile">${item.ocupantes}</td>
           <td><span class="badge ${item.ativo ? 'badge-success' : 'badge-danger'}">${item.ativo ? 'Ativo' : 'Inativo'}</span></td>
           <td>
             <div class="cell-actions">
-              <button class="btn-icon edit" onclick="edit(${item.id})"><img th:src="@{/assets/pencil (1).png}" alt="icone_editar_cargo"></button>
-              <button class="btn-icon delete" onclick="remove(${item.id})"><img th:src="@{/assets/trash-2 (1).png}" alt="icone_excluir_cargo"></button>
+              <button class="btn-icon edit" onclick="edit(${item.id})"><img src="/assets/pencil (1).png" alt="editar"></button>
+              <button class="btn-icon delete" onclick="remove(${item.id})"><img src="/assets/trash-2 (1).png" alt="excluir"></button>
             </div>
           </td>
         </tr>
@@ -205,10 +220,14 @@
 
     function save() {
       const formData = Form.serialize('form');
-      if (!formData.titulo || !formData.departamento) {
+      if (!formData.titulo || !formData.departamentoId) {
         Toast.error('Preencha os campos obrigatórios');
         return;
       }
+
+      // Resolve nome do departamento
+      const dept = departamentos.find(d => String(d.id) === String(formData.departamentoId));
+      formData.departamentoNome = dept ? dept.nome : '';
 
       if (currentId) {
         const idx = data.findIndex(d => d.id === currentId);

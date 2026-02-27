@@ -65,18 +65,32 @@
       <div class="modal-body">
         <form id="form">
           <input type="hidden" name="id">
-          <div class="form-group"><label class="form-label">Nome do Benefício *</label><input type="text"
-              class="form-input" name="nome" required></div>
+          <div class="form-row form-row-2">
+            <div class="form-group"><label class="form-label">Nome do Benefício *</label><input type="text"
+                class="form-input" name="nome" required></div>
+            <div class="form-group"><label class="form-label">Natureza *</label>
+              <select class="form-select" name="natureza" required id="naturezaSelect" onchange="onNaturezaChange()">
+                <option value="">Selecione</option>
+                <option value="PROVENTO">Provento</option>
+                <option value="DESCONTO">Desconto</option>
+                <option value="INFORMATIVO">Informativo</option>
+              </select>
+            </div>
+          </div>
           <div class="form-group"><label class="form-label">Descrição</label><textarea class="form-input"
               name="descricao" rows="2"></textarea></div>
           <div class="form-row form-row-2">
             <div class="form-group"><label class="form-label">Valor Padrão</label><input type="text" class="form-input"
-                name="valor" data-mask="currency"></div>
+                name="valorPadrao" data-mask="currency"></div>
             <div class="form-group"><label class="form-label">Desconto em Folha?</label><select class="form-select"
-                name="desconto">
+                name="possuiDescontoFolha">
                 <option value="true">Sim</option>
                 <option value="false">Não</option>
               </select></div>
+          </div>
+          <div class="form-row form-row-2" id="incidenciasRow">
+            <div class="form-group"><label class="checkbox-label"><input type="checkbox" name="incideFerias"><span>Incide em Férias</span></label></div>
+            <div class="form-group"><label class="checkbox-label"><input type="checkbox" name="incideDecimo"><span>Incide em 13º Salário</span></label></div>
           </div>
           <div class="form-group"><label class="checkbox-label"><input type="checkbox" name="ativo"
                 checked><span>Benefício Ativo</span></label></div>
@@ -144,19 +158,20 @@
   <div th:replace="~{fragments/scripts :: common}"></div>
   <script>
     const benefits = [
-      { id: 1, nome: "Vale Refeição", descricao: "Cartão para refeições diárias", valor: 800, beneficiarios: 235, ativo: true },
-      { id: 2, nome: "Vale Transporte", descricao: "Auxílio para deslocamento", valor: 300, beneficiarios: 180, ativo: true },
-      { id: 3, nome: "Plano de Saúde", descricao: "Assistência médica completa", valor: 650, beneficiarios: 248, ativo: true },
-      { id: 4, nome: "Plano Odontológico", descricao: "Cobertura odontológica", valor: 80, beneficiarios: 220, ativo: true },
-      { id: 5, nome: "Seguro de Vida", descricao: "Proteção para família", valor: 50, beneficiarios: 248, ativo: true },
-      { id: 6, nome: "Gympass", descricao: "Acesso a academias parceiras", valor: 100, beneficiarios: 85, ativo: true }
+      { id: 1, nome: "Vale Refeição", descricao: "Cartão para refeições diárias", valorPadrao: 800, natureza: "PROVENTO", possuiDescontoFolha: false, incideFerias: true, incideDecimo: true, beneficiarios: 235, ativo: true },
+      { id: 2, nome: "Vale Transporte", descricao: "Auxílio para deslocamento", valorPadrao: 300, natureza: "DESCONTO", possuiDescontoFolha: true, incideFerias: false, incideDecimo: false, beneficiarios: 180, ativo: true },
+      { id: 3, nome: "Plano de Saúde", descricao: "Assistência médica completa", valorPadrao: 650, natureza: "DESCONTO", possuiDescontoFolha: true, incideFerias: false, incideDecimo: false, beneficiarios: 248, ativo: true },
+      { id: 4, nome: "Plano Odontológico", descricao: "Cobertura odontológica", valorPadrao: 80, natureza: "DESCONTO", possuiDescontoFolha: true, incideFerias: false, incideDecimo: false, beneficiarios: 220, ativo: true },
+      { id: 5, nome: "Seguro de Vida", descricao: "Proteção para família", valorPadrao: 50, natureza: "INFORMATIVO", possuiDescontoFolha: false, incideFerias: false, incideDecimo: false, beneficiarios: 248, ativo: true },
+      { id: 6, nome: "Gympass", descricao: "Acesso a academias parceiras", valorPadrao: 100, natureza: "DESCONTO", possuiDescontoFolha: true, incideFerias: false, incideDecimo: false, beneficiarios: 85, ativo: true }
     ];
     let currentId = null;
 
+    const naturezaLabels = { PROVENTO: 'Provento', DESCONTO: 'Desconto', INFORMATIVO: 'Informativo' };
+    const naturezaBadge  = { PROVENTO: 'badge-success', DESCONTO: 'badge-warning', INFORMATIVO: 'badge-info' };
+
     document.addEventListener('DOMContentLoaded', () => {
       if (!Auth.requireAuth()) return;
-
-      // Inicializar interface
       initUserMenu();
       initSidebar();
       Auth.applyRoleVisibility(document);
@@ -165,20 +180,33 @@
       Mask.initAll();
     });
 
+    function onNaturezaChange() {
+      const val = document.getElementById('naturezaSelect').value;
+      const row = document.getElementById('incidenciasRow');
+      if (val === 'PROVENTO') {
+        row.style.display = '';
+      } else {
+        row.style.display = 'none';
+        document.querySelector('[name="incideFerias"]').checked = false;
+        document.querySelector('[name="incideDecimo"]').checked = false;
+      }
+    }
+
     function render() {
       document.getElementById("benefitsGrid").innerHTML = benefits.map(b => `
         <div class="benefit-card">
           <div class="benefit-header">
+            <span class="badge ${naturezaBadge[b.natureza] || 'badge-info'}">${naturezaLabels[b.natureza] || b.natureza}</span>
             <div class="cell-actions">
-              <button class="btn-icon edit" onclick="edit(${b.id})"><img src="/assets/pencil (1).png" alt="icone_editar"></button>
-              <button class="btn-icon delete" onclick="remove(${b.id})"><img src="/assets/trash-2 (1).png" alt="icone_excluir"></button>
+              <button class="btn-icon edit" onclick="edit(${b.id})"><img src="/assets/pencil (1).png" alt="editar"></button>
+              <button class="btn-icon delete" onclick="remove(${b.id})"><img src="/assets/trash-2 (1).png" alt="excluir"></button>
             </div>
           </div>
           <h3 class="benefit-name">${b.nome}</h3>
-          <p class="benefit-desc">${b.descricao}</p>
+          <p class="benefit-desc">${b.descricao || 'Sem descrição'}</p>
           <div class="benefit-stats">
             <span><strong>${b.beneficiarios}</strong> beneficiários</span>
-            <span><strong>${formatCurrency(b.valor)}</strong>/mês</span>
+            <span><strong>${formatCurrency(b.valorPadrao)}</strong>/mês</span>
           </div>
         </div>
       `).join('');
@@ -188,13 +216,43 @@
       currentId = id;
       document.getElementById("form").reset();
       document.getElementById("modalTitle").textContent = id ? "Editar Benefício" : "Novo Benefício";
-      if (id) { const item = benefits.find(b => b.id === id); if (item) Form.populate('form', item); }
-      Modal.open('modal'); Mask.initAll();
+      if (id) {
+        const item = benefits.find(b => b.id === id);
+        if (item) Form.populate('form', item);
+      }
+      onNaturezaChange();
+      Modal.open('modal');
+      Mask.initAll();
     }
 
     function edit(id) { openModal(id); }
-    function save() { const data = Form.serialize('form'); if (!data.nome) { Toast.error('Nome obrigatório'); return; } if (currentId) { const idx = benefits.findIndex(b => b.id === currentId); if (idx > -1) benefits[idx] = { ...benefits[idx], ...data }; Toast.success('Benefício atualizado!'); } else { benefits.push({ id: Date.now(), ...data, beneficiarios: 0, icon: '🎁' }); Toast.success('Benefício criado!'); } Modal.close('modal'); render(); }
-    function remove(id) { Confirm.show('Excluir este benefício?', () => { const idx = benefits.findIndex(b => b.id === id); if (idx > -1) benefits.splice(idx, 1); Toast.success('Benefício excluído!'); render(); }); }
+
+    function save() {
+      const data = Form.serialize('form');
+      if (!data.nome) { Toast.error('Nome é obrigatório'); return; }
+      if (!data.natureza) { Toast.error('Natureza é obrigatória'); return; }
+
+      if (currentId) {
+        const idx = benefits.findIndex(b => b.id === currentId);
+        if (idx > -1) benefits[idx] = { ...benefits[idx], ...data };
+        Toast.success('Benefício atualizado!');
+      } else {
+        benefits.push({ id: Date.now(), ...data, beneficiarios: 0 });
+        Toast.success('Benefício criado!');
+      }
+      Modal.close('modal');
+      render();
+    }
+
+    function remove(id) {
+      Confirm.show('Excluir este benefício?', () => {
+        const idx = benefits.findIndex(b => b.id === id);
+        if (idx > -1) benefits.splice(idx, 1);
+        Toast.success('Benefício excluído!');
+        render();
+      });
+    }
+
     function formatCurrency(val) { return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val || 0); }
   </script>
 </body>
