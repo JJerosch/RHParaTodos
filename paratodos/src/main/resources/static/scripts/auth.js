@@ -60,7 +60,7 @@ const Auth = {
     return allowedRoles.map(normalizeRole).includes(role);
   },
 
-  requireRole(allowedRoles = [], redirectTo = "/employee-dashboard") {
+  requireRole(allowedRoles = [], redirectTo = "/meu-ponto") {
     if (!this.requireAuth()) return false;
     if (!this.hasAnyRole(allowedRoles)) {
       window.location.href = redirectTo;
@@ -133,7 +133,7 @@ const Auth = {
   // ---- Redirecionamento após login (usado pelo backend, mantido para compatibilidade) ----
   redirectAfterLogin(user) {
     const role = normalizeRole(user?.role) || this.getCurrentRole();
-    return role === "EMPLOYEE" ? "/employee-dashboard" : "/dashboard";
+    return role === "EMPLOYEE" ? "/meu-ponto" : "/dashboard";
   },
 
   // ---- Compatibilidade legada (não utiliza mais localStorage) ----

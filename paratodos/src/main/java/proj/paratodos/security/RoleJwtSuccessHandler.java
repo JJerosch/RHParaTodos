@@ -32,11 +32,7 @@ public class RoleJwtSuccessHandler implements AuthenticationSuccessHandler {
     }
 
     public String resolveRedirect(UserPrincipal principal) {
-        String role = principal.getRole().toUpperCase();
-        return switch (role) {
-            case "ADMIN", "RH_CHEFE", "RH_ASSISTENTE", "DP_CHEFE", "DP_ASSISTENTE" -> "/dashboard";
-            default -> "/employee-dashboard";
-        };
+        return "/dashboard";
     }
 
     @Override

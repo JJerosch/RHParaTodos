@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/head :: head('Meus Holerites')}"><title>Meus Holerites</title></head>
+
+<body>
+<style>
+    .payslip-summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: var(--spacing-4);
+      margin-bottom: var(--spacing-6);
+    }
+    .payslip-summary-card {
+      background: white;
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-5);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--gray-200);
+    }
+    .payslip-summary-card .label {
+      font-size: var(--font-size-sm);
+      color: var(--gray-500);
+      margin-bottom: var(--spacing-1);
+    }
+    .payslip-summary-card .value {
+      font-size: var(--font-size-2xl);
+      font-weight: 700;
+      color: var(--primary-dark);
+    }
+    .payslip-summary-card .sub {
+      font-size: var(--font-size-sm);
+      color: var(--gray-400);
+      margin-top: var(--spacing-1);
+    }
+    .payslip-summary-card.highlight {
+      background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-gray) 100%);
+      color: white;
+      border: none;
+    }
+    .payslip-summary-card.highlight .label { color: rgba(255,255,255,0.8); }
+    .payslip-summary-card.highlight .value { color: white; }
+    .payslip-summary-card.highlight .sub { color: rgba(255,255,255,0.6); }
+    .year-filter {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-3);
+      margin-bottom: var(--spacing-4);
+    }
+    .year-filter select {
+      padding: var(--spacing-2) var(--spacing-4);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--gray-300);
+      font-size: var(--font-size-base);
+      background: white;
+    }
+    .payslip-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: var(--spacing-4);
+    }
+    .payslip-card {
+      background: white;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--gray-200);
+      overflow: hidden;
+      transition: all 0.2s;
+    }
+    .payslip-card:hover {
+      border-color: var(--primary-dark);
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+    }
+    .payslip-card-header {
+      background: var(--gray-50);
+      padding: var(--spacing-4);
+      border-bottom: 1px solid var(--gray-200);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .payslip-card-header .month {
+      font-weight: 700;
+      font-size: var(--font-size-lg);
+      color: var(--gray-800);
+    }
+    .payslip-card-body {
+      padding: var(--spacing-4);
+    }
+    .payslip-card-row {
+      display: flex;
+      justify-content: space-between;
+      padding: var(--spacing-2) 0;
+      border-bottom: 1px dashed var(--gray-100);
+      font-size: var(--font-size-sm);
+    }
+    .payslip-card-row:last-child { border-bottom: none; }
+    .payslip-card-row .label { color: var(--gray-500); }
+    .payslip-card-row .value { font-weight: 600; color: var(--gray-800); }
+    .payslip-card-row.total { border-top: 2px solid var(--gray-200); padding-top: var(--spacing-3); margin-top: var(--spacing-2); }
+    .payslip-card-row.total .value { color: var(--success-green); font-size: var(--font-size-lg); }
+    .payslip-card-footer {
+      padding: var(--spacing-3) var(--spacing-4);
+      border-top: 1px solid var(--gray-200);
+      display: flex;
+      gap: var(--spacing-2);
+    }
+    .payslip-card-footer .btn {
+      flex: 1;
+      padding: var(--spacing-2);
+      font-size: var(--font-size-sm);
+      text-align: center;
+    }
+    .empty-state {
+      text-align: center;
+      padding: var(--spacing-12);
+      color: var(--gray-400);
+    }
+    .empty-state img {
+      width: 64px;
+      height: 64px;
+      opacity: 0.3;
+      margin-bottom: var(--spacing-4);
+    }
+    .empty-state p {
+      font-size: var(--font-size-lg);
+      margin-bottom: var(--spacing-2);
+    }
+    .empty-state small { color: var(--gray-400); }
+    @media (max-width: 768px) {
+      .payslip-grid { grid-template-columns: 1fr; }
+      .payslip-summary { grid-template-columns: 1fr 1fr; }
+    }
+</style>
+
+<script th:inline="javascript">
+    window.__CURRENT_USER__ = {
+      email: /*[[${currentUser.email}]]*/ 'usuario@local',
+      role:  /*[[${currentUser.role}]]*/ 'EMPLOYEE'
+    };
+</script>
+
+<aside th:replace="~{fragments/sidebar :: admin('meus-holerites')}"></aside>
+
+<div class="main-content">
+    <header th:replace="~{fragments/topbar :: topbar('Meus Holerites')}"></header>
+
+    <div class="content-area">
+        <div class="page-header">
+            <div>
+                <h2 class="page-title">Meus Holerites</h2>
+                <div class="page-subtitle">Visualize e baixe seus holerites processados.</div>
+            </div>
+        </div>
+
+        <!-- Resumo -->
+        <div class="payslip-summary">
+            <div class="payslip-summary-card highlight">
+                <div class="label">Último Salário Líquido</div>
+                <div class="value" id="lastNetSalary">---</div>
+                <div class="sub" id="lastPayslipRef">Nenhum holerite processado</div>
+            </div>
+            <div class="payslip-summary-card">
+                <div class="label">Salário Bruto</div>
+                <div class="value" id="lastGrossSalary">---</div>
+                <div class="sub">Valor bruto mensal</div>
+            </div>
+            <div class="payslip-summary-card">
+                <div class="label">Descontos Totais</div>
+                <div class="value" id="lastDeductions">---</div>
+                <div class="sub">INSS + IR + Outros</div>
+            </div>
+            <div class="payslip-summary-card">
+                <div class="label">Holerites Disponíveis</div>
+                <div class="value" id="totalPayslips">0</div>
+                <div class="sub">Total processados</div>
+            </div>
+        </div>
+
+        <!-- Filtro por ano -->
+        <div class="year-filter">
+            <label style="font-weight: 600; color: var(--gray-700);">Ano:</label>
+            <select id="yearFilter">
+                <option value="2026" selected>2026</option>
+                <option value="2025">2025</option>
+            </select>
+        </div>
+
+        <!-- Grid de Holerites (por mês) -->
+        <div class="payslip-grid" id="payslipGrid">
+            <div class="empty-state" style="grid-column: 1 / -1;">
+                <img th:src="@{/assets/banknote (1).png}" alt="">
+                <p>Nenhum holerite encontrado</p>
+                <small>Seus holerites aparecerão aqui quando forem processados pelo departamento pessoal.</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragments/scripts :: common}"></div>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+      if (!Auth.requireAuth()) return;
+      initUserMenu();
+      initSidebar();
+      Auth.applyRoleVisibility(document);
+      Auth.applyActionVisibility(document);
+    });
+</script>
+</body>
+</html>

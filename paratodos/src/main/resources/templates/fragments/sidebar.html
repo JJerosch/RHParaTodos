@@ -96,6 +96,21 @@
             <span class="nav-text">Ponto</span>
         </a>
 
+        <!-- Minha Área (Individual) -->
+        <div class="nav-section" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE,DP_CHEFE,DP_ASSISTENTE,EMPLOYEE">Minha Área</div>
+        <a th:href="@{/meu-ponto}" class="nav-item"
+           th:classappend="${activePage == 'meu-ponto'} ? ' active'"
+           data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE,DP_CHEFE,DP_ASSISTENTE,EMPLOYEE">
+            <span class="nav-icon"><img th:src="@{/assets/hourglass.png}" alt="" width="20" height="20"></span>
+            <span class="nav-text">Meu Ponto</span>
+        </a>
+        <a th:href="@{/meus-holerites}" class="nav-item"
+           th:classappend="${activePage == 'meus-holerites'} ? ' active'"
+           data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE,DP_CHEFE,DP_ASSISTENTE,EMPLOYEE">
+            <span class="nav-icon"><img th:src="@{/assets/banknote (1).png}" alt="" width="20" height="20"></span>
+            <span class="nav-text">Meus Holerites</span>
+        </a>
+
         <!-- Administração -->
         <div class="nav-section" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE,DP_CHEFE">Administração</div>
         <a th:href="@{/reports}" class="nav-item"

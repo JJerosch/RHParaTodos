@@ -35,10 +35,6 @@ public class PagesController {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth != null && auth.isAuthenticated()
                 && !(auth.getPrincipal() instanceof String)) {
-            if (auth.getPrincipal() instanceof UserPrincipal p
-                    && "EMPLOYEE".equalsIgnoreCase(p.getRole())) {
-                return "redirect:/employee-dashboard";
-            }
             return "redirect:/dashboard";
         }
         return "redirect:/login";
@@ -49,10 +45,6 @@ public class PagesController {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth != null && auth.isAuthenticated()
                 && !(auth.getPrincipal() instanceof String)) {
-            if (auth.getPrincipal() instanceof UserPrincipal p
-                    && "EMPLOYEE".equalsIgnoreCase(p.getRole())) {
-                return "redirect:/employee-dashboard";
-            }
             return "redirect:/dashboard";
         }
         return "index"; // templates/index.html
@@ -161,5 +153,17 @@ public class PagesController {
     public String payslipsPage(Model model) {
         injectCurrentUser(model);
         return "payslips";
+    }
+
+    @GetMapping("/meu-ponto")
+    public String meuPontoPage(Model model) {
+        injectCurrentUser(model);
+        return "meu-ponto";
+    }
+
+    @GetMapping("/meus-holerites")
+    public String meusHoleritesPage(Model model) {
+        injectCurrentUser(model);
+        return "meus-holerites";
     }
 }

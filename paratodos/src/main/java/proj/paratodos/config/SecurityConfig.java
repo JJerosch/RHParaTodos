@@ -85,13 +85,17 @@ public class SecurityConfig {
                         .requestMatchers("/timesheet/**")
                             .hasAnyRole("ADMIN", "RH_CHEFE", "RH_ASSISTENTE", "DP_CHEFE", "DP_ASSISTENTE")
 
-                        // Self-service funcionário
+                        // Self-service funcionário (legado mantido para compatibilidade)
                         .requestMatchers("/employee-dashboard/**", "/payslips/**")
                             .hasAnyRole("ADMIN", "EMPLOYEE")
 
-                        // Dashboard gerencial
+                        // Minha Área (individual): todos os perfis
+                        .requestMatchers("/meu-ponto/**", "/meus-holerites/**")
+                            .hasAnyRole("ADMIN", "RH_CHEFE", "RH_ASSISTENTE", "DP_CHEFE", "DP_ASSISTENTE", "EMPLOYEE")
+
+                        // Dashboard unificado: todos os perfis
                         .requestMatchers("/dashboard/**")
-                            .hasAnyRole("ADMIN", "RH_CHEFE", "RH_ASSISTENTE", "DP_CHEFE", "DP_ASSISTENTE")
+                            .hasAnyRole("ADMIN", "RH_CHEFE", "RH_ASSISTENTE", "DP_CHEFE", "DP_ASSISTENTE", "EMPLOYEE")
 
                         .anyRequest().authenticated()
                 )
