@@ -21,25 +21,25 @@
         <div class="stat-box">
           <div class="stat-box-icon" style="background: rgba(44, 62, 80, 0.1);"><img
               th:src="@{/assets/gift (2).png}" alt="icone_tipos_beneficios"></div>
-          <div class="stat-box-value">6</div>
+          <div class="stat-box-value" id="statTipos">0</div>
           <div class="stat-box-label">Tipos de Benefícios</div>
         </div>
         <div class="stat-box">
           <div class="stat-box-icon" style="background: rgba(39, 174, 96, 0.1);"><img
               th:src="@{/assets/users (1).png}" alt="icone_beneficiarios"></div>
-          <div class="stat-box-value">248</div>
+          <div class="stat-box-value" id="statBeneficiarios">0</div>
           <div class="stat-box-label">Beneficiários</div>
         </div>
         <div class="stat-box">
           <div class="stat-box-icon" style="background: rgba(243, 156, 18, 0.1);"><img
               th:src="@{/assets/banknote (1).png}" alt="icone_custo_mensal"></div>
-          <div class="stat-box-value">R$ 185K</div>
+          <div class="stat-box-value" id="statCusto">R$ 0</div>
           <div class="stat-box-label">Custo Mensal</div>
         </div>
         <div class="stat-box">
           <div class="stat-box-icon" style="background: rgba(231, 76, 60, 0.1);"><img
               th:src="@{/assets/chart-column (1).png}" alt="icone_custo_funcionario"></div>
-          <div class="stat-box-value">R$ 745</div>
+          <div class="stat-box-value" id="statCustoFunc">R$ 0</div>
           <div class="stat-box-label">Custo/Funcionário</div>
         </div>
       </div>
@@ -157,7 +157,10 @@
 
   <div th:replace="~{fragments/scripts :: common}"></div>
   <script>
-    const benefits = [
+    const API = '/api/benefits';
+
+    // Mock data (fallback)
+    const mockBenefits = [
       { id: 1, nome: "Vale Refeição", descricao: "Cartão para refeições diárias", valorPadrao: 800, natureza: "PROVENTO", possuiDescontoFolha: false, incideFerias: true, incideDecimo: true, beneficiarios: 235, ativo: true },
       { id: 2, nome: "Vale Transporte", descricao: "Auxílio para deslocamento", valorPadrao: 300, natureza: "DESCONTO", possuiDescontoFolha: true, incideFerias: false, incideDecimo: false, beneficiarios: 180, ativo: true },
       { id: 3, nome: "Plano de Saúde", descricao: "Assistência médica completa", valorPadrao: 650, natureza: "DESCONTO", possuiDescontoFolha: true, incideFerias: false, incideDecimo: false, beneficiarios: 248, ativo: true },
@@ -165,6 +168,8 @@
       { id: 5, nome: "Seguro de Vida", descricao: "Proteção para família", valorPadrao: 50, natureza: "INFORMATIVO", possuiDescontoFolha: false, incideFerias: false, incideDecimo: false, beneficiarios: 248, ativo: true },
       { id: 6, nome: "Gympass", descricao: "Acesso a academias parceiras", valorPadrao: 100, natureza: "DESCONTO", possuiDescontoFolha: true, incideFerias: false, incideDecimo: false, beneficiarios: 85, ativo: true }
     ];
+
+    let benefits = [];
     let currentId = null;
 
     const naturezaLabels = { PROVENTO: 'Provento', DESCONTO: 'Desconto', INFORMATIVO: 'Informativo' };
@@ -176,9 +181,39 @@
       initSidebar();
       Auth.applyRoleVisibility(document);
       Auth.applyActionVisibility(document);
-      render();
+      loadData();
       Mask.initAll();
     });
+
+    async function loadData() {
+      try {
+        const [listRes, statsRes] = await Promise.all([
+          fetch(API, { credentials: 'same-origin' }),
+          fetch(API + '/stats', { credentials: 'same-origin' })
+        ]);
+        if (!listRes.ok) throw new Error('API indisponível');
+        benefits = await listRes.json();
+        const stats = await statsRes.json();
+        document.getElementById("statTipos").textContent = stats.tipos;
+        document.getElementById("statBeneficiarios").textContent = stats.beneficiarios;
+        document.getElementById("statCusto").textContent = formatCurrency(stats.custoMensal);
+        document.getElementById("statCustoFunc").textContent = formatCurrency(stats.custoPorFuncionario);
+      } catch (e) {
+        console.log('Usando dados mock:', e.message);
+        benefits = mockBenefits;
+        updateStatsLocal();
+      }
+      render();
+    }
+
+    function updateStatsLocal() {
+      document.getElementById("statTipos").textContent = benefits.length;
+      const totalBenef = benefits.reduce((s, b) => s + (b.beneficiarios || 0), 0);
+      const custoMensal = benefits.reduce((s, b) => s + (b.valorPadrao || 0) * (b.beneficiarios || 0), 0);
+      document.getElementById("statBeneficiarios").textContent = totalBenef;
+      document.getElementById("statCusto").textContent = formatCurrency(custoMensal);
+      document.getElementById("statCustoFunc").textContent = totalBenef > 0 ? formatCurrency(custoMensal / totalBenef) : 'R$ 0';
+    }
 
     function onNaturezaChange() {
       const val = document.getElementById('naturezaSelect').value;
@@ -205,7 +240,7 @@
           <h3 class="benefit-name">${b.nome}</h3>
           <p class="benefit-desc">${b.descricao || 'Sem descrição'}</p>
           <div class="benefit-stats">
-            <span><strong>${b.beneficiarios}</strong> beneficiários</span>
+            <span><strong>${b.beneficiarios || 0}</strong> beneficiários</span>
             <span><strong>${formatCurrency(b.valorPadrao)}</strong>/mês</span>
           </div>
         </div>
@@ -227,29 +262,51 @@
 
     function edit(id) { openModal(id); }
 
-    function save() {
-      const data = Form.serialize('form');
-      if (!data.nome) { Toast.error('Nome é obrigatório'); return; }
-      if (!data.natureza) { Toast.error('Natureza é obrigatória'); return; }
+    async function save() {
+      const formData = Form.serialize('form');
+      if (!formData.nome) { Toast.error('Nome é obrigatório'); return; }
+      if (!formData.natureza) { Toast.error('Natureza é obrigatória'); return; }
 
-      if (currentId) {
-        const idx = benefits.findIndex(b => b.id === currentId);
-        if (idx > -1) benefits[idx] = { ...benefits[idx], ...data };
-        Toast.success('Benefício atualizado!');
-      } else {
-        benefits.push({ id: Date.now(), ...data, beneficiarios: 0 });
-        Toast.success('Benefício criado!');
+      const body = {
+        nome: formData.nome,
+        descricao: formData.descricao || null,
+        natureza: formData.natureza,
+        valorPadrao: formData.valorPadrao ? parseFloat(String(formData.valorPadrao).replace(/[^\d,]/g, '').replace(',', '.')) : null,
+        possuiDescontoFolha: formData.possuiDescontoFolha === 'true' || formData.possuiDescontoFolha === true,
+        incideFerias: !!formData.incideFerias,
+        incideDecimo: !!formData.incideDecimo,
+        ativo: formData.ativo !== undefined ? !!formData.ativo : true
+      };
+
+      try {
+        let res;
+        if (currentId) {
+          res = await fetch(API + '/' + currentId, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify(body) });
+        } else {
+          res = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify(body) });
+        }
+        if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err.error || 'Erro ao salvar'); }
+        Toast.success(currentId ? 'Benefício atualizado!' : 'Benefício criado!');
+        Modal.close('modal');
+        loadData();
+      } catch (e) {
+        console.error(e);
+        Toast.error(e.message || 'Erro ao salvar benefício');
       }
-      Modal.close('modal');
-      render();
     }
 
     function remove(id) {
-      Confirm.show('Excluir este benefício?', () => {
-        const idx = benefits.findIndex(b => b.id === id);
-        if (idx > -1) benefits.splice(idx, 1);
-        Toast.success('Benefício excluído!');
-        render();
+      const item = benefits.find(b => b.id === id);
+      Confirm.show('Excluir o benefício <strong>' + item.nome + '</strong>?', async () => {
+        try {
+          const res = await fetch(API + '/' + id, { method: 'DELETE', credentials: 'same-origin' });
+          if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err.error || 'Erro ao excluir'); }
+          Toast.success('Benefício excluído!');
+          loadData();
+        } catch (e) {
+          console.error(e);
+          Toast.error(e.message || 'Erro ao excluir benefício');
+        }
       });
     }
 
