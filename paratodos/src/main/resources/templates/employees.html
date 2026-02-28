@@ -235,7 +235,7 @@
                 <div class="form-row form-row-3">
                   <div class="form-group">
                     <label class="form-label">CEP</label>
-                    <input type="text" class="form-input" name="cep" data-mask="cep" onblur="searchCEP(this.value)">
+                    <input type="text" class="form-input" name="cep" data-mask="cep" data-viacep='{"logradouro":"logradouro","bairro":"bairro","cidade":"cidade","estado":"estado"}'>
                   </div>
                   <div class="form-group" style="grid-column: span 2;">
                     <label class="form-label">Logradouro</label>
@@ -798,22 +798,6 @@
       link.download = 'funcionarios_' + new Date().toISOString().split('T')[0] + '.csv';
       link.click();
       Toast.success('Exportação realizada!');
-    }
-
-    // ── Busca CEP ──
-    async function searchCEP(cep) {
-      cep = cep.replace(/\D/g, '');
-      if (cep.length !== 8) return;
-      try {
-        const res = await fetch('https://viacep.com.br/ws/' + cep + '/json/');
-        const d = await res.json();
-        if (!d.erro) {
-          document.getElementById('logradouro').value = d.logradouro || '';
-          document.getElementById('bairro').value = d.bairro || '';
-          document.getElementById('cidade').value = d.localidade || '';
-          document.getElementById('estado').value = d.uf || '';
-        }
-      } catch (e) { console.error('Erro ao buscar CEP:', e); }
     }
 
     // ── Utilitários ──

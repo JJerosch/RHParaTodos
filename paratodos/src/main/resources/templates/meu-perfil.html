@@ -124,8 +124,16 @@
                 <span class="info-value" id="infoComplemento">Sala 101</span>
               </div>
               <div class="info-row">
-                <span class="info-label">Cidade/UF</span>
-                <span class="info-value" id="infoCidade">Sao Paulo - SP</span>
+                <span class="info-label">Bairro</span>
+                <span class="info-value" id="infoBairro">Bela Vista</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Cidade</span>
+                <span class="info-value" id="infoCidade">Sao Paulo</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Estado</span>
+                <span class="info-value" id="infoEstado">SP</span>
               </div>
             </div>
 
@@ -182,19 +190,19 @@
             <div class="form-row form-row-3">
               <div class="form-group">
                 <label class="form-label" for="editCep">CEP</label>
-                <input type="text" id="editCep" class="form-input" value="01310-100">
+                <input type="text" id="editCep" class="form-input" data-mask="cep" data-viacep='{"logradouro":"editLogradouro","bairro":"editBairro","cidade":"editCidade","estado":"editEstado"}' value="01310-100">
               </div>
-              <div class="form-group">
+              <div class="form-group" style="grid-column: span 2;">
                 <label class="form-label" for="editLogradouro">Logradouro</label>
                 <input type="text" id="editLogradouro" class="form-input" value="Avenida Paulista">
-              </div>
-              <div class="form-group">
-                <label class="form-label" for="editNumero">Numero</label>
-                <input type="text" id="editNumero" class="form-input" value="1000">
               </div>
             </div>
 
             <div class="form-row form-row-3">
+              <div class="form-group">
+                <label class="form-label" for="editNumero">Numero</label>
+                <input type="text" id="editNumero" class="form-input" value="1000">
+              </div>
               <div class="form-group">
                 <label class="form-label" for="editComplemento">Complemento</label>
                 <input type="text" id="editComplemento" class="form-input" value="Sala 101">
@@ -203,9 +211,45 @@
                 <label class="form-label" for="editBairro">Bairro</label>
                 <input type="text" id="editBairro" class="form-input" value="Bela Vista">
               </div>
+            </div>
+
+            <div class="form-row form-row-2">
               <div class="form-group">
                 <label class="form-label" for="editCidade">Cidade</label>
                 <input type="text" id="editCidade" class="form-input" value="Sao Paulo">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="editEstado">Estado</label>
+                <select id="editEstado" class="form-select">
+                  <option value="">Selecione</option>
+                  <option value="AC">Acre</option>
+                  <option value="AL">Alagoas</option>
+                  <option value="AP">Amapá</option>
+                  <option value="AM">Amazonas</option>
+                  <option value="BA">Bahia</option>
+                  <option value="CE">Ceará</option>
+                  <option value="DF">Distrito Federal</option>
+                  <option value="ES">Espírito Santo</option>
+                  <option value="GO">Goiás</option>
+                  <option value="MA">Maranhão</option>
+                  <option value="MT">Mato Grosso</option>
+                  <option value="MS">Mato Grosso do Sul</option>
+                  <option value="MG">Minas Gerais</option>
+                  <option value="PA">Pará</option>
+                  <option value="PB">Paraíba</option>
+                  <option value="PR">Paraná</option>
+                  <option value="PE">Pernambuco</option>
+                  <option value="PI">Piauí</option>
+                  <option value="RJ">Rio de Janeiro</option>
+                  <option value="RN">Rio Grande do Norte</option>
+                  <option value="RS">Rio Grande do Sul</option>
+                  <option value="RO">Rondônia</option>
+                  <option value="RR">Roraima</option>
+                  <option value="SC">Santa Catarina</option>
+                  <option value="SP" selected>São Paulo</option>
+                  <option value="SE">Sergipe</option>
+                  <option value="TO">Tocantins</option>
+                </select>
               </div>
             </div>
 
@@ -719,7 +763,9 @@
         document.getElementById('infoLogradouro').textContent = document.getElementById('editLogradouro').value;
         document.getElementById('infoNumero').textContent = document.getElementById('editNumero').value;
         document.getElementById('infoComplemento').textContent = document.getElementById('editComplemento').value;
+        document.getElementById('infoBairro').textContent = document.getElementById('editBairro').value;
         document.getElementById('infoCidade').textContent = document.getElementById('editCidade').value;
+        document.getElementById('infoEstado').textContent = document.getElementById('editEstado').value;
         document.getElementById('infoEmergenciaNome').textContent = document.getElementById('editEmergenciaNome').value;
         document.getElementById('infoEmergenciaParentesco').textContent = document.getElementById('editEmergenciaParentesco').value;
         document.getElementById('infoEmergenciaTelefone').textContent = document.getElementById('editEmergenciaTelefone').value;
