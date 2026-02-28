@@ -7,7 +7,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import proj.paratodos.repository.UsuarioRepository;
 import proj.paratodos.security.*;
 import proj.paratodos.service.JwtService;
@@ -45,7 +44,7 @@ public class SecurityConfig {
 
                 // Desabilita CSRF para endpoints REST /api/** (chamadas fetch/AJAX com JSON)
                 .csrf(csrf -> csrf
-                        .ignoringRequestMatchers(new AntPathRequestMatcher("/api/**"))
+                        .ignoringRequestMatchers("/api/**")
                 )
 
                 .authorizeHttpRequests(auth -> auth
