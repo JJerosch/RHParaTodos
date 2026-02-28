@@ -235,7 +235,7 @@
                 <div class="form-row form-row-3">
                   <div class="form-group">
                     <label class="form-label">CEP</label>
-                    <input type="text" class="form-input" name="cep" data-mask="cep" onblur="searchCEP(this.value)">
+                    <input type="text" class="form-input" name="cep" data-mask="cep" data-viacep='{"logradouro":"logradouro","bairro":"bairro","cidade":"cidade","estado":"estado"}'>
                   </div>
                   <div class="form-group" style="grid-column: span 2;">
                     <label class="form-label">Logradouro</label>
@@ -441,80 +441,112 @@
 
   <div th:replace="~{fragments/scripts :: common}"></div>
   <script>
-    // Mock data
-    let data = [
-      { id: 1, matricula: "001234", nomeCompleto: "João Silva Santos", cpf: "123.456.789-00", emailCorporativo: "joao.santos@empresa.com.br", telefone: "(11) 98765-4321", departamentoId: 1, departamentoNome: "Tecnologia", cargoId: 2, cargoNome: "Desenvolvedor Senior", dataAdmissao: "2020-03-15", status: "ATIVO", salarioAtual: 12500.00, tipoContrato: "CLT" },
-      { id: 2, matricula: "001235", nomeCompleto: "Maria Oliveira Costa", cpf: "987.654.321-00", emailCorporativo: "maria.costa@empresa.com.br", telefone: "(11) 91234-5678", departamentoId: 2, departamentoNome: "Recursos Humanos", cargoId: 3, cargoNome: "Coordenadora de RH", dataAdmissao: "2019-08-01", status: "ATIVO", salarioAtual: 9800.00, tipoContrato: "CLT" },
-      { id: 3, matricula: "001236", nomeCompleto: "Pedro Henrique Almeida", cpf: "456.789.123-00", emailCorporativo: "pedro.almeida@empresa.com.br", telefone: "(21) 99876-5432", departamentoId: 3, departamentoNome: "Financeiro", cargoId: 1, cargoNome: "Analista Financeiro", dataAdmissao: "2021-02-10", status: "FERIAS", salarioAtual: 6500.00, tipoContrato: "CLT" },
-      { id: 4, matricula: "001237", nomeCompleto: "Ana Paula Ferreira", cpf: "321.654.987-00", emailCorporativo: "ana.ferreira@empresa.com.br", telefone: "(11) 97654-3210", departamentoId: 4, departamentoNome: "Comercial", cargoId: 4, cargoNome: "Gerente Comercial", dataAdmissao: "2018-11-20", status: "ATIVO", salarioAtual: 15000.00, tipoContrato: "CLT" },
-      { id: 5, matricula: "001238", nomeCompleto: "Carlos Eduardo Lima", cpf: "789.123.456-00", emailCorporativo: "carlos.lima@empresa.com.br", telefone: "(31) 98765-1234", departamentoId: 5, departamentoNome: "Operações", cargoId: 1, cargoNome: "Analista de Operações", dataAdmissao: "2022-06-05", status: "ATIVO", salarioAtual: 5200.00, tipoContrato: "CLT" },
-      { id: 6, matricula: "001239", nomeCompleto: "Juliana Santos Ribeiro", cpf: "654.987.321-00", emailCorporativo: "juliana.ribeiro@empresa.com.br", telefone: "(11) 96543-2109", departamentoId: 1, departamentoNome: "Tecnologia", cargoId: 2, cargoNome: "Desenvolvedora Pleno", dataAdmissao: "2021-09-15", status: "ATIVO", salarioAtual: 8500.00, tipoContrato: "CLT" },
-      { id: 7, matricula: "001240", nomeCompleto: "Roberto Martins Souza", cpf: "147.258.369-00", emailCorporativo: "roberto.souza@empresa.com.br", telefone: "(21) 95432-1098", departamentoId: 3, departamentoNome: "Financeiro", cargoId: 5, cargoNome: "Diretor Financeiro", dataAdmissao: "2017-03-01", status: "ATIVO", salarioAtual: 25000.00, tipoContrato: "CLT" },
-      { id: 8, matricula: "001241", nomeCompleto: "Fernanda Gomes Pereira", cpf: "369.147.258-00", emailCorporativo: "fernanda.pereira@empresa.com.br", telefone: "(11) 94321-0987", departamentoId: 2, departamentoNome: "Recursos Humanos", cargoId: 1, cargoNome: "Assistente de RH", dataAdmissao: "2023-01-10", status: "ATIVO", salarioAtual: 3800.00, tipoContrato: "CLT" },
-      { id: 9, matricula: "001242", nomeCompleto: "Marcos Antônio Silva", cpf: "258.369.147-00", emailCorporativo: "marcos.silva@empresa.com.br", telefone: "(41) 93210-9876", departamentoId: 4, departamentoNome: "Comercial", cargoId: 1, cargoNome: "Vendedor", dataAdmissao: "2022-04-18", status: "AFASTADO", salarioAtual: 4500.00, tipoContrato: "CLT" },
-      { id: 10, matricula: "001243", nomeCompleto: "Patricia Reis Mendes", cpf: "951.753.486-00", emailCorporativo: "patricia.mendes@empresa.com.br", telefone: "(11) 92109-8765", departamentoId: 1, departamentoNome: "Tecnologia", cargoId: 3, cargoNome: "Tech Lead", dataAdmissao: "2019-05-22", status: "ATIVO", salarioAtual: 18000.00, tipoContrato: "CLT" },
-      { id: 11, matricula: "001244", nomeCompleto: "Lucas Oliveira Nunes", cpf: "753.159.486-00", emailCorporativo: "lucas.nunes@empresa.com.br", telefone: "(51) 91098-7654", departamentoId: 5, departamentoNome: "Operações", cargoId: 3, cargoNome: "Coordenador de Operações", dataAdmissao: "2020-07-14", status: "ATIVO", salarioAtual: 9200.00, tipoContrato: "CLT" },
-      { id: 12, matricula: "001245", nomeCompleto: "Camila Rodrigues Dias", cpf: "159.753.486-00", emailCorporativo: "camila.dias@empresa.com.br", telefone: "(11) 90987-6543", departamentoId: 3, departamentoNome: "Financeiro", cargoId: 1, cargoNome: "Analista Contábil", dataAdmissao: "2021-11-08", status: "ATIVO", salarioAtual: 5800.00, tipoContrato: "CLT" }
-    ];
-
-    let filtered = [...data];
+    // ── Estado da página ──
     let currentId = null;
-    let currentPage = 1;
+    let currentPage = 0;   // API usa 0-based
     let perPage = 10;
+    let totalElements = 0;
+    let totalPages = 0;
+    let currentSort = 'nomeCompleto,asc';
+    let pageData = [];      // dados da página atual vindos da API
 
-    // Dados mock para dropdowns (sera carregado da API depois)
-    const departamentos = [
-      { id: 1, nome: "Tecnologia" },
-      { id: 2, nome: "Recursos Humanos" },
-      { id: 3, nome: "Financeiro" },
-      { id: 4, nome: "Comercial" },
-      { id: 5, nome: "Operações" }
-    ];
-
-    const cargos = [
-      { id: 1, titulo: "Analista" },
-      { id: 2, titulo: "Desenvolvedor" },
-      { id: 3, titulo: "Coordenador" },
-      { id: 4, titulo: "Gerente" },
-      { id: 5, titulo: "Diretor" }
-    ];
+    let departamentos = [];
+    let cargos = [];
 
     const statusLabels = { ATIVO: 'Ativo', FERIAS: 'Em Férias', AFASTADO: 'Afastado', DESLIGADO: 'Desligado' };
     const statusBadge  = { ATIVO: 'badge-success', FERIAS: 'badge-warning', AFASTADO: 'badge-info', DESLIGADO: 'badge-danger' };
 
-    document.addEventListener("DOMContentLoaded", () => {
+    // ── Helper de fetch ──
+    async function api(endpoint, options = {}) {
+      const res = await fetch(endpoint, {
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json', ...options.headers },
+        ...options
+      });
+      if (res.status === 401) { window.location.href = '/login'; return; }
+      if (res.status === 204) return null;
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(body.error || 'Erro na requisição');
+      return body;
+    }
+
+    // ── Init ──
+    document.addEventListener("DOMContentLoaded", async () => {
       if (!Auth.requireAuth()) return;
       initUserMenu();
       initSidebar();
       Auth.applyRoleVisibility(document);
       Auth.applyActionVisibility(document);
-      loadDropdowns();
       initTabs();
-      updateStats();
-      render();
       Mask.initAll();
+
+      await Promise.all([loadDropdowns(), loadStats(), loadPage()]);
     });
 
-    function loadDropdowns() {
+    // ── Dropdowns (da API real) ──
+    async function loadDropdowns() {
+      const [depts, cgs, gestores] = await Promise.all([
+        api('/api/employees/departamentos'),
+        api('/api/employees/cargos'),
+        api('/api/employees/gestores')
+      ]);
+
+      departamentos = depts || [];
+      cargos = cgs || [];
+
       const filterDept = document.getElementById("filterDepartment");
-      const formDept = document.getElementById("formDeptSelect");
-      const formCargo = document.getElementById("formCargoSelect");
+      const formDept   = document.getElementById("formDeptSelect");
+      const formCargo  = document.getElementById("formCargoSelect");
       const formGestor = document.getElementById("formGestorSelect");
 
       departamentos.forEach(d => {
         filterDept.innerHTML += '<option value="' + d.id + '">' + d.nome + '</option>';
-        formDept.innerHTML += '<option value="' + d.id + '">' + d.nome + '</option>';
+        formDept.innerHTML   += '<option value="' + d.id + '">' + d.nome + '</option>';
       });
-
       cargos.forEach(c => {
         formCargo.innerHTML += '<option value="' + c.id + '">' + c.titulo + '</option>';
       });
-
-      data.filter(e => e.status === 'ATIVO').forEach(e => {
-        formGestor.innerHTML += '<option value="' + e.id + '">' + e.nomeCompleto + '</option>';
+      (gestores || []).forEach(g => {
+        formGestor.innerHTML += '<option value="' + g.id + '">' + g.nome + '</option>';
       });
     }
 
+    // ── Stats (da API real) ──
+    async function loadStats() {
+      const stats = await api('/api/employees/stats');
+      if (!stats) return;
+      document.getElementById("statTotal").textContent     = stats.total;
+      document.getElementById("statAtivos").textContent    = stats.ativos;
+      document.getElementById("statFerias").textContent    = stats.ferias;
+      document.getElementById("statDesligados").textContent = stats.desligadosMes;
+    }
+
+    // ── Carregar página da API ──
+    async function loadPage() {
+      const search = document.getElementById("searchInput").value.trim();
+      const dept   = document.getElementById("filterDepartment").value;
+      const status = document.getElementById("filterStatus").value;
+
+      const params = new URLSearchParams();
+      if (search) params.set('search', search);
+      if (dept)   params.set('departamentoId', dept);
+      if (status) params.set('status', status);
+      params.set('page', currentPage);
+      params.set('size', perPage);
+      params.set('sort', currentSort);
+
+      const page = await api('/api/employees?' + params.toString());
+      if (!page) return;
+
+      pageData      = page.content || [];
+      totalElements = page.totalElements || 0;
+      totalPages    = page.totalPages || 0;
+      currentPage   = page.number || 0;
+
+      render();
+    }
+
+    // ── Tabs ──
     function initTabs() {
       document.querySelectorAll('.tabs').forEach(tabContainer => {
         const buttons = tabContainer.querySelectorAll('.tab-btn');
@@ -535,34 +567,18 @@
       });
     }
 
-    function updateStats() {
-      document.getElementById("statTotal").textContent = data.length;
-      document.getElementById("statAtivos").textContent = data.filter(e => e.status === "ATIVO").length;
-      document.getElementById("statFerias").textContent = data.filter(e => e.status === "FERIAS").length;
-      document.getElementById("statDesligados").textContent = data.filter(e => e.status === "DESLIGADO").length;
-    }
-
+    // ── Filtrar (recarrega da API) ──
     function filter() {
-      const search = document.getElementById("searchInput").value.toLowerCase();
-      const dept = document.getElementById("filterDepartment").value;
-      const status = document.getElementById("filterStatus").value;
-
-      filtered = data.filter(emp =>
-        (!search || emp.nomeCompleto.toLowerCase().includes(search) || emp.matricula.includes(search) || emp.cpf.includes(search)) &&
-        (!dept || String(emp.departamentoId) === dept) &&
-        (!status || emp.status === status)
-      );
-      currentPage = 1;
-      render();
+      currentPage = 0;
+      loadPage();
     }
 
+    // ── Render tabela ──
     function render() {
-      const start = (currentPage - 1) * perPage;
-      const pageData = filtered.slice(start, start + perPage);
       const tbody = document.getElementById("tableBody");
 
       if (pageData.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state"><div class="empty-state-icon"><img src="/assets/users (1).png" alt="vazio"></div><h3 class="empty-state-title">Nenhum funcionário encontrado</h3><p class="empty-state-text">Tente ajustar os filtros ou adicione um novo funcionário.</p></div></td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state"><div class="empty-state-icon"><img src="/assets/id-card-lanyard (1).png" alt="vazio"></div><h3 class="empty-state-title">Nenhum funcionário encontrado</h3><p class="empty-state-text">Tente ajustar os filtros ou adicione um novo funcionário.</p></div></td></tr>';
       } else {
         tbody.innerHTML = pageData.map(emp => `
           <tr>
@@ -577,7 +593,7 @@
             </td>
             <td>${emp.matricula}</td>
             <td class="hide-mobile">${emp.departamentoNome || '-'}</td>
-            <td class="hide-mobile">${emp.cargoNome || '-'}</td>
+            <td class="hide-mobile">${emp.cargoTitulo || '-'}</td>
             <td class="hide-mobile">${formatDate(emp.dataAdmissao)}</td>
             <td><span class="badge ${statusBadge[emp.status] || 'badge-info'}">${statusLabels[emp.status] || emp.status}</span></td>
             <td>
@@ -594,38 +610,43 @@
       updateTableInfo();
     }
 
+    // ── Paginação ──
     function renderPagination() {
-      const totalPages = Math.ceil(filtered.length / perPage);
       const pag = document.getElementById("pagination");
-      let html = '<button class="pagination-btn" onclick="goToPage(' + (currentPage - 1) + ')"' + (currentPage === 1 ? ' disabled' : '') + '>&larr;</button>';
-      for (let i = 1; i <= totalPages; i++) {
-        if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
-          html += '<button class="pagination-btn' + (i === currentPage ? ' active' : '') + '" onclick="goToPage(' + i + ')">' + i + '</button>';
+      let html = '<button class="pagination-btn" onclick="goToPage(' + (currentPage - 1) + ')"' + (currentPage === 0 ? ' disabled' : '') + '>&larr;</button>';
+      for (let i = 0; i < totalPages; i++) {
+        const display = i + 1;
+        if (i === 0 || i === totalPages - 1 || (i >= currentPage - 1 && i <= currentPage + 1)) {
+          html += '<button class="pagination-btn' + (i === currentPage ? ' active' : '') + '" onclick="goToPage(' + i + ')">' + display + '</button>';
         } else if (i === currentPage - 2 || i === currentPage + 2) {
           html += '<span style="padding: 0 8px;">...</span>';
         }
       }
-      html += '<button class="pagination-btn" onclick="goToPage(' + (currentPage + 1) + ')"' + (currentPage === totalPages || totalPages === 0 ? ' disabled' : '') + '>&rarr;</button>';
+      html += '<button class="pagination-btn" onclick="goToPage(' + (currentPage + 1) + ')"' + (currentPage >= totalPages - 1 ? ' disabled' : '') + '>&rarr;</button>';
       pag.innerHTML = html;
     }
 
     function goToPage(page) {
-      const totalPages = Math.ceil(filtered.length / perPage);
-      if (page >= 1 && page <= totalPages) { currentPage = page; render(); }
+      if (page >= 0 && page < totalPages) { currentPage = page; loadPage(); }
     }
 
     function changePerPage() {
       perPage = parseInt(document.getElementById("perPage").value);
-      currentPage = 1;
-      render();
+      currentPage = 0;
+      loadPage();
     }
 
     function updateTableInfo() {
-      const start = (currentPage - 1) * perPage + 1;
-      const end = Math.min(currentPage * perPage, filtered.length);
-      document.getElementById("tableInfo").textContent = filtered.length === 0 ? 'Nenhum resultado' : 'Mostrando ' + start + '-' + end + ' de ' + filtered.length + ' resultados';
+      if (totalElements === 0) {
+        document.getElementById("tableInfo").textContent = 'Nenhum resultado';
+        return;
+      }
+      const start = currentPage * perPage + 1;
+      const end   = Math.min(start + perPage - 1, totalElements);
+      document.getElementById("tableInfo").textContent = 'Mostrando ' + start + '-' + end + ' de ' + totalElements + ' resultados';
     }
 
+    // ── Ordenação (server-side) ──
     function sortTable(colIndex) {
       const headers = document.querySelectorAll('#employeesTable th');
       const header = headers[colIndex];
@@ -633,34 +654,27 @@
       headers.forEach(h => h.classList.remove('asc', 'desc'));
       header.classList.add(isAsc ? 'desc' : 'asc');
 
-      const keys = ['nomeCompleto', 'matricula', 'departamentoNome', 'cargoNome', 'dataAdmissao', 'status'];
-      const key = keys[colIndex];
-
-      filtered.sort((a, b) => {
-        let aVal = a[key] || '', bVal = b[key] || '';
-        if (key === 'dataAdmissao') { aVal = new Date(aVal); bVal = new Date(bVal); }
-        if (aVal < bVal) return isAsc ? 1 : -1;
-        if (aVal > bVal) return isAsc ? -1 : 1;
-        return 0;
-      });
-      render();
+      const keys = ['nomeCompleto', 'matricula', 'departamento.nome', 'cargo.titulo', 'dataAdmissao', 'status'];
+      currentSort = keys[colIndex] + ',' + (isAsc ? 'desc' : 'asc');
+      currentPage = 0;
+      loadPage();
     }
 
-    function openModal(id = null) {
+    // ── Modal: Abrir para criar/editar ──
+    async function openModal(id = null) {
       currentId = id;
       document.getElementById("employeeForm").reset();
-      // Reset tabs
       document.querySelectorAll('.tab-btn').forEach((btn, i) => btn.classList.toggle('active', i === 0));
       document.querySelectorAll('.tab-content').forEach((c, i) => c.classList.toggle('active', i === 0));
 
       if (id) {
         document.getElementById("modalTitle").textContent = "Editar Funcionário";
-        const emp = data.find(e => e.id === id);
-        if (emp) Form.populate('employeeForm', emp);
+        try {
+          const emp = await api('/api/employees/' + id);
+          if (emp) Form.populate('employeeForm', emp);
+        } catch (e) { Toast.error('Erro ao carregar funcionário'); return; }
       } else {
         document.getElementById("modalTitle").textContent = "Novo Funcionário";
-        const lastMat = Math.max(...data.map(e => parseInt(e.matricula) || 0));
-        document.querySelector('[name="matricula"]').value = String(lastMat + 1).padStart(6, '0');
       }
       Modal.open('employeeModal');
       Mask.initAll();
@@ -668,8 +682,12 @@
 
     function edit(id) { openModal(id); }
 
-    function view(id) {
-      const emp = data.find(e => e.id === id);
+    // ── Modal: Visualizar detalhes ──
+    async function view(id) {
+      let emp;
+      try {
+        emp = await api('/api/employees/' + id);
+      } catch (e) { Toast.error('Erro ao carregar funcionário'); return; }
       if (!emp) return;
       currentId = id;
 
@@ -678,7 +696,7 @@
           <div class="avatar avatar-lg">${getInitials(emp.nomeCompleto)}</div>
           <div>
             <h2 style="margin: 0; color: var(--gray-800);">${emp.nomeCompleto}</h2>
-            <p style="margin: var(--spacing-1) 0 0; color: var(--gray-500);">${emp.cargoNome || '-'} &bull; ${emp.departamentoNome || '-'}</p>
+            <p style="margin: var(--spacing-1) 0 0; color: var(--gray-500);">${emp.cargoTitulo || '-'} &bull; ${emp.departamentoNome || '-'}</p>
             <span class="badge ${statusBadge[emp.status]}" style="margin-top: var(--spacing-2);">${statusLabels[emp.status]}</span>
           </div>
         </div>
@@ -701,50 +719,76 @@
       Modal.open('viewModal');
     }
 
-    function save() {
+    // ── Salvar (criar ou atualizar via API) ──
+    async function save() {
       const form = document.getElementById("employeeForm");
       if (!form.checkValidity()) { form.reportValidity(); return; }
 
       const formData = Form.serialize('employeeForm');
-      formData.cpf = formData.cpf.replace(/\D/g, '');
+
+      // Limpar CPF
+      if (formData.cpf) formData.cpf = formData.cpf.replace(/\D/g, '');
+      // Limpar salário
       if (formData.salarioAtual) {
-        formData.salarioAtual = parseFloat(formData.salarioAtual.replace(/[^\d,]/g, '').replace(',', '.')) || 0;
+        formData.salarioAtual = parseFloat(String(formData.salarioAtual).replace(/[^\d,]/g, '').replace(',', '.')) || 0;
       }
+      // Converter IDs para number/null
+      formData.departamentoId = formData.departamentoId ? Number(formData.departamentoId) : null;
+      formData.cargoId        = formData.cargoId ? Number(formData.cargoId) : null;
+      formData.gestorId       = formData.gestorId ? Number(formData.gestorId) : null;
 
-      // Resolver nomes para exibicao
-      const dept = departamentos.find(d => String(d.id) === String(formData.departamentoId));
-      const cargo = cargos.find(c => String(c.id) === String(formData.cargoId));
-      formData.departamentoNome = dept ? dept.nome : '';
-      formData.cargoNome = cargo ? cargo.titulo : '';
-
-      if (currentId) {
-        const idx = data.findIndex(e => e.id === currentId);
-        if (idx > -1) data[idx] = { ...data[idx], ...formData };
-        Toast.success('Funcionário atualizado!');
-      } else {
-        data.push({ id: Date.now(), ...formData });
-        Toast.success('Funcionário cadastrado!');
+      try {
+        if (currentId) {
+          await api('/api/employees/' + currentId, { method: 'PUT', body: JSON.stringify(formData) });
+          Toast.success('Funcionário atualizado!');
+        } else {
+          await api('/api/employees', { method: 'POST', body: JSON.stringify(formData) });
+          Toast.success('Funcionário cadastrado!');
+        }
+      } catch (e) {
+        Toast.error(e.message || 'Erro ao salvar funcionário');
+        return;
       }
 
       Modal.close('employeeModal');
-      filter();
-      updateStats();
+      await Promise.all([loadStats(), loadPage()]);
     }
 
+    // ── Excluir via API ──
     function remove(id) {
-      const emp = data.find(e => e.id === id);
-      Confirm.show('Excluir o funcionário <strong>' + emp.nomeCompleto + '</strong>?', () => {
-        data = data.filter(e => e.id !== id);
-        Toast.success('Funcionário excluído!');
-        filter();
-        updateStats();
+      const emp = pageData.find(e => e.id === id);
+      if (!emp) return;
+      Confirm.show('Excluir o funcionário <strong>' + emp.nomeCompleto + '</strong>?', async () => {
+        try {
+          await api('/api/employees/' + id, { method: 'DELETE' });
+          Toast.success('Funcionário excluído!');
+          await Promise.all([loadStats(), loadPage()]);
+        } catch (e) {
+          Toast.error(e.message || 'Erro ao excluir funcionário');
+        }
       });
     }
 
-    function exportEmployees() {
+    // ── Exportar CSV (busca todos filtrados da API) ──
+    async function exportEmployees() {
+      const search = document.getElementById("searchInput").value.trim();
+      const dept   = document.getElementById("filterDepartment").value;
+      const status = document.getElementById("filterStatus").value;
+
+      const params = new URLSearchParams();
+      if (search) params.set('search', search);
+      if (dept)   params.set('departamentoId', dept);
+      if (status) params.set('status', status);
+      params.set('page', '0');
+      params.set('size', '10000');
+      params.set('sort', currentSort);
+
+      const page = await api('/api/employees?' + params.toString());
+      const all = (page && page.content) || [];
+
       const headers = ['Matrícula', 'Nome', 'CPF', 'Departamento', 'Cargo', 'Admissão', 'Status', 'Salário'];
-      const rows = filtered.map(emp => [
-        emp.matricula, emp.nomeCompleto, emp.cpf, emp.departamentoNome || '-', emp.cargoNome || '-',
+      const rows = all.map(emp => [
+        emp.matricula, emp.nomeCompleto, emp.cpf, emp.departamentoNome || '-', emp.cargoTitulo || '-',
         formatDate(emp.dataAdmissao), statusLabels[emp.status] || emp.status, formatCurrency(emp.salarioAtual)
       ]);
       let csv = headers.join(';') + '\n' + rows.map(r => r.join(';')).join('\n');
@@ -756,24 +800,10 @@
       Toast.success('Exportação realizada!');
     }
 
-    async function searchCEP(cep) {
-      cep = cep.replace(/\D/g, '');
-      if (cep.length !== 8) return;
-      try {
-        const res = await fetch('https://viacep.com.br/ws/' + cep + '/json/');
-        const d = await res.json();
-        if (!d.erro) {
-          document.getElementById('logradouro').value = d.logradouro || '';
-          document.getElementById('bairro').value = d.bairro || '';
-          document.getElementById('cidade').value = d.localidade || '';
-          document.getElementById('estado').value = d.uf || '';
-        }
-      } catch (e) { console.error('Erro ao buscar CEP:', e); }
-    }
-
-    function getInitials(name) { return name.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase(); }
+    // ── Utilitários ──
+    function getInitials(name) { return (name || '').split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase(); }
     function formatDate(d) { if (!d) return '-'; return new Date(d + 'T00:00:00').toLocaleDateString('pt-BR'); }
-    function formatCurrency(v) { if (!v) return '-'; return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v); }
+    function formatCurrency(v) { if (v == null) return '-'; return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v); }
   </script>
 </body>
 

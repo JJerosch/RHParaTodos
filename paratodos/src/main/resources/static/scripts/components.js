@@ -381,11 +381,75 @@ const QuickActions = {
   }
 };
 
+// ViaCEP - Busca de endereço por CEP
+const ViaCEP = {
+  /**
+   * Busca endereço pelo CEP usando a API ViaCEP.
+   * @param {string} cep - CEP digitado (com ou sem máscara)
+   * @param {object} fields - Mapeamento dos campos a preencher.
+   *   Chaves aceitas: logradouro, bairro, cidade, estado
+   *   Valores: elemento DOM ou ID (string) do campo.
+   */
+  async search(cep, fields) {
+    cep = (cep || '').replace(/\D/g, '');
+    if (cep.length !== 8) return;
+
+    try {
+      const res = await fetch('https://viacep.com.br/ws/' + cep + '/json/');
+      const data = await res.json();
+      if (data.erro) {
+        Toast.warning('CEP não encontrado.');
+        return;
+      }
+
+      const map = {
+        logradouro: data.logradouro || '',
+        bairro: data.bairro || '',
+        cidade: data.localidade || '',
+        estado: data.uf || ''
+      };
+
+      for (const [key, value] of Object.entries(map)) {
+        const el = this._resolveElement(fields[key]);
+        if (el) el.value = value;
+      }
+    } catch (e) {
+      console.error('Erro ao buscar CEP:', e);
+      Toast.error('Erro ao buscar CEP. Verifique sua conexão.');
+    }
+  },
+
+  _resolveElement(ref) {
+    if (!ref) return null;
+    if (typeof ref === 'string') return document.getElementById(ref);
+    return ref;
+  },
+
+  /**
+   * Inicializa automaticamente todos os inputs com data-viacep.
+   * O atributo data-viacep deve conter um JSON com o mapeamento dos campos.
+   * Exemplo: data-viacep='{"logradouro":"editLogradouro","bairro":"editBairro","cidade":"editCidade","estado":"editEstado"}'
+   */
+  initAll() {
+    document.querySelectorAll('[data-viacep]').forEach(input => {
+      input.addEventListener('blur', () => {
+        try {
+          const fields = JSON.parse(input.getAttribute('data-viacep'));
+          this.search(input.value, fields);
+        } catch (e) {
+          console.error('data-viacep inválido:', e);
+        }
+      });
+    });
+  }
+};
+
 // Initialize all components on DOM ready
 document.addEventListener('DOMContentLoaded', () => {
   Modal.init();
   Tabs.init();
   Mask.initAll();
+  ViaCEP.initAll();
   QuickActions.init();
 });
 
@@ -398,3 +462,4 @@ window.Form = Form;
 window.Format = Format;
 window.Mask = Mask;
 window.Confirm = Confirm;
+window.ViaCEP = ViaCEP;
