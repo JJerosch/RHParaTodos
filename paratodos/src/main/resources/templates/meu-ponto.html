@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/head :: head('Meu Ponto')}"><title>Meu Ponto</title></head>
+
+<body>
+<style>
+    .punch-hero {
+      background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-gray) 100%);
+      color: white;
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-8);
+      text-align: center;
+      margin-bottom: var(--spacing-6);
+    }
+    .punch-hero .current-time {
+      font-size: 3.5rem;
+      font-weight: 700;
+      font-family: monospace;
+      letter-spacing: 2px;
+    }
+    .punch-hero .current-date {
+      opacity: 0.85;
+      margin-top: var(--spacing-2);
+      font-size: var(--font-size-base);
+    }
+    .punch-actions {
+      display: flex;
+      justify-content: center;
+      gap: var(--spacing-4);
+      margin-top: var(--spacing-6);
+    }
+    .punch-actions .btn {
+      padding: var(--spacing-4) var(--spacing-8);
+      font-size: var(--font-size-lg);
+      border-radius: var(--radius-lg);
+      min-width: 200px;
+    }
+    .btn-success {
+      background: var(--success-green);
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    .btn-success:hover { opacity: 0.9; }
+    .btn-success:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-danger {
+      background: var(--error-red);
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    .btn-danger:hover { opacity: 0.9; }
+    .btn-danger:disabled { opacity: 0.5; cursor: not-allowed; }
+    .punch-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: var(--spacing-4);
+      margin-bottom: var(--spacing-6);
+    }
+    .punch-stat-card {
+      background: white;
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-5);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--gray-200);
+      text-align: center;
+    }
+    .punch-stat-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto var(--spacing-3);
+      font-size: 20px;
+    }
+    .punch-stat-value {
+      font-size: var(--font-size-2xl);
+      font-weight: 700;
+      color: var(--primary-dark);
+    }
+    .punch-stat-label {
+      font-size: var(--font-size-sm);
+      color: var(--gray-500);
+      margin-top: var(--spacing-1);
+    }
+    .timeline {
+      position: relative;
+      padding-left: 30px;
+    }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 10px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: var(--gray-200);
+    }
+    .timeline-item {
+      position: relative;
+      padding-bottom: var(--spacing-4);
+    }
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -24px;
+      top: 4px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--primary-dark);
+      border: 2px solid white;
+    }
+    .timeline-item.entrada::before { background: var(--success-green); }
+    .timeline-item.saida::before { background: var(--error-red); }
+    .timeline-empty {
+      text-align: center;
+      padding: var(--spacing-8);
+      color: var(--gray-400);
+    }
+    .timeline-empty img {
+      width: 48px;
+      height: 48px;
+      opacity: 0.4;
+      margin-bottom: var(--spacing-3);
+    }
+    .bottom-grid {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: var(--spacing-6);
+      margin-top: var(--spacing-6);
+    }
+    @media (max-width: 768px) {
+      .punch-hero .current-time { font-size: 2.5rem; }
+      .punch-actions { flex-direction: column; align-items: center; }
+      .punch-actions .btn { min-width: 100%; }
+      .bottom-grid { grid-template-columns: 1fr; }
+    }
+</style>
+
+<script th:inline="javascript">
+    window.__CURRENT_USER__ = {
+      email: /*[[${currentUser.email}]]*/ 'usuario@local',
+      role:  /*[[${currentUser.role}]]*/ 'EMPLOYEE'
+    };
+</script>
+
+<aside th:replace="~{fragments/sidebar :: admin('meu-ponto')}"></aside>
+
+<div class="main-content">
+    <header th:replace="~{fragments/topbar :: topbar('Meu Ponto')}"></header>
+
+    <div class="content-area">
+        <!-- Hero: Relógio + Bater Ponto -->
+        <div class="punch-hero">
+            <div class="current-time" id="currentTime">00:00:00</div>
+            <div class="current-date" id="currentDate">Carregando...</div>
+            <div class="punch-actions">
+                <button class="btn btn-success" id="btnEntrada" onclick="registerPunch('ENTRADA')">
+                    &#9654; Registrar Entrada
+                </button>
+                <button class="btn btn-danger" id="btnSaida" onclick="registerPunch('SAIDA')" disabled>
+                    &#9632; Registrar Saída
+                </button>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="punch-stats-grid">
+            <div class="punch-stat-card">
+                <div class="punch-stat-icon" style="background: rgba(40,167,69,0.1);">
+                    <img th:src="@{/assets/hourglass.png}" alt="" width="24" height="24">
+                </div>
+                <div class="punch-stat-value" id="horasHoje">00:00</div>
+                <div class="punch-stat-label">Horas Hoje</div>
+            </div>
+            <div class="punch-stat-card">
+                <div class="punch-stat-icon" style="background: rgba(44,62,80,0.1);">
+                    <img th:src="@{/assets/calendar.png}" alt="" width="24" height="24">
+                </div>
+                <div class="punch-stat-value" id="horasSemana">--:--</div>
+                <div class="punch-stat-label">Horas na Semana</div>
+            </div>
+            <div class="punch-stat-card">
+                <div class="punch-stat-icon" style="background: rgba(243,156,18,0.1);">
+                    <img th:src="@{/assets/calendar-check.png}" alt="" width="24" height="24">
+                </div>
+                <div class="punch-stat-value" id="horasMes">--:--</div>
+                <div class="punch-stat-label">Horas no Mês</div>
+            </div>
+            <div class="punch-stat-card">
+                <div class="punch-stat-icon" style="background: rgba(231,76,60,0.1);">
+                    <img th:src="@{/assets/scale.png}" alt="" width="24" height="24">
+                </div>
+                <div class="punch-stat-value" id="bancoHoras">--:--</div>
+                <div class="punch-stat-label">Banco de Horas</div>
+            </div>
+        </div>
+
+        <!-- Registros de Hoje + Histórico da Semana -->
+        <div class="bottom-grid">
+            <!-- Registros de Hoje -->
+            <div class="card">
+                <h3 style="margin-bottom: var(--spacing-4);">Registros de Hoje</h3>
+                <div class="timeline" id="todayTimeline">
+                    <div class="timeline-empty">
+                        <img th:src="@{/assets/hourglass.png}" alt="">
+                        <p>Nenhum registro hoje.<br>Bata seu ponto acima para começar.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Histórico da Semana -->
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-4);">
+                    <h3>Histórico da Semana</h3>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Entrada</th>
+                            <th>Saída Almoço</th>
+                            <th>Retorno</th>
+                            <th>Saída</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody id="weekHistoryBody">
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: var(--spacing-6); color: var(--gray-400);">
+                                Nenhum registro encontrado para esta semana.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragments/scripts :: common}"></div>
+<script>
+    let isWorking = false;
+    let startTime = null;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      if (!Auth.requireAuth()) return;
+      initUserMenu();
+      initSidebar();
+      Auth.applyRoleVisibility(document);
+      Auth.applyActionVisibility(document);
+      updateClock();
+      setInterval(updateClock, 1000);
+    });
+
+    function updateClock() {
+      const now = new Date();
+      document.getElementById("currentTime").textContent = now.toLocaleTimeString('pt-BR');
+      document.getElementById("currentDate").textContent = now.toLocaleDateString('pt-BR', {
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+      });
+
+      if (isWorking && startTime) {
+        const diff = now - startTime;
+        const hours = Math.floor(diff / 3600000);
+        const mins  = Math.floor((diff % 3600000) / 60000);
+        document.getElementById("horasHoje").textContent =
+          String(hours).padStart(2,'0') + ':' + String(mins).padStart(2,'0');
+      }
+    }
+
+    function registerPunch(type) {
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+      if (type === 'ENTRADA') {
+        isWorking = true;
+        startTime = now;
+        document.getElementById("btnEntrada").disabled = true;
+        document.getElementById("btnSaida").disabled   = false;
+
+        clearEmptyState();
+        addTimelineEntry(timeStr, 'Entrada', 'entrada');
+        Toast.success('Entrada registrada às ' + timeStr);
+      } else {
+        isWorking = false;
+        document.getElementById("btnEntrada").disabled = false;
+        document.getElementById("btnSaida").disabled   = true;
+
+        addTimelineEntry(timeStr, 'Saída', 'saida');
+        Toast.success('Saída registrada às ' + timeStr);
+      }
+    }
+
+    function clearEmptyState() {
+      const empty = document.querySelector('.timeline-empty');
+      if (empty) empty.remove();
+    }
+
+    function addTimelineEntry(time, label, type) {
+      const timeline = document.getElementById("todayTimeline");
+      const entry = document.createElement('div');
+      entry.className = 'timeline-item ' + type;
+      entry.innerHTML = '<strong>' + time + '</strong>' +
+        '<p style="color: var(--gray-500); font-size: var(--font-size-sm);">' + label + '</p>';
+      timeline.appendChild(entry);
+    }
+</script>
+</body>
+</html>

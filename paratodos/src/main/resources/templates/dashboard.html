@@ -320,15 +320,22 @@
 <div th:replace="~{fragments/scripts :: common}"></div>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-      if (!Auth.requireRole(["ADMIN","RH_CHEFE","RH_ASSISTENTE","DP_CHEFE","DP_ASSISTENTE"], "/employee-dashboard")) return;
+      if (!Auth.requireAuth()) return;
 
       initUserMenu();
       initSidebar();
       Auth.applyRoleVisibility(document);
       Auth.applyActionVisibility(document);
 
-      // Dashboard-specific: welcome message + date
       var user = Auth.getCurrentUser();
+
+      // EMPLOYEE que acessa /dashboard é redirecionado para /meu-ponto
+      if (user && user.role === 'EMPLOYEE') {
+        window.location.href = '/meu-ponto';
+        return;
+      }
+
+      // Dashboard-specific: welcome message + date
       if (user) {
         var namePart = (user.email || '').split('@')[0].split('.')[0];
         var displayName = namePart.charAt(0).toUpperCase() + namePart.slice(1);
