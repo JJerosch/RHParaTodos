@@ -130,7 +130,10 @@
 
   <div th:replace="~{fragments/scripts :: common}"></div>
   <script>
-    let data = [
+    const API = '/api/positions';
+
+    // Mock data (fallback)
+    const mockData = [
       { id: 1, titulo: "Desenvolvedor Backend", departamentoId: 3, departamentoNome: "Tecnologia", nivel: "SENIOR", salarioMinimo: 10000, salarioMaximo: 15000, ocupantes: 8, ativo: true },
       { id: 2, titulo: "Desenvolvedor Frontend", departamentoId: 3, departamentoNome: "Tecnologia", nivel: "PLENO", salarioMinimo: 7000, salarioMaximo: 11000, ocupantes: 6, ativo: true },
       { id: 3, titulo: "Analista de RH", departamentoId: 1, departamentoNome: "Recursos Humanos", nivel: "PLENO", salarioMinimo: 5000, salarioMaximo: 8000, ocupantes: 4, ativo: true },
@@ -138,16 +141,18 @@
       { id: 5, titulo: "Vendedor", departamentoId: null, departamentoNome: "Comercial", nivel: "JUNIOR", salarioMinimo: 3000, salarioMaximo: 5000, ocupantes: 15, ativo: true },
       { id: 6, titulo: "Tech Lead", departamentoId: 3, departamentoNome: "Tecnologia", nivel: "GESTAO", salarioMinimo: 18000, salarioMaximo: 25000, ocupantes: 3, ativo: true }
     ];
-    let filtered = [...data];
-    let currentId = null;
-
-    // Departamentos para dropdowns (mock, sera carregado da API depois)
-    const departamentos = [
+    const mockDepartamentos = [
       { id: 1, nome: "Recursos Humanos" },
       { id: 2, nome: "Departamento Pessoal" },
       { id: 3, nome: "Tecnologia" },
       { id: 4, nome: "Financeiro" }
     ];
+
+    let data = [];
+    let filtered = [];
+    let departamentos = [];
+    let currentId = null;
+    let usingMock = false;
 
     const nivelLabels = { JUNIOR: 'Junior', PLENO: 'Pleno', SENIOR: 'Senior', GESTAO: 'Gestão' };
 
@@ -157,15 +162,36 @@
       initSidebar();
       Auth.applyRoleVisibility(document);
       Auth.applyActionVisibility(document);
-      loadDepartamentos();
-      render();
+      loadData();
       Mask.initAll();
     });
 
-    function loadDepartamentos() {
+    async function loadData() {
+      try {
+        const [posRes, deptRes] = await Promise.all([
+          fetch(API, { credentials: 'same-origin' }),
+          fetch(API + '/departamentos', { credentials: 'same-origin' })
+        ]);
+        if (!posRes.ok) throw new Error('API indisponível');
+        data = await posRes.json();
+        departamentos = await deptRes.json();
+        usingMock = false;
+      } catch (e) {
+        console.log('Usando dados mock:', e.message);
+        data = mockData;
+        departamentos = mockDepartamentos;
+        usingMock = true;
+      }
+      filtered = [...data];
+      populateDeptDropdowns();
+      render();
+    }
+
+    function populateDeptDropdowns() {
       const filterSelect = document.getElementById("filterDept");
       const formSelect = document.getElementById("formDeptSelect");
-
+      filterSelect.innerHTML = '<option value="">Todos</option>';
+      formSelect.innerHTML = '<option value="">Selecione</option>';
       departamentos.forEach(d => {
         filterSelect.innerHTML += '<option value="' + d.id + '">' + d.nome + '</option>';
         formSelect.innerHTML += '<option value="' + d.id + '">' + d.nome + '</option>';
@@ -177,6 +203,22 @@
       const dept = document.getElementById("filterDept").value;
       const level = document.getElementById("filterLevel").value;
 
+      if (!usingMock && (search || dept || level)) {
+        // Usar filtro da API com query params
+        const params = new URLSearchParams();
+        if (search) params.set('search', search);
+        if (dept) params.set('departamentoId', dept);
+        if (level) params.set('nivel', level);
+        fetch(API + '?' + params.toString(), { credentials: 'same-origin' })
+          .then(r => r.json())
+          .then(result => { filtered = result; render(); })
+          .catch(() => { filterLocal(search, dept, level); });
+      } else {
+        filterLocal(search, dept, level);
+      }
+    }
+
+    function filterLocal(search, dept, level) {
       filtered = data.filter(item =>
         (!search || item.titulo.toLowerCase().includes(search)) &&
         (!dept || String(item.departamentoId) === dept) &&
@@ -218,35 +260,52 @@
 
     function edit(id) { openModal(id); }
 
-    function save() {
+    async function save() {
       const formData = Form.serialize('form');
       if (!formData.titulo || !formData.departamentoId) {
         Toast.error('Preencha os campos obrigatórios');
         return;
       }
 
-      // Resolve nome do departamento
-      const dept = departamentos.find(d => String(d.id) === String(formData.departamentoId));
-      formData.departamentoNome = dept ? dept.nome : '';
+      const body = {
+        titulo: formData.titulo,
+        descricao: formData.descricao || null,
+        nivel: formData.nivel || null,
+        departamentoId: Number(formData.departamentoId),
+        salarioMinimo: formData.salarioMinimo ? parseFloat(String(formData.salarioMinimo).replace(/[^\d,]/g, '').replace(',', '.')) : null,
+        salarioMaximo: formData.salarioMaximo ? parseFloat(String(formData.salarioMaximo).replace(/[^\d,]/g, '').replace(',', '.')) : null,
+        ativo: formData.ativo !== undefined ? !!formData.ativo : true
+      };
 
-      if (currentId) {
-        const idx = data.findIndex(d => d.id === currentId);
-        if (idx > -1) data[idx] = { ...data[idx], ...formData };
-        Toast.success('Cargo atualizado!');
-      } else {
-        data.push({ id: Date.now(), ...formData, ocupantes: 0, ativo: true });
-        Toast.success('Cargo criado!');
+      try {
+        let res;
+        if (currentId) {
+          res = await fetch(API + '/' + currentId, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify(body) });
+        } else {
+          res = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify(body) });
+        }
+        if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err.error || 'Erro ao salvar'); }
+        Toast.success(currentId ? 'Cargo atualizado!' : 'Cargo criado!');
+        Modal.close('modal');
+        loadData();
+      } catch (e) {
+        console.error(e);
+        Toast.error(e.message || 'Erro ao salvar cargo');
       }
-
-      Modal.close('modal');
-      filter();
     }
 
     function remove(id) {
-      Confirm.show('Excluir este cargo?', () => {
-        data = data.filter(d => d.id !== id);
-        Toast.success('Cargo excluído!');
-        filter();
+      const item = data.find(d => d.id === id);
+      Confirm.show('Excluir o cargo <strong>' + item.titulo + '</strong>?', async () => {
+        try {
+          const res = await fetch(API + '/' + id, { method: 'DELETE', credentials: 'same-origin' });
+          if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err.error || 'Erro ao excluir'); }
+          Toast.success('Cargo excluído!');
+          loadData();
+        } catch (e) {
+          console.error(e);
+          Toast.error(e.message || 'Erro ao excluir cargo');
+        }
       });
     }
 

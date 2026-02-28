@@ -4,24 +4,20 @@
 <head th:replace="~{fragments/head :: head('Funcionários')}"><title>Funcionários</title></head>
 
 <body>
-
-<!-- Injeção do usuário atual -->
-<script th:inline="javascript">
+  <script th:inline="javascript">
     window.__CURRENT_USER__ = {
       email: /*[[${currentUser.email}]]*/ 'usuario@local',
       role:  /*[[${currentUser.role}]]*/ 'EMPLOYEE'
     };
-</script>
+  </script>
 
-<!-- Sidebar -->
-<aside th:replace="~{fragments/sidebar :: admin('employees')}"></aside>
+  <!-- Sidebar -->
+  <aside th:replace="~{fragments/sidebar :: admin('employees')}"></aside>
 
-<!-- Main Content -->
-<div class="main-content">
-    <!-- Topbar -->
+  <!-- Main Content -->
+  <div class="main-content">
     <header th:replace="~{fragments/topbar :: topbar('Funcionários')}"></header>
 
-    <!-- Content Area -->
     <div class="content-area">
       <!-- Stats -->
       <div class="stats-row">
@@ -69,7 +65,7 @@
           <button class="btn btn-secondary" onclick="exportEmployees()">
             <img th:src="@{/assets/folder-output.png}" alt="icone_exportar"> Exportar
           </button>
-          <button class="btn btn-primary" onclick="openEmployeeModal()">
+          <button class="btn btn-primary" onclick="openModal()">
             <img th:src="@{/assets/plus.png}" alt="icone_novo_funcionarios"> Novo Funcionário
           </button>
         </div>
@@ -78,19 +74,18 @@
       <!-- Filters -->
       <div class="filters-bar">
         <div class="search-box">
-          <input type="text" id="searchInput" placeholder="Buscar por nome, matrícula ou CPF..."
-            onkeyup="filterEmployees()">
+          <input type="text" id="searchInput" placeholder="Buscar por nome, matrícula ou CPF..." onkeyup="filter()">
         </div>
         <div class="filter-group">
           <label>Departamento:</label>
-          <select id="filterDepartment" onchange="filterEmployees()">
+          <select id="filterDepartment" onchange="filter()">
             <option value="">Todos</option>
             <!-- Sera preenchido dinamicamente -->
           </select>
         </div>
         <div class="filter-group">
           <label>Status:</label>
-          <select id="filterStatus" onchange="filterEmployees()">
+          <select id="filterStatus" onchange="filter()">
             <option value="">Todos</option>
             <option value="ATIVO">Ativo</option>
             <option value="FERIAS">Em Férias</option>
@@ -114,9 +109,7 @@
               <th>Ações</th>
             </tr>
           </thead>
-          <tbody id="employeesTableBody">
-            <!-- Data will be loaded here -->
-          </tbody>
+          <tbody id="tableBody"></tbody>
         </table>
 
         <div class="table-footer">
@@ -131,9 +124,7 @@
             <span>por página</span>
           </div>
           <div class="table-info" id="tableInfo">Mostrando 0 de 0 resultados</div>
-          <div class="pagination" id="pagination">
-            <!-- Pagination will be generated -->
-          </div>
+          <div class="pagination" id="pagination"></div>
         </div>
       </div>
     </div>
@@ -148,7 +139,7 @@
       </div>
       <div class="modal-body">
         <form id="employeeForm">
-          <input type="hidden" id="employeeId" name="id">
+          <input type="hidden" name="id">
 
           <!-- Tabs -->
           <div class="tabs" data-tab-content="employeeTabs">
@@ -419,8 +410,7 @@
                 </div>
                 <div class="form-group">
                   <label class="form-label">Chave PIX</label>
-                  <input type="text" class="form-input" name="pix"
-                    placeholder="CPF, Email, Telefone ou Chave aleatória">
+                  <input type="text" class="form-input" name="pix" placeholder="CPF, Email, Telefone ou Chave aleatória">
                 </div>
               </div>
             </div>
@@ -429,31 +419,362 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" onclick="Modal.close('employeeModal')">Cancelar</button>
-        <button type="button" class="btn btn-primary" onclick="saveEmployee()">Salvar</button>
+        <button type="button" class="btn btn-primary" onclick="save()">Salvar</button>
       </div>
     </div>
   </div>
 
   <!-- Modal: Visualizar Funcionário -->
-  <div class="modal" id="viewEmployeeModal">
+  <div class="modal" id="viewModal">
     <div class="modal-dialog modal-lg">
       <div class="modal-header">
         <h3 class="modal-title">Detalhes do Funcionário</h3>
-        <button class="modal-close" onclick="Modal.close('viewEmployeeModal')">&times;</button>
+        <button class="modal-close" onclick="Modal.close('viewModal')">&times;</button>
       </div>
-      <div class="modal-body" id="viewEmployeeContent">
-        <!-- Content will be loaded dynamically -->
-      </div>
+      <div class="modal-body" id="viewContent"></div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" onclick="Modal.close('viewEmployeeModal')">Fechar</button>
-        <button type="button" class="btn btn-primary" onclick="editFromView()">Editar</button>
+        <button type="button" class="btn btn-secondary" onclick="Modal.close('viewModal')">Fechar</button>
+        <button type="button" class="btn btn-primary" onclick="Modal.close('viewModal'); edit(currentId)">Editar</button>
       </div>
     </div>
   </div>
 
-  <!-- Scripts comuns (auth.js, components.js, initUserMenu, initSidebar) -->
   <div th:replace="~{fragments/scripts :: common}"></div>
-  <script th:src="@{/scripts/employees.js}"></script>
+  <script>
+    // Mock data
+    let data = [
+      { id: 1, matricula: "001234", nomeCompleto: "João Silva Santos", cpf: "123.456.789-00", emailCorporativo: "joao.santos@empresa.com.br", telefone: "(11) 98765-4321", departamentoId: 1, departamentoNome: "Tecnologia", cargoId: 2, cargoNome: "Desenvolvedor Senior", dataAdmissao: "2020-03-15", status: "ATIVO", salarioAtual: 12500.00, tipoContrato: "CLT" },
+      { id: 2, matricula: "001235", nomeCompleto: "Maria Oliveira Costa", cpf: "987.654.321-00", emailCorporativo: "maria.costa@empresa.com.br", telefone: "(11) 91234-5678", departamentoId: 2, departamentoNome: "Recursos Humanos", cargoId: 3, cargoNome: "Coordenadora de RH", dataAdmissao: "2019-08-01", status: "ATIVO", salarioAtual: 9800.00, tipoContrato: "CLT" },
+      { id: 3, matricula: "001236", nomeCompleto: "Pedro Henrique Almeida", cpf: "456.789.123-00", emailCorporativo: "pedro.almeida@empresa.com.br", telefone: "(21) 99876-5432", departamentoId: 3, departamentoNome: "Financeiro", cargoId: 1, cargoNome: "Analista Financeiro", dataAdmissao: "2021-02-10", status: "FERIAS", salarioAtual: 6500.00, tipoContrato: "CLT" },
+      { id: 4, matricula: "001237", nomeCompleto: "Ana Paula Ferreira", cpf: "321.654.987-00", emailCorporativo: "ana.ferreira@empresa.com.br", telefone: "(11) 97654-3210", departamentoId: 4, departamentoNome: "Comercial", cargoId: 4, cargoNome: "Gerente Comercial", dataAdmissao: "2018-11-20", status: "ATIVO", salarioAtual: 15000.00, tipoContrato: "CLT" },
+      { id: 5, matricula: "001238", nomeCompleto: "Carlos Eduardo Lima", cpf: "789.123.456-00", emailCorporativo: "carlos.lima@empresa.com.br", telefone: "(31) 98765-1234", departamentoId: 5, departamentoNome: "Operações", cargoId: 1, cargoNome: "Analista de Operações", dataAdmissao: "2022-06-05", status: "ATIVO", salarioAtual: 5200.00, tipoContrato: "CLT" },
+      { id: 6, matricula: "001239", nomeCompleto: "Juliana Santos Ribeiro", cpf: "654.987.321-00", emailCorporativo: "juliana.ribeiro@empresa.com.br", telefone: "(11) 96543-2109", departamentoId: 1, departamentoNome: "Tecnologia", cargoId: 2, cargoNome: "Desenvolvedora Pleno", dataAdmissao: "2021-09-15", status: "ATIVO", salarioAtual: 8500.00, tipoContrato: "CLT" },
+      { id: 7, matricula: "001240", nomeCompleto: "Roberto Martins Souza", cpf: "147.258.369-00", emailCorporativo: "roberto.souza@empresa.com.br", telefone: "(21) 95432-1098", departamentoId: 3, departamentoNome: "Financeiro", cargoId: 5, cargoNome: "Diretor Financeiro", dataAdmissao: "2017-03-01", status: "ATIVO", salarioAtual: 25000.00, tipoContrato: "CLT" },
+      { id: 8, matricula: "001241", nomeCompleto: "Fernanda Gomes Pereira", cpf: "369.147.258-00", emailCorporativo: "fernanda.pereira@empresa.com.br", telefone: "(11) 94321-0987", departamentoId: 2, departamentoNome: "Recursos Humanos", cargoId: 1, cargoNome: "Assistente de RH", dataAdmissao: "2023-01-10", status: "ATIVO", salarioAtual: 3800.00, tipoContrato: "CLT" },
+      { id: 9, matricula: "001242", nomeCompleto: "Marcos Antônio Silva", cpf: "258.369.147-00", emailCorporativo: "marcos.silva@empresa.com.br", telefone: "(41) 93210-9876", departamentoId: 4, departamentoNome: "Comercial", cargoId: 1, cargoNome: "Vendedor", dataAdmissao: "2022-04-18", status: "AFASTADO", salarioAtual: 4500.00, tipoContrato: "CLT" },
+      { id: 10, matricula: "001243", nomeCompleto: "Patricia Reis Mendes", cpf: "951.753.486-00", emailCorporativo: "patricia.mendes@empresa.com.br", telefone: "(11) 92109-8765", departamentoId: 1, departamentoNome: "Tecnologia", cargoId: 3, cargoNome: "Tech Lead", dataAdmissao: "2019-05-22", status: "ATIVO", salarioAtual: 18000.00, tipoContrato: "CLT" },
+      { id: 11, matricula: "001244", nomeCompleto: "Lucas Oliveira Nunes", cpf: "753.159.486-00", emailCorporativo: "lucas.nunes@empresa.com.br", telefone: "(51) 91098-7654", departamentoId: 5, departamentoNome: "Operações", cargoId: 3, cargoNome: "Coordenador de Operações", dataAdmissao: "2020-07-14", status: "ATIVO", salarioAtual: 9200.00, tipoContrato: "CLT" },
+      { id: 12, matricula: "001245", nomeCompleto: "Camila Rodrigues Dias", cpf: "159.753.486-00", emailCorporativo: "camila.dias@empresa.com.br", telefone: "(11) 90987-6543", departamentoId: 3, departamentoNome: "Financeiro", cargoId: 1, cargoNome: "Analista Contábil", dataAdmissao: "2021-11-08", status: "ATIVO", salarioAtual: 5800.00, tipoContrato: "CLT" }
+    ];
+
+    let filtered = [...data];
+    let currentId = null;
+    let currentPage = 1;
+    let perPage = 10;
+
+    // Dados mock para dropdowns (sera carregado da API depois)
+    const departamentos = [
+      { id: 1, nome: "Tecnologia" },
+      { id: 2, nome: "Recursos Humanos" },
+      { id: 3, nome: "Financeiro" },
+      { id: 4, nome: "Comercial" },
+      { id: 5, nome: "Operações" }
+    ];
+
+    const cargos = [
+      { id: 1, titulo: "Analista" },
+      { id: 2, titulo: "Desenvolvedor" },
+      { id: 3, titulo: "Coordenador" },
+      { id: 4, titulo: "Gerente" },
+      { id: 5, titulo: "Diretor" }
+    ];
+
+    const statusLabels = { ATIVO: 'Ativo', FERIAS: 'Em Férias', AFASTADO: 'Afastado', DESLIGADO: 'Desligado' };
+    const statusBadge  = { ATIVO: 'badge-success', FERIAS: 'badge-warning', AFASTADO: 'badge-info', DESLIGADO: 'badge-danger' };
+
+    document.addEventListener("DOMContentLoaded", () => {
+      if (!Auth.requireAuth()) return;
+      initUserMenu();
+      initSidebar();
+      Auth.applyRoleVisibility(document);
+      Auth.applyActionVisibility(document);
+      loadDropdowns();
+      initTabs();
+      updateStats();
+      render();
+      Mask.initAll();
+    });
+
+    function loadDropdowns() {
+      const filterDept = document.getElementById("filterDepartment");
+      const formDept = document.getElementById("formDeptSelect");
+      const formCargo = document.getElementById("formCargoSelect");
+      const formGestor = document.getElementById("formGestorSelect");
+
+      departamentos.forEach(d => {
+        filterDept.innerHTML += '<option value="' + d.id + '">' + d.nome + '</option>';
+        formDept.innerHTML += '<option value="' + d.id + '">' + d.nome + '</option>';
+      });
+
+      cargos.forEach(c => {
+        formCargo.innerHTML += '<option value="' + c.id + '">' + c.titulo + '</option>';
+      });
+
+      data.filter(e => e.status === 'ATIVO').forEach(e => {
+        formGestor.innerHTML += '<option value="' + e.id + '">' + e.nomeCompleto + '</option>';
+      });
+    }
+
+    function initTabs() {
+      document.querySelectorAll('.tabs').forEach(tabContainer => {
+        const buttons = tabContainer.querySelectorAll('.tab-btn');
+        const contentId = tabContainer.dataset.tabContent;
+        buttons.forEach(btn => {
+          btn.addEventListener('click', () => {
+            buttons.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            const target = btn.dataset.tab;
+            if (contentId) {
+              const container = document.getElementById(contentId);
+              container.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+              const targetContent = container.querySelector('[data-tab-content="' + target + '"]');
+              if (targetContent) targetContent.classList.add('active');
+            }
+          });
+        });
+      });
+    }
+
+    function updateStats() {
+      document.getElementById("statTotal").textContent = data.length;
+      document.getElementById("statAtivos").textContent = data.filter(e => e.status === "ATIVO").length;
+      document.getElementById("statFerias").textContent = data.filter(e => e.status === "FERIAS").length;
+      document.getElementById("statDesligados").textContent = data.filter(e => e.status === "DESLIGADO").length;
+    }
+
+    function filter() {
+      const search = document.getElementById("searchInput").value.toLowerCase();
+      const dept = document.getElementById("filterDepartment").value;
+      const status = document.getElementById("filterStatus").value;
+
+      filtered = data.filter(emp =>
+        (!search || emp.nomeCompleto.toLowerCase().includes(search) || emp.matricula.includes(search) || emp.cpf.includes(search)) &&
+        (!dept || String(emp.departamentoId) === dept) &&
+        (!status || emp.status === status)
+      );
+      currentPage = 1;
+      render();
+    }
+
+    function render() {
+      const start = (currentPage - 1) * perPage;
+      const pageData = filtered.slice(start, start + perPage);
+      const tbody = document.getElementById("tableBody");
+
+      if (pageData.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state"><div class="empty-state-icon"><img src="/assets/users (1).png" alt="vazio"></div><h3 class="empty-state-title">Nenhum funcionário encontrado</h3><p class="empty-state-text">Tente ajustar os filtros ou adicione um novo funcionário.</p></div></td></tr>';
+      } else {
+        tbody.innerHTML = pageData.map(emp => `
+          <tr>
+            <td>
+              <div class="cell-avatar">
+                <div class="avatar">${getInitials(emp.nomeCompleto)}</div>
+                <div class="cell-info">
+                  <span class="cell-primary">${emp.nomeCompleto}</span>
+                  <span class="cell-secondary">${emp.emailCorporativo || ''}</span>
+                </div>
+              </div>
+            </td>
+            <td>${emp.matricula}</td>
+            <td class="hide-mobile">${emp.departamentoNome || '-'}</td>
+            <td class="hide-mobile">${emp.cargoNome || '-'}</td>
+            <td class="hide-mobile">${formatDate(emp.dataAdmissao)}</td>
+            <td><span class="badge ${statusBadge[emp.status] || 'badge-info'}">${statusLabels[emp.status] || emp.status}</span></td>
+            <td>
+              <div class="cell-actions">
+                <button class="btn-icon view" onclick="view(${emp.id})"><img src="/assets/eye.png" alt="ver"></button>
+                <button class="btn-icon edit" onclick="edit(${emp.id})"><img src="/assets/pencil (1).png" alt="editar"></button>
+                <button class="btn-icon delete" onclick="remove(${emp.id})"><img src="/assets/trash-2 (1).png" alt="excluir"></button>
+              </div>
+            </td>
+          </tr>
+        `).join('');
+      }
+      renderPagination();
+      updateTableInfo();
+    }
+
+    function renderPagination() {
+      const totalPages = Math.ceil(filtered.length / perPage);
+      const pag = document.getElementById("pagination");
+      let html = '<button class="pagination-btn" onclick="goToPage(' + (currentPage - 1) + ')"' + (currentPage === 1 ? ' disabled' : '') + '>&larr;</button>';
+      for (let i = 1; i <= totalPages; i++) {
+        if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+          html += '<button class="pagination-btn' + (i === currentPage ? ' active' : '') + '" onclick="goToPage(' + i + ')">' + i + '</button>';
+        } else if (i === currentPage - 2 || i === currentPage + 2) {
+          html += '<span style="padding: 0 8px;">...</span>';
+        }
+      }
+      html += '<button class="pagination-btn" onclick="goToPage(' + (currentPage + 1) + ')"' + (currentPage === totalPages || totalPages === 0 ? ' disabled' : '') + '>&rarr;</button>';
+      pag.innerHTML = html;
+    }
+
+    function goToPage(page) {
+      const totalPages = Math.ceil(filtered.length / perPage);
+      if (page >= 1 && page <= totalPages) { currentPage = page; render(); }
+    }
+
+    function changePerPage() {
+      perPage = parseInt(document.getElementById("perPage").value);
+      currentPage = 1;
+      render();
+    }
+
+    function updateTableInfo() {
+      const start = (currentPage - 1) * perPage + 1;
+      const end = Math.min(currentPage * perPage, filtered.length);
+      document.getElementById("tableInfo").textContent = filtered.length === 0 ? 'Nenhum resultado' : 'Mostrando ' + start + '-' + end + ' de ' + filtered.length + ' resultados';
+    }
+
+    function sortTable(colIndex) {
+      const headers = document.querySelectorAll('#employeesTable th');
+      const header = headers[colIndex];
+      const isAsc = header.classList.contains('asc');
+      headers.forEach(h => h.classList.remove('asc', 'desc'));
+      header.classList.add(isAsc ? 'desc' : 'asc');
+
+      const keys = ['nomeCompleto', 'matricula', 'departamentoNome', 'cargoNome', 'dataAdmissao', 'status'];
+      const key = keys[colIndex];
+
+      filtered.sort((a, b) => {
+        let aVal = a[key] || '', bVal = b[key] || '';
+        if (key === 'dataAdmissao') { aVal = new Date(aVal); bVal = new Date(bVal); }
+        if (aVal < bVal) return isAsc ? 1 : -1;
+        if (aVal > bVal) return isAsc ? -1 : 1;
+        return 0;
+      });
+      render();
+    }
+
+    function openModal(id = null) {
+      currentId = id;
+      document.getElementById("employeeForm").reset();
+      // Reset tabs
+      document.querySelectorAll('.tab-btn').forEach((btn, i) => btn.classList.toggle('active', i === 0));
+      document.querySelectorAll('.tab-content').forEach((c, i) => c.classList.toggle('active', i === 0));
+
+      if (id) {
+        document.getElementById("modalTitle").textContent = "Editar Funcionário";
+        const emp = data.find(e => e.id === id);
+        if (emp) Form.populate('employeeForm', emp);
+      } else {
+        document.getElementById("modalTitle").textContent = "Novo Funcionário";
+        const lastMat = Math.max(...data.map(e => parseInt(e.matricula) || 0));
+        document.querySelector('[name="matricula"]').value = String(lastMat + 1).padStart(6, '0');
+      }
+      Modal.open('employeeModal');
+      Mask.initAll();
+    }
+
+    function edit(id) { openModal(id); }
+
+    function view(id) {
+      const emp = data.find(e => e.id === id);
+      if (!emp) return;
+      currentId = id;
+
+      document.getElementById("viewContent").innerHTML = `
+        <div style="display: flex; align-items: center; gap: var(--spacing-6); margin-bottom: var(--spacing-6); padding-bottom: var(--spacing-6); border-bottom: 1px solid var(--gray-200);">
+          <div class="avatar avatar-lg">${getInitials(emp.nomeCompleto)}</div>
+          <div>
+            <h2 style="margin: 0; color: var(--gray-800);">${emp.nomeCompleto}</h2>
+            <p style="margin: var(--spacing-1) 0 0; color: var(--gray-500);">${emp.cargoNome || '-'} &bull; ${emp.departamentoNome || '-'}</p>
+            <span class="badge ${statusBadge[emp.status]}" style="margin-top: var(--spacing-2);">${statusLabels[emp.status]}</span>
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--spacing-6);">
+          <div>
+            <h4 style="color: var(--gray-600); margin-bottom: var(--spacing-3); font-size: var(--font-size-sm); text-transform: uppercase;">Dados Pessoais</h4>
+            <p><strong>Matrícula:</strong> ${emp.matricula}</p>
+            <p><strong>CPF:</strong> ${emp.cpf}</p>
+            <p><strong>Email:</strong> ${emp.emailCorporativo || '-'}</p>
+            <p><strong>Telefone:</strong> ${emp.telefone || '-'}</p>
+          </div>
+          <div>
+            <h4 style="color: var(--gray-600); margin-bottom: var(--spacing-3); font-size: var(--font-size-sm); text-transform: uppercase;">Dados Profissionais</h4>
+            <p><strong>Admissão:</strong> ${formatDate(emp.dataAdmissao)}</p>
+            <p><strong>Tipo Contrato:</strong> ${emp.tipoContrato || '-'}</p>
+            <p><strong>Salário:</strong> ${formatCurrency(emp.salarioAtual)}</p>
+          </div>
+        </div>
+      `;
+      Modal.open('viewModal');
+    }
+
+    function save() {
+      const form = document.getElementById("employeeForm");
+      if (!form.checkValidity()) { form.reportValidity(); return; }
+
+      const formData = Form.serialize('employeeForm');
+      formData.cpf = formData.cpf.replace(/\D/g, '');
+      if (formData.salarioAtual) {
+        formData.salarioAtual = parseFloat(formData.salarioAtual.replace(/[^\d,]/g, '').replace(',', '.')) || 0;
+      }
+
+      // Resolver nomes para exibicao
+      const dept = departamentos.find(d => String(d.id) === String(formData.departamentoId));
+      const cargo = cargos.find(c => String(c.id) === String(formData.cargoId));
+      formData.departamentoNome = dept ? dept.nome : '';
+      formData.cargoNome = cargo ? cargo.titulo : '';
+
+      if (currentId) {
+        const idx = data.findIndex(e => e.id === currentId);
+        if (idx > -1) data[idx] = { ...data[idx], ...formData };
+        Toast.success('Funcionário atualizado!');
+      } else {
+        data.push({ id: Date.now(), ...formData });
+        Toast.success('Funcionário cadastrado!');
+      }
+
+      Modal.close('employeeModal');
+      filter();
+      updateStats();
+    }
+
+    function remove(id) {
+      const emp = data.find(e => e.id === id);
+      Confirm.show('Excluir o funcionário <strong>' + emp.nomeCompleto + '</strong>?', () => {
+        data = data.filter(e => e.id !== id);
+        Toast.success('Funcionário excluído!');
+        filter();
+        updateStats();
+      });
+    }
+
+    function exportEmployees() {
+      const headers = ['Matrícula', 'Nome', 'CPF', 'Departamento', 'Cargo', 'Admissão', 'Status', 'Salário'];
+      const rows = filtered.map(emp => [
+        emp.matricula, emp.nomeCompleto, emp.cpf, emp.departamentoNome || '-', emp.cargoNome || '-',
+        formatDate(emp.dataAdmissao), statusLabels[emp.status] || emp.status, formatCurrency(emp.salarioAtual)
+      ]);
+      let csv = headers.join(';') + '\n' + rows.map(r => r.join(';')).join('\n');
+      const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'funcionarios_' + new Date().toISOString().split('T')[0] + '.csv';
+      link.click();
+      Toast.success('Exportação realizada!');
+    }
+
+    async function searchCEP(cep) {
+      cep = cep.replace(/\D/g, '');
+      if (cep.length !== 8) return;
+      try {
+        const res = await fetch('https://viacep.com.br/ws/' + cep + '/json/');
+        const d = await res.json();
+        if (!d.erro) {
+          document.getElementById('logradouro').value = d.logradouro || '';
+          document.getElementById('bairro').value = d.bairro || '';
+          document.getElementById('cidade').value = d.localidade || '';
+          document.getElementById('estado').value = d.uf || '';
+        }
+      } catch (e) { console.error('Erro ao buscar CEP:', e); }
+    }
+
+    function getInitials(name) { return name.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase(); }
+    function formatDate(d) { if (!d) return '-'; return new Date(d + 'T00:00:00').toLocaleDateString('pt-BR'); }
+    function formatCurrency(v) { if (!v) return '-'; return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v); }
+  </script>
 </body>
 
 </html>

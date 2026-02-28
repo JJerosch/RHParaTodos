@@ -94,7 +94,7 @@
           </div>
           <div class="form-group">
             <label class="form-label">Departamento Pai</label>
-            <select class="form-select" name="departamento_pai_id" id="parentDeptSelect">
+            <select class="form-select" name="departamentoPaiId" id="parentDeptSelect">
               <option value="">Nenhum (Raiz)</option>
             </select>
           </div>
@@ -196,8 +196,10 @@
 
   <div th:replace="~{fragments/scripts :: common}"></div>
   <script>
-    // Mock data
-    const departments = [
+    const API = '/api/departments';
+
+    // Mock data (fallback caso API nao esteja disponivel)
+    const mockDepartments = [
       { id: 1, nome: "Tecnologia", descricao: "Desenvolvimento de sistemas e infraestrutura", funcionarios: 45, cargos: 8, ativo: true },
       { id: 2, nome: "Recursos Humanos", descricao: "Gestão de pessoas e cultura organizacional", funcionarios: 12, cargos: 5, ativo: true },
       { id: 3, nome: "Financeiro", descricao: "Contabilidade, tesouraria e planejamento financeiro", funcionarios: 18, cargos: 6, ativo: true },
@@ -206,6 +208,7 @@
       { id: 6, nome: "Jurídico", descricao: "Assessoria jurídica e compliance", funcionarios: 8, cargos: 3, ativo: true }
     ];
 
+    let departments = [];
     let currentDeptId = null;
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -214,42 +217,60 @@
       initSidebar();
       Auth.applyRoleVisibility(document);
       Auth.applyActionVisibility(document);
-      renderDepartments();
-      updateStats();
+      loadData();
     });
 
-    function updateStats() {
+    async function loadData() {
+      try {
+        const [listRes, statsRes] = await Promise.all([
+          fetch(API, { credentials: 'same-origin' }),
+          fetch(API + '/stats', { credentials: 'same-origin' })
+        ]);
+        if (!listRes.ok) throw new Error('API indisponível');
+        departments = await listRes.json();
+        const stats = await statsRes.json();
+        document.getElementById("statTotal").textContent = stats.total;
+        document.getElementById("statAtivos").textContent = stats.ativos;
+        document.getElementById("statFuncionarios").textContent = stats.funcionarios;
+        document.getElementById("statMedia").textContent = stats.media;
+      } catch (e) {
+        console.log('Usando dados mock:', e.message);
+        departments = mockDepartments;
+        updateStatsLocal();
+      }
+      render();
+    }
+
+    function updateStatsLocal() {
       const total = departments.length;
       const ativos = departments.filter(d => d.ativo).length;
-      const funcionarios = departments.reduce((sum, d) => sum + d.funcionarios, 0);
-      const media = Math.round(funcionarios / total);
-
+      const funcionarios = departments.reduce((sum, d) => sum + (d.funcionarios || 0), 0);
+      const media = total > 0 ? Math.round(funcionarios / total) : 0;
       document.getElementById("statTotal").textContent = total;
       document.getElementById("statAtivos").textContent = ativos;
       document.getElementById("statFuncionarios").textContent = funcionarios;
       document.getElementById("statMedia").textContent = media;
     }
 
-    function renderDepartments() {
+    function render() {
       const grid = document.getElementById("departmentsGrid");
-
-      grid.innerHTML = departments.map((dept, i) => `
+      grid.innerHTML = departments.map(dept => `
         <div class="department-card">
           <div class="department-header">
             <div class="department-actions">
-              <button class="btn-icon edit" onclick="editDepartment(${dept.id})" title="Editar"><img th:src="@{/assets/pencil (1).png}" src="/assets/pencil (1).png" alt="icone_editar_departamento"></button>
-              <button class="btn-icon delete" onclick="deleteDepartment(${dept.id})" title="Excluir"><img th:src="@{/assets/trash-2 (1).png}" src="/assets/trash-2 (1).png" alt="icone_excluir_departamento"></button>
+              <button class="btn-icon edit" onclick="edit(${dept.id})" title="Editar"><img src="/assets/pencil (1).png" alt="editar"></button>
+              <button class="btn-icon delete" onclick="remove(${dept.id})" title="Excluir"><img src="/assets/trash-2 (1).png" alt="excluir"></button>
             </div>
           </div>
           <h3 class="department-name">${dept.nome}</h3>
           <p class="department-desc">${dept.descricao || 'Sem descrição'}</p>
           <div class="department-stats">
             <div class="department-stat">
-              <div class="department-stat-value">${dept.funcionarios}</div>
+              <div class="department-stat-value">${dept.funcionarios || 0}</div>
               <div class="department-stat-label">Funcionários</div>
             </div>
             <div class="department-stat">
-              <div class="department-stat-value">${dept.cargos}</div>
+              <div class="department-stat-value">${dept.cargos || 0}</div>
               <div class="department-stat-label">Cargos</div>
             </div>
             <div class="department-stat">
@@ -262,13 +283,12 @@
       // Update parent select
       const select = document.getElementById("parentDeptSelect");
       select.innerHTML = '<option value="">Nenhum (Raiz)</option>' +
-        departments.map(d => `<option value="${d.id}">${d.nome}</option>`).join('');
+        departments.map(d => '<option value="' + d.id + '">' + d.nome + '</option>').join('');
     }
 
-    function openDepartmentModal(id = null) {
+    function openModal(id = null) {
       currentDeptId = id;
       document.getElementById("departmentForm").reset();
-
       if (id) {
         document.getElementById("modalTitle").textContent = "Editar Departamento";
         const dept = departments.find(d => d.id === id);
@@ -276,42 +296,51 @@
       } else {
         document.getElementById("modalTitle").textContent = "Novo Departamento";
       }
-
       Modal.open('departmentModal');
     }
 
-    function editDepartment(id) { openDepartmentModal(id); }
+    function edit(id) { openModal(id); }
 
-    function saveDepartment() {
-      const data = Form.serialize('departmentForm');
+    async function saveDepartment() {
+      const formData = Form.serialize('departmentForm');
+      if (!formData.nome) { Toast.error('Nome é obrigatório'); return; }
 
-      if (!data.nome) {
-        Toast.error('Nome é obrigatório');
-        return;
+      const body = {
+        nome: formData.nome,
+        descricao: formData.descricao || null,
+        departamentoPaiId: formData.departamentoPaiId ? Number(formData.departamentoPaiId) : null,
+        ativo: !!formData.ativo
+      };
+
+      try {
+        let res;
+        if (currentDeptId) {
+          res = await fetch(API + '/' + currentDeptId, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify(body) });
+        } else {
+          res = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify(body) });
+        }
+        if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err.error || 'Erro ao salvar'); }
+        Toast.success(currentDeptId ? 'Departamento atualizado!' : 'Departamento criado!');
+        Modal.close('departmentModal');
+        loadData();
+      } catch (e) {
+        console.error(e);
+        Toast.error(e.message || 'Erro ao salvar departamento');
       }
-
-      if (currentDeptId) {
-        const idx = departments.findIndex(d => d.id === currentDeptId);
-        if (idx > -1) departments[idx] = { ...departments[idx], ...data, ativo: !!data.ativo };
-        Toast.success('Departamento atualizado!');
-      } else {
-        departments.push({ id: Date.now(), ...data, ativo: !!data.ativo, funcionarios: 0, cargos: 0 });
-        Toast.success('Departamento criado!');
-      }
-
-      Modal.close('departmentModal');
-      renderDepartments();
-      updateStats();
     }
 
-    function deleteDepartment(id) {
+    function remove(id) {
       const dept = departments.find(d => d.id === id);
-      Confirm.show(`Excluir o departamento <strong>${dept.nome}</strong>?`, () => {
-        const idx = departments.findIndex(d => d.id === id);
-        if (idx > -1) departments.splice(idx, 1);
-        Toast.success('Departamento excluído!');
-        renderDepartments();
-        updateStats();
+      Confirm.show('Excluir o departamento <strong>' + dept.nome + '</strong>?', async () => {
+        try {
+          const res = await fetch(API + '/' + id, { method: 'DELETE', credentials: 'same-origin' });
+          if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err.error || 'Erro ao excluir'); }
+          Toast.success('Departamento excluído!');
+          loadData();
+        } catch (e) {
+          console.error(e);
+          Toast.error(e.message || 'Erro ao excluir departamento');
+        }
       });
     }
   </script>
