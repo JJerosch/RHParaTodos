@@ -23,7 +23,7 @@
           <h2 class="page-title">Gestão de Cargos</h2>
           <p class="page-subtitle">Defina cargos e faixas salariais</p>
         </div>
-        <div class="page-actions">
+        <div class="page-actions" data-action-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE">
           <button class="btn btn-primary" onclick="openModal()">+ Novo Cargo</button>
         </div>
       </div>
@@ -227,6 +227,8 @@
       render();
     }
 
+    const canWrite = Auth.hasAnyRole(['ADMIN', 'RH_CHEFE', 'RH_ASSISTENTE']);
+
     function render() {
       document.getElementById("tableBody").innerHTML = filtered.map(item => `
         <tr>
@@ -237,10 +239,7 @@
           <td class="hide-mobile">${item.ocupantes}</td>
           <td><span class="badge ${item.ativo ? 'badge-success' : 'badge-danger'}">${item.ativo ? 'Ativo' : 'Inativo'}</span></td>
           <td>
-            <div class="cell-actions">
-              <button class="btn-icon edit" onclick="edit(${item.id})"><img src="/assets/pencil (1).png" alt="editar"></button>
-              <button class="btn-icon delete" onclick="remove(${item.id})"><img src="/assets/trash-2 (1).png" alt="excluir"></button>
-            </div>
+            ${canWrite ? '<div class="cell-actions"><button class="btn-icon edit" onclick="edit(' + item.id + ')"><img src="/assets/pencil (1).png" alt="editar"></button><button class="btn-icon delete" onclick="remove(' + item.id + ')"><img src="/assets/trash-2 (1).png" alt="excluir"></button></div>' : '-'}
           </td>
         </tr>
       `).join('');

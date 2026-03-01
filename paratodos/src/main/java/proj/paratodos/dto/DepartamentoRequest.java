@@ -13,5 +13,7 @@ public record DepartamentoRequest(
 
         Long departamentoPaiId,
 
-        Boolean ativo
+        Boolean ativo,
+
+        Integer headcountLimite
 ) {}

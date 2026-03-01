@@ -69,6 +69,9 @@ public class DepartamentoService {
         d.setDescricao(req.descricao());
         d.setDepartamentoPaiId(req.departamentoPaiId());
         d.setAtivo(req.ativo() != null ? req.ativo() : true);
+        if (req.headcountLimite() != null) {
+            d.setHeadcountLimite(req.headcountLimite());
+        }
     }
 
     private DepartamentoResponse toResponse(Departamento d) {
