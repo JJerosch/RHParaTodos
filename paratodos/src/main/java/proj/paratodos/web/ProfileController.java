@@ -57,7 +57,10 @@ public class ProfileController {
         if (body.containsKey("complemento"))    f.setComplemento(body.get("complemento"));
         if (body.containsKey("bairro"))         f.setBairro(body.get("bairro"));
         if (body.containsKey("cidade"))         f.setCidade(body.get("cidade"));
-        if (body.containsKey("estado"))         f.setEstado(body.get("estado"));
+        if (body.containsKey("estado"))              f.setEstado(body.get("estado"));
+        if (body.containsKey("emergenciaNome"))       f.setEmergenciaNome(body.get("emergenciaNome"));
+        if (body.containsKey("emergenciaParentesco")) f.setEmergenciaParentesco(body.get("emergenciaParentesco"));
+        if (body.containsKey("emergenciaTelefone"))   f.setEmergenciaTelefone(body.get("emergenciaTelefone"));
 
         funcionarioRepository.save(f);
         return ResponseEntity.ok(FuncionarioResponse.fromEntity(f));

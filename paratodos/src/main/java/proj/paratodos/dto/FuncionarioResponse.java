@@ -43,6 +43,9 @@ public record FuncionarioResponse(
         String tipoContrato,
         BigDecimal salarioAtual,
         String fotoUrl,
+        String emergenciaNome,
+        String emergenciaParentesco,
+        String emergenciaTelefone,
         LocalDateTime criadoEm,
         LocalDateTime atualizadoEm
 ) {
@@ -85,6 +88,9 @@ public record FuncionarioResponse(
                 f.getTipoContrato(),
                 f.getSalarioAtual(),
                 f.getFotoUrl(),
+                f.getEmergenciaNome(),
+                f.getEmergenciaParentesco(),
+                f.getEmergenciaTelefone(),
                 f.getCriadoEm(),
                 f.getAtualizadoEm()
         );

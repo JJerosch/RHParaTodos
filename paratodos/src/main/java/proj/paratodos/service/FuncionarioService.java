@@ -132,6 +132,9 @@ public class FuncionarioService {
         f.setConta(req.conta());
         f.setTipoConta(req.tipoConta());
         f.setPix(req.pix());
+        f.setEmergenciaNome(req.emergenciaNome());
+        f.setEmergenciaParentesco(req.emergenciaParentesco());
+        f.setEmergenciaTelefone(req.emergenciaTelefone());
         f.setDataAdmissao(req.dataAdmissao());
         f.setDataDesligamento(req.dataDesligamento());
         f.setStatus(req.status() != null ? req.status() : "ATIVO");

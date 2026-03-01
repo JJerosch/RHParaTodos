@@ -50,6 +50,11 @@ public record FuncionarioRequest(
         String tipoConta,
         String pix,
 
+        // Contato de emergencia
+        String emergenciaNome,
+        String emergenciaParentesco,
+        String emergenciaTelefone,
+
         // Dados profissionais
         Long cargoId,
         Long departamentoId,

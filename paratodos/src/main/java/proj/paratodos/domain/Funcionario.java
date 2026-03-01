@@ -134,6 +134,15 @@ public class Funcionario {
     @Column(name = "dependentes_qtd", nullable = false)
     private Integer dependentesQtd = 0;
 
+    @Column(name = "emergencia_nome")
+    private String emergenciaNome;
+
+    @Column(name = "emergencia_parentesco", length = 100)
+    private String emergenciaParentesco;
+
+    @Column(name = "emergencia_telefone", length = 20)
+    private String emergenciaTelefone;
+
     @PrePersist
     void prePersist() {
         criadoEm = LocalDateTime.now();
