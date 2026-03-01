@@ -7,7 +7,18 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import proj.paratodos.domain.Funcionario;
 
+import java.util.Optional;
+
 public interface FuncionarioRepository extends JpaRepository<Funcionario, Long> {
+
+    @Query("""
+        SELECT f FROM Funcionario f
+        LEFT JOIN FETCH f.cargo
+        LEFT JOIN FETCH f.departamento
+        LEFT JOIN FETCH f.gestor
+        WHERE f.usuario.id = :usuarioId
+    """)
+    Optional<Funcionario> findByUsuarioId(@Param("usuarioId") Long usuarioId);
 
     boolean existsByCpf(String cpf);
 
