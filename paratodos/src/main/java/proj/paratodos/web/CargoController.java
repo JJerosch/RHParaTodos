@@ -9,6 +9,8 @@ import proj.paratodos.dto.CargoResponse;
 import proj.paratodos.repository.DepartamentoRepository;
 import proj.paratodos.service.CargoService;
 
+import org.springframework.security.access.prepost.PreAuthorize;
+
 import java.util.List;
 import java.util.Map;
 
@@ -39,17 +41,20 @@ public class CargoController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'RH_CHEFE', 'RH_ASSISTENTE')")
     public ResponseEntity<CargoResponse> create(@Valid @RequestBody CargoRequest request) {
         CargoResponse created = cargoService.create(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'RH_CHEFE', 'RH_ASSISTENTE')")
     public CargoResponse update(@PathVariable Long id, @Valid @RequestBody CargoRequest request) {
         return cargoService.update(id, request);
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'RH_CHEFE', 'RH_ASSISTENTE')")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         cargoService.delete(id);
         return ResponseEntity.noContent().build();

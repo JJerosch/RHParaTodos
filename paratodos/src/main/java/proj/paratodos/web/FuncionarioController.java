@@ -15,6 +15,8 @@ import proj.paratodos.repository.CargoRepository;
 import proj.paratodos.repository.DepartamentoRepository;
 import proj.paratodos.service.FuncionarioService;
 
+import org.springframework.security.access.prepost.PreAuthorize;
+
 import java.util.List;
 import java.util.Map;
 
@@ -67,6 +69,7 @@ public class FuncionarioController {
 
     /** POST /api/employees */
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'RH_CHEFE', 'RH_ASSISTENTE')")
     public ResponseEntity<FuncionarioResponse> create(@Valid @RequestBody FuncionarioRequest request) {
         FuncionarioResponse created = funcionarioService.create(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
@@ -74,12 +77,14 @@ public class FuncionarioController {
 
     /** PUT /api/employees/{id} */
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'RH_CHEFE', 'RH_ASSISTENTE')")
     public FuncionarioResponse update(@PathVariable Long id, @Valid @RequestBody FuncionarioRequest request) {
         return funcionarioService.update(id, request);
     }
 
     /** DELETE /api/employees/{id} */
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'RH_CHEFE', 'RH_ASSISTENTE')")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         funcionarioService.delete(id);
         return ResponseEntity.noContent().build();

@@ -20,6 +20,7 @@ public class RecrutamentoService {
     private final CargoRepository cargoRepository;
     private final UsuarioRepository usuarioRepository;
     private final FuncionarioRepository funcionarioRepository;
+    private final PromocaoRepository promocaoRepository;
 
     public RecrutamentoService(VagaRepository vagaRepository,
                                CandidatoRepository candidatoRepository,
@@ -27,7 +28,8 @@ public class RecrutamentoService {
                                DepartamentoRepository departamentoRepository,
                                CargoRepository cargoRepository,
                                UsuarioRepository usuarioRepository,
-                               FuncionarioRepository funcionarioRepository) {
+                               FuncionarioRepository funcionarioRepository,
+                               PromocaoRepository promocaoRepository) {
         this.vagaRepository = vagaRepository;
         this.candidatoRepository = candidatoRepository;
         this.candidaturaRepository = candidaturaRepository;
@@ -35,6 +37,7 @@ public class RecrutamentoService {
         this.cargoRepository = cargoRepository;
         this.usuarioRepository = usuarioRepository;
         this.funcionarioRepository = funcionarioRepository;
+        this.promocaoRepository = promocaoRepository;
     }
 
     // ── Vagas ──
@@ -211,7 +214,7 @@ public class RecrutamentoService {
     }
 
     @Transactional
-    public CandidaturaResponse updateEtapa(Long candidaturaId, String novaEtapa, String observacoes, String motivoRejeicao) {
+    public CandidaturaResponse updateEtapa(Long candidaturaId, String novaEtapa, String observacoes, String motivoRejeicao, Long userId) {
         Candidatura c = candidaturaRepository.findByIdWithDetails(candidaturaId);
         if (c == null) {
             throw new IllegalArgumentException("Candidatura nao encontrada: " + candidaturaId);
@@ -221,17 +224,18 @@ public class RecrutamentoService {
         if (observacoes != null) c.setObservacoes(observacoes);
         if (motivoRejeicao != null) c.setMotivoRejeicao(motivoRejeicao);
 
-        // Se contratado, cria funcionario sem departamento
+        // Se contratado, cria funcionario sem departamento e gera solicitacao de contratacao
         if ("CONTRATADO".equals(novaEtapa)) {
-            createFuncionarioFromCandidato(c);
+            createFuncionarioFromCandidato(c, userId);
         }
 
         c = candidaturaRepository.save(c);
         return CandidaturaResponse.fromEntity(c);
     }
 
-    private void createFuncionarioFromCandidato(Candidatura candidatura) {
+    private void createFuncionarioFromCandidato(Candidatura candidatura, Long userId) {
         Candidato cand = candidatura.getCandidato();
+        Vaga vaga = candidatura.getVaga();
 
         // Gera matricula unica
         String matricula = "NEW-" + System.currentTimeMillis() % 100000;
@@ -245,13 +249,42 @@ public class RecrutamentoService {
         f.setDataNascimento(cand.getDataNascimento() != null ? cand.getDataNascimento() : LocalDate.of(2000, 1, 1));
         f.setDataAdmissao(LocalDate.now());
         f.setStatus("ATIVO");
-        f.setTipoContrato(candidatura.getVaga().getTipoContrato());
+        f.setTipoContrato(vaga.getTipoContrato());
         f.setSalarioAtual(cand.getPretensaoSalarial());
+        f.setCidade(cand.getCidade());
+        f.setEstado(cand.getEstado());
         // Sem departamento e sem cargo - precisa de promocao para atribuir
         f.setDepartamento(null);
         f.setCargo(null);
 
-        funcionarioRepository.save(f);
+        f = funcionarioRepository.save(f);
+
+        // Cria automaticamente uma solicitacao de promocao tipo CONTRATACAO
+        Promocao p = new Promocao();
+        p.setFuncionario(f);
+        p.setTipo("CONTRATACAO");
+        p.setStatus("PENDENTE");
+        p.setMotivo("Contratação via recrutamento - Vaga: " + vaga.getTitulo()
+                + (vaga.getDepartamento() != null ? " | Dept: " + vaga.getDepartamento().getNome() : "")
+                + (vaga.getCargo() != null ? " | Cargo: " + vaga.getCargo().getTitulo() : ""));
+
+        // Preenche dados atuais (nulos pois é novo funcionário)
+        p.setCargoAtual(null);
+        p.setDepartamentoAtual(null);
+        p.setSalarioAtual(cand.getPretensaoSalarial());
+
+        // Preenche proposta baseada na vaga
+        p.setDepartamentoNovo(vaga.getDepartamento());
+        p.setCargoNovo(vaga.getCargo());
+        p.setSalarioNovo(cand.getPretensaoSalarial());
+
+        // Solicitante é o usuário que moveu o candidato para CONTRATADO
+        if (userId != null) {
+            Usuario solicitante = usuarioRepository.findById(userId).orElse(null);
+            p.setSolicitante(solicitante);
+        }
+
+        promocaoRepository.save(p);
     }
 
     public RecrutamentoStatsResponse getStats() {

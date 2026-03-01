@@ -237,7 +237,7 @@
           <td>
             <div class="cell-info">
               <span class="cell-primary">${p.funcionarioNome || '-'}</span>
-              <span class="cell-secondary">${p.funcionarioMatricula || ''}</span>
+              <span class="cell-secondary">${p.funcionarioEmail || p.funcionarioMatricula || ''}</span>
             </div>
           </td>
           <td><span class="badge badge-info">${tipoLabels[p.tipo] || p.tipo}</span></td>
