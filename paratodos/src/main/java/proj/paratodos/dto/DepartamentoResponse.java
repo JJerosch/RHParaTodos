@@ -13,6 +13,7 @@ public record DepartamentoResponse(
         Boolean ativo,
         long funcionarios,
         long cargos,
+        Integer headcountLimite,
         LocalDateTime criadoEm,
         LocalDateTime atualizadoEm
 ) {
@@ -27,6 +28,7 @@ public record DepartamentoResponse(
                 d.getAtivo(),
                 funcionarios,
                 cargos,
+                d.getHeadcountLimite(),
                 d.getCriadoEm(),
                 d.getAtualizadoEm()
         );

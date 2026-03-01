@@ -61,7 +61,7 @@
           <h2 class="page-title">Lista de Funcionários</h2>
           <p class="page-subtitle">Gerencie todos os funcionários da empresa</p>
         </div>
-        <div class="page-actions">
+        <div class="page-actions" data-action-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE">
           <button class="btn btn-secondary" onclick="exportEmployees()">
             <img th:src="@{/assets/folder-output.png}" alt="icone_exportar"> Exportar
           </button>
@@ -434,7 +434,7 @@
       <div class="modal-body" id="viewContent"></div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" onclick="Modal.close('viewModal')">Fechar</button>
-        <button type="button" class="btn btn-primary" onclick="Modal.close('viewModal'); edit(currentId)">Editar</button>
+        <button type="button" class="btn btn-primary" data-action-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE" onclick="Modal.close('viewModal'); edit(currentId)">Editar</button>
       </div>
     </div>
   </div>
@@ -452,6 +452,10 @@
 
     let departamentos = [];
     let cargos = [];
+
+    const userRole = window.__CURRENT_USER__.role;
+    const isDP = userRole === 'DP_CHEFE' || userRole === 'DP_ASSISTENTE';
+    const canWrite = !isDP;
 
     const statusLabels = { ATIVO: 'Ativo', FERIAS: 'Em Férias', AFASTADO: 'Afastado', DESLIGADO: 'Desligado' };
     const statusBadge  = { ATIVO: 'badge-success', FERIAS: 'badge-warning', AFASTADO: 'badge-info', DESLIGADO: 'badge-danger' };
@@ -599,8 +603,8 @@
             <td>
               <div class="cell-actions">
                 <button class="btn-icon view" onclick="view(${emp.id})"><img src="/assets/eye.png" alt="ver"></button>
-                <button class="btn-icon edit" onclick="edit(${emp.id})"><img src="/assets/pencil (1).png" alt="editar"></button>
-                <button class="btn-icon delete" onclick="remove(${emp.id})"><img src="/assets/trash-2 (1).png" alt="excluir"></button>
+                ${canWrite ? '<button class="btn-icon edit" onclick="edit(' + emp.id + ')"><img src="/assets/pencil (1).png" alt="editar"></button>' : ''}
+                ${canWrite ? '<button class="btn-icon delete" onclick="remove(' + emp.id + ')"><img src="/assets/trash-2 (1).png" alt="excluir"></button>' : ''}
               </div>
             </td>
           </tr>
@@ -691,7 +695,7 @@
       if (!emp) return;
       currentId = id;
 
-      document.getElementById("viewContent").innerHTML = `
+      let viewHtml = `
         <div style="display: flex; align-items: center; gap: var(--spacing-6); margin-bottom: var(--spacing-6); padding-bottom: var(--spacing-6); border-bottom: 1px solid var(--gray-200);">
           <div class="avatar avatar-lg">${getInitials(emp.nomeCompleto)}</div>
           <div>
@@ -714,8 +718,22 @@
             <p><strong>Tipo Contrato:</strong> ${emp.tipoContrato || '-'}</p>
             <p><strong>Salário:</strong> ${formatCurrency(emp.salarioAtual)}</p>
           </div>
-        </div>
-      `;
+        </div>`;
+
+      // DP vê dados bancários (necessário para função de folha de pagamento)
+      if (isDP) {
+        viewHtml += `
+        <div style="margin-top: var(--spacing-6); padding-top: var(--spacing-4); border-top: 1px solid var(--gray-200);">
+          <h4 style="color: var(--gray-600); margin-bottom: var(--spacing-3); font-size: var(--font-size-sm); text-transform: uppercase;">Dados Bancários (DP)</h4>
+          <p><strong>Banco:</strong> ${emp.banco || '-'}</p>
+          <p><strong>Agência:</strong> ${emp.agencia || '-'}</p>
+          <p><strong>Conta:</strong> ${emp.conta || '-'}</p>
+          <p><strong>Tipo:</strong> ${emp.tipoConta || '-'}</p>
+          <p><strong>PIX:</strong> ${emp.pix || '-'}</p>
+        </div>`;
+      }
+
+      document.getElementById("viewContent").innerHTML = viewHtml;
       Modal.open('viewModal');
     }
 

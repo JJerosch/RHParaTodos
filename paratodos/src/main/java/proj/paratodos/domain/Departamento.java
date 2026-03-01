@@ -27,6 +27,9 @@ public class Departamento {
     @Column(nullable = false)
     private Boolean ativo = true;
 
+    @Column(name = "headcount_limite")
+    private Integer headcountLimite = 0;
+
     @Column(name = "criado_em", updatable = false)
     private LocalDateTime criadoEm;
 

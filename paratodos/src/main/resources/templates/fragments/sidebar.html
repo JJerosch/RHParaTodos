@@ -27,25 +27,31 @@
             <span class="nav-text">Dashboard</span>
         </a>
 
-        <!-- Gestão de Pessoas -->
-        <div class="nav-section" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE">Gestão de Pessoas</div>
-        <a th:href="@{/employees}" class="nav-item"
-           th:classappend="${activePage == 'employees'} ? ' active'"
-           data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE">
-            <span class="nav-icon"><img th:src="@{/assets/id-card-lanyard (1).png}" alt="" width="20" height="20"></span>
-            <span class="nav-text">Funcionários</span>
-        </a>
+        <!-- Departamentos (seção principal com subáreas) -->
+        <div class="nav-section" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE,DP_CHEFE,DP_ASSISTENTE">Departamentos</div>
         <a th:href="@{/departments}" class="nav-item"
            th:classappend="${activePage == 'departments'} ? ' active'"
            data-roles="ADMIN,RH_CHEFE">
             <span class="nav-icon"><img th:src="@{/assets/building-2.png}" alt="" width="20" height="20"></span>
-            <span class="nav-text">Departamentos</span>
+            <span class="nav-text">Estrutura</span>
+        </a>
+        <a th:href="@{/employees}" class="nav-item"
+           th:classappend="${activePage == 'employees'} ? ' active'"
+           data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE,DP_CHEFE,DP_ASSISTENTE">
+            <span class="nav-icon"><img th:src="@{/assets/id-card-lanyard (1).png}" alt="" width="20" height="20"></span>
+            <span class="nav-text">Funcionários</span>
         </a>
         <a th:href="@{/positions}" class="nav-item"
            th:classappend="${activePage == 'positions'} ? ' active'"
-           data-roles="ADMIN,RH_CHEFE">
+           data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE,DP_CHEFE,DP_ASSISTENTE">
             <span class="nav-icon"><img th:src="@{/assets/scroll.png}" alt="" width="20" height="20"></span>
             <span class="nav-text">Cargos</span>
+        </a>
+        <a th:href="@{/promotions}" class="nav-item"
+           th:classappend="${activePage == 'promotions'} ? ' active'"
+           data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE">
+            <span class="nav-icon"><img th:src="@{/assets/scroll.png}" alt="" width="20" height="20"></span>
+            <span class="nav-text">Promoções</span>
         </a>
 
         <!-- Recursos Humanos -->

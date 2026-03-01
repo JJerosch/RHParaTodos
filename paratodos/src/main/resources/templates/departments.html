@@ -99,6 +99,10 @@
             </select>
           </div>
           <div class="form-group">
+            <label class="form-label">Limite de Headcount</label>
+            <input type="number" class="form-input" name="headcountLimite" min="0" placeholder="0 = sem limite">
+          </div>
+          <div class="form-group">
             <label class="checkbox-label">
               <input type="checkbox" name="ativo" checked>
               <span>Departamento Ativo</span>
@@ -266,8 +270,8 @@
           <p class="department-desc">${dept.descricao || 'Sem descrição'}</p>
           <div class="department-stats">
             <div class="department-stat">
-              <div class="department-stat-value">${dept.funcionarios || 0}</div>
-              <div class="department-stat-label">Funcionários</div>
+              <div class="department-stat-value">${dept.funcionarios || 0}${dept.headcountLimite ? '/' + dept.headcountLimite : ''}</div>
+              <div class="department-stat-label">Funcionários${dept.headcountLimite ? ' (Limite)' : ''}</div>
             </div>
             <div class="department-stat">
               <div class="department-stat-value">${dept.cargos || 0}</div>
@@ -309,7 +313,8 @@
         nome: formData.nome,
         descricao: formData.descricao || null,
         departamentoPaiId: formData.departamentoPaiId ? Number(formData.departamentoPaiId) : null,
-        ativo: !!formData.ativo
+        ativo: !!formData.ativo,
+        headcountLimite: formData.headcountLimite ? Number(formData.headcountLimite) : 0
       };
 
       try {

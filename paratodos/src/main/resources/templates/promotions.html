@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/head :: head('Promoções')}"><title>Promoções</title></head>
+
+<body>
+  <script th:inline="javascript">
+    window.__CURRENT_USER__ = {
+      email: /*[[${currentUser.email}]]*/ 'usuario@local',
+      role:  /*[[${currentUser.role}]]*/ 'EMPLOYEE'
+    };
+  </script>
+
+  <aside th:replace="~{fragments/sidebar :: admin('promotions')}"></aside>
+
+  <div class="main-content">
+    <header th:replace="~{fragments/topbar :: topbar('Promoções')}"></header>
+
+    <div class="content-area">
+      <!-- Stats -->
+      <div class="stats-row">
+        <div class="stat-box">
+          <div class="stat-box-header">
+            <div class="stat-box-icon" style="background: rgba(44, 62, 80, 0.1); color: var(--primary-dark);"><img th:src="@{/assets/scroll.png}" alt="" width="20" height="20"></div>
+          </div>
+          <div class="stat-box-value" id="statTotal">0</div>
+          <div class="stat-box-label">Total</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-box-header">
+            <div class="stat-box-icon" style="background: rgba(243, 156, 18, 0.1); color: var(--warning-orange);"><img th:src="@{/assets/hourglass.png}" alt="" width="20" height="20"></div>
+          </div>
+          <div class="stat-box-value" id="statPendentes">0</div>
+          <div class="stat-box-label">Pendentes</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-box-header">
+            <div class="stat-box-icon" style="background: rgba(39, 174, 96, 0.1); color: var(--success-green);"><img th:src="@{/assets/check (1).png}" alt="" width="20" height="20"></div>
+          </div>
+          <div class="stat-box-value" id="statAprovadas">0</div>
+          <div class="stat-box-label">Aprovadas</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-box-header">
+            <div class="stat-box-icon" style="background: rgba(231, 76, 60, 0.1); color: var(--error-red);"><img th:src="@{/assets/door-open.png}" alt="" width="20" height="20"></div>
+          </div>
+          <div class="stat-box-value" id="statRejeitadas">0</div>
+          <div class="stat-box-label">Rejeitadas</div>
+        </div>
+      </div>
+
+      <!-- Page Header -->
+      <div class="page-header">
+        <div>
+          <h2 class="page-title">Solicitações de Promoção</h2>
+          <p class="page-subtitle">Gerencie solicitações de mudança de cargo, departamento e salário</p>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-primary" onclick="openModal()">+ Nova Solicitação</button>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="filters-bar">
+        <div class="filter-group">
+          <label>Status:</label>
+          <select id="filterStatus" onchange="loadData()">
+            <option value="">Todos</option>
+            <option value="PENDENTE">Pendente</option>
+            <option value="APROVADA">Aprovada</option>
+            <option value="REJEITADA">Rejeitada</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Funcionário</th>
+              <th>Tipo</th>
+              <th class="hide-mobile">De</th>
+              <th class="hide-mobile">Para</th>
+              <th class="hide-mobile">Solicitante</th>
+              <th>Status</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Nova Solicitação -->
+  <div class="modal" id="promotionModal">
+    <div class="modal-dialog modal-md">
+      <div class="modal-header">
+        <h3 class="modal-title">Nova Solicitação</h3>
+        <button class="modal-close" onclick="Modal.close('promotionModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="promotionForm">
+          <div class="form-group">
+            <label class="form-label">Funcionário *</label>
+            <select class="form-select" name="funcionarioId" id="funcSelect" required>
+              <option value="">Selecione</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Tipo *</label>
+            <select class="form-select" name="tipo" required>
+              <option value="PROMOCAO">Promoção</option>
+              <option value="TRANSFERENCIA">Transferência</option>
+              <option value="REAJUSTE">Reajuste Salarial</option>
+              <option value="CONTRATACAO">Contratação (Atribuir Dept/Cargo)</option>
+            </select>
+          </div>
+          <div class="form-row form-row-2">
+            <div class="form-group">
+              <label class="form-label">Novo Departamento</label>
+              <select class="form-select" name="departamentoNovoId" id="deptSelect">
+                <option value="">Manter atual</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Novo Cargo</label>
+              <select class="form-select" name="cargoNovoId" id="cargoSelect">
+                <option value="">Manter atual</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Novo Salário</label>
+            <input type="text" class="form-input" name="salarioNovo" data-mask="currency" placeholder="Deixe vazio para manter atual">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Motivo/Justificativa *</label>
+            <textarea class="form-input" name="motivo" rows="3" required placeholder="Descreva o motivo da solicitação..."></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="Modal.close('promotionModal')">Cancelar</button>
+        <button class="btn btn-primary" onclick="save()">Enviar Solicitação</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Detalhes / Aprovação -->
+  <div class="modal" id="detailModal">
+    <div class="modal-dialog modal-md">
+      <div class="modal-header">
+        <h3 class="modal-title">Detalhes da Solicitação</h3>
+        <button class="modal-close" onclick="Modal.close('detailModal')">&times;</button>
+      </div>
+      <div class="modal-body" id="detailContent"></div>
+      <div class="modal-footer" id="detailFooter"></div>
+    </div>
+  </div>
+
+  <div th:replace="~{fragments/scripts :: common}"></div>
+  <script>
+    const API = '/api/promotions';
+    let data = [];
+    const role = window.__CURRENT_USER__.role;
+    const isChefe = role === 'RH_CHEFE' || role === 'ADMIN';
+
+    const tipoLabels = { PROMOCAO: 'Promoção', TRANSFERENCIA: 'Transferência', REAJUSTE: 'Reajuste', CONTRATACAO: 'Contratação' };
+    const statusLabels = { PENDENTE: 'Pendente', APROVADA: 'Aprovada', REJEITADA: 'Rejeitada' };
+    const statusBadge = { PENDENTE: 'badge-warning', APROVADA: 'badge-success', REJEITADA: 'badge-danger' };
+
+    async function api(url, opts = {}) {
+      const res = await fetch(url, { credentials: 'same-origin', headers: { 'Content-Type': 'application/json', ...opts.headers }, ...opts });
+      if (res.status === 401) { window.location.href = '/login'; return; }
+      if (res.status === 204) return null;
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(body.error || 'Erro na requisição');
+      return body;
+    }
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      if (!Auth.requireAuth()) return;
+      initUserMenu();
+      initSidebar();
+      Auth.applyRoleVisibility(document);
+      Auth.applyActionVisibility(document);
+      Mask.initAll();
+      await Promise.all([loadDropdowns(), loadData()]);
+    });
+
+    async function loadDropdowns() {
+      try {
+        const [funcs, depts, cargos] = await Promise.all([
+          api('/api/employees/gestores'),
+          api('/api/employees/departamentos'),
+          api('/api/employees/cargos')
+        ]);
+        const funcSelect = document.getElementById("funcSelect");
+        (funcs || []).forEach(f => funcSelect.innerHTML += '<option value="' + f.id + '">' + f.nome + '</option>');
+        const deptSelect = document.getElementById("deptSelect");
+        (depts || []).forEach(d => deptSelect.innerHTML += '<option value="' + d.id + '">' + d.nome + '</option>');
+        const cargoSelect = document.getElementById("cargoSelect");
+        (cargos || []).forEach(c => cargoSelect.innerHTML += '<option value="' + c.id + '">' + c.titulo + '</option>');
+      } catch (e) { console.error('Erro ao carregar dropdowns:', e); }
+    }
+
+    async function loadData() {
+      try {
+        const status = document.getElementById("filterStatus").value;
+        const url = status ? API + '?status=' + status : API;
+        data = await api(url) || [];
+
+        const stats = await api(API + '/stats');
+        if (stats) {
+          document.getElementById("statTotal").textContent = stats.total;
+          document.getElementById("statPendentes").textContent = stats.pendentes;
+          document.getElementById("statAprovadas").textContent = stats.aprovadas;
+          document.getElementById("statRejeitadas").textContent = stats.rejeitadas;
+        }
+      } catch (e) {
+        console.error('Erro ao carregar dados:', e);
+        data = [];
+      }
+      render();
+    }
+
+    function render() {
+      const tbody = document.getElementById("tableBody");
+      if (data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state"><h3 class="empty-state-title">Nenhuma solicitação encontrada</h3></div></td></tr>';
+        return;
+      }
+      tbody.innerHTML = data.map(p => `
+        <tr>
+          <td>
+            <div class="cell-info">
+              <span class="cell-primary">${p.funcionarioNome || '-'}</span>
+              <span class="cell-secondary">${p.funcionarioMatricula || ''}</span>
+            </div>
+          </td>
+          <td><span class="badge badge-info">${tipoLabels[p.tipo] || p.tipo}</span></td>
+          <td class="hide-mobile">
+            <div class="cell-info">
+              <span class="cell-primary">${p.cargoAtualTitulo || '-'}</span>
+              <span class="cell-secondary">${p.departamentoAtualNome || '-'}</span>
+            </div>
+          </td>
+          <td class="hide-mobile">
+            <div class="cell-info">
+              <span class="cell-primary">${p.cargoNovoTitulo || '-'}</span>
+              <span class="cell-secondary">${p.departamentoNovoNome || '-'}</span>
+            </div>
+          </td>
+          <td class="hide-mobile">${p.solicitanteEmail || '-'}</td>
+          <td><span class="badge ${statusBadge[p.status]}">${statusLabels[p.status]}</span></td>
+          <td>
+            <div class="cell-actions">
+              <button class="btn-icon view" onclick="viewDetail(${p.id})"><img src="/assets/eye.png" alt="ver"></button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function openModal() {
+      document.getElementById("promotionForm").reset();
+      Modal.open('promotionModal');
+      Mask.initAll();
+    }
+
+    async function save() {
+      const form = document.getElementById("promotionForm");
+      if (!form.checkValidity()) { form.reportValidity(); return; }
+
+      const formData = Form.serialize('promotionForm');
+      const body = {
+        funcionarioId: Number(formData.funcionarioId),
+        tipo: formData.tipo,
+        departamentoNovoId: formData.departamentoNovoId ? Number(formData.departamentoNovoId) : null,
+        cargoNovoId: formData.cargoNovoId ? Number(formData.cargoNovoId) : null,
+        salarioNovo: formData.salarioNovo ? parseFloat(String(formData.salarioNovo).replace(/[^\d,]/g, '').replace(',', '.')) : null,
+        motivo: formData.motivo
+      };
+
+      try {
+        await api(API, { method: 'POST', body: JSON.stringify(body) });
+        Toast.success('Solicitação enviada!');
+        Modal.close('promotionModal');
+        loadData();
+      } catch (e) {
+        Toast.error(e.message || 'Erro ao enviar solicitação');
+      }
+    }
+
+    async function viewDetail(id) {
+      let p;
+      try { p = await api(API + '/' + id); } catch (e) { Toast.error('Erro ao carregar detalhes'); return; }
+      if (!p) return;
+
+      const formatCurrency = v => v != null ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v) : '-';
+      const formatDate = d => d ? new Date(d).toLocaleString('pt-BR') : '-';
+
+      document.getElementById("detailContent").innerHTML = `
+        <div style="margin-bottom: var(--spacing-4);">
+          <h4 style="margin: 0; color: var(--gray-800);">${p.funcionarioNome}</h4>
+          <p style="color: var(--gray-500); margin: var(--spacing-1) 0;">${p.funcionarioMatricula || ''}</p>
+          <span class="badge ${statusBadge[p.status]}">${statusLabels[p.status]}</span>
+          <span class="badge badge-info" style="margin-left: var(--spacing-2);">${tipoLabels[p.tipo] || p.tipo}</span>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-4); margin-bottom: var(--spacing-4);">
+          <div>
+            <h5 style="color: var(--gray-500); text-transform: uppercase; font-size: var(--font-size-xs);">Situação Atual</h5>
+            <p><strong>Cargo:</strong> ${p.cargoAtualTitulo || '-'}</p>
+            <p><strong>Departamento:</strong> ${p.departamentoAtualNome || 'Sem departamento'}</p>
+            <p><strong>Salário:</strong> ${formatCurrency(p.salarioAtual)}</p>
+          </div>
+          <div>
+            <h5 style="color: var(--gray-500); text-transform: uppercase; font-size: var(--font-size-xs);">Proposta</h5>
+            <p><strong>Cargo:</strong> ${p.cargoNovoTitulo || 'Manter atual'}</p>
+            <p><strong>Departamento:</strong> ${p.departamentoNovoNome || 'Manter atual'}</p>
+            <p><strong>Salário:</strong> ${p.salarioNovo != null ? formatCurrency(p.salarioNovo) : 'Manter atual'}</p>
+          </div>
+        </div>
+        <div style="margin-bottom: var(--spacing-4);">
+          <h5 style="color: var(--gray-500); text-transform: uppercase; font-size: var(--font-size-xs);">Justificativa</h5>
+          <p>${p.motivo}</p>
+        </div>
+        <div style="font-size: var(--font-size-sm); color: var(--gray-500);">
+          <p><strong>Solicitado por:</strong> ${p.solicitanteEmail} em ${formatDate(p.dataSolicitacao)}</p>
+          ${p.aprovadorEmail ? '<p><strong>Decidido por:</strong> ' + p.aprovadorEmail + ' em ' + formatDate(p.dataDecisao) + '</p>' : ''}
+          ${p.observacaoAprovador ? '<p><strong>Observação:</strong> ' + p.observacaoAprovador + '</p>' : ''}
+        </div>
+        ${p.status === 'PENDENTE' && isChefe ? '<div class="form-group" style="margin-top: var(--spacing-4);"><label class="form-label">Observação (opcional)</label><textarea class="form-input" id="approvalObs" rows="2" placeholder="Adicione uma observação..."></textarea></div>' : ''}
+      `;
+
+      let footerHtml = '<button class="btn btn-secondary" onclick="Modal.close(\'detailModal\')">Fechar</button>';
+      if (p.status === 'PENDENTE' && isChefe) {
+        footerHtml += ' <button class="btn btn-danger" onclick="decide(' + p.id + ', \'reject\')">Rejeitar</button>';
+        footerHtml += ' <button class="btn btn-primary" onclick="decide(' + p.id + ', \'approve\')">Aprovar</button>';
+      }
+      document.getElementById("detailFooter").innerHTML = footerHtml;
+      Modal.open('detailModal');
+    }
+
+    async function decide(id, action) {
+      const obs = document.getElementById("approvalObs");
+      const observacao = obs ? obs.value : null;
+      try {
+        await api(API + '/' + id + '/' + action, { method: 'PUT', body: JSON.stringify({ observacao }) });
+        Toast.success(action === 'approve' ? 'Solicitação aprovada!' : 'Solicitação rejeitada!');
+        Modal.close('detailModal');
+        loadData();
+      } catch (e) {
+        Toast.error(e.message || 'Erro ao processar');
+      }
+    }
+  </script>
+</body>
+
+</html>

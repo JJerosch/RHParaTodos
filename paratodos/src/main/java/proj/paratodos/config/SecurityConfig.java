@@ -65,13 +65,25 @@ public class SecurityConfig {
                         .requestMatchers("/benefits/**", "/api/benefits/**", "/vacation/**")
                             .hasAnyRole("ADMIN", "RH_CHEFE", "DP_CHEFE", "DP_ASSISTENTE")
 
-                        // Funcionários, recrutamento, treinamentos: RH
-                        .requestMatchers("/employees/**", "/api/employees/**", "/recruitment/**", "/training/**")
+                        // Funcionários: RH + DP (DP consulta apenas)
+                        .requestMatchers("/employees/**", "/api/employees/**")
+                            .hasAnyRole("ADMIN", "RH_CHEFE", "RH_ASSISTENTE", "DP_CHEFE", "DP_ASSISTENTE")
+
+                        // Recrutamento e treinamentos: RH
+                        .requestMatchers("/recruitment/**", "/api/recruitment/**", "/training/**")
                             .hasAnyRole("ADMIN", "RH_CHEFE", "RH_ASSISTENTE")
 
-                        // Departamentos e cargos: somente chefia RH
-                        .requestMatchers("/departments/**", "/api/departments/**", "/positions/**", "/api/positions/**")
+                        // Promoções: RH (todos solicitam, RH_CHEFE aprova)
+                        .requestMatchers("/promotions/**", "/api/promotions/**")
+                            .hasAnyRole("ADMIN", "RH_CHEFE", "RH_ASSISTENTE")
+
+                        // Departamentos: somente chefia RH (gestão)
+                        .requestMatchers("/departments/**", "/api/departments/**")
                             .hasAnyRole("ADMIN", "RH_CHEFE")
+
+                        // Cargos: RH + DP (DP apenas consulta)
+                        .requestMatchers("/positions/**", "/api/positions/**")
+                            .hasAnyRole("ADMIN", "RH_CHEFE", "RH_ASSISTENTE", "DP_CHEFE", "DP_ASSISTENTE")
 
                         // Avaliações de desempenho: chefia RH
                         .requestMatchers("/performance/**")
