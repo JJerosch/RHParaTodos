@@ -740,6 +740,11 @@
       setText('infoCidade', p.cidade);
       setText('infoEstado', p.estado);
 
+      // Visão Geral — Emergência
+      setText('infoEmergenciaNome', p.emergenciaNome);
+      setText('infoEmergenciaParentesco', p.emergenciaParentesco);
+      setText('infoEmergenciaTelefone', p.emergenciaTelefone);
+
       // Form de edição — preencher com dados atuais
       setVal('editNome', p.nomeCompleto);
       setVal('editEmail', p.emailCorporativo || p.emailPessoal);
@@ -753,20 +758,26 @@
       setVal('editBairro', p.bairro);
       setVal('editCidade', p.cidade);
       setVal('editEstado', p.estado);
+      setVal('editEmergenciaNome', p.emergenciaNome);
+      setVal('editEmergenciaParentesco', p.emergenciaParentesco);
+      setVal('editEmergenciaTelefone', p.emergenciaTelefone);
     }
 
     // ── Salvar perfil na API ──
     async function saveProfile() {
       const body = {
-        telefone:     document.getElementById('editTelefone')?.value || '',
-        emailPessoal: document.getElementById('editEmail')?.value || '',
-        cep:          (document.getElementById('editCep')?.value || '').replace(/\D/g, ''),
-        logradouro:   document.getElementById('editLogradouro')?.value || '',
-        numero:       document.getElementById('editNumero')?.value || '',
-        complemento:  document.getElementById('editComplemento')?.value || '',
-        bairro:       document.getElementById('editBairro')?.value || '',
-        cidade:       document.getElementById('editCidade')?.value || '',
-        estado:       document.getElementById('editEstado')?.value || ''
+        telefone:              document.getElementById('editTelefone')?.value || '',
+        emailPessoal:          document.getElementById('editEmail')?.value || '',
+        cep:                   (document.getElementById('editCep')?.value || '').replace(/\D/g, ''),
+        logradouro:            document.getElementById('editLogradouro')?.value || '',
+        numero:                document.getElementById('editNumero')?.value || '',
+        complemento:           document.getElementById('editComplemento')?.value || '',
+        bairro:                document.getElementById('editBairro')?.value || '',
+        cidade:                document.getElementById('editCidade')?.value || '',
+        estado:                document.getElementById('editEstado')?.value || '',
+        emergenciaNome:        document.getElementById('editEmergenciaNome')?.value || '',
+        emergenciaParentesco:  document.getElementById('editEmergenciaParentesco')?.value || '',
+        emergenciaTelefone:    document.getElementById('editEmergenciaTelefone')?.value || ''
       };
 
       try {
