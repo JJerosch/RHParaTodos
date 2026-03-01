@@ -50,7 +50,7 @@ public class FuncionarioService {
         validateUniqueness(request, null);
 
         Funcionario f = new Funcionario();
-        mapRequestToEntity(request, f);
+        mapRequestToEntity(request, f, true);
 
         f = funcionarioRepository.save(f);
         return FuncionarioResponse.fromEntity(f);
@@ -62,7 +62,9 @@ public class FuncionarioService {
                 .orElseThrow(() -> new IllegalArgumentException("Funcionario nao encontrado: " + id));
 
         validateUniqueness(request, id);
-        mapRequestToEntity(request, f);
+        // Na edicao, cargo/departamento/salario NAO sao alterados diretamente
+        // Essas mudancas devem ser feitas via sistema de promocoes
+        mapRequestToEntity(request, f, false);
 
         f = funcionarioRepository.save(f);
         return FuncionarioResponse.fromEntity(f);
@@ -102,7 +104,11 @@ public class FuncionarioService {
         }
     }
 
-    private void mapRequestToEntity(FuncionarioRequest req, Funcionario f) {
+    /**
+     * @param allowProfessionalFields true = criacao (permite setar cargo/dept/salario),
+     *                                false = edicao (ignora cargo/dept/salario, use promocoes)
+     */
+    private void mapRequestToEntity(FuncionarioRequest req, Funcionario f, boolean allowProfessionalFields) {
         f.setMatricula(req.matricula());
         f.setNomeCompleto(req.nomeCompleto());
         f.setCpf(req.cpf());
@@ -130,23 +136,27 @@ public class FuncionarioService {
         f.setDataDesligamento(req.dataDesligamento());
         f.setStatus(req.status() != null ? req.status() : "ATIVO");
         f.setTipoContrato(req.tipoContrato());
-        f.setSalarioAtual(req.salarioAtual());
 
-        // Relacionamentos
-        if (req.departamentoId() != null) {
-            Departamento dep = departamentoRepository.findById(req.departamentoId())
-                    .orElseThrow(() -> new IllegalArgumentException("Departamento nao encontrado: " + req.departamentoId()));
-            f.setDepartamento(dep);
-        } else {
-            f.setDepartamento(null);
-        }
+        // Cargo, departamento e salario so podem ser alterados na criacao
+        // Para edicao, usar sistema de promocoes
+        if (allowProfessionalFields) {
+            f.setSalarioAtual(req.salarioAtual());
 
-        if (req.cargoId() != null) {
-            Cargo cargo = cargoRepository.findById(req.cargoId())
-                    .orElseThrow(() -> new IllegalArgumentException("Cargo nao encontrado: " + req.cargoId()));
-            f.setCargo(cargo);
-        } else {
-            f.setCargo(null);
+            if (req.departamentoId() != null) {
+                Departamento dep = departamentoRepository.findById(req.departamentoId())
+                        .orElseThrow(() -> new IllegalArgumentException("Departamento nao encontrado: " + req.departamentoId()));
+                f.setDepartamento(dep);
+            } else {
+                f.setDepartamento(null);
+            }
+
+            if (req.cargoId() != null) {
+                Cargo cargo = cargoRepository.findById(req.cargoId())
+                        .orElseThrow(() -> new IllegalArgumentException("Cargo nao encontrado: " + req.cargoId()));
+                f.setCargo(cargo);
+            } else {
+                f.setCargo(null);
+            }
         }
 
         if (req.gestorId() != null) {

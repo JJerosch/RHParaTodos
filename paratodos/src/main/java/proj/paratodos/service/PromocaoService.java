@@ -110,8 +110,20 @@ public class PromocaoService {
         p.setDataDecisao(LocalDateTime.now());
         p.setObservacaoAprovador(observacao);
 
-        // Aplica mudancas no funcionario
+        // Para CONTRATACAO, valida que funcionario tem dados minimos preenchidos
         Funcionario f = p.getFuncionario();
+        if ("CONTRATACAO".equals(p.getTipo())) {
+            StringBuilder missing = new StringBuilder();
+            if (f.getCpf() == null || f.getCpf().isBlank()) missing.append("CPF, ");
+            if (f.getDataNascimento() == null) missing.append("Data de Nascimento, ");
+            if (f.getMatricula() == null || f.getMatricula().startsWith("NEW-")) missing.append("Matricula definitiva, ");
+            if (p.getDepartamentoNovo() == null) missing.append("Departamento, ");
+            if (p.getCargoNovo() == null) missing.append("Cargo, ");
+            if (missing.length() > 0) {
+                throw new IllegalArgumentException("Dados incompletos para contratacao. Faltam: " + missing.substring(0, missing.length() - 2)
+                        + ". Atualize os dados do funcionario e da solicitacao antes de aprovar.");
+            }
+        }
 
         if (p.getCargoNovo() != null) {
             f.setCargo(p.getCargoNovo());

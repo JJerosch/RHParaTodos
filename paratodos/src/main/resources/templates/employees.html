@@ -96,15 +96,21 @@
       </div>
 
       <!-- Table -->
-      <div class="table-container">
-        <table class="data-table" id="employeesTable">
+      <div class="table-container" style="overflow-x: auto;">
+        <table class="data-table" id="employeesTable" style="min-width: 1200px;">
           <thead>
             <tr>
               <th class="sortable" onclick="sortTable(0)">Funcionário</th>
               <th class="sortable" onclick="sortTable(1)">Matrícula</th>
-              <th class="sortable hide-mobile" onclick="sortTable(2)">Departamento</th>
-              <th class="sortable hide-mobile" onclick="sortTable(3)">Cargo</th>
-              <th class="sortable hide-mobile" onclick="sortTable(4)">Admissão</th>
+              <th class="sortable" onclick="sortTable(2)">Email Corporativo</th>
+              <th class="sortable" onclick="sortTable(3)">CPF</th>
+              <th class="sortable" onclick="sortTable(4)">Departamento</th>
+              <th class="sortable" onclick="sortTable(5)">Cargo</th>
+              <th class="sortable" onclick="sortTable(6)">Telefone</th>
+              <th class="sortable" onclick="sortTable(7)">Cidade/UF</th>
+              <th class="sortable" onclick="sortTable(8)">Contrato</th>
+              <th class="sortable" onclick="sortTable(9)">Admissão</th>
+              <th class="sortable" onclick="sortTable(10)">Salário</th>
               <th>Status</th>
               <th>Ações</th>
             </tr>
@@ -312,23 +318,37 @@
                     <input type="date" class="form-input" name="dataAdmissao" required>
                   </div>
                 </div>
-                <div class="form-row form-row-2">
-                  <div class="form-group">
-                    <label class="form-label">Departamento *</label>
-                    <select class="form-select" name="departamentoId" id="formDeptSelect" required>
-                      <option value="">Selecione</option>
-                      <!-- Sera preenchido dinamicamente -->
-                    </select>
+                <!-- Campos de cargo/departamento/salário: somente na criação -->
+                <div id="professionalFieldsCreate">
+                  <div class="form-row form-row-2">
+                    <div class="form-group">
+                      <label class="form-label">Departamento *</label>
+                      <select class="form-select" name="departamentoId" id="formDeptSelect">
+                        <option value="">Selecione</option>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Cargo *</label>
+                      <select class="form-select" name="cargoId" id="formCargoSelect">
+                        <option value="">Selecione</option>
+                      </select>
+                    </div>
                   </div>
                   <div class="form-group">
-                    <label class="form-label">Cargo *</label>
-                    <select class="form-select" name="cargoId" id="formCargoSelect" required>
-                      <option value="">Selecione</option>
-                      <!-- Sera preenchido dinamicamente -->
-                    </select>
+                    <label class="form-label">Salário</label>
+                    <input type="text" class="form-input" name="salarioAtual" data-mask="currency">
                   </div>
                 </div>
-                <div class="form-row form-row-3">
+                <!-- Info somente leitura quando editando -->
+                <div id="professionalFieldsEdit" style="display: none;">
+                  <div style="background: var(--gray-100); border-radius: var(--radius-md); padding: var(--spacing-4); margin-bottom: var(--spacing-4);">
+                    <p style="margin: 0 0 var(--spacing-2); color: var(--gray-500); font-size: var(--font-size-sm);">Cargo, departamento e salário são gerenciados pelo sistema de Promoções.</p>
+                    <p style="margin: 0;"><strong>Departamento:</strong> <span id="editDeptName">-</span></p>
+                    <p style="margin: var(--spacing-1) 0;"><strong>Cargo:</strong> <span id="editCargoName">-</span></p>
+                    <p style="margin: var(--spacing-1) 0;"><strong>Salário:</strong> <span id="editSalario">-</span></p>
+                  </div>
+                </div>
+                <div class="form-row form-row-2">
                   <div class="form-group">
                     <label class="form-label">Tipo de Contrato</label>
                     <select class="form-select" name="tipoContrato">
@@ -338,10 +358,6 @@
                       <option value="TEMPORARIO">Temporário</option>
                       <option value="APRENDIZ">Jovem Aprendiz</option>
                     </select>
-                  </div>
-                  <div class="form-group">
-                    <label class="form-label">Salário</label>
-                    <input type="text" class="form-input" name="salarioAtual" data-mask="currency">
                   </div>
                   <div class="form-group">
                     <label class="form-label">Status</label>
@@ -358,7 +374,6 @@
                     <label class="form-label">Gestor Direto</label>
                     <select class="form-select" name="gestorId" id="formGestorSelect">
                       <option value="">Selecione</option>
-                      <!-- Sera preenchido dinamicamente -->
                     </select>
                   </div>
                   <div class="form-group">
@@ -582,23 +597,26 @@
       const tbody = document.getElementById("tableBody");
 
       if (pageData.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state"><div class="empty-state-icon"><img src="/assets/id-card-lanyard (1).png" alt="vazio"></div><h3 class="empty-state-title">Nenhum funcionário encontrado</h3><p class="empty-state-text">Tente ajustar os filtros ou adicione um novo funcionário.</p></div></td></tr>';
+        tbody.innerHTML = '<tr><td colspan="13"><div class="empty-state"><div class="empty-state-icon"><img src="/assets/id-card-lanyard (1).png" alt="vazio"></div><h3 class="empty-state-title">Nenhum funcionário encontrado</h3><p class="empty-state-text">Tente ajustar os filtros ou adicione um novo funcionário.</p></div></td></tr>';
       } else {
         tbody.innerHTML = pageData.map(emp => `
           <tr>
             <td>
               <div class="cell-avatar">
                 <div class="avatar">${getInitials(emp.nomeCompleto)}</div>
-                <div class="cell-info">
-                  <span class="cell-primary">${emp.nomeCompleto}</span>
-                  <span class="cell-secondary">${emp.emailCorporativo || ''}</span>
-                </div>
+                <span class="cell-primary">${emp.nomeCompleto}</span>
               </div>
             </td>
             <td>${emp.matricula}</td>
-            <td class="hide-mobile">${emp.departamentoNome || '-'}</td>
-            <td class="hide-mobile">${emp.cargoTitulo || '-'}</td>
-            <td class="hide-mobile">${formatDate(emp.dataAdmissao)}</td>
+            <td>${emp.emailCorporativo || '-'}</td>
+            <td>${emp.cpf || '-'}</td>
+            <td>${emp.departamentoNome || '-'}</td>
+            <td>${emp.cargoTitulo || '-'}</td>
+            <td>${emp.telefone || emp.celular || '-'}</td>
+            <td>${emp.cidade ? emp.cidade + '/' + (emp.estado || '') : '-'}</td>
+            <td>${emp.tipoContrato || '-'}</td>
+            <td>${formatDate(emp.dataAdmissao)}</td>
+            <td>${formatCurrency(emp.salarioAtual)}</td>
             <td><span class="badge ${statusBadge[emp.status] || 'badge-info'}">${statusLabels[emp.status] || emp.status}</span></td>
             <td>
               <div class="cell-actions">
@@ -658,7 +676,7 @@
       headers.forEach(h => h.classList.remove('asc', 'desc'));
       header.classList.add(isAsc ? 'desc' : 'asc');
 
-      const keys = ['nomeCompleto', 'matricula', 'departamento.nome', 'cargo.titulo', 'dataAdmissao', 'status'];
+      const keys = ['nomeCompleto', 'matricula', 'emailCorporativo', 'cpf', 'departamento.nome', 'cargo.titulo', 'telefone', 'cidade', 'tipoContrato', 'dataAdmissao', 'salarioAtual', 'status'];
       currentSort = keys[colIndex] + ',' + (isAsc ? 'desc' : 'asc');
       currentPage = 0;
       loadPage();
@@ -671,14 +689,28 @@
       document.querySelectorAll('.tab-btn').forEach((btn, i) => btn.classList.toggle('active', i === 0));
       document.querySelectorAll('.tab-content').forEach((c, i) => c.classList.toggle('active', i === 0));
 
+      const createFields = document.getElementById("professionalFieldsCreate");
+      const editFields = document.getElementById("professionalFieldsEdit");
+
       if (id) {
         document.getElementById("modalTitle").textContent = "Editar Funcionário";
+        // Edição: esconde campos de cargo/dept/salário, mostra info read-only
+        createFields.style.display = 'none';
+        editFields.style.display = 'block';
         try {
           const emp = await api('/api/employees/' + id);
-          if (emp) Form.populate('employeeForm', emp);
+          if (emp) {
+            Form.populate('employeeForm', emp);
+            document.getElementById("editDeptName").textContent = emp.departamentoNome || 'Sem departamento';
+            document.getElementById("editCargoName").textContent = emp.cargoTitulo || 'Sem cargo';
+            document.getElementById("editSalario").textContent = formatCurrency(emp.salarioAtual);
+          }
         } catch (e) { Toast.error('Erro ao carregar funcionário'); return; }
       } else {
         document.getElementById("modalTitle").textContent = "Novo Funcionário";
+        // Criação: mostra campos de cargo/dept/salário editáveis
+        createFields.style.display = 'block';
+        editFields.style.display = 'none';
       }
       Modal.open('employeeModal');
       Mask.initAll();

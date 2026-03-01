@@ -86,12 +86,14 @@ public class RecrutamentoController {
     }
 
     @PutMapping("/candidaturas/{id}/etapa")
-    public CandidaturaResponse updateEtapa(@PathVariable Long id, @RequestBody Map<String, String> body) {
+    public CandidaturaResponse updateEtapa(@PathVariable Long id,
+                                           @RequestBody Map<String, String> body,
+                                           @AuthenticationPrincipal UserPrincipal principal) {
         String etapa = body.get("etapa");
         if (etapa == null || etapa.isBlank()) {
             throw new IllegalArgumentException("Etapa e obrigatoria");
         }
-        return recrutamentoService.updateEtapa(id, etapa, body.get("observacoes"), body.get("motivoRejeicao"));
+        return recrutamentoService.updateEtapa(id, etapa, body.get("observacoes"), body.get("motivoRejeicao"), principal.getId());
     }
 
     @GetMapping("/stats")
