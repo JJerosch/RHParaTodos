@@ -440,17 +440,17 @@ BEGIN
   SELECT id INTO u_rh_chefe FROM public.usuarios WHERE email='rh.chefe@local' LIMIT 1;
 
   IF NOT EXISTS (SELECT 1 FROM public.vagas WHERE titulo='Desenvolvedor Júnior - Fullstack' AND status IN ('ABERTA','EM_ANDAMENTO')) THEN
-    INSERT INTO public.vagas (titulo, descricao, departamento_id, cargo_id, quantidade, prioridade, salario_min, salario_max, tipo_contrato, local_trabalho, modelo_trabalho, requisitos, status, publicada_em, criado_por_id)
+    INSERT INTO public.vagas (titulo, descricao, departamento_id, cargo_id, quantidade, prioridade, salario_min, salario_max, tipo_contrato, local_trabalho, modelo_trabalho, requisitos, status, publicada_em, criado_por)
     VALUES ('Desenvolvedor Júnior - Fullstack', 'Vaga para desenvolvedor fullstack com conhecimento em Java e React', dep_ti, c_dev_jr, 2, 'ALTA', 3000, 5000, 'CLT', 'São Paulo - SP', 'HIBRIDO', 'Java, Spring Boot, React, SQL', 'ABERTA', now() - interval '5 days', u_rh_chefe);
   END IF;
 
   IF NOT EXISTS (SELECT 1 FROM public.vagas WHERE titulo='Executivo de Vendas B2B' AND status IN ('ABERTA','EM_ANDAMENTO')) THEN
-    INSERT INTO public.vagas (titulo, descricao, departamento_id, cargo_id, quantidade, prioridade, salario_min, salario_max, tipo_contrato, local_trabalho, modelo_trabalho, requisitos, status, publicada_em, criado_por_id)
+    INSERT INTO public.vagas (titulo, descricao, departamento_id, cargo_id, quantidade, prioridade, salario_min, salario_max, tipo_contrato, local_trabalho, modelo_trabalho, requisitos, status, publicada_em, criado_por)
     VALUES ('Executivo de Vendas B2B', 'Vaga para executivo de vendas com experiência em B2B e SaaS', dep_com, c_exec_vendas, 1, 'MEDIA', 4000, 8000, 'CLT', 'São Paulo - SP', 'PRESENCIAL', 'Vendas B2B, CRM, negociação', 'ABERTA', now() - interval '10 days', u_rh_chefe);
   END IF;
 
   IF NOT EXISTS (SELECT 1 FROM public.vagas WHERE titulo='Analista de Marketing Digital' AND status IN ('ABERTA','EM_ANDAMENTO')) THEN
-    INSERT INTO public.vagas (titulo, descricao, departamento_id, cargo_id, quantidade, prioridade, salario_min, salario_max, tipo_contrato, local_trabalho, modelo_trabalho, requisitos, status, publicada_em, criado_por_id)
+    INSERT INTO public.vagas (titulo, descricao, departamento_id, cargo_id, quantidade, prioridade, salario_min, salario_max, tipo_contrato, local_trabalho, modelo_trabalho, requisitos, status, publicada_em, criado_por)
     VALUES ('Analista de Marketing Digital', 'Vaga para analista focado em campanhas digitais e SEO', dep_mkt, c_analista_mkt, 1, 'MEDIA', 3500, 6500, 'CLT', 'São Paulo - SP', 'REMOTO', 'Marketing digital, Google Ads, SEO, Analytics', 'EM_ANDAMENTO', now() - interval '20 days', u_rh_chefe);
   END IF;
 END $$;
