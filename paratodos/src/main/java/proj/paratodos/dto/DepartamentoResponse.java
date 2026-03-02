@@ -8,27 +8,21 @@ public record DepartamentoResponse(
         Long id,
         String nome,
         String descricao,
-        Long departamentoPaiId,
-        String departamentoPaiNome,
         Boolean ativo,
         long funcionarios,
         long cargos,
-        Integer headcountLimite,
         LocalDateTime criadoEm,
         LocalDateTime atualizadoEm
 ) {
 
-    public static DepartamentoResponse fromEntity(Departamento d, long funcionarios, long cargos, String paiNome) {
+    public static DepartamentoResponse fromEntity(Departamento d, long funcionarios, long cargos) {
         return new DepartamentoResponse(
                 d.getId(),
                 d.getNome(),
                 d.getDescricao(),
-                d.getDepartamentoPaiId(),
-                paiNome,
                 d.getAtivo(),
                 funcionarios,
                 cargos,
-                d.getHeadcountLimite(),
                 d.getCriadoEm(),
                 d.getAtualizadoEm()
         );

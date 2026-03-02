@@ -67,24 +67,12 @@ public class DepartamentoService {
     private void mapRequestToEntity(DepartamentoRequest req, Departamento d) {
         d.setNome(req.nome());
         d.setDescricao(req.descricao());
-        d.setDepartamentoPaiId(req.departamentoPaiId());
         d.setAtivo(req.ativo() != null ? req.ativo() : true);
-        if (req.headcountLimite() != null) {
-            d.setHeadcountLimite(req.headcountLimite());
-        }
     }
 
     private DepartamentoResponse toResponse(Departamento d) {
         long funcionarios = departamentoRepository.countFuncionariosByDepartamentoId(d.getId());
         long cargos = departamentoRepository.countCargosByDepartamentoId(d.getId());
-
-        String paiNome = null;
-        if (d.getDepartamentoPaiId() != null) {
-            paiNome = departamentoRepository.findById(d.getDepartamentoPaiId())
-                    .map(Departamento::getNome)
-                    .orElse(null);
-        }
-
-        return DepartamentoResponse.fromEntity(d, funcionarios, cargos, paiNome);
+        return DepartamentoResponse.fromEntity(d, funcionarios, cargos);
     }
 }

@@ -95,6 +95,12 @@ public class PagesController {
         return "promotions";
     }
 
+    @GetMapping("/solicitacoes")
+    public String solicitacoesPage(Model model) {
+        injectCurrentUser(model);
+        return "solicitacoes";
+    }
+
     @GetMapping("/recruitment")
     public String recruitmentPage(Model model) {
         injectCurrentUser(model);

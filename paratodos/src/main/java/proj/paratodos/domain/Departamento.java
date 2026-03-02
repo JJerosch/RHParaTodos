@@ -21,9 +21,6 @@ public class Departamento {
 
     private String descricao;
 
-    @Column(name = "departamento_pai_id")
-    private Long departamentoPaiId;
-
     @Column(nullable = false)
     private Boolean ativo = true;
 
