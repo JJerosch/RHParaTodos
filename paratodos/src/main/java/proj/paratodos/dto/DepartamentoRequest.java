@@ -11,9 +11,5 @@ public record DepartamentoRequest(
 
         String descricao,
 
-        Long departamentoPaiId,
-
-        Boolean ativo,
-
-        Integer headcountLimite
+        Boolean ativo
 ) {}

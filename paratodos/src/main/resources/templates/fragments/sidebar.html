@@ -53,6 +53,12 @@
             <span class="nav-icon"><img th:src="@{/assets/scroll.png}" alt="" width="20" height="20"></span>
             <span class="nav-text">Promoções</span>
         </a>
+        <a th:href="@{/solicitacoes}" class="nav-item"
+           th:classappend="${activePage == 'solicitacoes'} ? ' active'"
+           data-roles="ADMIN,RH_CHEFE">
+            <span class="nav-icon"><img th:src="@{/assets/check (1).png}" alt="" width="20" height="20"></span>
+            <span class="nav-text">Solicitações</span>
+        </a>
 
         <!-- Recursos Humanos -->
         <div class="nav-section" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE">Recursos Humanos</div>

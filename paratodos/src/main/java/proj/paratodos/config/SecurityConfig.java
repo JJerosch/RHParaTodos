@@ -79,6 +79,14 @@ public class SecurityConfig {
                         .requestMatchers("/promotions/**", "/api/promotions/**")
                             .hasAnyRole("ADMIN", "RH_CHEFE", "RH_ASSISTENTE")
 
+                        // Solicitações: apenas chefes de RH e ADMIN (aprovação/rejeição)
+                        .requestMatchers("/solicitacoes/**")
+                            .hasAnyRole("ADMIN", "RH_CHEFE")
+
+                        // Dashboard API: perfis de gestão
+                        .requestMatchers("/api/dashboard/**")
+                            .hasAnyRole("ADMIN", "RH_CHEFE", "RH_ASSISTENTE", "DP_CHEFE", "DP_ASSISTENTE")
+
                         // Departamentos: somente chefia RH (gestão)
                         .requestMatchers("/departments/**", "/api/departments/**")
                             .hasAnyRole("ADMIN", "RH_CHEFE")

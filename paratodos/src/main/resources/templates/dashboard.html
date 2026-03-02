@@ -44,8 +44,8 @@
                 </div>
                 <div class="stat-content">
                     <h3>Total de Funcionários</h3>
-                    <p class="stat-value">248</p>
-                    <small class="stat-change positive">+5 este mês</small>
+                    <p class="stat-value" id="statTotal">--</p>
+                    <small class="stat-change positive" id="statContratadosMes"></small>
                 </div>
             </div>
 
@@ -55,8 +55,8 @@
                 </div>
                 <div class="stat-content">
                     <h3>Funcionários Ativos</h3>
-                    <p class="stat-value">235</p>
-                    <small class="stat-change positive">94.8% do total</small>
+                    <p class="stat-value" id="statAtivos">--</p>
+                    <small class="stat-change positive" id="statPercentAtivos"></small>
                 </div>
             </div>
 
@@ -66,19 +66,8 @@
                 </div>
                 <div class="stat-content">
                     <h3>Vagas Abertas</h3>
-                    <p class="stat-value">12</p>
-                    <small class="stat-change neutral">3 em andamento</small>
-                </div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-icon" style="background-color: rgba(231, 76, 60, 0.1);">
-                    <img th:src="@{/assets/chart-column-decreasing (1).png}" alt="icone_turnover">
-                </div>
-                <div class="stat-content">
-                    <h3>Taxa de Turnover</h3>
-                    <p class="stat-value">5.2%</p>
-                    <small class="stat-change negative">+0.3% no trimestre</small>
+                    <p class="stat-value" id="statVagas">--</p>
+                    <small class="stat-change neutral" id="statVagasAndamento"></small>
                 </div>
             </div>
         </div>
@@ -114,39 +103,8 @@
                     <h2>Contratações Recentes</h2>
                     <a th:href="@{/employees}" class="card-link">Ver todos &#8594;</a>
                 </div>
-                <div class="recent-list">
-                    <div class="recent-item">
-                        <div class="recent-avatar">JS</div>
-                        <div class="recent-info">
-                            <strong>João Silva</strong>
-                            <small>Desenvolvedor Senior - TI</small>
-                        </div>
-                        <span class="badge badge-success">Ativo</span>
-                    </div>
-                    <div class="recent-item">
-                        <div class="recent-avatar">MS</div>
-                        <div class="recent-info">
-                            <strong>Maria Santos</strong>
-                            <small>Analista de RH - RH</small>
-                        </div>
-                        <span class="badge badge-success">Ativo</span>
-                    </div>
-                    <div class="recent-item">
-                        <div class="recent-avatar">PC</div>
-                        <div class="recent-info">
-                            <strong>Pedro Costa</strong>
-                            <small>Designer UX/UI - TI</small>
-                        </div>
-                        <span class="badge badge-warning">Onboarding</span>
-                    </div>
-                    <div class="recent-item">
-                        <div class="recent-avatar">AF</div>
-                        <div class="recent-info">
-                            <strong>Ana Ferreira</strong>
-                            <small>Analista Financeiro - Finanças</small>
-                        </div>
-                        <span class="badge badge-success">Ativo</span>
-                    </div>
+                <div class="recent-list" id="recentHires">
+                    <div class="empty-state-inline">Carregando...</div>
                 </div>
             </div>
 
@@ -154,30 +112,10 @@
             <div class="dashboard-card">
                 <div class="card-header">
                     <h2>Pendências</h2>
-                    <span class="badge badge-warning">8 itens</span>
+                    <span class="badge badge-warning" id="pendingBadge">0 itens</span>
                 </div>
-                <div class="pending-list">
-                    <div class="pending-item" data-roles="ADMIN,DP_CHEFE,DP_ASSISTENTE">
-                        <div class="pending-info">
-                            <strong>Aprovar Férias</strong>
-                            <small>3 solicitações aguardando</small>
-                        </div>
-                        <a th:href="@{/vacation}" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.875rem;">Revisar</a>
-                    </div>
-                    <div class="pending-item" data-roles="ADMIN,RH_CHEFE">
-                        <div class="pending-info">
-                            <strong>Avaliações Pendentes</strong>
-                            <small>5 avaliações a concluir</small>
-                        </div>
-                        <a th:href="@{/performance}" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.875rem;">Revisar</a>
-                    </div>
-                    <div class="pending-item" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE">
-                        <div class="pending-info">
-                            <strong>Documentos Vencendo</strong>
-                            <small>2 ASOs próximos do vencimento</small>
-                        </div>
-                        <a th:href="@{/employees}" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.875rem;">Revisar</a>
-                    </div>
+                <div class="pending-list" id="pendingList">
+                    <div class="empty-state-inline">Carregando...</div>
                 </div>
             </div>
 
@@ -186,31 +124,8 @@
                 <div class="card-header">
                     <h2>Aniversariantes do Mês</h2>
                 </div>
-                <div class="birthday-list">
-                    <div class="birthday-item">
-                        <div class="birthday-info">
-                            <strong>Ana Paula Oliveira</strong>
-                            <small>15/01 - Analista Financeiro</small>
-                        </div>
-                    </div>
-                    <div class="birthday-item">
-                        <div class="birthday-info">
-                            <strong>Carlos Eduardo</strong>
-                            <small>18/01 - Gerente de Projetos</small>
-                        </div>
-                    </div>
-                    <div class="birthday-item">
-                        <div class="birthday-info">
-                            <strong>Juliana Lima</strong>
-                            <small>22/01 - Coordenadora RH</small>
-                        </div>
-                    </div>
-                    <div class="birthday-item">
-                        <div class="birthday-info">
-                            <strong>Roberto Martins</strong>
-                            <small>28/01 - Desenvolvedor</small>
-                        </div>
-                    </div>
+                <div class="birthday-list" id="birthdayList">
+                    <div class="empty-state-inline">Carregando...</div>
                 </div>
             </div>
 
@@ -219,42 +134,8 @@
                 <div class="card-header">
                     <h2>Distribuição por Departamento</h2>
                 </div>
-                <div class="department-chart">
-                    <div class="chart-bar">
-                        <span class="chart-label">Tecnologia</span>
-                        <div class="chart-progress">
-                            <div class="chart-fill" style="width: 45%; background: var(--primary-dark);"></div>
-                        </div>
-                        <span class="chart-value">45</span>
-                    </div>
-                    <div class="chart-bar">
-                        <span class="chart-label">Comercial</span>
-                        <div class="chart-progress">
-                            <div class="chart-fill" style="width: 35%; background: var(--success-green);"></div>
-                        </div>
-                        <span class="chart-value">35</span>
-                    </div>
-                    <div class="chart-bar">
-                        <span class="chart-label">Operações</span>
-                        <div class="chart-progress">
-                            <div class="chart-fill" style="width: 52%; background: var(--warning-orange);"></div>
-                        </div>
-                        <span class="chart-value">52</span>
-                    </div>
-                    <div class="chart-bar">
-                        <span class="chart-label">Financeiro</span>
-                        <div class="chart-progress">
-                            <div class="chart-fill" style="width: 18%; background: var(--info-gray);"></div>
-                        </div>
-                        <span class="chart-value">18</span>
-                    </div>
-                    <div class="chart-bar">
-                        <span class="chart-label">RH</span>
-                        <div class="chart-progress">
-                            <div class="chart-fill" style="width: 12%; background: var(--error-red);"></div>
-                        </div>
-                        <span class="chart-value">12</span>
-                    </div>
+                <div class="department-chart" id="deptChart">
+                    <div class="empty-state-inline">Carregando...</div>
                 </div>
             </div>
         </div>
@@ -309,6 +190,7 @@
     .chart-fill { height: 100%; border-radius: 4px; transition: width 0.5s ease; }
     .chart-value { font-weight: 600; color: var(--gray-800); text-align: right; }
     .stat-change.neutral { color: var(--gray-500); }
+    .empty-state-inline { color: var(--gray-400); font-size: var(--font-size-sm); padding: var(--spacing-4) 0; text-align: center; }
     @media (max-width: 768px) {
       .welcome-banner { flex-direction: column; text-align: center; gap: var(--spacing-4); }
       .quick-actions-grid { grid-template-columns: repeat(2, 1fr); }
@@ -319,6 +201,8 @@
 <!-- Scripts comuns (auth.js, components.js, initUserMenu, initSidebar) -->
 <div th:replace="~{fragments/scripts :: common}"></div>
 <script>
+    const chartColors = ['var(--primary-dark)', 'var(--success-green)', 'var(--warning-orange)', 'var(--info-gray)', 'var(--error-red)', '#8e44ad', '#16a085', '#d35400'];
+
     document.addEventListener('DOMContentLoaded', function () {
       if (!Auth.requireAuth()) return;
 
@@ -335,7 +219,7 @@
         return;
       }
 
-      // Dashboard-specific: welcome message + date
+      // Welcome message + date
       if (user) {
         var namePart = (user.email || '').split('@')[0].split('.')[0];
         var displayName = namePart.charAt(0).toUpperCase() + namePart.slice(1);
@@ -349,7 +233,143 @@
       });
       document.getElementById('currentDate').textContent =
         date.charAt(0).toUpperCase() + date.slice(1);
+
+      // Carregar dados reais do dashboard
+      loadDashboard();
     });
+
+    async function loadDashboard() {
+      try {
+        const res = await fetch('/api/dashboard', { credentials: 'same-origin' });
+        if (!res.ok) throw new Error('API indisponível');
+        const data = await res.json();
+
+        // Stats cards
+        document.getElementById('statTotal').textContent = data.totalFuncionarios;
+        document.getElementById('statAtivos').textContent = data.funcionariosAtivos;
+        document.getElementById('statVagas').textContent = data.vagasAbertas;
+
+        document.getElementById('statContratadosMes').textContent =
+          data.contratadosMes > 0 ? '+' + data.contratadosMes + ' este mês' : 'Nenhum este mês';
+
+        document.getElementById('statPercentAtivos').textContent =
+          data.percentAtivos + '% do total';
+
+        document.getElementById('statVagasAndamento').textContent =
+          data.vagasEmAndamento + ' em andamento';
+
+        // Contratações recentes
+        renderRecentHires(data.contratacaoRecentes);
+
+        // Pendências
+        renderPending(data.promocoesPendentes);
+
+        // Aniversariantes
+        renderBirthdays(data.aniversariantes);
+
+        // Distribuição por departamento
+        renderDeptChart(data.distribuicaoDepartamento);
+
+      } catch (e) {
+        console.error('Erro ao carregar dashboard:', e);
+        document.getElementById('recentHires').innerHTML = '<div class="empty-state-inline">Erro ao carregar dados</div>';
+      }
+    }
+
+    function getInitials(name) {
+      return (name || '').split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase();
+    }
+
+    function renderRecentHires(hires) {
+      const container = document.getElementById('recentHires');
+      if (!hires || hires.length === 0) {
+        container.innerHTML = '<div class="empty-state-inline">Nenhuma contratação no último mês</div>';
+        return;
+      }
+      container.innerHTML = hires.map(h => `
+        <div class="recent-item">
+          <div class="recent-avatar">${getInitials(h.nome)}</div>
+          <div class="recent-info">
+            <strong>${h.nome}</strong>
+            <small>${h.cargo} - ${h.departamento}</small>
+          </div>
+          <span class="badge badge-success">${h.status === 'ATIVO' ? 'Ativo' : h.status}</span>
+        </div>
+      `).join('');
+    }
+
+    function renderPending(promocoesPendentes) {
+      const container = document.getElementById('pendingList');
+      const badge = document.getElementById('pendingBadge');
+      let items = [];
+
+      if (promocoesPendentes > 0) {
+        items.push({
+          title: 'Solicitações de Promoção/Alteração',
+          detail: promocoesPendentes + ' solicitação(ões) pendente(s)',
+          link: '/solicitacoes',
+          roles: 'ADMIN,RH_CHEFE'
+        });
+      }
+
+      if (items.length === 0) {
+        badge.textContent = '0 itens';
+        container.innerHTML = '<div class="empty-state-inline">Nenhuma pendência no momento</div>';
+        return;
+      }
+
+      badge.textContent = items.length + ' ite' + (items.length === 1 ? 'm' : 'ns');
+      container.innerHTML = items.map(item => `
+        <div class="pending-item" data-roles="${item.roles}">
+          <div class="pending-info">
+            <strong>${item.title}</strong>
+            <small>${item.detail}</small>
+          </div>
+          <a href="${item.link}" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.875rem;">Revisar</a>
+        </div>
+      `).join('');
+
+      Auth.applyRoleVisibility(container);
+    }
+
+    function renderBirthdays(birthdays) {
+      const container = document.getElementById('birthdayList');
+      if (!birthdays || birthdays.length === 0) {
+        container.innerHTML = '<div class="empty-state-inline">Nenhum aniversariante este mês</div>';
+        return;
+      }
+      const mesNome = new Date().toLocaleDateString('pt-BR', { month: '2-digit' });
+      container.innerHTML = birthdays.map(b => `
+        <div class="birthday-item">
+          <div class="birthday-info">
+            <strong>${b.nome}</strong>
+            <small>${String(b.dia).padStart(2, '0')}/${mesNome} - ${b.cargo}</small>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderDeptChart(distribution) {
+      const container = document.getElementById('deptChart');
+      if (!distribution || distribution.length === 0) {
+        container.innerHTML = '<div class="empty-state-inline">Nenhum departamento com funcionários</div>';
+        return;
+      }
+      const maxCount = Math.max(...distribution.map(d => d.count));
+      container.innerHTML = distribution.map((d, i) => {
+        const percent = maxCount > 0 ? Math.round((d.count / maxCount) * 100) : 0;
+        const color = chartColors[i % chartColors.length];
+        return `
+          <div class="chart-bar">
+            <span class="chart-label">${d.nome}</span>
+            <div class="chart-progress">
+              <div class="chart-fill" style="width: ${percent}%; background: ${color};"></div>
+            </div>
+            <span class="chart-value">${d.count}</span>
+          </div>
+        `;
+      }).join('');
+    }
 </script>
 </body>
 </html>

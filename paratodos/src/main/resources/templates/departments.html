@@ -11,70 +11,27 @@
     };
   </script>
 
-  <!-- Sidebar -->
   <aside th:replace="~{fragments/sidebar :: admin('departments')}"></aside>
 
-
-  <!-- Main Content -->
   <div class="main-content">
     <header th:replace="~{fragments/topbar :: topbar('Departamentos')}"></header>
 
     <div class="content-area">
-      <!-- Stats -->
-      <div class="stats-row">
-        <div class="stat-box">
-          <div class="stat-box-header">
-            <div class="stat-box-icon" style="background: rgba(44, 62, 80, 0.1); color: var(--primary-dark);"><img
-                th:src="@{/assets/building-2.png}" alt="icone_departamentos"></div>
-          </div>
-          <div class="stat-box-value" id="statTotal">0</div>
-          <div class="stat-box-label">Total de Departamentos</div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-box-header">
-            <div class="stat-box-icon" style="background: rgba(39, 174, 96, 0.1); color: var(--success-green);"><img
-                th:src="@{/assets/check (1).png}" alt="icone_departamentos_ativos"></div>
-          </div>
-          <div class="stat-box-value" id="statAtivos">0</div>
-          <div class="stat-box-label">Ativos</div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-box-header">
-            <div class="stat-box-icon" style="background: rgba(243, 156, 18, 0.1); color: var(--warning-orange);"><img
-                th:src="@{/assets/users (1).png}" alt="icone_total_funcionarios"></div>
-          </div>
-          <div class="stat-box-value" id="statFuncionarios">0</div>
-          <div class="stat-box-label">Total de Funcionários</div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-box-header">
-            <div class="stat-box-icon" style="background: rgba(93, 109, 126, 0.1); color: var(--info-gray);"><img
-                th:src="@{/assets/scale.png}" alt="icone_media_departamento"></div>
-          </div>
-          <div class="stat-box-value" id="statMedia">0</div>
-          <div class="stat-box-label">Média por Departamento</div>
-        </div>
-      </div>
-
-      <!-- Page Header -->
       <div class="page-header">
         <div>
-          <h2 class="page-title">Estrutura Organizacional</h2>
-          <p class="page-subtitle">Gerencie os departamentos da empresa</p>
+          <h2 class="page-title">Quadro de Lotação</h2>
+          <p class="page-subtitle">Departamentos e quantidade de funcionários</p>
         </div>
         <div class="page-actions">
           <button class="btn btn-primary" onclick="openModal()">+ Novo Departamento</button>
         </div>
       </div>
 
-      <!-- Departments Grid -->
-      <div class="departments-grid" id="departmentsGrid">
-        <!-- Cards will be loaded here -->
-      </div>
+      <div class="departments-grid" id="departmentsGrid"></div>
     </div>
   </div>
 
-  <!-- Modal -->
+  <!-- Modal: Editar Departamento -->
   <div class="modal" id="departmentModal">
     <div class="modal-dialog modal-md">
       <div class="modal-header">
@@ -91,16 +48,6 @@
           <div class="form-group">
             <label class="form-label">Descrição</label>
             <textarea class="form-input" name="descricao" rows="3"></textarea>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Departamento Pai</label>
-            <select class="form-select" name="departamentoPaiId" id="parentDeptSelect">
-              <option value="">Nenhum (Raiz)</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Limite de Headcount</label>
-            <input type="number" class="form-input" name="headcountLimite" min="0" placeholder="0 = sem limite">
           </div>
           <div class="form-group">
             <label class="checkbox-label">
@@ -120,10 +67,9 @@
   <style>
     .departments-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
       gap: var(--spacing-4);
     }
-
     .department-card {
       background: white;
       border-radius: var(--radius-lg);
@@ -131,67 +77,50 @@
       box-shadow: var(--shadow-sm);
       border: 1px solid var(--gray-200);
       transition: all 0.2s;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
     }
-
     .department-card:hover {
       box-shadow: var(--shadow-md);
       transform: translateY(-2px);
     }
-
     .department-header {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      margin-bottom: var(--spacing-4);
+      margin-bottom: var(--spacing-3);
     }
-
-    .department-icon {
-      width: 48px;
-      height: 48px;
-      background: var(--gray-100);
-      border-radius: var(--radius-md);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 24px;
-    }
-
-    .department-actions {
-      display: flex;
-      gap: var(--spacing-1);
-    }
-
     .department-name {
       font-size: var(--font-size-lg);
       font-weight: 600;
       color: var(--gray-800);
       margin-bottom: var(--spacing-1);
     }
-
     .department-desc {
       font-size: var(--font-size-sm);
       color: var(--gray-500);
       margin-bottom: var(--spacing-4);
+      min-height: 20px;
     }
-
-    .department-stats {
+    .department-footer {
       display: flex;
-      gap: var(--spacing-6);
+      justify-content: space-between;
+      align-items: center;
       padding-top: var(--spacing-4);
       border-top: 1px solid var(--gray-100);
     }
-
-    .department-stat {
-      text-align: center;
+    .department-count {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-2);
     }
-
-    .department-stat-value {
-      font-size: var(--font-size-xl);
+    .department-count-value {
+      font-size: var(--font-size-2xl);
       font-weight: 700;
       color: var(--primary-dark);
     }
-
-    .department-stat-label {
+    .department-count-label {
       font-size: var(--font-size-xs);
       color: var(--gray-500);
       text-transform: uppercase;
@@ -201,17 +130,6 @@
   <div th:replace="~{fragments/scripts :: common}"></div>
   <script>
     const API = '/api/departments';
-
-    // Mock data (fallback caso API nao esteja disponivel)
-    const mockDepartments = [
-      { id: 1, nome: "Tecnologia", descricao: "Desenvolvimento de sistemas e infraestrutura", funcionarios: 45, cargos: 8, ativo: true },
-      { id: 2, nome: "Recursos Humanos", descricao: "Gestão de pessoas e cultura organizacional", funcionarios: 12, cargos: 5, ativo: true },
-      { id: 3, nome: "Financeiro", descricao: "Contabilidade, tesouraria e planejamento financeiro", funcionarios: 18, cargos: 6, ativo: true },
-      { id: 4, nome: "Comercial", descricao: "Vendas, marketing e relacionamento com clientes", funcionarios: 35, cargos: 7, ativo: true },
-      { id: 5, nome: "Operações", descricao: "Logística, produção e gestão operacional", funcionarios: 52, cargos: 9, ativo: true },
-      { id: 6, nome: "Jurídico", descricao: "Assessoria jurídica e compliance", funcionarios: 8, cargos: 3, ativo: true }
-    ];
-
     let departments = [];
     let currentDeptId = null;
 
@@ -226,68 +144,46 @@
 
     async function loadData() {
       try {
-        const [listRes, statsRes] = await Promise.all([
-          fetch(API, { credentials: 'same-origin' }),
-          fetch(API + '/stats', { credentials: 'same-origin' })
-        ]);
-        if (!listRes.ok) throw new Error('API indisponível');
-        departments = await listRes.json();
-        const stats = await statsRes.json();
-        document.getElementById("statTotal").textContent = stats.total;
-        document.getElementById("statAtivos").textContent = stats.ativos;
-        document.getElementById("statFuncionarios").textContent = stats.funcionarios;
-        document.getElementById("statMedia").textContent = stats.media;
+        const res = await fetch(API, { credentials: 'same-origin' });
+        if (!res.ok) throw new Error('API indisponível');
+        departments = await res.json();
       } catch (e) {
-        console.log('Usando dados mock:', e.message);
-        departments = mockDepartments;
-        updateStatsLocal();
+        console.error('Erro ao carregar departamentos:', e);
+        departments = [];
       }
       render();
     }
 
-    function updateStatsLocal() {
-      const total = departments.length;
-      const ativos = departments.filter(d => d.ativo).length;
-      const funcionarios = departments.reduce((sum, d) => sum + (d.funcionarios || 0), 0);
-      const media = total > 0 ? Math.round(funcionarios / total) : 0;
-      document.getElementById("statTotal").textContent = total;
-      document.getElementById("statAtivos").textContent = ativos;
-      document.getElementById("statFuncionarios").textContent = funcionarios;
-      document.getElementById("statMedia").textContent = media;
-    }
-
     function render() {
       const grid = document.getElementById("departmentsGrid");
+      if (departments.length === 0) {
+        grid.innerHTML = '<div class="empty-state"><h3 class="empty-state-title">Nenhum departamento cadastrado</h3></div>';
+        return;
+      }
       grid.innerHTML = departments.map(dept => `
         <div class="department-card">
-          <div class="department-header">
-            <div class="department-actions">
+          <div>
+            <div class="department-header">
+              <div>
+                <h3 class="department-name">${dept.nome}</h3>
+                <span class="badge ${dept.ativo ? 'badge-success' : 'badge-danger'}">${dept.ativo ? 'Ativo' : 'Inativo'}</span>
+              </div>
               <button class="btn-icon edit" onclick="edit(${dept.id})" title="Editar"><img src="/assets/pencil (1).png" alt="editar"></button>
-              <button class="btn-icon delete" onclick="remove(${dept.id})" title="Excluir"><img src="/assets/trash-2 (1).png" alt="excluir"></button>
             </div>
+            <p class="department-desc">${dept.descricao || 'Sem descrição'}</p>
           </div>
-          <h3 class="department-name">${dept.nome}</h3>
-          <p class="department-desc">${dept.descricao || 'Sem descrição'}</p>
-          <div class="department-stats">
-            <div class="department-stat">
-              <div class="department-stat-value">${dept.funcionarios || 0}${dept.headcountLimite ? '/' + dept.headcountLimite : ''}</div>
-              <div class="department-stat-label">Funcionários${dept.headcountLimite ? ' (Limite)' : ''}</div>
+          <div class="department-footer">
+            <div class="department-count">
+              <span class="department-count-value">${dept.funcionarios || 0}</span>
+              <span class="department-count-label">funcionários</span>
             </div>
-            <div class="department-stat">
-              <div class="department-stat-value">${dept.cargos || 0}</div>
-              <div class="department-stat-label">Cargos</div>
-            </div>
-            <div class="department-stat">
-              <span class="badge ${dept.ativo ? 'badge-success' : 'badge-danger'}">${dept.ativo ? 'Ativo' : 'Inativo'}</span>
+            <div class="department-count">
+              <span class="department-count-value">${dept.cargos || 0}</span>
+              <span class="department-count-label">cargos</span>
             </div>
           </div>
         </div>
       `).join('');
-
-      // Update parent select
-      const select = document.getElementById("parentDeptSelect");
-      select.innerHTML = '<option value="">Nenhum (Raiz)</option>' +
-        departments.map(d => '<option value="' + d.id + '">' + d.nome + '</option>').join('');
     }
 
     function openModal(id = null) {
@@ -312,9 +208,7 @@
       const body = {
         nome: formData.nome,
         descricao: formData.descricao || null,
-        departamentoPaiId: formData.departamentoPaiId ? Number(formData.departamentoPaiId) : null,
-        ativo: !!formData.ativo,
-        headcountLimite: formData.headcountLimite ? Number(formData.headcountLimite) : 0
+        ativo: !!formData.ativo
       };
 
       try {
@@ -332,21 +226,6 @@
         console.error(e);
         Toast.error(e.message || 'Erro ao salvar departamento');
       }
-    }
-
-    function remove(id) {
-      const dept = departments.find(d => d.id === id);
-      Confirm.show('Excluir o departamento <strong>' + dept.nome + '</strong>?', async () => {
-        try {
-          const res = await fetch(API + '/' + id, { method: 'DELETE', credentials: 'same-origin' });
-          if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err.error || 'Erro ao excluir'); }
-          Toast.success('Departamento excluído!');
-          loadData();
-        } catch (e) {
-          console.error(e);
-          Toast.error(e.message || 'Erro ao excluir departamento');
-        }
-      });
     }
   </script>
 </body>

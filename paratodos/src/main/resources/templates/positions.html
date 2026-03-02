@@ -13,63 +13,27 @@
 
   <aside th:replace="~{fragments/sidebar :: admin('positions')}"></aside>
 
-
   <div class="main-content">
     <header th:replace="~{fragments/topbar :: topbar('Cargos')}"></header>
 
     <div class="content-area">
       <div class="page-header">
         <div>
-          <h2 class="page-title">Gestão de Cargos</h2>
-          <p class="page-subtitle">Defina cargos e faixas salariais</p>
+          <h2 class="page-title">Cargos por Departamento</h2>
+          <p class="page-subtitle">Clique em um departamento para ver seus cargos e funcionários</p>
         </div>
         <div class="page-actions" data-action-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE">
           <button class="btn btn-primary" onclick="openModal()">+ Novo Cargo</button>
         </div>
       </div>
 
-      <div class="filters-bar">
-        <div class="search-box">
-          <input type="text" id="search" placeholder="Buscar cargo..." onkeyup="filter()">
-        </div>
-        <div class="filter-group">
-          <label>Departamento:</label>
-          <select id="filterDept" onchange="filter()">
-            <option value="">Todos</option>
-            <!-- Sera preenchido dinamicamente -->
-          </select>
-        </div>
-        <div class="filter-group">
-          <label>Nível:</label>
-          <select id="filterLevel" onchange="filter()">
-            <option value="">Todos</option>
-            <option value="JUNIOR">Junior</option>
-            <option value="PLENO">Pleno</option>
-            <option value="SENIOR">Senior</option>
-            <option value="GESTAO">Gestão</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="table-container">
-        <table class="data-table" id="dataTable">
-          <thead>
-            <tr>
-              <th>Cargo</th>
-              <th>Departamento</th>
-              <th>Nível</th>
-              <th class="hide-mobile">Faixa Salarial</th>
-              <th class="hide-mobile">Ocupantes</th>
-              <th>Status</th>
-              <th>Ações</th>
-            </tr>
-          </thead>
-          <tbody id="tableBody"></tbody>
-        </table>
+      <div id="accordionContainer">
+        <div style="text-align: center; padding: var(--spacing-6); color: var(--gray-400);">Carregando...</div>
       </div>
     </div>
   </div>
 
+  <!-- Modal: Novo/Editar Cargo -->
   <div class="modal" id="modal">
     <div class="modal-dialog modal-md">
       <div class="modal-header">
@@ -88,7 +52,6 @@
               <label class="form-label">Departamento *</label>
               <select class="form-select" name="departamentoId" id="formDeptSelect" required>
                 <option value="">Selecione</option>
-                <!-- Sera preenchido dinamicamente -->
               </select>
             </div>
           </div>
@@ -128,33 +91,94 @@
     </div>
   </div>
 
+  <style>
+    .accordion-item {
+      background: white;
+      border-radius: var(--radius-lg);
+      margin-bottom: var(--spacing-3);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--gray-200);
+      overflow: hidden;
+    }
+    .accordion-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: var(--spacing-4) var(--spacing-5);
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.2s;
+    }
+    .accordion-header:hover { background: var(--gray-50); }
+    .accordion-header-left {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-3);
+    }
+    .accordion-arrow {
+      transition: transform 0.2s;
+      font-size: 12px;
+      color: var(--gray-400);
+    }
+    .accordion-item.open .accordion-arrow { transform: rotate(90deg); }
+    .accordion-dept-name {
+      font-size: var(--font-size-lg);
+      font-weight: 600;
+      color: var(--gray-800);
+    }
+    .accordion-count {
+      font-size: var(--font-size-sm);
+      color: var(--gray-500);
+      background: var(--gray-100);
+      padding: var(--spacing-1) var(--spacing-3);
+      border-radius: var(--radius-full);
+    }
+    .accordion-body {
+      display: none;
+      padding: 0 var(--spacing-5) var(--spacing-5);
+    }
+    .accordion-item.open .accordion-body { display: block; }
+    .cargo-section { margin-bottom: var(--spacing-4); }
+    .cargo-section:last-child { margin-bottom: 0; }
+    .cargo-title {
+      font-weight: 600;
+      color: var(--primary-dark);
+      font-size: var(--font-size-base);
+      margin-bottom: var(--spacing-2);
+      padding-bottom: var(--spacing-2);
+      border-bottom: 1px solid var(--gray-100);
+    }
+    .func-row {
+      display: grid;
+      grid-template-columns: 1fr 120px 100px;
+      gap: var(--spacing-2);
+      padding: var(--spacing-2) 0;
+      font-size: var(--font-size-sm);
+      border-bottom: 1px solid var(--gray-50);
+      align-items: center;
+    }
+    .func-row:last-child { border-bottom: none; }
+    .func-name { color: var(--gray-800); font-weight: 500; }
+    .func-salary { color: var(--gray-600); text-align: right; }
+    .func-date { color: var(--gray-500); text-align: right; }
+    .cargo-empty {
+      font-size: var(--font-size-sm);
+      color: var(--gray-400);
+      font-style: italic;
+      padding: var(--spacing-2) 0;
+    }
+    @media (max-width: 768px) {
+      .func-row { grid-template-columns: 1fr; gap: 0; }
+      .func-salary, .func-date { text-align: left; font-size: var(--font-size-xs); }
+    }
+  </style>
+
   <div th:replace="~{fragments/scripts :: common}"></div>
   <script>
     const API = '/api/positions';
-
-    // Mock data (fallback)
-    const mockData = [
-      { id: 1, titulo: "Desenvolvedor Backend", departamentoId: 3, departamentoNome: "Tecnologia", nivel: "SENIOR", salarioMinimo: 10000, salarioMaximo: 15000, ocupantes: 8, ativo: true },
-      { id: 2, titulo: "Desenvolvedor Frontend", departamentoId: 3, departamentoNome: "Tecnologia", nivel: "PLENO", salarioMinimo: 7000, salarioMaximo: 11000, ocupantes: 6, ativo: true },
-      { id: 3, titulo: "Analista de RH", departamentoId: 1, departamentoNome: "Recursos Humanos", nivel: "PLENO", salarioMinimo: 5000, salarioMaximo: 8000, ocupantes: 4, ativo: true },
-      { id: 4, titulo: "Gerente Financeiro", departamentoId: 4, departamentoNome: "Financeiro", nivel: "GESTAO", salarioMinimo: 15000, salarioMaximo: 22000, ocupantes: 2, ativo: true },
-      { id: 5, titulo: "Vendedor", departamentoId: null, departamentoNome: "Comercial", nivel: "JUNIOR", salarioMinimo: 3000, salarioMaximo: 5000, ocupantes: 15, ativo: true },
-      { id: 6, titulo: "Tech Lead", departamentoId: 3, departamentoNome: "Tecnologia", nivel: "GESTAO", salarioMinimo: 18000, salarioMaximo: 25000, ocupantes: 3, ativo: true }
-    ];
-    const mockDepartamentos = [
-      { id: 1, nome: "Recursos Humanos" },
-      { id: 2, nome: "Departamento Pessoal" },
-      { id: 3, nome: "Tecnologia" },
-      { id: 4, nome: "Financeiro" }
-    ];
-
-    let data = [];
-    let filtered = [];
     let departamentos = [];
+    let allData = [];
     let currentId = null;
-    let usingMock = false;
-
-    const nivelLabels = { JUNIOR: 'Junior', PLENO: 'Pleno', SENIOR: 'Senior', GESTAO: 'Gestão' };
 
     document.addEventListener("DOMContentLoaded", () => {
       if (!Auth.requireAuth()) return;
@@ -168,96 +192,95 @@
 
     async function loadData() {
       try {
-        const [posRes, deptRes] = await Promise.all([
-          fetch(API, { credentials: 'same-origin' }),
+        const [byDeptRes, deptRes] = await Promise.all([
+          fetch(API + '/by-department', { credentials: 'same-origin' }),
           fetch(API + '/departamentos', { credentials: 'same-origin' })
         ]);
-        if (!posRes.ok) throw new Error('API indisponível');
-        data = await posRes.json();
+        if (!byDeptRes.ok) throw new Error('API indisponível');
+        allData = await byDeptRes.json();
         departamentos = await deptRes.json();
-        usingMock = false;
       } catch (e) {
-        console.log('Usando dados mock:', e.message);
-        data = mockData;
-        departamentos = mockDepartamentos;
-        usingMock = true;
+        console.error('Erro ao carregar dados:', e);
+        allData = [];
+        departamentos = [];
       }
-      filtered = [...data];
-      populateDeptDropdowns();
+      populateDeptDropdown();
       render();
     }
 
-    function populateDeptDropdowns() {
-      const filterSelect = document.getElementById("filterDept");
+    function populateDeptDropdown() {
       const formSelect = document.getElementById("formDeptSelect");
-      filterSelect.innerHTML = '<option value="">Todos</option>';
       formSelect.innerHTML = '<option value="">Selecione</option>';
       departamentos.forEach(d => {
-        filterSelect.innerHTML += '<option value="' + d.id + '">' + d.nome + '</option>';
         formSelect.innerHTML += '<option value="' + d.id + '">' + d.nome + '</option>';
       });
     }
 
-    function filter() {
-      const search = document.getElementById("search").value.toLowerCase();
-      const dept = document.getElementById("filterDept").value;
-      const level = document.getElementById("filterLevel").value;
-
-      if (!usingMock && (search || dept || level)) {
-        // Usar filtro da API com query params
-        const params = new URLSearchParams();
-        if (search) params.set('search', search);
-        if (dept) params.set('departamentoId', dept);
-        if (level) params.set('nivel', level);
-        fetch(API + '?' + params.toString(), { credentials: 'same-origin' })
-          .then(r => r.json())
-          .then(result => { filtered = result; render(); })
-          .catch(() => { filterLocal(search, dept, level); });
-      } else {
-        filterLocal(search, dept, level);
-      }
+    function formatCurrency(val) {
+      if (val == null) return '-';
+      return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
     }
 
-    function filterLocal(search, dept, level) {
-      filtered = data.filter(item =>
-        (!search || item.titulo.toLowerCase().includes(search)) &&
-        (!dept || String(item.departamentoId) === dept) &&
-        (!level || item.nivel === level)
-      );
-      render();
+    function formatDate(d) {
+      if (!d) return '-';
+      return new Date(d + 'T00:00:00').toLocaleDateString('pt-BR');
     }
-
-    const canWrite = Auth.hasAnyRole(['ADMIN', 'RH_CHEFE', 'RH_ASSISTENTE']);
 
     function render() {
-      document.getElementById("tableBody").innerHTML = filtered.map(item => `
-        <tr>
-          <td><strong>${item.titulo}</strong></td>
-          <td>${item.departamentoNome || '-'}</td>
-          <td><span class="badge badge-info">${nivelLabels[item.nivel] || item.nivel || '-'}</span></td>
-          <td class="hide-mobile">${formatCurrency(item.salarioMinimo)} - ${formatCurrency(item.salarioMaximo)}</td>
-          <td class="hide-mobile">${item.ocupantes}</td>
-          <td><span class="badge ${item.ativo ? 'badge-success' : 'badge-danger'}">${item.ativo ? 'Ativo' : 'Inativo'}</span></td>
-          <td>
-            ${canWrite ? '<div class="cell-actions"><button class="btn-icon edit" onclick="edit(' + item.id + ')"><img src="/assets/pencil (1).png" alt="editar"></button><button class="btn-icon delete" onclick="remove(' + item.id + ')"><img src="/assets/trash-2 (1).png" alt="excluir"></button></div>' : '-'}
-          </td>
-        </tr>
-      `).join('');
+      const container = document.getElementById("accordionContainer");
+      if (allData.length === 0) {
+        container.innerHTML = '<div class="empty-state"><h3 class="empty-state-title">Nenhum departamento encontrado</h3></div>';
+        return;
+      }
+
+      container.innerHTML = allData.map((dept, i) => {
+        const cargosHtml = dept.cargos.map(cargo => {
+          const funcsHtml = cargo.funcionarios.length > 0
+            ? cargo.funcionarios.map(f => `
+                <div class="func-row">
+                  <span class="func-name">${f.nome}</span>
+                  <span class="func-salary">${formatCurrency(f.salario)}</span>
+                  <span class="func-date">${formatDate(f.dataAdmissao)}</span>
+                </div>
+              `).join('')
+            : '<div class="cargo-empty">Nenhum funcionário neste cargo</div>';
+
+          return `
+            <div class="cargo-section">
+              <div class="cargo-title">${cargo.titulo} <span style="font-weight: 400; color: var(--gray-400);">(${cargo.funcionarios.length})</span></div>
+              ${funcsHtml}
+            </div>
+          `;
+        }).join('');
+
+        return `
+          <div class="accordion-item" id="acc-${i}">
+            <div class="accordion-header" onclick="toggleAccordion(${i})">
+              <div class="accordion-header-left">
+                <span class="accordion-arrow">&#9654;</span>
+                <span class="accordion-dept-name">${dept.nome}</span>
+              </div>
+              <span class="accordion-count">${dept.totalFuncionarios} funcionário(s)</span>
+            </div>
+            <div class="accordion-body">
+              ${dept.cargos.length > 0 ? cargosHtml : '<div class="cargo-empty">Nenhum cargo cadastrado neste departamento</div>'}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function toggleAccordion(index) {
+      document.getElementById('acc-' + index).classList.toggle('open');
     }
 
     function openModal(id = null) {
       currentId = id;
       document.getElementById("form").reset();
       document.getElementById("modalTitle").textContent = id ? "Editar Cargo" : "Novo Cargo";
-      if (id) {
-        const item = data.find(d => d.id === id);
-        if (item) Form.populate('form', item);
-      }
       Modal.open('modal');
       Mask.initAll();
     }
-
-    function edit(id) { openModal(id); }
 
     async function save() {
       const formData = Form.serialize('form');
@@ -291,25 +314,6 @@
         console.error(e);
         Toast.error(e.message || 'Erro ao salvar cargo');
       }
-    }
-
-    function remove(id) {
-      const item = data.find(d => d.id === id);
-      Confirm.show('Excluir o cargo <strong>' + item.titulo + '</strong>?', async () => {
-        try {
-          const res = await fetch(API + '/' + id, { method: 'DELETE', credentials: 'same-origin' });
-          if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err.error || 'Erro ao excluir'); }
-          Toast.success('Cargo excluído!');
-          loadData();
-        } catch (e) {
-          console.error(e);
-          Toast.error(e.message || 'Erro ao excluir cargo');
-        }
-      });
-    }
-
-    function formatCurrency(val) {
-      return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val || 0);
     }
   </script>
 </body>

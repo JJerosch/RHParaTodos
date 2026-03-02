@@ -97,20 +97,18 @@
 
       <!-- Table -->
       <div class="table-container" style="overflow-x: auto;">
-        <table class="data-table" id="employeesTable" style="min-width: 1200px;">
+        <table class="data-table" id="employeesTable" style="min-width: 900px;">
           <thead>
             <tr>
               <th class="sortable" onclick="sortTable(0)">Funcionário</th>
               <th class="sortable" onclick="sortTable(1)">Matrícula</th>
               <th class="sortable" onclick="sortTable(2)">Email Corporativo</th>
-              <th class="sortable" onclick="sortTable(3)">CPF</th>
-              <th class="sortable" onclick="sortTable(4)">Departamento</th>
-              <th class="sortable" onclick="sortTable(5)">Cargo</th>
-              <th class="sortable" onclick="sortTable(6)">Telefone</th>
-              <th class="sortable" onclick="sortTable(7)">Cidade/UF</th>
-              <th class="sortable" onclick="sortTable(8)">Contrato</th>
-              <th class="sortable" onclick="sortTable(9)">Admissão</th>
-              <th class="sortable" onclick="sortTable(10)">Salário</th>
+              <th class="sortable" onclick="sortTable(3)">Departamento</th>
+              <th class="sortable" onclick="sortTable(4)">Cargo</th>
+              <th class="sortable" onclick="sortTable(5)">Telefone</th>
+              <th class="sortable" onclick="sortTable(6)">Cidade/UF</th>
+              <th class="sortable" onclick="sortTable(7)">Contrato</th>
+              <th class="sortable" onclick="sortTable(8)">Admissão</th>
               <th>Status</th>
               <th>Ações</th>
             </tr>
@@ -597,7 +595,7 @@
       const tbody = document.getElementById("tableBody");
 
       if (pageData.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="13"><div class="empty-state"><div class="empty-state-icon"><img src="/assets/id-card-lanyard (1).png" alt="vazio"></div><h3 class="empty-state-title">Nenhum funcionário encontrado</h3><p class="empty-state-text">Tente ajustar os filtros ou adicione um novo funcionário.</p></div></td></tr>';
+        tbody.innerHTML = '<tr><td colspan="11"><div class="empty-state"><div class="empty-state-icon"><img src="/assets/id-card-lanyard (1).png" alt="vazio"></div><h3 class="empty-state-title">Nenhum funcionário encontrado</h3><p class="empty-state-text">Tente ajustar os filtros ou adicione um novo funcionário.</p></div></td></tr>';
       } else {
         tbody.innerHTML = pageData.map(emp => `
           <tr>
@@ -609,14 +607,12 @@
             </td>
             <td>${emp.matricula}</td>
             <td>${emp.emailCorporativo || '-'}</td>
-            <td>${emp.cpf || '-'}</td>
             <td>${emp.departamentoNome || '-'}</td>
             <td>${emp.cargoTitulo || '-'}</td>
             <td>${emp.telefone || emp.celular || '-'}</td>
             <td>${emp.cidade ? emp.cidade + '/' + (emp.estado || '') : '-'}</td>
             <td>${emp.tipoContrato || '-'}</td>
             <td>${formatDate(emp.dataAdmissao)}</td>
-            <td>${formatCurrency(emp.salarioAtual)}</td>
             <td><span class="badge ${statusBadge[emp.status] || 'badge-info'}">${statusLabels[emp.status] || emp.status}</span></td>
             <td>
               <div class="cell-actions">
@@ -676,7 +672,7 @@
       headers.forEach(h => h.classList.remove('asc', 'desc'));
       header.classList.add(isAsc ? 'desc' : 'asc');
 
-      const keys = ['nomeCompleto', 'matricula', 'emailCorporativo', 'cpf', 'departamento.nome', 'cargo.titulo', 'telefone', 'cidade', 'tipoContrato', 'dataAdmissao', 'salarioAtual', 'status'];
+      const keys = ['nomeCompleto', 'matricula', 'emailCorporativo', 'departamento.nome', 'cargo.titulo', 'telefone', 'cidade', 'tipoContrato', 'dataAdmissao', 'status'];
       currentSort = keys[colIndex] + ',' + (isAsc ? 'desc' : 'asc');
       currentPage = 0;
       loadPage();

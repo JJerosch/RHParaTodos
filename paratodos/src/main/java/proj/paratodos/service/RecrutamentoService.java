@@ -64,20 +64,6 @@ public class RecrutamentoService {
 
     @Transactional
     public VagaResponse createVaga(VagaRequest request, Long criadoPorId) {
-        // Verifica headcount do departamento
-        if (request.departamentoId() != null) {
-            Departamento dept = departamentoRepository.findById(request.departamentoId())
-                    .orElseThrow(() -> new IllegalArgumentException("Departamento nao encontrado"));
-
-            if (dept.getHeadcountLimite() != null && dept.getHeadcountLimite() > 0) {
-                long funcionariosAtuais = departamentoRepository.countFuncionariosByDepartamentoId(dept.getId());
-                long vagasAbertas = vagaRepository.countActiveByDepartamentoId(dept.getId());
-                if (funcionariosAtuais + vagasAbertas >= dept.getHeadcountLimite()) {
-                    throw new IllegalArgumentException("Limite de headcount atingido para o departamento " + dept.getNome());
-                }
-            }
-        }
-
         Vaga v = new Vaga();
         v.setTitulo(request.titulo());
         v.setDescricao(request.descricao());
@@ -253,38 +239,13 @@ public class RecrutamentoService {
         f.setSalarioAtual(cand.getPretensaoSalarial());
         f.setCidade(cand.getCidade());
         f.setEstado(cand.getEstado());
-        // Sem departamento e sem cargo - precisa de promocao para atribuir
-        f.setDepartamento(null);
-        f.setCargo(null);
 
-        f = funcionarioRepository.save(f);
+        // Atribui cargo e departamento da vaga diretamente
+        f.setDepartamento(vaga.getDepartamento());
+        f.setCargo(vaga.getCargo());
+        f.setCargoDesde(LocalDate.now());
 
-        // Cria automaticamente uma solicitacao de promocao tipo CONTRATACAO
-        Promocao p = new Promocao();
-        p.setFuncionario(f);
-        p.setTipo("CONTRATACAO");
-        p.setStatus("PENDENTE");
-        p.setMotivo("Contratação via recrutamento - Vaga: " + vaga.getTitulo()
-                + (vaga.getDepartamento() != null ? " | Dept: " + vaga.getDepartamento().getNome() : "")
-                + (vaga.getCargo() != null ? " | Cargo: " + vaga.getCargo().getTitulo() : ""));
-
-        // Preenche dados atuais (nulos pois é novo funcionário)
-        p.setCargoAtual(null);
-        p.setDepartamentoAtual(null);
-        p.setSalarioAtual(cand.getPretensaoSalarial());
-
-        // Preenche proposta baseada na vaga
-        p.setDepartamentoNovo(vaga.getDepartamento());
-        p.setCargoNovo(vaga.getCargo());
-        p.setSalarioNovo(cand.getPretensaoSalarial());
-
-        // Solicitante é o usuário que moveu o candidato para CONTRATADO
-        if (userId != null) {
-            Usuario solicitante = usuarioRepository.findById(userId).orElse(null);
-            p.setSolicitante(solicitante);
-        }
-
-        promocaoRepository.save(p);
+        funcionarioRepository.save(f);
     }
 
     public RecrutamentoStatsResponse getStats() {
