@@ -28,11 +28,20 @@ public interface FuncionarioRepository extends JpaRepository<Funcionario, Long> 
 
     boolean existsByEmailCorporativo(String emailCorporativo);
 
-    @Query("""
+    @Query(value = """
         SELECT f FROM Funcionario f
         LEFT JOIN FETCH f.cargo
         LEFT JOIN FETCH f.departamento
         LEFT JOIN FETCH f.gestor
+        WHERE (:search IS NULL
+            OR LOWER(f.nomeCompleto) LIKE LOWER(CONCAT('%', :search, '%'))
+            OR f.matricula LIKE CONCAT('%', :search, '%')
+            OR f.cpf LIKE CONCAT('%', :search, '%'))
+        AND (:departamentoId IS NULL OR f.departamento.id = :departamentoId)
+        AND (:status IS NULL OR f.status = :status)
+    """,
+    countQuery = """
+        SELECT COUNT(f) FROM Funcionario f
         WHERE (:search IS NULL
             OR LOWER(f.nomeCompleto) LIKE LOWER(CONCAT('%', :search, '%'))
             OR f.matricula LIKE CONCAT('%', :search, '%')
@@ -86,11 +95,11 @@ public interface FuncionarioRepository extends JpaRepository<Funcionario, Long> 
 
     @Query("""
         SELECT f FROM Funcionario f
-        LEFT JOIN FETCH f.cargo c
-        LEFT JOIN FETCH f.departamento d
+        LEFT JOIN FETCH f.cargo
+        LEFT JOIN FETCH f.departamento
         WHERE f.status = 'ATIVO'
-          AND d.id = :departamentoId
-        ORDER BY c.titulo ASC, f.nomeCompleto ASC
+          AND f.departamento.id = :departamentoId
+        ORDER BY f.cargo.titulo ASC, f.nomeCompleto ASC
     """)
     List<Funcionario> findAtivosByDepartamentoId(@Param("departamentoId") Long departamentoId);
 }
