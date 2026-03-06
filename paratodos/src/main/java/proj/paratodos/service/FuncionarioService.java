@@ -31,6 +31,7 @@ public class FuncionarioService {
         this.cargoRepository = cargoRepository;
     }
 
+    @Transactional(readOnly = true)
     public Page<FuncionarioResponse> search(String search, Long departamentoId, String status, Pageable pageable) {
         String searchParam = (search != null && !search.isBlank()) ? search.trim() : null;
         String statusParam = (status != null && !status.isBlank()) ? status.trim() : null;
@@ -39,6 +40,7 @@ public class FuncionarioService {
                 .map(FuncionarioResponse::fromEntity);
     }
 
+    @Transactional(readOnly = true)
     public FuncionarioResponse findById(Long id) {
         Funcionario f = funcionarioRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Funcionario nao encontrado: " + id));
@@ -78,6 +80,7 @@ public class FuncionarioService {
         funcionarioRepository.deleteById(id);
     }
 
+    @Transactional(readOnly = true)
     public FuncionarioStatsResponse getStats() {
         long total = funcionarioRepository.count();
         long ativos = funcionarioRepository.countByStatus("ATIVO");

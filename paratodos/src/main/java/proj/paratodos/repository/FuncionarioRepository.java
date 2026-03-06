@@ -2,6 +2,7 @@ package proj.paratodos.repository;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -28,11 +29,9 @@ public interface FuncionarioRepository extends JpaRepository<Funcionario, Long> 
 
     boolean existsByEmailCorporativo(String emailCorporativo);
 
+    @EntityGraph(attributePaths = {"cargo", "departamento", "gestor"})
     @Query(value = """
         SELECT f FROM Funcionario f
-        LEFT JOIN FETCH f.cargo
-        LEFT JOIN FETCH f.departamento
-        LEFT JOIN FETCH f.gestor
         WHERE (:search IS NULL
             OR LOWER(f.nomeCompleto) LIKE LOWER(CONCAT('%', :search, '%'))
             OR f.matricula LIKE CONCAT('%', :search, '%')
