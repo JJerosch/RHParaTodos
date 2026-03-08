@@ -26,12 +26,24 @@ public interface PontoApuracaoDiariaRepository extends JpaRepository<PontoApurac
         from PontoApuracaoDiaria p
         join fetch p.funcionario f
         where p.data between :inicio and :fim
-          and (:funcionarioId is null or f.id = :funcionarioId)
         order by p.data desc, f.nomeCompleto asc
     """)
     List<PontoApuracaoDiaria> buscarTimesheetAdmin(
             @Param("inicio") LocalDate inicio,
+            @Param("fim") LocalDate fim
+    );
+
+    @Query(value = """
+        select pad.*
+        from ponto_apuracao_diaria pad
+        join funcionarios f on f.id = pad.funcionario_id
+        where pad.data between :inicio and :fim
+          and f.nome_completo ilike :nome
+        order by pad.data desc, f.nome_completo asc
+    """, nativeQuery = true)
+    List<PontoApuracaoDiaria> buscarTimesheetAdminPorNome(
+            @Param("inicio") LocalDate inicio,
             @Param("fim") LocalDate fim,
-            @Param("funcionarioId") Long funcionarioId
+            @Param("nome") String nome
     );
 }

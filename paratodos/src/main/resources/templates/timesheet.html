@@ -65,8 +65,8 @@
     <div class="filters-card">
       <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--spacing-4); align-items:end;">
         <div class="form-group">
-          <label class="form-label">Funcionário ID</label>
-          <input type="number" class="form-input" id="funcionarioId" placeholder="Todos">
+          <label class="form-label">Nome do funcionário</label>
+          <input type="text" class="form-input" id="nomeFuncionario" placeholder="Digite o nome">
         </div>
 
         <div class="form-group">
@@ -79,8 +79,9 @@
           <input type="date" class="form-input" id="dataFim">
         </div>
 
-        <div class="form-group">
+        <div class="form-group" style="display:flex; gap: var(--spacing-3);">
           <button class="btn btn-primary" type="button" onclick="carregarTimesheet()">Filtrar</button>
+          <button class="btn btn-secondary" type="button" onclick="limparFiltros()">Limpar filtros</button>
         </div>
       </div>
     </div>
@@ -123,6 +124,10 @@
         <tr>
           <th>Data</th>
           <th>Funcionário</th>
+          <th>Entrada</th>
+          <th>Saída Almoço</th>
+          <th>Retorno</th>
+          <th>Saída</th>
           <th>Total</th>
           <th>Extras</th>
           <th>Faltantes</th>
@@ -131,7 +136,7 @@
         </thead>
         <tbody id="timesheetTableBody">
         <tr>
-          <td colspan="6" style="text-align:center; padding: var(--spacing-6); color: var(--gray-400);">
+          <td colspan="10" style="text-align:center; padding: var(--spacing-6); color: var(--gray-400);">
             Carregando dados...
           </td>
         </tr>
@@ -170,12 +175,12 @@
 
   async function carregarTimesheet() {
     try {
-      const funcionarioId = document.getElementById("funcionarioId").value;
+      const nome = document.getElementById("nomeFuncionario").value;
       const inicio = document.getElementById("dataInicio").value;
       const fim = document.getElementById("dataFim").value;
 
       const params = new URLSearchParams();
-      if (funcionarioId) params.append("funcionarioId", funcionarioId);
+      if (nome) params.append("nome", nome);
       if (inicio) params.append("inicio", inicio);
       if (fim) params.append("fim", fim);
 
@@ -211,27 +216,36 @@
 
     if (!rows || !rows.length) {
       tbody.innerHTML = `
-          <tr>
-            <td colspan="6" style="text-align:center; padding: var(--spacing-6); color: var(--gray-400);">
-              Nenhum registro encontrado para o período informado.
-            </td>
-          </tr>
-        `;
+        <tr>
+          <td colspan="10" style="text-align:center; padding: var(--spacing-6); color: var(--gray-400);">
+            Nenhum registro encontrado para o período informado.
+          </td>
+        </tr>
+      `;
       return;
     }
 
     tbody.innerHTML = rows.map(row => `
-        <tr>
-          <td>${row.data}</td>
-          <td>${row.funcionarioNome}</td>
-          <td>${row.horasTrabalhadas}</td>
-          <td>${row.horasExtras}</td>
-          <td>${row.horasFaltantes}</td>
-          <td>${renderStatus(row.status)}</td>
-        </tr>
-      `).join("");
+      <tr>
+        <td>${row.data}</td>
+        <td>${row.funcionarioNome}</td>
+        <td>${row.entrada}</td>
+        <td>${row.saidaAlmoco}</td>
+        <td>${row.retornoAlmoco}</td>
+        <td>${row.saida}</td>
+        <td>${row.horasTrabalhadas}</td>
+        <td>${row.horasExtras}</td>
+        <td>${row.horasFaltantes}</td>
+        <td>${renderStatus(row.status)}</td>
+      </tr>
+    `).join("");
   }
-
+  function limparFiltros() {
+    document.getElementById("nomeFuncionario").value = "";
+    preencherDatasPadrao();
+    carregarTimesheet();
+  }
+  
   function renderStatus(status) {
     if (status === "FINALIZADO") {
       return `<span class="badge badge-success">Finalizado</span>`;

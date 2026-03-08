@@ -19,4 +19,10 @@ public interface PontoMarcacaoRepository extends JpaRepository<PontoMarcacao, Lo
             LocalDateTime inicio,
             LocalDateTime fim
     );
+
+    List<PontoMarcacao> findByFuncionarioIdInAndDataHoraBetweenOrderByDataHoraAsc(
+            List<Long> funcionarioIds,
+            LocalDateTime inicio,
+            LocalDateTime fim
+    );
 }

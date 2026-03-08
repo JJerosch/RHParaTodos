@@ -22,7 +22,7 @@ public class TimesheetAdminController {
 
     @GetMapping
     public TimesheetAdminResponse listar(
-            @RequestParam(required = false) Long funcionarioId,
+            @RequestParam(required = false) String nome,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate inicio,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fim
     ) {
@@ -36,6 +36,6 @@ public class TimesheetAdminController {
             fim = hoje;
         }
 
-        return pontoService.listarTimesheetAdmin(funcionarioId, inicio, fim);
+        return pontoService.listarTimesheetAdmin(nome, inicio, fim);
     }
 }

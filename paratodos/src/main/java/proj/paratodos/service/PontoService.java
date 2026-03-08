@@ -292,8 +292,18 @@ public class PontoService {
     }
 
     @Transactional(readOnly = true)
-    public TimesheetAdminResponse listarTimesheetAdmin(Long funcionarioId, LocalDate inicio, LocalDate fim) {
-        List<PontoApuracaoDiaria> apuracoes = pontoApuracaoDiariaRepository.buscarTimesheetAdmin(inicio, fim, funcionarioId);
+    public TimesheetAdminResponse listarTimesheetAdmin(String nome, LocalDate inicio, LocalDate fim) {
+        List<PontoApuracaoDiaria> apuracoes;
+
+        if (nome == null || nome.isBlank()) {
+            apuracoes = pontoApuracaoDiariaRepository.buscarTimesheetAdmin(inicio, fim);
+        } else {
+            apuracoes = pontoApuracaoDiariaRepository.buscarTimesheetAdminPorNome(
+                    inicio,
+                    fim,
+                    "%" + nome.trim() + "%"
+            );
+        }
 
         List<TimesheetAdminRowResponse> rows = apuracoes.stream()
                 .map(this::mapTimesheetRow)
@@ -329,10 +339,19 @@ public class PontoService {
     }
 
     private TimesheetAdminRowResponse mapTimesheetRow(PontoApuracaoDiaria apuracao) {
+        List<PontoMarcacao> marcacoes = buscarMarcacoesDia(
+                apuracao.getFuncionario().getId(),
+                apuracao.getData()
+        );
+
         return new TimesheetAdminRowResponse(
                 apuracao.getFuncionario().getId(),
                 apuracao.getFuncionario().getNomeCompleto(),
                 apuracao.getData().format(DATA_BR),
+                getHoraPorTipo(marcacoes, "ENTRADA"),
+                getHoraPorTipo(marcacoes, "SAIDA_ALMOCO"),
+                getHoraPorTipo(marcacoes, "RETORNO_ALMOCO"),
+                getHoraPorTipo(marcacoes, "SAIDA"),
                 formatHoras(apuracao.getHorasTrabalhadas()),
                 formatHoras(apuracao.getHorasExtras()),
                 formatHoras(apuracao.getHorasFaltantes()),
