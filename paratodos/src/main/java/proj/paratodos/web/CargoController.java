@@ -102,9 +102,12 @@ public class CargoController {
                 cargoMap.get(cargoKey).add(funcData);
             }
 
-            // Também incluir cargos sem funcionários
+            // Também incluir cargos sem funcionários e adicionar metadados do cargo
             var cargos = cargoService.search(null, dept.getId(), null);
+            // Mapear cargo título -> CargoResponse para metadata
+            Map<String, proj.paratodos.dto.CargoResponse> cargoMeta = new LinkedHashMap<>();
             for (var cargo : cargos) {
+                cargoMeta.put(cargo.titulo(), cargo);
                 if (!cargoMap.containsKey(cargo.titulo())) {
                     cargoMap.put(cargo.titulo(), new ArrayList<>());
                 }
@@ -115,6 +118,16 @@ public class CargoController {
                 Map<String, Object> cargoData = new LinkedHashMap<>();
                 cargoData.put("titulo", entry.getKey());
                 cargoData.put("funcionarios", entry.getValue());
+                // Adicionar metadados do cargo
+                var meta = cargoMeta.get(entry.getKey());
+                if (meta != null) {
+                    cargoData.put("id", meta.id());
+                    cargoData.put("nivel", meta.nivel());
+                    cargoData.put("salarioMinimo", meta.salarioMinimo());
+                    cargoData.put("salarioMaximo", meta.salarioMaximo());
+                    cargoData.put("ativo", meta.ativo());
+                    cargoData.put("ocupantes", meta.ocupantes());
+                }
                 cargosList.add(cargoData);
             }
 

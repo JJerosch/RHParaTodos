@@ -235,18 +235,42 @@
       if (!form.checkValidity()) { form.reportValidity(); return; }
 
       const formData = Form.serialize('promotionForm');
-      const body = {
-        funcionarioId: Number(formData.funcionarioId),
-        tipo: formData.tipo,
-        departamentoNovoId: formData.departamentoNovoId ? Number(formData.departamentoNovoId) : null,
-        cargoNovoId: formData.cargoNovoId ? Number(formData.cargoNovoId) : null,
-        salarioNovo: formData.salarioNovo ? parseFloat(String(formData.salarioNovo).replace(/[^\d,]/g, '').replace(',', '.')) : null,
-        motivo: formData.motivo
+      const funcId = Number(formData.funcionarioId);
+      const func = allFuncionarios.find(f => f.id === funcId);
+
+      // Mapear tipo do form para tipo de solicitação
+      let tipoSolicitacao = 'PROMOCAO';
+      if (formData.tipo === 'TRANSFERENCIA') tipoSolicitacao = 'TRANSFERENCIA';
+      if (formData.tipo === 'REAJUSTE') tipoSolicitacao = 'REAJUSTE_SALARIAL';
+
+      const dadosAntes = {
+        cargoId: func ? func.cargoId : null,
+        cargoTitulo: func ? func.cargoTitulo : null,
+        departamentoId: func ? func.departamentoId : null,
+        departamentoNome: func ? func.departamentoNome : null,
+        salarioAtual: func ? func.salarioAtual : null
       };
 
+      const dadosDepois = {};
+      if (formData.cargoNovoId) dadosDepois.cargoNovoId = Number(formData.cargoNovoId);
+      if (formData.departamentoNovoId) dadosDepois.departamentoNovoId = Number(formData.departamentoNovoId);
+      if (formData.salarioNovo) {
+        dadosDepois.salarioNovo = parseFloat(String(formData.salarioNovo).replace(/[^\d,]/g, '').replace(',', '.'));
+      }
+
       try {
-        await api('/api/promotions', { method: 'POST', body: JSON.stringify(body) });
-        Toast.success('Solicitação enviada com sucesso!');
+        await api('/api/solicitacoes', {
+          method: 'POST',
+          body: JSON.stringify({
+            tipo: tipoSolicitacao,
+            referenciaTipo: 'FUNCIONARIO',
+            referenciaId: funcId,
+            motivo: formData.motivo,
+            dadosAntes: JSON.stringify(dadosAntes),
+            dadosDepois: JSON.stringify(dadosDepois)
+          })
+        });
+        Toast.success('Solicitação enviada! Aguarde aprovação na Central de Solicitações.');
         Modal.close('promotionModal');
       } catch (e) {
         Toast.error(e.message || 'Erro ao enviar solicitação');
