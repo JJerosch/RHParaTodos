@@ -449,6 +449,27 @@
     </div>
   </div>
 
+  <!-- Modal: Solicitação (motivo) -->
+  <div class="modal" id="solicitacaoModal">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-header">
+        <h3 class="modal-title" id="solicitacaoTitle">Nova Solicitação</h3>
+        <button class="modal-close" onclick="Modal.close('solicitacaoModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p id="solicitacaoDesc" style="margin-bottom: var(--spacing-4); color: var(--gray-600);"></p>
+        <div class="form-group">
+          <label class="form-label">Motivo da solicitação *</label>
+          <textarea class="form-input" id="solicitacaoMotivo" rows="3" placeholder="Descreva o motivo..." required></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="Modal.close('solicitacaoModal')">Cancelar</button>
+        <button type="button" class="btn btn-primary" onclick="submitSolicitacao()">Enviar Solicitação</button>
+      </div>
+    </div>
+  </div>
+
   <div th:replace="~{fragments/scripts :: common}"></div>
   <script>
     // ── Estado da página ──
@@ -614,8 +635,9 @@
             <td>
               <div class="cell-actions">
                 <button class="btn-icon view" onclick="view(${emp.id})"><img src="/assets/eye.png" alt="ver"></button>
-                ${canWrite ? '<button class="btn-icon edit" onclick="edit(' + emp.id + ')"><img src="/assets/pencil (1).png" alt="editar"></button>' : ''}
-                ${canWrite ? '<button class="btn-icon delete" onclick="remove(' + emp.id + ')"><img src="/assets/trash-2 (1).png" alt="excluir"></button>' : ''}
+                ${canWrite ? '<button class="btn-icon edit" onclick="edit(' + emp.id + ')" title="Editar"><img src="/assets/pencil (1).png" alt="editar"></button>' : ''}
+                ${canWrite && emp.status === 'ATIVO' ? '<button class="btn-icon" onclick="requestDeactivation(' + emp.id + ')" title="Desativar" style="color: var(--warning-orange);"><img src="/assets/door-open.png" alt="desativar"></button>' : ''}
+                ${canWrite ? '<button class="btn-icon delete" onclick="requestDeletion(' + emp.id + ')" title="Excluir"><img src="/assets/trash-2 (1).png" alt="excluir"></button>' : ''}
               </div>
             </td>
           </tr>
@@ -762,7 +784,10 @@
       Modal.open('viewModal');
     }
 
-    // ── Salvar (criar ou atualizar via API) ──
+    // ── Estado da solicitação ──
+    let pendingSolicitacao = { tipo: null, funcionarioId: null, dadosJson: null };
+
+    // ── Salvar (criar = direto, editar = cria solicitação) ──
     async function save() {
       const form = document.getElementById("employeeForm");
       if (!form.checkValidity()) { form.reportValidity(); return; }
@@ -782,34 +807,71 @@
 
       try {
         if (currentId) {
-          await api('/api/employees/' + currentId, { method: 'PUT', body: JSON.stringify(formData) });
-          Toast.success('Funcionário atualizado!');
+          // Edição: cria solicitação ao invés de editar diretamente
+          Modal.close('employeeModal');
+          pendingSolicitacao = { tipo: 'EDICAO', funcionarioId: currentId, dadosJson: JSON.stringify(formData) };
+          const emp = pageData.find(e => e.id === currentId);
+          document.getElementById("solicitacaoTitle").textContent = "Solicitar Edição";
+          document.getElementById("solicitacaoDesc").textContent = 'Edição do funcionário ' + (emp ? emp.nomeCompleto : '#' + currentId) + '. Um administrador precisará aprovar as alterações.';
+          document.getElementById("solicitacaoMotivo").value = '';
+          Modal.open('solicitacaoModal');
         } else {
+          // Criação: executa diretamente (não precisa de aprovação)
           await api('/api/employees', { method: 'POST', body: JSON.stringify(formData) });
           Toast.success('Funcionário cadastrado!');
+          Modal.close('employeeModal');
+          await Promise.all([loadStats(), loadPage()]);
         }
       } catch (e) {
         Toast.error(e.message || 'Erro ao salvar funcionário');
+      }
+    }
+
+    // ── Solicitar desativação ──
+    function requestDeactivation(id) {
+      const emp = pageData.find(e => e.id === id);
+      if (!emp) return;
+      pendingSolicitacao = { tipo: 'DESATIVACAO', funcionarioId: id, dadosJson: null };
+      document.getElementById("solicitacaoTitle").textContent = "Solicitar Desativação";
+      document.getElementById("solicitacaoDesc").textContent = 'Desativar o funcionário ' + emp.nomeCompleto + '. O status será alterado para "Desligado" após aprovação de um administrador.';
+      document.getElementById("solicitacaoMotivo").value = '';
+      Modal.open('solicitacaoModal');
+    }
+
+    // ── Solicitar exclusão permanente ──
+    function requestDeletion(id) {
+      const emp = pageData.find(e => e.id === id);
+      if (!emp) return;
+      pendingSolicitacao = { tipo: 'EXCLUSAO', funcionarioId: id, dadosJson: null };
+      document.getElementById("solicitacaoTitle").textContent = "Solicitar Exclusão Permanente";
+      document.getElementById("solicitacaoDesc").innerHTML = 'Excluir permanentemente o funcionário <strong>' + emp.nomeCompleto + '</strong>. Esta ação é irreversível e precisa de aprovação de um administrador.';
+      document.getElementById("solicitacaoMotivo").value = '';
+      Modal.open('solicitacaoModal');
+    }
+
+    // ── Enviar solicitação para a API ──
+    async function submitSolicitacao() {
+      const motivo = document.getElementById("solicitacaoMotivo").value.trim();
+      if (!motivo) {
+        Toast.error('Informe o motivo da solicitação');
         return;
       }
 
-      Modal.close('employeeModal');
-      await Promise.all([loadStats(), loadPage()]);
-    }
-
-    // ── Excluir via API ──
-    function remove(id) {
-      const emp = pageData.find(e => e.id === id);
-      if (!emp) return;
-      Confirm.show('Excluir o funcionário <strong>' + emp.nomeCompleto + '</strong>?', async () => {
-        try {
-          await api('/api/employees/' + id, { method: 'DELETE' });
-          Toast.success('Funcionário excluído!');
-          await Promise.all([loadStats(), loadPage()]);
-        } catch (e) {
-          Toast.error(e.message || 'Erro ao excluir funcionário');
-        }
-      });
+      try {
+        await api('/api/solicitacoes', {
+          method: 'POST',
+          body: JSON.stringify({
+            tipo: pendingSolicitacao.tipo,
+            funcionarioId: pendingSolicitacao.funcionarioId,
+            motivo: motivo,
+            dadosJson: pendingSolicitacao.dadosJson
+          })
+        });
+        Toast.success('Solicitação enviada! Aguarde aprovação de um administrador.');
+        Modal.close('solicitacaoModal');
+      } catch (e) {
+        Toast.error(e.message || 'Erro ao criar solicitação');
+      }
     }
 
     // ── Exportar CSV (busca todos filtrados da API) ──

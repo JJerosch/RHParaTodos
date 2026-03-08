@@ -17,14 +17,34 @@
     <header th:replace="~{fragments/topbar :: topbar('Solicitações')}"></header>
 
     <div class="content-area">
+      <!-- Stats -->
+      <div class="stats-row">
+        <div class="stat-box">
+          <div class="stat-box-value" id="statTotal">0</div>
+          <div class="stat-box-label">Total</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-box-value" style="color: var(--warning-orange);" id="statPendentes">0</div>
+          <div class="stat-box-label">Pendentes</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-box-value" style="color: var(--success-green);" id="statAprovadas">0</div>
+          <div class="stat-box-label">Aprovadas</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-box-value" style="color: var(--error-red);" id="statRejeitadas">0</div>
+          <div class="stat-box-label">Rejeitadas</div>
+        </div>
+      </div>
+
       <div class="page-header">
         <div>
-          <h2 class="page-title">Solicitações Pendentes</h2>
-          <p class="page-subtitle">Aprove ou recuse solicitações de promoção, transferência e reajuste</p>
+          <h2 class="page-title">Solicitações</h2>
+          <p class="page-subtitle">Aprove ou recuse solicitações de promoções e ações sobre funcionários</p>
         </div>
         <div class="filter-group" style="display: flex; align-items: center; gap: var(--spacing-2);">
           <label>Filtrar:</label>
-          <select id="filterStatus" onchange="loadData()">
+          <select id="filterStatus" onchange="loadAll()">
             <option value="">Todas</option>
             <option value="PENDENTE" selected>Pendentes</option>
             <option value="APROVADA">Aprovadas</option>
@@ -33,8 +53,14 @@
         </div>
       </div>
 
-      <!-- Lista de solicitações -->
-      <div class="table-container">
+      <!-- Tabs -->
+      <div style="display: flex; gap: var(--spacing-2); margin-bottom: var(--spacing-4);">
+        <button class="btn btn-primary tab-switch active" onclick="switchTab('promocoes')" id="tabPromocoes">Promoções / Transferências</button>
+        <button class="btn btn-secondary tab-switch" onclick="switchTab('funcionarios')" id="tabFuncionarios">Ações sobre Funcionários</button>
+      </div>
+
+      <!-- Tabela Promoções -->
+      <div class="table-container" id="tblPromocoes">
         <table class="data-table">
           <thead>
             <tr>
@@ -46,7 +72,26 @@
               <th>Ação</th>
             </tr>
           </thead>
-          <tbody id="tableBody">
+          <tbody id="tbodyPromocoes">
+            <tr><td colspan="6" style="text-align:center; padding: 2rem; color: var(--gray-400);">Carregando...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Tabela Funcionários -->
+      <div class="table-container" id="tblFuncionarios" style="display: none;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Funcionário</th>
+              <th>Tipo</th>
+              <th>Solicitante</th>
+              <th>Data</th>
+              <th>Status</th>
+              <th>Ação</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyFuncionarios">
             <tr><td colspan="6" style="text-align:center; padding: 2rem; color: var(--gray-400);">Carregando...</td></tr>
           </tbody>
         </table>
@@ -75,7 +120,7 @@
       </div>
       <div class="modal-body">
         <p style="text-align: center; margin: var(--spacing-4) 0;">Tem certeza que deseja <strong style="color: var(--success-green);">aprovar</strong> esta solicitação?</p>
-        <p style="text-align: center; font-size: var(--font-size-sm); color: var(--gray-500);">Esta ação alterará o cargo, departamento e/ou salário do funcionário.</p>
+        <p style="text-align: center; font-size: var(--font-size-sm); color: var(--gray-500);" id="approveWarning">Esta ação será executada imediatamente após a aprovação.</p>
       </div>
       <div class="modal-footer">
         <button class="btn btn-secondary" onclick="Modal.close('confirmApproveModal')">Voltar</button>
@@ -118,15 +163,9 @@
       margin-bottom: var(--spacing-3);
     }
     .detail-section p { margin: var(--spacing-1) 0; }
-    .detail-arrow {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--gray-400);
-      font-size: 24px;
-      grid-column: 1 / -1;
-      padding: var(--spacing-2) 0;
-    }
+    .tab-switch { border-radius: var(--radius-md); font-size: var(--font-size-sm); padding: var(--spacing-2) var(--spacing-4); }
+    .tab-switch.active { background: var(--primary); color: white; }
+    .tab-switch:not(.active) { background: var(--gray-100); color: var(--gray-600); }
     @media (max-width: 768px) {
       .detail-grid { grid-template-columns: 1fr; }
     }
@@ -134,8 +173,12 @@
 
   <div th:replace="~{fragments/scripts :: common}"></div>
   <script>
-    let solicitacoes = [];
+    let promocoes = [];
+    let solicitacoesFuncionario = [];
     let currentSolId = null;
+    let currentSolType = null; // 'promocao' ou 'funcionario'
+    let activeTab = 'promocoes';
+    const isAdmin = window.__CURRENT_USER__.role === 'ADMIN';
 
     async function api(url, opts = {}) {
       const res = await fetch(url, { credentials: 'same-origin', headers: { 'Content-Type': 'application/json', ...opts.headers }, ...opts });
@@ -152,22 +195,48 @@
       initSidebar();
       Auth.applyRoleVisibility(document);
       Auth.applyActionVisibility(document);
-      loadData();
+      loadAll();
     });
 
-    async function loadData() {
-      const status = document.getElementById("filterStatus").value;
-      try {
-        const url = status ? '/api/promotions?status=' + status : '/api/promotions';
-        solicitacoes = await api(url) || [];
-      } catch (e) {
-        console.error('Erro ao carregar solicitações:', e);
-        solicitacoes = [];
-      }
-      render();
+    function switchTab(tab) {
+      activeTab = tab;
+      document.getElementById('tblPromocoes').style.display = tab === 'promocoes' ? '' : 'none';
+      document.getElementById('tblFuncionarios').style.display = tab === 'funcionarios' ? '' : 'none';
+      document.getElementById('tabPromocoes').className = 'btn tab-switch ' + (tab === 'promocoes' ? 'active' : '');
+      document.getElementById('tabFuncionarios').className = 'btn tab-switch ' + (tab === 'funcionarios' ? 'active' : '');
     }
 
-    const tipoLabels = { PROMOCAO: 'Promoção', TRANSFERENCIA: 'Transferência', REAJUSTE: 'Reajuste', CONTRATACAO: 'Contratação' };
+    async function loadAll() {
+      const status = document.getElementById("filterStatus").value;
+      try {
+        const [promoData, funcData, promoStats, funcStats] = await Promise.all([
+          api(status ? '/api/promotions?status=' + status : '/api/promotions'),
+          api(status ? '/api/solicitacoes?status=' + status : '/api/solicitacoes'),
+          api('/api/promotions/stats'),
+          api('/api/solicitacoes/stats')
+        ]);
+        promocoes = promoData || [];
+        solicitacoesFuncionario = funcData || [];
+
+        // Stats combinados
+        const totalP = (promoStats ? promoStats.pendentes : 0);
+        const totalF = (funcStats ? funcStats.pendentes : 0);
+        document.getElementById("statTotal").textContent = (promoStats ? promoStats.total : 0) + (funcStats ? funcStats.total : 0);
+        document.getElementById("statPendentes").textContent = totalP + totalF;
+        document.getElementById("statAprovadas").textContent = (promoStats ? promoStats.aprovadas : 0) + (funcStats ? funcStats.aprovadas : 0);
+        document.getElementById("statRejeitadas").textContent = (promoStats ? promoStats.rejeitadas : 0) + (funcStats ? funcStats.rejeitadas : 0);
+      } catch (e) {
+        console.error('Erro ao carregar solicitações:', e);
+        promocoes = [];
+        solicitacoesFuncionario = [];
+      }
+      renderPromocoes();
+      renderFuncionarios();
+    }
+
+    const tipoLabelsPromo = { PROMOCAO: 'Promoção', TRANSFERENCIA: 'Transferência', REAJUSTE: 'Reajuste', CONTRATACAO: 'Contratação' };
+    const tipoLabelsFunc = { EDICAO: 'Edição', DESATIVACAO: 'Desativação', EXCLUSAO: 'Exclusão' };
+    const tipoBadgeFunc = { EDICAO: 'badge-info', DESATIVACAO: 'badge-warning', EXCLUSAO: 'badge-danger' };
     const statusLabels = { PENDENTE: 'Pendente', APROVADA: 'Aprovada', REJEITADA: 'Rejeitada' };
     const statusBadge = { PENDENTE: 'badge-warning', APROVADA: 'badge-success', REJEITADA: 'badge-danger' };
 
@@ -181,16 +250,16 @@
       return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
     }
 
-    function render() {
-      const tbody = document.getElementById("tableBody");
-      if (solicitacoes.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><h3 class="empty-state-title">Nenhuma solicitação encontrada</h3></div></td></tr>';
+    function renderPromocoes() {
+      const tbody = document.getElementById("tbodyPromocoes");
+      if (promocoes.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><h3 class="empty-state-title">Nenhuma solicitação de promoção encontrada</h3></div></td></tr>';
         return;
       }
-      tbody.innerHTML = solicitacoes.map(s => `
-        <tr style="cursor: pointer;" onclick="openDetail(${s.id})">
+      tbody.innerHTML = promocoes.map(s => `
+        <tr style="cursor: pointer;" onclick="openPromoDetail(${s.id})">
           <td><strong>${s.funcionarioNome || '-'}</strong></td>
-          <td>${tipoLabels[s.tipo] || s.tipo}</td>
+          <td>${tipoLabelsPromo[s.tipo] || s.tipo}</td>
           <td>${s.solicitanteEmail || '-'}</td>
           <td>${formatDate(s.dataSolicitacao)}</td>
           <td><span class="badge ${statusBadge[s.status]}">${statusLabels[s.status]}</span></td>
@@ -199,23 +268,37 @@
       `).join('');
     }
 
-    async function openDetail(id) {
-      currentSolId = id;
-      let sol;
-      try {
-        sol = await api('/api/promotions/' + id);
-      } catch (e) {
-        Toast.error('Erro ao carregar detalhes');
+    function renderFuncionarios() {
+      const tbody = document.getElementById("tbodyFuncionarios");
+      if (solicitacoesFuncionario.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><h3 class="empty-state-title">Nenhuma solicitação de ação encontrada</h3></div></td></tr>';
         return;
       }
+      tbody.innerHTML = solicitacoesFuncionario.map(s => `
+        <tr style="cursor: pointer;" onclick="openFuncDetail(${s.id})">
+          <td><strong>${s.funcionarioNome || '-'}</strong><br><small style="color: var(--gray-500);">${s.funcionarioMatricula || ''}</small></td>
+          <td><span class="badge ${tipoBadgeFunc[s.tipo] || 'badge-info'}">${tipoLabelsFunc[s.tipo] || s.tipo}</span></td>
+          <td>${s.solicitanteEmail || '-'}</td>
+          <td>${formatDate(s.dataSolicitacao)}</td>
+          <td><span class="badge ${statusBadge[s.status]}">${statusLabels[s.status]}</span></td>
+          <td><button class="btn btn-secondary" style="padding: 0.3rem 0.8rem; font-size: 0.8rem;">Ver detalhes</button></td>
+        </tr>
+      `).join('');
+    }
+
+    // ── Detalhes: Promoção ──
+    async function openPromoDetail(id) {
+      currentSolId = id;
+      currentSolType = 'promocao';
+      let sol;
+      try { sol = await api('/api/promotions/' + id); } catch (e) { Toast.error('Erro ao carregar detalhes'); return; }
       if (!sol) return;
 
-      const content = document.getElementById("detailContent");
-      content.innerHTML = `
+      document.getElementById("detailContent").innerHTML = `
         <div style="margin-bottom: var(--spacing-4);">
           <h3 style="margin: 0;">${sol.funcionarioNome}</h3>
           <span class="badge ${statusBadge[sol.status]}" style="margin-top: var(--spacing-2);">${statusLabels[sol.status]}</span>
-          <span style="margin-left: var(--spacing-2); font-size: var(--font-size-sm); color: var(--gray-500);">${tipoLabels[sol.tipo] || sol.tipo}</span>
+          <span style="margin-left: var(--spacing-2); font-size: var(--font-size-sm); color: var(--gray-500);">${tipoLabelsPromo[sol.tipo] || sol.tipo}</span>
         </div>
         <div class="detail-grid">
           <div class="detail-section">
@@ -239,39 +322,92 @@
           ${sol.observacaoAprovador ? '<p><strong>Observação:</strong> ' + sol.observacaoAprovador + '</p>' : ''}
         </div>
       `;
+      showDetailFooter(sol.status);
+      document.getElementById("approveWarning").textContent = 'Esta ação alterará o cargo, departamento e/ou salário do funcionário.';
+      Modal.open('detailModal');
+    }
 
+    // ── Detalhes: Ação sobre Funcionário ──
+    async function openFuncDetail(id) {
+      currentSolId = id;
+      currentSolType = 'funcionario';
+      let sol;
+      try { sol = await api('/api/solicitacoes/' + id); } catch (e) { Toast.error('Erro ao carregar detalhes'); return; }
+      if (!sol) return;
+
+      const warningByType = {
+        DESATIVACAO: 'O funcionário será desligado (status alterado para DESLIGADO).',
+        EXCLUSAO: 'O funcionário será excluído permanentemente. Esta ação é irreversível!',
+        EDICAO: 'Os dados do funcionário serão atualizados conforme proposto.'
+      };
+
+      let detailHtml = `
+        <div style="margin-bottom: var(--spacing-4);">
+          <h3 style="margin: 0;">${sol.funcionarioNome}</h3>
+          <span class="badge ${statusBadge[sol.status]}" style="margin-top: var(--spacing-2);">${statusLabels[sol.status]}</span>
+          <span class="badge ${tipoBadgeFunc[sol.tipo] || 'badge-info'}" style="margin-left: var(--spacing-2);">${tipoLabelsFunc[sol.tipo] || sol.tipo}</span>
+        </div>`;
+
+      if (sol.tipo === 'EDICAO' && sol.dadosJson) {
+        try {
+          const dados = JSON.parse(sol.dadosJson);
+          detailHtml += '<div class="detail-section" style="margin-bottom: var(--spacing-4);"><h4>Dados Propostos</h4>';
+          const fieldLabels = {
+            nomeCompleto: 'Nome', emailPessoal: 'Email Pessoal', emailCorporativo: 'Email Corp.',
+            telefone: 'Telefone', celular: 'Celular', cidade: 'Cidade', estado: 'Estado',
+            tipoContrato: 'Contrato', status: 'Status', banco: 'Banco', agencia: 'Agência',
+            conta: 'Conta', pix: 'PIX'
+          };
+          for (const [key, label] of Object.entries(fieldLabels)) {
+            if (dados[key] !== undefined) {
+              detailHtml += '<p><strong>' + label + ':</strong> ' + (dados[key] || '-') + '</p>';
+            }
+          }
+          detailHtml += '</div>';
+        } catch (e) { /* ignore parse error */ }
+      }
+
+      detailHtml += `
+        <div style="padding-top: var(--spacing-4); border-top: 1px solid var(--gray-200);">
+          <p><strong>Motivo:</strong> ${sol.motivo || '-'}</p>
+          <p><strong>Solicitante:</strong> ${sol.solicitanteEmail || '-'}</p>
+          <p><strong>Data:</strong> ${formatDate(sol.dataSolicitacao)}</p>
+          ${sol.aprovadorEmail ? '<p><strong>Aprovador:</strong> ' + sol.aprovadorEmail + '</p>' : ''}
+          ${sol.observacaoAprovador ? '<p><strong>Observação:</strong> ' + sol.observacaoAprovador + '</p>' : ''}
+        </div>`;
+
+      document.getElementById("detailContent").innerHTML = detailHtml;
+      showDetailFooter(sol.status);
+      document.getElementById("approveWarning").textContent = warningByType[sol.tipo] || 'Esta ação será executada imediatamente.';
+      Modal.open('detailModal');
+    }
+
+    function showDetailFooter(status) {
       const footer = document.getElementById("detailFooter");
-      if (sol.status === 'PENDENTE') {
+      if (status === 'PENDENTE' && isAdmin) {
         footer.innerHTML = `
           <button class="btn btn-secondary" onclick="Modal.close('detailModal')">Fechar</button>
           <button class="btn" style="background: var(--error-red); color: white;" onclick="openRejectConfirm()">Recusar</button>
-          <button class="btn btn-primary" onclick="openApproveConfirm()">Aceitar</button>
+          <button class="btn btn-primary" onclick="openApproveConfirm()">Aprovar</button>
         `;
       } else {
         footer.innerHTML = '<button class="btn btn-secondary" onclick="Modal.close(\'detailModal\')">Fechar</button>';
       }
-
-      Modal.open('detailModal');
     }
 
-    function openApproveConfirm() {
-      Modal.open('confirmApproveModal');
-    }
-
-    function openRejectConfirm() {
-      document.getElementById("rejectObs").value = '';
-      Modal.open('confirmRejectModal');
-    }
+    function openApproveConfirm() { Modal.open('confirmApproveModal'); }
+    function openRejectConfirm() { document.getElementById("rejectObs").value = ''; Modal.open('confirmRejectModal'); }
 
     async function confirmAction(action) {
+      const baseUrl = currentSolType === 'promocao' ? '/api/promotions/' : '/api/solicitacoes/';
       try {
         if (action === 'approve') {
-          await api('/api/promotions/' + currentSolId + '/approve', { method: 'PUT', body: JSON.stringify({}) });
+          await api(baseUrl + currentSolId + '/approve', { method: 'PUT', body: JSON.stringify({}) });
           Toast.success('Solicitação aprovada!');
           Modal.close('confirmApproveModal');
         } else {
           const obs = document.getElementById("rejectObs").value;
-          await api('/api/promotions/' + currentSolId + '/reject', {
+          await api(baseUrl + currentSolId + '/reject', {
             method: 'PUT',
             body: JSON.stringify({ observacao: obs || null })
           });
@@ -279,7 +415,7 @@
           Modal.close('confirmRejectModal');
         }
         Modal.close('detailModal');
-        loadData();
+        loadAll();
       } catch (e) {
         Toast.error(e.message || 'Erro ao processar solicitação');
       }
