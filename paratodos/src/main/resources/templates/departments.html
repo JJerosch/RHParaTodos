@@ -22,8 +22,8 @@
           <h2 class="page-title">Quadro de Lotação</h2>
           <p class="page-subtitle">Departamentos e quantidade de funcionários</p>
         </div>
-        <div class="page-actions">
-          <button class="btn btn-primary" onclick="openModal()">+ Novo Departamento</button>
+        <div class="page-actions" data-action-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE">
+          <button class="btn btn-primary" onclick="openCreateModal()">+ Novo Departamento</button>
         </div>
       </div>
 
@@ -31,15 +31,41 @@
     </div>
   </div>
 
-  <!-- Modal: Editar Departamento -->
-  <div class="modal" id="departmentModal">
+  <!-- Modal: Criar Departamento (direto) -->
+  <div class="modal" id="createModal">
     <div class="modal-dialog modal-md">
       <div class="modal-header">
-        <h3 class="modal-title" id="modalTitle">Novo Departamento</h3>
-        <button class="modal-close" onclick="Modal.close('departmentModal')">&times;</button>
+        <h3 class="modal-title">Novo Departamento</h3>
+        <button class="modal-close" onclick="Modal.close('createModal')">&times;</button>
       </div>
       <div class="modal-body">
-        <form id="departmentForm">
+        <form id="createForm">
+          <div class="form-group">
+            <label class="form-label">Nome do Departamento *</label>
+            <input type="text" class="form-input" name="nome" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Descrição</label>
+            <textarea class="form-input" name="descricao" rows="3"></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="Modal.close('createModal')">Cancelar</button>
+        <button class="btn btn-primary" onclick="createDepartment()">Criar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Solicitar Edição -->
+  <div class="modal" id="editModal">
+    <div class="modal-dialog modal-md">
+      <div class="modal-header">
+        <h3 class="modal-title">Solicitar Edição de Departamento</h3>
+        <button class="modal-close" onclick="Modal.close('editModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="editForm">
           <input type="hidden" name="id">
           <div class="form-group">
             <label class="form-label">Nome do Departamento *</label>
@@ -50,16 +76,36 @@
             <textarea class="form-input" name="descricao" rows="3"></textarea>
           </div>
           <div class="form-group">
-            <label class="checkbox-label">
-              <input type="checkbox" name="ativo" checked>
-              <span>Departamento Ativo</span>
-            </label>
+            <label class="form-label">Motivo da Edição *</label>
+            <input type="text" class="form-input" name="motivo" required placeholder="Justificativa para alterar este departamento">
           </div>
         </form>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-secondary" onclick="Modal.close('departmentModal')">Cancelar</button>
-        <button class="btn btn-primary" onclick="saveDepartment()">Salvar</button>
+        <button class="btn btn-secondary" onclick="Modal.close('editModal')">Cancelar</button>
+        <button class="btn btn-primary" onclick="submitEdit()">Enviar Solicitação</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Solicitar Ação (desativar/excluir) -->
+  <div class="modal" id="actionModal">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-header">
+        <h3 class="modal-title" id="actionTitle">Solicitar Ação</h3>
+        <button class="modal-close" onclick="Modal.close('actionModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="text-align: center; margin: var(--spacing-4) 0;" id="actionMsg"></p>
+        <div id="actionWarning" style="display:none; background: #fff3cd; border: 1px solid #ffc107; border-radius: var(--radius-md); padding: var(--spacing-3); margin-bottom: var(--spacing-3); font-size: var(--font-size-sm); color: #856404;"></div>
+        <div class="form-group" style="margin-top: var(--spacing-4);">
+          <label class="form-label">Motivo *</label>
+          <textarea class="form-input" id="actionMotivo" rows="2" placeholder="Informe o motivo..." required></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="Modal.close('actionModal')">Cancelar</button>
+        <button class="btn btn-primary" id="actionConfirmBtn" onclick="confirmAction()">Enviar Solicitação</button>
       </div>
     </div>
   </div>
@@ -67,7 +113,7 @@
   <style>
     .departments-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
       gap: var(--spacing-4);
     }
     .department-card {
@@ -125,13 +171,43 @@
       color: var(--gray-500);
       text-transform: uppercase;
     }
+    .card-actions {
+      display: flex;
+      gap: var(--spacing-2);
+      margin-top: var(--spacing-3);
+      padding-top: var(--spacing-3);
+      border-top: 1px solid var(--gray-100);
+      flex-wrap: wrap;
+    }
+    .card-actions button {
+      padding: 0.3rem 0.7rem;
+      font-size: var(--font-size-xs);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--gray-300);
+      background: white;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .card-actions button:hover { border-color: var(--primary-dark); color: var(--primary-dark); }
+    .card-actions .btn-danger-outline:hover { border-color: var(--error-red); color: var(--error-red); }
   </style>
 
   <div th:replace="~{fragments/scripts :: common}"></div>
   <script>
     const API = '/api/departments';
     let departments = [];
-    let currentDeptId = null;
+
+    const userRole = window.__CURRENT_USER__.role;
+    const canWrite = ['ADMIN', 'RH_CHEFE', 'RH_ASSISTENTE'].includes(userRole);
+
+    async function api(url, opts = {}) {
+      const res = await fetch(url, { credentials: 'same-origin', headers: { 'Content-Type': 'application/json', ...opts.headers }, ...opts });
+      if (res.status === 401) { window.location.href = '/login'; return; }
+      if (res.status === 204) return null;
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(body.error || 'Erro na requisição');
+      return body;
+    }
 
     document.addEventListener("DOMContentLoaded", () => {
       if (!Auth.requireAuth()) return;
@@ -144,9 +220,7 @@
 
     async function loadData() {
       try {
-        const res = await fetch(API, { credentials: 'same-origin' });
-        if (!res.ok) throw new Error('API indisponível');
-        departments = await res.json();
+        departments = await api(API) || [];
       } catch (e) {
         console.error('Erro ao carregar departamentos:', e);
         departments = [];
@@ -160,71 +234,165 @@
         grid.innerHTML = '<div class="empty-state"><h3 class="empty-state-title">Nenhum departamento cadastrado</h3></div>';
         return;
       }
-      grid.innerHTML = departments.map(dept => `
-        <div class="department-card">
-          <div>
-            <div class="department-header">
-              <div>
-                <h3 class="department-name">${dept.nome}</h3>
-                <span class="badge ${dept.ativo ? 'badge-success' : 'badge-danger'}">${dept.ativo ? 'Ativo' : 'Inativo'}</span>
+      grid.innerHTML = departments.map(dept => {
+        const actionsHtml = canWrite ? `
+          <div class="card-actions">
+            <button onclick="openEditModal(${dept.id})">Editar</button>
+            <button onclick="requestAction(${dept.id}, '${dept.nome}', ${dept.funcionarios}, ${dept.cargos}, '${dept.ativo ? 'DESATIVACAO_DEPARTAMENTO' : 'EDICAO_DEPARTAMENTO'}', '${dept.ativo ? 'desativação' : 'reativação'}')">${dept.ativo ? 'Desativar' : 'Reativar'}</button>
+            <button class="btn-danger-outline" onclick="requestAction(${dept.id}, '${dept.nome}', ${dept.funcionarios}, ${dept.cargos}, 'EXCLUSAO_DEPARTAMENTO', 'exclusão permanente')">Excluir</button>
+          </div>
+        ` : '';
+
+        return `
+          <div class="department-card">
+            <div>
+              <div class="department-header">
+                <div>
+                  <h3 class="department-name">${dept.nome}</h3>
+                  <span class="badge ${dept.ativo ? 'badge-success' : 'badge-danger'}">${dept.ativo ? 'Ativo' : 'Inativo'}</span>
+                </div>
               </div>
-              <button class="btn-icon edit" onclick="edit(${dept.id})" title="Editar"><img src="/assets/pencil (1).png" alt="editar"></button>
+              <p class="department-desc">${dept.descricao || 'Sem descrição'}</p>
             </div>
-            <p class="department-desc">${dept.descricao || 'Sem descrição'}</p>
+            <div class="department-footer">
+              <div class="department-count">
+                <span class="department-count-value">${dept.funcionarios || 0}</span>
+                <span class="department-count-label">funcionários</span>
+              </div>
+              <div class="department-count">
+                <span class="department-count-value">${dept.cargos || 0}</span>
+                <span class="department-count-label">cargos</span>
+              </div>
+            </div>
+            ${actionsHtml}
           </div>
-          <div class="department-footer">
-            <div class="department-count">
-              <span class="department-count-value">${dept.funcionarios || 0}</span>
-              <span class="department-count-label">funcionários</span>
-            </div>
-            <div class="department-count">
-              <span class="department-count-value">${dept.cargos || 0}</span>
-              <span class="department-count-label">cargos</span>
-            </div>
-          </div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
     }
 
-    function openModal(id = null) {
-      currentDeptId = id;
-      document.getElementById("departmentForm").reset();
-      if (id) {
-        document.getElementById("modalTitle").textContent = "Editar Departamento";
-        const dept = departments.find(d => d.id === id);
-        if (dept) Form.populate('departmentForm', dept);
-      } else {
-        document.getElementById("modalTitle").textContent = "Novo Departamento";
-      }
-      Modal.open('departmentModal');
+    // ── Criar departamento (direto, sem solicitação) ──
+    function openCreateModal() {
+      document.getElementById("createForm").reset();
+      Modal.open('createModal');
     }
 
-    function edit(id) { openModal(id); }
-
-    async function saveDepartment() {
-      const formData = Form.serialize('departmentForm');
+    async function createDepartment() {
+      const formData = Form.serialize('createForm');
       if (!formData.nome) { Toast.error('Nome é obrigatório'); return; }
 
-      const body = {
+      try {
+        await api(API, {
+          method: 'POST',
+          body: JSON.stringify({ nome: formData.nome, descricao: formData.descricao || null, ativo: true })
+        });
+        Toast.success('Departamento criado!');
+        Modal.close('createModal');
+        loadData();
+      } catch (e) {
+        Toast.error(e.message || 'Erro ao criar departamento');
+      }
+    }
+
+    // ── Solicitar edição ──
+    let editingDept = null;
+
+    function openEditModal(deptId) {
+      const dept = departments.find(d => d.id === deptId);
+      if (!dept) return;
+      editingDept = dept;
+      document.getElementById("editForm").reset();
+      Form.populate('editForm', { nome: dept.nome, descricao: dept.descricao || '' });
+      Modal.open('editModal');
+    }
+
+    async function submitEdit() {
+      const formData = Form.serialize('editForm');
+      if (!formData.nome) { Toast.error('Nome é obrigatório'); return; }
+      if (!formData.motivo) { Toast.error('Informe o motivo'); return; }
+
+      const dadosAntes = {
+        nome: editingDept.nome,
+        descricao: editingDept.descricao
+      };
+      const dadosDepois = {
         nome: formData.nome,
-        descricao: formData.descricao || null,
-        ativo: !!formData.ativo
+        descricao: formData.descricao || null
       };
 
       try {
-        let res;
-        if (currentDeptId) {
-          res = await fetch(API + '/' + currentDeptId, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify(body) });
-        } else {
-          res = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify(body) });
-        }
-        if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err.error || 'Erro ao salvar'); }
-        Toast.success(currentDeptId ? 'Departamento atualizado!' : 'Departamento criado!');
-        Modal.close('departmentModal');
-        loadData();
+        await api('/api/solicitacoes', {
+          method: 'POST',
+          body: JSON.stringify({
+            tipo: 'EDICAO_DEPARTAMENTO',
+            referenciaTipo: 'DEPARTAMENTO',
+            referenciaId: editingDept.id,
+            motivo: formData.motivo,
+            dadosAntes: JSON.stringify(dadosAntes),
+            dadosDepois: JSON.stringify(dadosDepois)
+          })
+        });
+        Toast.success('Solicitação de edição criada! Aguarde aprovação.');
+        Modal.close('editModal');
       } catch (e) {
-        console.error(e);
-        Toast.error(e.message || 'Erro ao salvar departamento');
+        Toast.error(e.message || 'Erro ao criar solicitação');
+      }
+    }
+
+    // ── Solicitar desativação/exclusão ──
+    let actionTargetId = null;
+    let actionType = null;
+
+    function requestAction(deptId, deptNome, funcCount, cargoCount, tipo, descricaoAcao) {
+      actionTargetId = deptId;
+      actionType = tipo;
+      document.getElementById("actionTitle").textContent = 'Solicitar ' + descricaoAcao.charAt(0).toUpperCase() + descricaoAcao.slice(1);
+      document.getElementById("actionMsg").innerHTML = 'Deseja solicitar a <strong>' + descricaoAcao + '</strong> do departamento <strong>' + deptNome + '</strong>?';
+      document.getElementById("actionMotivo").value = '';
+
+      // Aviso se tem vínculos
+      const warning = document.getElementById("actionWarning");
+      if ((funcCount > 0 || cargoCount > 0) && (tipo === 'EXCLUSAO_DEPARTAMENTO' || tipo === 'DESATIVACAO_DEPARTAMENTO')) {
+        warning.style.display = 'block';
+        warning.innerHTML = 'Este departamento possui <strong>' + funcCount + ' funcionário(s)</strong> e <strong>' + cargoCount + ' cargo(s)</strong>. A ' + descricaoAcao + ' pode impactar esses registros.';
+      } else {
+        warning.style.display = 'none';
+      }
+
+      const btn = document.getElementById("actionConfirmBtn");
+      if (tipo === 'EXCLUSAO_DEPARTAMENTO') {
+        btn.style.background = 'var(--error-red)';
+        btn.style.color = 'white';
+        btn.className = 'btn';
+      } else {
+        btn.style.background = '';
+        btn.style.color = '';
+        btn.className = 'btn btn-primary';
+      }
+
+      Modal.open('actionModal');
+    }
+
+    async function confirmAction() {
+      const motivo = document.getElementById("actionMotivo").value.trim();
+      if (!motivo) {
+        Toast.error('Informe o motivo');
+        document.getElementById("actionMotivo").focus();
+        return;
+      }
+      try {
+        await api('/api/solicitacoes', {
+          method: 'POST',
+          body: JSON.stringify({
+            tipo: actionType,
+            referenciaTipo: 'DEPARTAMENTO',
+            referenciaId: actionTargetId,
+            motivo: motivo
+          })
+        });
+        Toast.success('Solicitação criada! Aguarde aprovação.');
+        Modal.close('actionModal');
+      } catch (e) {
+        Toast.error(e.message || 'Erro ao criar solicitação');
       }
     }
   </script>
