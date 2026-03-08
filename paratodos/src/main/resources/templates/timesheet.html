@@ -1,376 +1,243 @@
 <!DOCTYPE html>
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 
-<head th:replace="~{fragments/head :: head('Controle de Ponto')}"><title>Controle de Ponto</title></head>
+<head th:replace="~{fragments/head :: head('Controle de Ponto')}">
+  <title>Controle de Ponto</title>
+</head>
 
 <body>
-  <style>
-    .timesheet-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: var(--spacing-4);
-      margin-bottom: var(--spacing-6);
-    }
+<style>
+  .timesheet-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: var(--spacing-4);
+    margin-bottom: var(--spacing-6);
+  }
 
-    .time-card {
-      background: white;
-      border-radius: var(--radius-lg);
-      padding: var(--spacing-5);
-      box-shadow: var(--shadow-sm);
-      border: 1px solid var(--gray-200);
-      text-align: center;
-    }
+  .time-card {
+    background: white;
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-5);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--gray-200);
+    text-align: center;
+  }
 
-    .time-card-icon {
-      font-size: 32px;
-      margin-bottom: var(--spacing-2);
-    }
+  .time-card-icon {
+    font-size: 28px;
+    margin-bottom: var(--spacing-2);
+  }
 
-    .time-card-value {
-      font-size: var(--font-size-3xl);
-      font-weight: 700;
-      color: var(--primary-dark);
-    }
+  .time-card-value {
+    font-size: var(--font-size-3xl);
+    font-weight: 700;
+    color: var(--primary-dark);
+  }
 
-    .time-card-label {
-      font-size: var(--font-size-sm);
-      color: var(--gray-500);
-    }
+  .time-card-label {
+    font-size: var(--font-size-sm);
+    color: var(--gray-500);
+  }
 
-    .punch-btn {
-      padding: var(--spacing-6);
-      font-size: var(--font-size-xl);
-    }
+  .filters-card {
+    background: white;
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-5);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--gray-200);
+    margin-bottom: var(--spacing-6);
+  }
+</style>
 
-    .punch-btn.active {
-      animation: pulse 2s infinite;
-    }
+<script th:inline="javascript">
+  window.__CURRENT_USER__ = {
+    email: /*[[${currentUser.email}]]*/ 'usuario@local',
+    role:  /*[[${currentUser.role}]]*/ 'ADMIN'
+  };
+</script>
 
-    @keyframes pulse {
+<aside th:replace="~{fragments/sidebar :: admin('timesheet')}"></aside>
 
-      0%,
-      100% {
-        box-shadow: 0 0 0 0 rgba(39, 174, 96, 0.4);
-      }
+<div class="main-content">
+  <header th:replace="~{fragments/topbar :: topbar('Controle de Ponto')}"></header>
 
-      50% {
-        box-shadow: 0 0 0 15px rgba(39, 174, 96, 0);
-      }
-    }
-
-    .timeline {
-      position: relative;
-      padding-left: 30px;
-    }
-
-    .timeline::before {
-      content: '';
-      position: absolute;
-      left: 10px;
-      top: 0;
-      bottom: 0;
-      width: 2px;
-      background: var(--gray-200);
-    }
-
-    .timeline-item {
-      position: relative;
-      padding-bottom: var(--spacing-4);
-    }
-
-    .timeline-item::before {
-      content: '';
-      position: absolute;
-      left: -24px;
-      top: 4px;
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      background: var(--primary-dark);
-      border: 2px solid white;
-    }
-
-    .timeline-item.entrada::before {
-      background: var(--success-green);
-    }
-
-    .timeline-item.saida::before {
-      background: var(--error-red);
-    }
-
-    .current-time {
-      font-size: var(--font-size-3xl);
-      font-weight: 700;
-      color: var(--primary-dark);
-      font-family: monospace;
-    }
-  </style>
-  <script th:inline="javascript">
-    window.__CURRENT_USER__ = {
-      email: /*[[${currentUser.email}]]*/ 'usuario@local',
-      role:  /*[[${currentUser.role}]]*/ 'EMPLOYEE'
-    };
-  </script>
-
-  <aside th:replace="~{fragments/sidebar :: admin('timesheet')}"></aside>
-
-  <div class="main-content">
-    <header th:replace="~{fragments/topbar :: topbar('Controle de Ponto')}"></header>
-
-    <div class="content-area">
-      <!-- Relógio e Registro -->
-      <div class="card" style="margin-bottom: var(--spacing-6); text-align: center;">
-        <p style="color: var(--gray-500); margin-bottom: var(--spacing-2);">Horário atual</p>
-        <div class="current-time" id="currentTime">00:00:00</div>
-        <p style="color: var(--gray-500); margin: var(--spacing-2) 0 var(--spacing-6);" id="currentDate">Segunda-feira,
-          12 de Janeiro de 2026</p>
-
-        <div style="display: flex; justify-content: center; gap: var(--spacing-4); flex-wrap: wrap;">
-          <button class="btn btn-success punch-btn" id="btnEntrada" onclick="registerPunch('ENTRADA')">
-            ▶ Registrar Entrada
-          </button>
-          <button class="btn btn-danger punch-btn" id="btnSaida" onclick="registerPunch('SAIDA')" disabled>
-            ⏹ Registrar Saída
-          </button>
-        </div>
-      </div>
-
-      <!-- Stats do Dia -->
-      <div class="timesheet-grid">
-        <div class="time-card">
-          <div class="time-card-icon">⏱️</div>
-          <div class="time-card-value" id="horasHoje">00:00</div>
-          <div class="time-card-label">Horas Hoje</div>
-        </div>
-        <div class="time-card">
-          <div class="time-card-icon">📅</div>
-          <div class="time-card-value" id="horasSemana">32:45</div>
-          <div class="time-card-label">Horas na Semana</div>
-        </div>
-        <div class="time-card">
-          <div class="time-card-icon">📊</div>
-          <div class="time-card-value" id="horasMes">145:30</div>
-          <div class="time-card-label">Horas no Mês</div>
-        </div>
-        <div class="time-card">
-          <div class="time-card-icon">⚡</div>
-          <div class="time-card-value" id="horasExtras">+12:30</div>
-          <div class="time-card-label">Banco de Horas</div>
-        </div>
-      </div>
-
-      <div style="display: grid; grid-template-columns: 1fr 2fr; gap: var(--spacing-6);">
-        <!-- Registros de Hoje -->
-        <div class="card">
-          <h3 style="margin-bottom: var(--spacing-4);">Registros de Hoje</h3>
-          <div class="timeline" id="todayTimeline">
-            <div class="timeline-item entrada">
-              <strong>08:02</strong>
-              <p style="color: var(--gray-500); font-size: var(--font-size-sm);">Entrada</p>
-            </div>
-            <div class="timeline-item saida">
-              <strong>12:05</strong>
-              <p style="color: var(--gray-500); font-size: var(--font-size-sm);">Saída para almoço</p>
-            </div>
-            <div class="timeline-item entrada">
-              <strong>13:15</strong>
-              <p style="color: var(--gray-500); font-size: var(--font-size-sm);">Retorno do almoço</p>
-            </div>
-          </div>
+  <div class="content-area">
+    <div class="filters-card">
+      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--spacing-4); align-items:end;">
+        <div class="form-group">
+          <label class="form-label">Funcionário ID</label>
+          <input type="number" class="form-input" id="funcionarioId" placeholder="Todos">
         </div>
 
-        <!-- Histórico da Semana -->
-        <div class="card">
-          <div
-            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-4);">
-            <h3>Histórico da Semana</h3>
-            <button class="btn btn-secondary btn-sm" onclick="showFullHistory()">Ver Completo</button>
-          </div>
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Data</th>
-                <th>Entrada</th>
-                <th>Saída Almoço</th>
-                <th>Retorno</th>
-                <th>Saída</th>
-                <th>Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><strong>Segunda</strong> 12/01</td>
-                <td>08:02</td>
-                <td>12:05</td>
-                <td>13:15</td>
-                <td>--:--</td>
-                <td><span class="badge badge-warning">Em andamento</span></td>
-              </tr>
-              <tr>
-                <td><strong>Sexta</strong> 09/01</td>
-                <td>08:00</td>
-                <td>12:00</td>
-                <td>13:00</td>
-                <td>17:30</td>
-                <td><span class="badge badge-success">8h30</span></td>
-              </tr>
-              <tr>
-                <td><strong>Quinta</strong> 08/01</td>
-                <td>07:55</td>
-                <td>12:10</td>
-                <td>13:05</td>
-                <td>18:00</td>
-                <td><span class="badge badge-success">8h50</span></td>
-              </tr>
-              <tr>
-                <td><strong>Quarta</strong> 07/01</td>
-                <td>08:10</td>
-                <td>12:00</td>
-                <td>13:00</td>
-                <td>17:15</td>
-                <td><span class="badge badge-info">8h05</span></td>
-              </tr>
-              <tr>
-                <td><strong>Terça</strong> 06/01</td>
-                <td>08:05</td>
-                <td>12:15</td>
-                <td>13:10</td>
-                <td>17:30</td>
-                <td><span class="badge badge-success">8h20</span></td>
-              </tr>
-            </tbody>
-          </table>
+        <div class="form-group">
+          <label class="form-label">Data inicial</label>
+          <input type="date" class="form-input" id="dataInicio">
         </div>
-      </div>
 
-      <!-- Ajustes Pendentes (para gestores) -->
-      <div class="card" style="margin-top: var(--spacing-6);">
-        <div
-          style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-4);">
-          <h3>Solicitações de Ajuste</h3>
-          <button class="btn btn-primary btn-sm" onclick="requestAdjustment()">+ Solicitar Ajuste</button>
+        <div class="form-group">
+          <label class="form-label">Data final</label>
+          <input type="date" class="form-input" id="dataFim">
         </div>
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Data</th>
-              <th>Tipo</th>
-              <th>Horário Original</th>
-              <th>Horário Solicitado</th>
-              <th>Justificativa</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>10/01/2026</td>
-              <td>Entrada</td>
-              <td>--:--</td>
-              <td>08:00</td>
-              <td>Esqueci de registrar</td>
-              <td><span class="badge badge-warning">Pendente</span></td>
-            </tr>
-          </tbody>
-        </table>
+
+        <div class="form-group">
+          <button class="btn btn-primary" type="button" onclick="carregarTimesheet()">Filtrar</button>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- Modal Ajuste -->
-  <div class="modal" id="adjustmentModal">
-    <div class="modal-dialog modal-md">
-      <div class="modal-header">
-        <h3 class="modal-title">Solicitar Ajuste de Ponto</h3><button class="modal-close"
-          onclick="Modal.close('adjustmentModal')">&times;</button>
+    <div class="timesheet-grid">
+      <div class="time-card">
+        <div class="time-card-icon">👥</div>
+        <div class="time-card-value" id="totalFuncionarios">0</div>
+        <div class="time-card-label">Funcionários no período</div>
       </div>
-      <div class="modal-body">
-        <form id="adjustmentForm">
-          <div class="form-row form-row-2">
-            <div class="form-group"><label class="form-label">Data *</label><input type="date" class="form-input"
-                name="data" required></div>
-            <div class="form-group"><label class="form-label">Tipo *</label><select class="form-select" name="tipo"
-                required>
-                <option value="">Selecione</option>
-                <option value="ENTRADA">Entrada</option>
-                <option value="SAIDA_ALMOCO">Saída Almoço</option>
-                <option value="RETORNO_ALMOCO">Retorno Almoço</option>
-                <option value="SAIDA">Saída</option>
-              </select></div>
-          </div>
-          <div class="form-group"><label class="form-label">Horário *</label><input type="time" class="form-input"
-              name="horario" required></div>
-          <div class="form-group"><label class="form-label">Justificativa *</label><textarea class="form-input"
-              name="justificativa" rows="3" required></textarea></div>
-        </form>
+      <div class="time-card">
+        <div class="time-card-icon">📄</div>
+        <div class="time-card-value" id="totalRegistros">0</div>
+        <div class="time-card-label">Registros apurados</div>
       </div>
-      <div class="modal-footer"><button class="btn btn-secondary"
-          onclick="Modal.close('adjustmentModal')">Cancelar</button><button class="btn btn-primary"
-          onclick="submitAdjustment()">Enviar Solicitação</button></div>
+      <div class="time-card">
+        <div class="time-card-icon">⏱️</div>
+        <div class="time-card-value" id="totalHorasTrabalhadas">00:00</div>
+        <div class="time-card-label">Horas trabalhadas</div>
+      </div>
+      <div class="time-card">
+        <div class="time-card-icon">➕</div>
+        <div class="time-card-value" id="totalHorasExtras">00:00</div>
+        <div class="time-card-label">Horas extras</div>
+      </div>
+      <div class="time-card">
+        <div class="time-card-icon">➖</div>
+        <div class="time-card-value" id="totalHorasFaltantes">00:00</div>
+        <div class="time-card-label">Horas faltantes</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: var(--spacing-4);">
+        <h3>Resumo Administrativo de Ponto</h3>
+      </div>
+
+      <table class="data-table">
+        <thead>
+        <tr>
+          <th>Data</th>
+          <th>Funcionário</th>
+          <th>Total</th>
+          <th>Extras</th>
+          <th>Faltantes</th>
+          <th>Status</th>
+        </tr>
+        </thead>
+        <tbody id="timesheetTableBody">
+        <tr>
+          <td colspan="6" style="text-align:center; padding: var(--spacing-6); color: var(--gray-400);">
+            Carregando dados...
+          </td>
+        </tr>
+        </tbody>
+      </table>
     </div>
   </div>
+</div>
 
-  <div th:replace="~{fragments/scripts :: common}"></div>
-  <script>
-    let isWorking = false;
-    let startTime = null;
+<div th:replace="~{fragments/scripts :: common}"></div>
 
-    document.addEventListener("DOMContentLoaded", () => {
-      if (!Auth.requireAuth()) return;
-      initUserMenu(); initSidebar(); Auth.applyRoleVisibility(document); Auth.applyActionVisibility(document);
-      updateClock();
-      setInterval(updateClock, 1000);
-    });
+<script>
+  document.addEventListener("DOMContentLoaded", async () => {
+    if (!Auth.requireAuth()) return;
+    initUserMenu();
+    initSidebar();
+    Auth.applyRoleVisibility(document);
+    Auth.applyActionVisibility(document);
 
-    function updateClock() {
-      const now = new Date();
-      document.getElementById("currentTime").textContent = now.toLocaleTimeString('pt-BR');
-      document.getElementById("currentDate").textContent = now.toLocaleDateString('pt-BR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    preencherDatasPadrao();
+    await carregarTimesheet();
+  });
 
-      if (isWorking && startTime) {
-        const diff = now - startTime;
-        const hours = Math.floor(diff / 3600000);
-        const mins = Math.floor((diff % 3600000) / 60000);
-        document.getElementById("horasHoje").textContent = `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
+  function preencherDatasPadrao() {
+    const hoje = new Date();
+    const yyyy = hoje.getFullYear();
+    const mm = String(hoje.getMonth() + 1).padStart(2, "0");
+    const dd = String(hoje.getDate()).padStart(2, "0");
+
+    const primeiroDia = `${yyyy}-${mm}-01`;
+    const hojeStr = `${yyyy}-${mm}-${dd}`;
+
+    document.getElementById("dataInicio").value = primeiroDia;
+    document.getElementById("dataFim").value = hojeStr;
+  }
+
+  async function carregarTimesheet() {
+    try {
+      const funcionarioId = document.getElementById("funcionarioId").value;
+      const inicio = document.getElementById("dataInicio").value;
+      const fim = document.getElementById("dataFim").value;
+
+      const params = new URLSearchParams();
+      if (funcionarioId) params.append("funcionarioId", funcionarioId);
+      if (inicio) params.append("inicio", inicio);
+      if (fim) params.append("fim", fim);
+
+      const resp = await fetch(`/api/admin/timesheet?${params.toString()}`, {
+        method: "GET",
+        credentials: "same-origin"
+      });
+
+      if (!resp.ok) {
+        Toast.error("Não foi possível carregar o timesheet.");
+        return;
       }
+
+      const data = await resp.json();
+      renderSummary(data.summary);
+      renderRows(data.rows);
+    } catch (e) {
+      console.error(e);
+      Toast.error("Erro ao carregar o timesheet.");
+    }
+  }
+
+  function renderSummary(summary) {
+    document.getElementById("totalFuncionarios").textContent = summary.totalFuncionarios ?? 0;
+    document.getElementById("totalRegistros").textContent = summary.totalRegistros ?? 0;
+    document.getElementById("totalHorasTrabalhadas").textContent = summary.totalHorasTrabalhadas ?? "00:00";
+    document.getElementById("totalHorasExtras").textContent = summary.totalHorasExtras ?? "00:00";
+    document.getElementById("totalHorasFaltantes").textContent = summary.totalHorasFaltantes ?? "00:00";
+  }
+
+  function renderRows(rows) {
+    const tbody = document.getElementById("timesheetTableBody");
+
+    if (!rows || !rows.length) {
+      tbody.innerHTML = `
+          <tr>
+            <td colspan="6" style="text-align:center; padding: var(--spacing-6); color: var(--gray-400);">
+              Nenhum registro encontrado para o período informado.
+            </td>
+          </tr>
+        `;
+      return;
     }
 
-    function registerPunch(type) {
-      const now = new Date();
-      const timeStr = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    tbody.innerHTML = rows.map(row => `
+        <tr>
+          <td>${row.data}</td>
+          <td>${row.funcionarioNome}</td>
+          <td>${row.horasTrabalhadas}</td>
+          <td>${row.horasExtras}</td>
+          <td>${row.horasFaltantes}</td>
+          <td>${renderStatus(row.status)}</td>
+        </tr>
+      `).join("");
+  }
 
-      if (type === 'ENTRADA') {
-        isWorking = true;
-        startTime = now;
-        document.getElementById("btnEntrada").disabled = true;
-        document.getElementById("btnSaida").disabled = false;
-        document.getElementById("btnEntrada").classList.remove('active');
-        document.getElementById("btnSaida").classList.add('active');
-
-        addTimelineEntry(timeStr, 'Entrada', 'entrada');
-        Toast.success(`Entrada registrada às ${timeStr}`);
-      } else {
-        isWorking = false;
-        document.getElementById("btnEntrada").disabled = false;
-        document.getElementById("btnSaida").disabled = true;
-        document.getElementById("btnSaida").classList.remove('active');
-
-        addTimelineEntry(timeStr, 'Saída', 'saida');
-        Toast.success(`Saída registrada às ${timeStr}`);
-      }
+  function renderStatus(status) {
+    if (status === "FINALIZADO") {
+      return `<span class="badge badge-success">Finalizado</span>`;
     }
-
-    function addTimelineEntry(time, label, type) {
-      const timeline = document.getElementById("todayTimeline");
-      const entry = document.createElement('div');
-      entry.className = `timeline-item ${type}`;
-      entry.innerHTML = `<strong>${time}</strong><p style="color: var(--gray-500); font-size: var(--font-size-sm);">${label}</p>`;
-      timeline.appendChild(entry);
-    }
-
-    function requestAdjustment() { Modal.open('adjustmentModal'); }
-    function submitAdjustment() { Toast.success('Solicitação enviada para aprovação'); Modal.close('adjustmentModal'); }
-    function showFullHistory() { Toast.info('Redirecionando para histórico completo...'); }
-  </script>
+    return `<span class="badge badge-warning">Em andamento</span>`;
+  }
+</script>
 </body>
-
 </html>

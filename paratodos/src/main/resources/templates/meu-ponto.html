@@ -159,10 +159,10 @@
             <div class="current-time" id="currentTime">00:00:00</div>
             <div class="current-date" id="currentDate">Carregando...</div>
             <div class="punch-actions">
-                <button class="btn btn-success" id="btnEntrada" onclick="registerPunch('ENTRADA')">
+                <button class="btn btn-success" id="btnEntrada" type="button">
                     &#9654; Registrar Entrada
                 </button>
-                <button class="btn btn-danger" id="btnSaida" onclick="registerPunch('SAIDA')" disabled>
+                <button class="btn btn-danger" id="btnSaida" type="button" disabled>
                     &#9632; Registrar Saída
                 </button>
             </div>
@@ -244,70 +244,234 @@
 
 <div th:replace="~{fragments/scripts :: common}"></div>
 <script>
-    let isWorking = false;
-    let startTime = null;
+    document.addEventListener("DOMContentLoaded", async () => {
+        if (!Auth.requireAuth()) return;
+        initUserMenu();
+        initSidebar();
+        Auth.applyRoleVisibility(document);
+        Auth.applyActionVisibility(document);
 
-    document.addEventListener("DOMContentLoaded", () => {
-      if (!Auth.requireAuth()) return;
-      initUserMenu();
-      initSidebar();
-      Auth.applyRoleVisibility(document);
-      Auth.applyActionVisibility(document);
-      updateClock();
-      setInterval(updateClock, 1000);
+        updateClock();
+        setInterval(updateClock, 1000);
+
+        bindButtons();
+        await carregarResumo();
+        await carregarSemana();
     });
 
+    function bindButtons() {
+        const btnEntrada = document.getElementById("btnEntrada");
+        const btnSaida = document.getElementById("btnSaida");
+
+        if (btnEntrada) btnEntrada.addEventListener("click", registrarPonto);
+        if (btnSaida) btnSaida.addEventListener("click", registrarPonto);
+    }
+
     function updateClock() {
-      const now = new Date();
-      document.getElementById("currentTime").textContent = now.toLocaleTimeString('pt-BR');
-      document.getElementById("currentDate").textContent = now.toLocaleDateString('pt-BR', {
-        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
-      });
+        const now = new Date();
+        const currentTime = document.getElementById("currentTime");
+        const currentDate = document.getElementById("currentDate");
 
-      if (isWorking && startTime) {
-        const diff = now - startTime;
-        const hours = Math.floor(diff / 3600000);
-        const mins  = Math.floor((diff % 3600000) / 60000);
-        document.getElementById("horasHoje").textContent =
-          String(hours).padStart(2,'0') + ':' + String(mins).padStart(2,'0');
-      }
+        if (currentTime) {
+            currentTime.textContent = now.toLocaleTimeString("pt-BR");
+        }
+
+        if (currentDate) {
+            currentDate.textContent = now.toLocaleDateString("pt-BR", {
+                weekday: "long",
+                year: "numeric",
+                month: "long",
+                day: "numeric"
+            });
+        }
     }
 
-    function registerPunch(type) {
-      const now = new Date();
-      const timeStr = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    async function carregarResumo() {
+        try {
+            const resp = await fetch("/api/my-timesheet/summary", {
+                method: "GET",
+                credentials: "same-origin"
+            });
 
-      if (type === 'ENTRADA') {
-        isWorking = true;
-        startTime = now;
-        document.getElementById("btnEntrada").disabled = true;
-        document.getElementById("btnSaida").disabled   = false;
+            const data = await resp.json();
 
-        clearEmptyState();
-        addTimelineEntry(timeStr, 'Entrada', 'entrada');
-        Toast.success('Entrada registrada às ' + timeStr);
-      } else {
-        isWorking = false;
-        document.getElementById("btnEntrada").disabled = false;
-        document.getElementById("btnSaida").disabled   = true;
+            if (!resp.ok) {
+                Toast.error(data.error || "Não foi possível carregar o resumo do ponto.");
+                return;
+            }
 
-        addTimelineEntry(timeStr, 'Saída', 'saida');
-        Toast.success('Saída registrada às ' + timeStr);
-      }
+            document.getElementById("horasHoje").textContent = data.horasHoje ?? "00:00";
+            document.getElementById("horasSemana").textContent = data.horasSemana ?? "00:00";
+            document.getElementById("horasMes").textContent = data.horasMes ?? "00:00";
+            document.getElementById("bancoHoras").textContent = data.bancoHoras ?? "+00:00";
+
+            renderTimeline(data.marcacoesHoje || []);
+            atualizarBotoes(data.proximaAcao, data.statusAtual);
+        } catch (e) {
+            console.error(e);
+            Toast.error("Erro ao carregar dados do ponto.");
+        }
     }
 
-    function clearEmptyState() {
-      const empty = document.querySelector('.timeline-empty');
-      if (empty) empty.remove();
+    async function carregarSemana() {
+        try {
+            const resp = await fetch("/api/my-timesheet/week", {
+                method: "GET",
+                credentials: "same-origin"
+            });
+
+            if (!resp.ok) {
+                Toast.error("Não foi possível carregar o histórico da semana.");
+                return;
+            }
+
+            const rows = await resp.json();
+            const tbody = document.getElementById("weekHistoryBody");
+
+            if (!tbody) return;
+
+            if (!rows || !rows.length) {
+                tbody.innerHTML = `
+          <tr>
+            <td colspan="6" style="text-align:center; padding: var(--spacing-6); color: var(--gray-400);">
+              Nenhum registro encontrado para esta semana.
+            </td>
+          </tr>
+        `;
+                return;
+            }
+
+            tbody.innerHTML = rows.map(item => `
+        <tr>
+          <td>${item.data ?? "--/--/----"}</td>
+          <td>${item.entrada ?? "--:--"}</td>
+          <td>${item.saidaAlmoco ?? "--:--"}</td>
+          <td>${item.retornoAlmoco ?? "--:--"}</td>
+          <td>${item.saida ?? "--:--"}</td>
+          <td>${item.total ?? "--:--"}</td>
+        </tr>
+      `).join("");
+        } catch (e) {
+            console.error(e);
+            Toast.error("Erro ao carregar histórico da semana.");
+        }
     }
 
-    function addTimelineEntry(time, label, type) {
-      const timeline = document.getElementById("todayTimeline");
-      const entry = document.createElement('div');
-      entry.className = 'timeline-item ' + type;
-      entry.innerHTML = '<strong>' + time + '</strong>' +
-        '<p style="color: var(--gray-500); font-size: var(--font-size-sm);">' + label + '</p>';
-      timeline.appendChild(entry);
+    async function registrarPonto() {
+        try {
+            const resp = await fetch("/api/my-timesheet/punch", {
+                method: "POST",
+                credentials: "same-origin"
+            });
+
+            const data = await resp.json();
+
+            if (!resp.ok) {
+                Toast.error(data.error || "Não foi possível registrar o ponto.");
+                return;
+            }
+
+            Toast.success((traduzirTipo(data.tipoRegistrado) || "Ponto") + " registrado com sucesso.");
+            await carregarResumo();
+            await carregarSemana();
+        } catch (e) {
+            console.error(e);
+            Toast.error("Erro ao registrar o ponto.");
+        }
+    }
+
+    function atualizarBotoes(proximaAcao, statusAtual) {
+        const btnEntrada = document.getElementById("btnEntrada");
+        const btnSaida = document.getElementById("btnSaida");
+
+        if (!btnEntrada || !btnSaida) return;
+
+        btnEntrada.disabled = true;
+        btnSaida.disabled = true;
+
+        btnEntrada.textContent = "▶ Registrar Entrada";
+        btnSaida.textContent = "⏹ Registrar Saída";
+
+        if (statusAtual === "FINALIZADO") {
+            return;
+        }
+
+        if (proximaAcao === "ENTRADA") {
+            btnEntrada.disabled = false;
+            btnEntrada.textContent = "▶ Registrar Entrada";
+            return;
+        }
+
+        if (proximaAcao === "SAIDA_ALMOCO") {
+            btnSaida.disabled = false;
+            btnSaida.textContent = "⏸ Iniciar Intervalo";
+            return;
+        }
+
+        if (proximaAcao === "RETORNO_ALMOCO") {
+            btnEntrada.disabled = false;
+            btnEntrada.textContent = "↩ Voltar do Intervalo";
+            return;
+        }
+
+        if (proximaAcao === "SAIDA") {
+            btnSaida.disabled = false;
+            btnSaida.textContent = "⏹ Fechar Expediente";
+        }
+    }
+
+    function renderTimeline(marcacoes) {
+        const timeline = document.getElementById("todayTimeline");
+        if (!timeline) return;
+
+        if (!marcacoes || !marcacoes.length) {
+            timeline.innerHTML = `
+        <div class="timeline-empty">
+          <img src="/assets/hourglass.png" alt="">
+          <p>Nenhum registro hoje.<br>Bata seu ponto acima para começar.</p>
+        </div>
+      `;
+            return;
+        }
+
+        timeline.innerHTML = marcacoes.map(m => {
+            const tipoCss = (m.tipo === "ENTRADA" || m.tipo === "RETORNO_ALMOCO") ? "entrada" : "saida";
+            const label = traduzirTipo(m.tipo);
+            const hora = formatHora(m.dataHora);
+
+            return `
+        <div class="timeline-item ${tipoCss}">
+          <strong>${hora}</strong>
+          <p style="color: var(--gray-500); font-size: var(--font-size-sm);">${label}</p>
+        </div>
+      `;
+        }).join("");
+    }
+
+    function formatHora(dataHora) {
+        if (!dataHora) return "--:--";
+        const date = new Date(dataHora);
+        if (isNaN(date.getTime())) return "--:--";
+
+        return date.toLocaleTimeString("pt-BR", {
+            hour: "2-digit",
+            minute: "2-digit"
+        });
+    }
+
+    function traduzirTipo(tipo) {
+        switch (tipo) {
+            case "ENTRADA":
+                return "Entrada";
+            case "SAIDA_ALMOCO":
+                return "Saída para almoço";
+            case "RETORNO_ALMOCO":
+                return "Retorno do almoço";
+            case "SAIDA":
+                return "Saída";
+            default:
+                return tipo || "";
+        }
     }
 </script>
 </body>
