@@ -1,7 +1,9 @@
 package proj.paratodos.service;
 
+import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import proj.paratodos.domain.Cargo;
@@ -15,6 +17,7 @@ import proj.paratodos.repository.DepartamentoRepository;
 import proj.paratodos.repository.FuncionarioRepository;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 
 @Service
 public class FuncionarioService {
@@ -33,10 +36,30 @@ public class FuncionarioService {
 
     @Transactional(readOnly = true)
     public Page<FuncionarioResponse> search(String search, Long departamentoId, String status, Pageable pageable) {
-        String searchParam = (search != null && !search.isBlank()) ? search.trim() : null;
-        String statusParam = (status != null && !status.isBlank()) ? status.trim() : null;
+        Specification<Funcionario> spec = (root, query, cb) -> {
+            var predicates = new ArrayList<Predicate>();
 
-        return funcionarioRepository.search(searchParam, departamentoId, statusParam, pageable)
+            if (search != null && !search.isBlank()) {
+                String s = "%" + search.trim().toLowerCase() + "%";
+                predicates.add(cb.or(
+                        cb.like(cb.lower(root.get("nomeCompleto")), s),
+                        cb.like(root.get("matricula"), "%" + search.trim() + "%"),
+                        cb.like(root.get("cpf"), "%" + search.trim() + "%")
+                ));
+            }
+
+            if (departamentoId != null) {
+                predicates.add(cb.equal(root.get("departamento").get("id"), departamentoId));
+            }
+
+            if (status != null && !status.isBlank()) {
+                predicates.add(cb.equal(root.get("status"), status.trim()));
+            }
+
+            return predicates.isEmpty() ? null : cb.and(predicates.toArray(new Predicate[0]));
+        };
+
+        return funcionarioRepository.findAll(spec, pageable)
                 .map(FuncionarioResponse::fromEntity);
     }
 

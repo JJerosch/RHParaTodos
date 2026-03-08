@@ -1,9 +1,7 @@
 package proj.paratodos.repository;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import proj.paratodos.domain.Funcionario;
@@ -12,7 +10,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-public interface FuncionarioRepository extends JpaRepository<Funcionario, Long> {
+public interface FuncionarioRepository extends JpaRepository<Funcionario, Long>, JpaSpecificationExecutor<Funcionario> {
 
     @Query("""
         SELECT f FROM Funcionario f
@@ -28,31 +26,6 @@ public interface FuncionarioRepository extends JpaRepository<Funcionario, Long> 
     boolean existsByMatricula(String matricula);
 
     boolean existsByEmailCorporativo(String emailCorporativo);
-
-    @EntityGraph(attributePaths = {"cargo", "departamento", "gestor"})
-    @Query(value = """
-        SELECT f FROM Funcionario f
-        WHERE (:search IS NULL
-            OR LOWER(f.nomeCompleto) LIKE LOWER(CONCAT('%', :search, '%'))
-            OR f.matricula LIKE CONCAT('%', :search, '%')
-            OR f.cpf LIKE CONCAT('%', :search, '%'))
-        AND (:departamentoId IS NULL OR f.departamento.id = :departamentoId)
-        AND (:status IS NULL OR f.status = :status)
-    """,
-    countQuery = """
-        SELECT COUNT(f) FROM Funcionario f
-        WHERE (:search IS NULL
-            OR LOWER(f.nomeCompleto) LIKE LOWER(CONCAT('%', :search, '%'))
-            OR f.matricula LIKE CONCAT('%', :search, '%')
-            OR f.cpf LIKE CONCAT('%', :search, '%'))
-        AND (:departamentoId IS NULL OR f.departamento.id = :departamentoId)
-        AND (:status IS NULL OR f.status = :status)
-    """)
-    Page<Funcionario> search(
-            @Param("search") String search,
-            @Param("departamentoId") Long departamentoId,
-            @Param("status") String status,
-            Pageable pageable);
 
     long countByStatus(String status);
 
