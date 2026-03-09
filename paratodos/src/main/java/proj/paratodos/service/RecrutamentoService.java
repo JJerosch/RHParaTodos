@@ -249,7 +249,7 @@ public class RecrutamentoService {
         f.setEmailPessoal(cand.getEmail());
         f.setEmailCorporativo(emailCorp);
         f.setTelefone(cand.getTelefone());
-        f.setCpf(cand.getCpf() != null ? cand.getCpf() : "");
+        f.setCpf(cand.getCpf() != null && !cand.getCpf().isBlank() ? cand.getCpf() : "PEND-" + System.currentTimeMillis() % 100000);
         f.setMatricula(matricula);
         f.setDataNascimento(cand.getDataNascimento() != null ? cand.getDataNascimento() : LocalDate.of(2000, 1, 1));
         f.setDataAdmissao(LocalDate.now());
