@@ -95,7 +95,12 @@
             <span class="nav-icon"><img th:src="@{/assets/hourglass.png}" alt="" width="20" height="20"></span>
             <span class="nav-text">Ponto</span>
         </a>
-
+        <a th:href="@{/admin/ponto-calendario}" class="nav-item"
+           th:classappend="${activePage == 'ponto-calendario'} ? ' active'"
+           data-roles="ADMIN">
+            <span class="nav-icon"><img th:src="@{/assets/calendar.png}" alt="" width="20" height="20"></span>
+            <span class="nav-text">Calendário do Ponto</span>
+        </a>
         <!-- Minha Área (Individual) -->
         <div class="nav-section" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE,DP_CHEFE,DP_ASSISTENTE,EMPLOYEE">Minha Área</div>
         <a th:href="@{/meu-ponto}" class="nav-item"

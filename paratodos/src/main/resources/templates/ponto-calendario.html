@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/head :: head('Calendário do Ponto')}">
+    <title>Calendário do Ponto</title>
+</head>
+
+<body>
+
+<script th:inline="javascript">
+    window.__CURRENT_USER__ = {
+        email: /*[[${currentUser.email}]]*/ 'usuario@local',
+        role:  /*[[${currentUser.role}]]*/ 'ADMIN'
+    };
+</script>
+
+<aside th:replace="~{fragments/sidebar :: admin('ponto-calendario')}"></aside>
+
+<div class="main-content">
+    <header th:replace="~{fragments/topbar :: topbar('Calendário do Ponto')}"></header>
+
+    <div class="content-area">
+        <div class="card" style="margin-bottom:16px;">
+            <div style="display:flex; gap:12px; align-items:center;">
+                <button class="btn btn-secondary" type="button" onclick="mesAnterior()">←</button>
+                <h3 id="tituloMes" style="margin:0;"></h3>
+                <button class="btn btn-secondary" type="button" onclick="proximoMes()">→</button>
+            </div>
+
+            <p style="margin-top:8px; color:var(--gray-500);">
+                Clique em um dia para classificar como Dia útil, Feriado ou Recesso.
+            </p>
+        </div>
+
+        <div class="card">
+            <div id="gridCalendario" style="display:grid; grid-template-columns:repeat(7, 1fr); gap:10px;"></div>
+        </div>
+    </div>
+</div>
+
+<div id="diaModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.35); z-index:9999;">
+    <div style="max-width:420px; margin:8vh auto; background:#fff; border-radius:12px; padding:20px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+            <h3 style="margin:0;">Classificar dia</h3>
+            <button class="btn btn-secondary" type="button" onclick="fecharModal()">Fechar</button>
+        </div>
+
+        <input type="hidden" id="diaSelecionado">
+
+        <div class="form-group">
+            <label class="form-label">Data</label>
+            <input class="form-input" id="diaLabel" disabled>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Tipo</label>
+            <select class="form-select" id="tipoDia">
+                <option value="DIA_UTIL">Dia útil</option>
+                <option value="FERIADO">Feriado</option>
+                <option value="RECESSO">Recesso</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Descrição</label>
+            <input class="form-input" id="descricaoDia" placeholder="Opcional">
+        </div>
+
+        <div style="display:flex; gap:8px; justify-content:flex-end;">
+            <button class="btn btn-secondary" type="button" onclick="limparDia()">Limpar</button>
+            <button class="btn btn-primary" type="button" onclick="salvarDia()">Salvar</button>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragments/scripts :: common}"></div>
+
+<script>
+    let anoAtual;
+    let mesAtual;
+    let diasMes = [];
+
+    document.addEventListener("DOMContentLoaded", async function () {
+        if (!Auth.requireAuth()) return;
+
+        initUserMenu();
+        initSidebar();
+        Auth.applyRoleVisibility(document);
+        Auth.applyActionVisibility(document);
+
+        const hoje = new Date();
+        anoAtual = hoje.getFullYear();
+        mesAtual = hoje.getMonth() + 1;
+
+        await carregarMes();
+    });
+
+    async function carregarMes() {
+        try {
+            const resp = await fetch(`/api/admin/ponto-calendario?ano=${anoAtual}&mes=${mesAtual}`, {
+                credentials: "same-origin"
+            });
+
+            const data = await resp.json();
+
+            if (!resp.ok) {
+                Toast.error(data.error || "Erro ao carregar calendário.");
+                return;
+            }
+
+            diasMes = data || [];
+            renderCalendario();
+        } catch (e) {
+            console.error(e);
+            Toast.error("Erro ao carregar calendário.");
+        }
+    }
+
+    function renderCalendario() {
+        const grid = document.getElementById("gridCalendario");
+        const titulo = document.getElementById("tituloMes");
+
+        const nomesMes = [
+            "Janeiro","Fevereiro","Março","Abril","Maio","Junho",
+            "Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"
+        ];
+
+        titulo.textContent = `${nomesMes[mesAtual - 1]} / ${anoAtual}`;
+
+        grid.innerHTML = diasMes.map(function (d) {
+            let bg = "#fff";
+
+            if (d.tipo === "FERIADO") bg = "rgba(231,76,60,0.12)";
+            if (d.tipo === "RECESSO") bg = "rgba(243,156,18,0.12)";
+            if (d.tipo === "DIA_UTIL") bg = "rgba(39,174,96,0.12)";
+
+            const dia = new Date(d.data + "T00:00:00").getDate();
+
+            return `
+                <button
+                    type="button"
+                    onclick='abrirDia(${JSON.stringify(JSON.stringify(d))})'
+                    style="
+                        border:1px solid var(--gray-200);
+                        border-radius:12px;
+                        padding:12px;
+                        background:${bg};
+                        text-align:left;
+                        min-height:90px;
+                        cursor:pointer;
+                    ">
+                    <div style="font-weight:700; margin-bottom:6px;">${dia}</div>
+                    <div style="font-size:12px; color:var(--gray-600);">${traduzirTipo(d.tipo)}</div>
+                    <div style="font-size:11px; color:var(--gray-500); margin-top:4px;">
+                        ${d.descricao || ""}
+                    </div>
+                </button>
+            `;
+        }).join("");
+    }
+
+    function abrirDia(raw) {
+        const d = JSON.parse(raw);
+
+        document.getElementById("diaSelecionado").value = d.data;
+        document.getElementById("diaLabel").value = new Date(d.data + "T00:00:00").toLocaleDateString("pt-BR");
+        document.getElementById("tipoDia").value = d.tipo;
+        document.getElementById("descricaoDia").value = d.descricao || "";
+        document.getElementById("diaModal").style.display = "block";
+    }
+
+    function fecharModal() {
+        document.getElementById("diaModal").style.display = "none";
+    }
+
+    async function salvarDia() {
+        const data = document.getElementById("diaSelecionado").value;
+        const tipo = document.getElementById("tipoDia").value;
+        const descricao = document.getElementById("descricaoDia").value;
+
+        try {
+            const resp = await fetch(`/api/admin/ponto-calendario/${data}`, {
+                method: "PUT",
+                credentials: "same-origin",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ tipo, descricao })
+            });
+
+            const body = await resp.json().catch(() => ({}));
+
+            if (!resp.ok) {
+                Toast.error(body.error || "Erro ao salvar.");
+                return;
+            }
+
+            Toast.success("Dia atualizado.");
+            fecharModal();
+            await carregarMes();
+        } catch (e) {
+            console.error(e);
+            Toast.error("Erro ao salvar.");
+        }
+    }
+
+    async function limparDia() {
+        const data = document.getElementById("diaSelecionado").value;
+
+        try {
+            const resp = await fetch(`/api/admin/ponto-calendario/${data}`, {
+                method: "DELETE",
+                credentials: "same-origin"
+            });
+
+            const body = await resp.json().catch(() => ({}));
+
+            if (!resp.ok) {
+                Toast.error(body.error || "Erro ao limpar.");
+                return;
+            }
+
+            Toast.success("Configuração removida.");
+            fecharModal();
+            await carregarMes();
+        } catch (e) {
+            console.error(e);
+            Toast.error("Erro ao limpar.");
+        }
+    }
+
+    function traduzirTipo(tipo) {
+        if (tipo === "DIA_UTIL") return "Dia útil";
+        if (tipo === "FERIADO") return "Feriado";
+        if (tipo === "RECESSO") return "Recesso";
+        return tipo || "";
+    }
+
+    function mesAnterior() {
+        mesAtual--;
+        if (mesAtual < 1) {
+            mesAtual = 12;
+            anoAtual--;
+        }
+        carregarMes();
+    }
+
+    function proximoMes() {
+        mesAtual++;
+        if (mesAtual > 12) {
+            mesAtual = 1;
+            anoAtual++;
+        }
+        carregarMes();
+    }
+</script>
+
+</body>
+</html>

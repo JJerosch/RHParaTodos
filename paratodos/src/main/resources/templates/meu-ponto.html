@@ -1,150 +1,16 @@
 <!DOCTYPE html>
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 
-<head th:replace="~{fragments/head :: head('Meu Ponto')}"><title>Meu Ponto</title></head>
+<head th:replace="~{fragments/head :: head('Meu Ponto')}">
+    <title>Meu Ponto - Sistema RH Para Todos</title>
+</head>
 
 <body>
-<style>
-    .punch-hero {
-      background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-gray) 100%);
-      color: white;
-      border-radius: var(--radius-lg);
-      padding: var(--spacing-8);
-      text-align: center;
-      margin-bottom: var(--spacing-6);
-    }
-    .punch-hero .current-time {
-      font-size: 3.5rem;
-      font-weight: 700;
-      font-family: monospace;
-      letter-spacing: 2px;
-    }
-    .punch-hero .current-date {
-      opacity: 0.85;
-      margin-top: var(--spacing-2);
-      font-size: var(--font-size-base);
-    }
-    .punch-actions {
-      display: flex;
-      justify-content: center;
-      gap: var(--spacing-4);
-      margin-top: var(--spacing-6);
-    }
-    .punch-actions .btn {
-      padding: var(--spacing-4) var(--spacing-8);
-      font-size: var(--font-size-lg);
-      border-radius: var(--radius-lg);
-      min-width: 200px;
-    }
-    .btn-success {
-      background: var(--success-green);
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-    .btn-success:hover { opacity: 0.9; }
-    .btn-success:disabled { opacity: 0.5; cursor: not-allowed; }
-    .btn-danger {
-      background: var(--error-red);
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-    .btn-danger:hover { opacity: 0.9; }
-    .btn-danger:disabled { opacity: 0.5; cursor: not-allowed; }
-    .punch-stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: var(--spacing-4);
-      margin-bottom: var(--spacing-6);
-    }
-    .punch-stat-card {
-      background: white;
-      border-radius: var(--radius-lg);
-      padding: var(--spacing-5);
-      box-shadow: var(--shadow-sm);
-      border: 1px solid var(--gray-200);
-      text-align: center;
-    }
-    .punch-stat-icon {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto var(--spacing-3);
-      font-size: 20px;
-    }
-    .punch-stat-value {
-      font-size: var(--font-size-2xl);
-      font-weight: 700;
-      color: var(--primary-dark);
-    }
-    .punch-stat-label {
-      font-size: var(--font-size-sm);
-      color: var(--gray-500);
-      margin-top: var(--spacing-1);
-    }
-    .timeline {
-      position: relative;
-      padding-left: 30px;
-    }
-    .timeline::before {
-      content: '';
-      position: absolute;
-      left: 10px;
-      top: 0;
-      bottom: 0;
-      width: 2px;
-      background: var(--gray-200);
-    }
-    .timeline-item {
-      position: relative;
-      padding-bottom: var(--spacing-4);
-    }
-    .timeline-item::before {
-      content: '';
-      position: absolute;
-      left: -24px;
-      top: 4px;
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      background: var(--primary-dark);
-      border: 2px solid white;
-    }
-    .timeline-item.entrada::before { background: var(--success-green); }
-    .timeline-item.saida::before { background: var(--error-red); }
-    .timeline-empty {
-      text-align: center;
-      padding: var(--spacing-8);
-      color: var(--gray-400);
-    }
-    .timeline-empty img {
-      width: 48px;
-      height: 48px;
-      opacity: 0.4;
-      margin-bottom: var(--spacing-3);
-    }
-    .bottom-grid {
-      display: grid;
-      grid-template-columns: 1fr 2fr;
-      gap: var(--spacing-6);
-      margin-top: var(--spacing-6);
-    }
-    @media (max-width: 768px) {
-      .punch-hero .current-time { font-size: 2.5rem; }
-      .punch-actions { flex-direction: column; align-items: center; }
-      .punch-actions .btn { min-width: 100%; }
-      .bottom-grid { grid-template-columns: 1fr; }
-    }
-</style>
 
 <script th:inline="javascript">
     window.__CURRENT_USER__ = {
-      email: /*[[${currentUser.email}]]*/ 'usuario@local',
-      role:  /*[[${currentUser.role}]]*/ 'EMPLOYEE'
+        email: /*[[${currentUser.email}]]*/ 'usuario@local',
+        role:  /*[[${currentUser.role}]]*/ 'EMPLOYEE'
     };
 </script>
 
@@ -154,325 +20,470 @@
     <header th:replace="~{fragments/topbar :: topbar('Meu Ponto')}"></header>
 
     <div class="content-area">
-        <!-- Hero: Relógio + Bater Ponto -->
-        <div class="punch-hero">
-            <div class="current-time" id="currentTime">00:00:00</div>
-            <div class="current-date" id="currentDate">Carregando...</div>
-            <div class="punch-actions">
-                <button class="btn btn-success" id="btnEntrada" type="button">
-                    &#9654; Registrar Entrada
+        <div class="hero-card">
+            <div class="hero-clock" id="clock">00:00:00</div>
+            <div class="hero-date" id="heroDate">--</div>
+
+            <div id="avisoDia" class="day-warning" style="display:none;"></div>
+
+            <div class="hero-actions">
+                <button id="btnEntrada" class="btn btn-primary hero-btn" type="button">
+                    Registrar Entrada
                 </button>
-                <button class="btn btn-danger" id="btnSaida" type="button" disabled>
-                    &#9632; Registrar Saída
+                <button id="btnSaida" class="btn btn-secondary hero-btn" type="button" disabled>
+                    Registrar Saída
                 </button>
             </div>
         </div>
 
-        <!-- Stats Cards -->
-        <div class="punch-stats-grid">
-            <div class="punch-stat-card">
-                <div class="punch-stat-icon" style="background: rgba(40,167,69,0.1);">
-                    <img th:src="@{/assets/hourglass.png}" alt="" width="24" height="24">
+        <div class="stats-grid four">
+            <div class="stat-card">
+                <div class="stat-content">
+                    <p class="stat-value" id="horasHoje">00:00</p>
+                    <small>Horas Hoje</small>
                 </div>
-                <div class="punch-stat-value" id="horasHoje">00:00</div>
-                <div class="punch-stat-label">Horas Hoje</div>
             </div>
-            <div class="punch-stat-card">
-                <div class="punch-stat-icon" style="background: rgba(44,62,80,0.1);">
-                    <img th:src="@{/assets/calendar.png}" alt="" width="24" height="24">
+
+            <div class="stat-card">
+                <div class="stat-content">
+                    <p class="stat-value" id="horasSemana">00:00</p>
+                    <small>Horas na Semana</small>
                 </div>
-                <div class="punch-stat-value" id="horasSemana">--:--</div>
-                <div class="punch-stat-label">Horas na Semana</div>
             </div>
-            <div class="punch-stat-card">
-                <div class="punch-stat-icon" style="background: rgba(243,156,18,0.1);">
-                    <img th:src="@{/assets/calendar-check.png}" alt="" width="24" height="24">
+
+            <div class="stat-card">
+                <div class="stat-content">
+                    <p class="stat-value" id="horasMes">00:00</p>
+                    <small>Horas no Mês</small>
                 </div>
-                <div class="punch-stat-value" id="horasMes">--:--</div>
-                <div class="punch-stat-label">Horas no Mês</div>
             </div>
-            <div class="punch-stat-card">
-                <div class="punch-stat-icon" style="background: rgba(231,76,60,0.1);">
-                    <img th:src="@{/assets/scale.png}" alt="" width="24" height="24">
+
+            <div class="stat-card">
+                <div class="stat-content">
+                    <p class="stat-value" id="bancoHoras">+00:00</p>
+                    <small>Banco de Horas</small>
                 </div>
-                <div class="punch-stat-value" id="bancoHoras">--:--</div>
-                <div class="punch-stat-label">Banco de Horas</div>
             </div>
         </div>
 
-        <!-- Registros de Hoje + Histórico da Semana -->
-        <div class="bottom-grid">
-            <!-- Registros de Hoje -->
-            <div class="card">
-                <h3 style="margin-bottom: var(--spacing-4);">Registros de Hoje</h3>
-                <div class="timeline" id="todayTimeline">
-                    <div class="timeline-empty">
-                        <img th:src="@{/assets/hourglass.png}" alt="">
-                        <p>Nenhum registro hoje.<br>Bata seu ponto acima para começar.</p>
-                    </div>
+        <div class="dashboard-grid ponto-grid">
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h2>Registros de Hoje</h2>
+                </div>
+                <div id="registrosHoje" class="empty-state-inline">
+                    Carregando...
                 </div>
             </div>
 
-            <!-- Histórico da Semana -->
-            <div class="card">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-4);">
-                    <h3>Histórico da Semana</h3>
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h2>Histórico da Semana</h2>
                 </div>
-                <table class="data-table">
-                    <thead>
+
+                <div class="table-wrap">
+                    <table class="table">
+                        <thead>
                         <tr>
-                            <th>Data</th>
-                            <th>Entrada</th>
-                            <th>Saída Almoço</th>
-                            <th>Retorno</th>
-                            <th>Saída</th>
-                            <th>Total</th>
+                            <th>DATA</th>
+                            <th>ENTRADA</th>
+                            <th>SAÍDA ALMOÇO</th>
+                            <th>RETORNO</th>
+                            <th>SAÍDA</th>
+                            <th>TOTAL</th>
                         </tr>
-                    </thead>
-                    <tbody id="weekHistoryBody">
-                        <tr>
-                            <td colspan="6" style="text-align: center; padding: var(--spacing-6); color: var(--gray-400);">
-                                Nenhum registro encontrado para esta semana.
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody id="historicoSemanaBody">
+                        <tr><td colspan="6" class="empty-state-inline">Carregando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
+<style>
+    .hero-card {
+        background: #fff;
+        border: 1px solid var(--gray-200);
+        border-radius: var(--radius-lg);
+        padding: 32px 24px;
+        margin-bottom: 24px;
+        text-align: center;
+    }
+
+    .hero-clock {
+        font-size: 56px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        color: var(--primary-dark);
+        margin-bottom: 8px;
+    }
+
+    .hero-date {
+        font-size: 18px;
+        color: var(--gray-600);
+        margin-bottom: 20px;
+    }
+
+    .hero-actions {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .hero-btn {
+        min-width: 220px;
+        font-size: 16px;
+        padding: 12px 18px;
+        transition: opacity 0.2s ease, filter 0.2s ease;
+    }
+
+    .hero-btn:disabled {
+        opacity: 0.45;
+        filter: grayscale(15%);
+        cursor: not-allowed;
+    }
+
+    .day-warning {
+        margin: 0 auto 18px auto;
+        max-width: 680px;
+        padding: 12px 16px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 14px;
+        border: 1px solid var(--gray-200);
+        background: var(--gray-50);
+        color: var(--gray-700);
+    }
+
+    .stats-grid.four {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    .stat-card {
+        background: #fff;
+        border: 1px solid var(--gray-200);
+        border-radius: var(--radius-lg);
+        padding: 24px;
+        text-align: center;
+    }
+
+    .stat-value {
+        font-size: 34px;
+        font-weight: 700;
+        color: var(--primary-dark);
+        margin: 0 0 6px 0;
+    }
+
+    .ponto-grid {
+        display: grid;
+        grid-template-columns: 1fr 1.2fr;
+        gap: 20px;
+    }
+
+    .dashboard-card {
+        background: #fff;
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--gray-200);
+        padding: 20px;
+    }
+
+    .card-header h2 {
+        margin: 0 0 16px 0;
+    }
+
+    .empty-state-inline {
+        color: var(--gray-400);
+        font-size: 14px;
+        padding: 20px 0;
+        text-align: center;
+    }
+
+    .registro-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid var(--gray-100);
+    }
+
+    .registro-item:last-child {
+        border-bottom: none;
+    }
+
+    .registro-tipo {
+        font-weight: 600;
+        color: var(--gray-700);
+    }
+
+    .registro-hora {
+        color: var(--primary-dark);
+        font-weight: 700;
+    }
+
+    .table-wrap {
+        overflow-x: auto;
+    }
+
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .table th,
+    .table td {
+        padding: 12px 10px;
+        text-align: center;
+        border-bottom: 1px solid var(--gray-100);
+        font-size: 14px;
+    }
+
+    .table th {
+        color: var(--gray-500);
+        font-weight: 700;
+    }
+
+    @media (max-width: 1100px) {
+        .stats-grid.four {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .ponto-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .hero-clock {
+            font-size: 42px;
+        }
+
+        .hero-date {
+            font-size: 16px;
+        }
+
+        .stats-grid.four {
+            grid-template-columns: 1fr;
+        }
+
+        .hero-btn {
+            width: 100%;
+        }
+    }
+</style>
+
 <div th:replace="~{fragments/scripts :: common}"></div>
+
 <script>
-    document.addEventListener("DOMContentLoaded", async () => {
+    document.addEventListener("DOMContentLoaded", function () {
         if (!Auth.requireAuth()) return;
+
         initUserMenu();
         initSidebar();
         Auth.applyRoleVisibility(document);
         Auth.applyActionVisibility(document);
 
-        updateClock();
-        setInterval(updateClock, 1000);
+        iniciarRelogio();
+        carregarResumo();
+        carregarHistoricoSemana();
 
-        bindButtons();
-        await carregarResumo();
-        await carregarSemana();
+        document.getElementById("btnEntrada").addEventListener("click", registrarPonto);
+        document.getElementById("btnSaida").addEventListener("click", registrarPonto);
     });
 
-    function bindButtons() {
-        const btnEntrada = document.getElementById("btnEntrada");
-        const btnSaida = document.getElementById("btnSaida");
+    function iniciarRelogio() {
+        function atualizar() {
+            const agora = new Date();
 
-        if (btnEntrada) btnEntrada.addEventListener("click", registrarPonto);
-        if (btnSaida) btnSaida.addEventListener("click", registrarPonto);
-    }
+            document.getElementById("clock").textContent = agora.toLocaleTimeString("pt-BR");
 
-    function updateClock() {
-        const now = new Date();
-        const currentTime = document.getElementById("currentTime");
-        const currentDate = document.getElementById("currentDate");
-
-        if (currentTime) {
-            currentTime.textContent = now.toLocaleTimeString("pt-BR");
-        }
-
-        if (currentDate) {
-            currentDate.textContent = now.toLocaleDateString("pt-BR", {
+            const dataFormatada = agora.toLocaleDateString("pt-BR", {
                 weekday: "long",
                 year: "numeric",
                 month: "long",
                 day: "numeric"
             });
+
+            document.getElementById("heroDate").textContent =
+                dataFormatada.charAt(0).toUpperCase() + dataFormatada.slice(1);
         }
+
+        atualizar();
+        setInterval(atualizar, 1000);
     }
 
     async function carregarResumo() {
         try {
             const resp = await fetch("/api/my-timesheet/summary", {
-                method: "GET",
                 credentials: "same-origin"
             });
 
             const data = await resp.json();
 
             if (!resp.ok) {
-                Toast.error(data.error || "Não foi possível carregar o resumo do ponto.");
+                Toast.error(data.error || "Erro ao carregar resumo.");
                 return;
             }
 
-            document.getElementById("horasHoje").textContent = data.horasHoje ?? "00:00";
-            document.getElementById("horasSemana").textContent = data.horasSemana ?? "00:00";
-            document.getElementById("horasMes").textContent = data.horasMes ?? "00:00";
-            document.getElementById("bancoHoras").textContent = data.bancoHoras ?? "+00:00";
+            document.getElementById("horasHoje").textContent = data.horasHoje || "00:00";
+            document.getElementById("horasSemana").textContent = data.horasSemana || "00:00";
+            document.getElementById("horasMes").textContent = data.horasMes || "00:00";
+            document.getElementById("bancoHoras").textContent = data.bancoHoras || "+00:00";
 
-            renderTimeline(data.marcacoesHoje || []);
-            atualizarBotoes(data.proximaAcao, data.statusAtual);
+            aplicarEstadoDoDia(data);
+            renderRegistrosHoje(data.marcacoesHoje || []);
         } catch (e) {
             console.error(e);
-            Toast.error("Erro ao carregar dados do ponto.");
+            Toast.error("Erro ao carregar resumo.");
         }
     }
 
-    async function carregarSemana() {
+    function aplicarEstadoDoDia(data) {
+        const tipoDia = data.tipoDia;
+        const aviso = document.getElementById("avisoDia");
+        const btnEntrada = document.getElementById("btnEntrada");
+        const btnSaida = document.getElementById("btnSaida");
+
+        btnEntrada.disabled = false;
+        btnSaida.disabled = true;
+        aviso.style.display = "none";
+        aviso.textContent = "";
+
+        if (tipoDia === "FERIADO") {
+            aviso.style.display = "block";
+            aviso.textContent = "Hoje é feriado. O registro de ponto está indisponível.";
+            btnEntrada.disabled = true;
+            btnSaida.disabled = true;
+            return;
+        }
+
+        if (tipoDia === "RECESSO") {
+            aviso.style.display = "block";
+            aviso.textContent = "Hoje é recesso. O registro de ponto está indisponível.";
+            btnEntrada.disabled = true;
+            btnSaida.disabled = true;
+            return;
+        }
+
+        const proximaAcao = data.proximaAcao || "ENTRADA";
+
+        if (proximaAcao === "ENTRADA") {
+            btnEntrada.disabled = false;
+            btnSaida.disabled = true;
+            btnEntrada.textContent = "Registrar Entrada";
+            btnSaida.textContent = "Registrar Saída";
+        } else if (proximaAcao === "SAIDA_ALMOCO" || proximaAcao === "RETORNO_ALMOCO" || proximaAcao === "SAIDA") {
+            btnEntrada.disabled = true;
+            btnSaida.disabled = false;
+            btnSaida.textContent = traduzirAcao(proximaAcao);
+        } else {
+            btnEntrada.disabled = true;
+            btnSaida.disabled = true;
+            btnEntrada.textContent = "Registrar Entrada";
+            btnSaida.textContent = "Registrar Saída";
+        }
+    }
+
+    function traduzirAcao(acao) {
+        if (acao === "SAIDA_ALMOCO") return "Registrar Saída Almoço";
+        if (acao === "RETORNO_ALMOCO") return "Registrar Retorno";
+        if (acao === "SAIDA") return "Registrar Saída";
+        return acao || "Registrar Saída";
+    }
+
+    function renderRegistrosHoje(marcacoes) {
+        const container = document.getElementById("registrosHoje");
+
+        if (!marcacoes || marcacoes.length === 0) {
+            container.innerHTML = '<div class="empty-state-inline">Nenhum registro hoje.</div>';
+            return;
+        }
+
+        container.innerHTML = marcacoes.map(function (m) {
+            return `
+                <div class="registro-item">
+                    <span class="registro-tipo">${formatarTipo(m.tipo)}</span>
+                    <span class="registro-hora">${m.hora || "--:--"}</span>
+                </div>
+            `;
+        }).join("");
+    }
+
+    function formatarTipo(tipo) {
+        if (tipo === "ENTRADA") return "Entrada";
+        if (tipo === "SAIDA_ALMOCO") return "Saída Almoço";
+        if (tipo === "RETORNO_ALMOCO") return "Retorno";
+        if (tipo === "SAIDA") return "Saída";
+        return tipo || "";
+    }
+
+    async function carregarHistoricoSemana() {
         try {
             const resp = await fetch("/api/my-timesheet/week", {
-                method: "GET",
                 credentials: "same-origin"
             });
 
+            const data = await resp.json();
+
             if (!resp.ok) {
-                Toast.error("Não foi possível carregar o histórico da semana.");
+                Toast.error(data.error || "Erro ao carregar histórico.");
                 return;
             }
 
-            const rows = await resp.json();
-            const tbody = document.getElementById("weekHistoryBody");
+            const tbody = document.getElementById("historicoSemanaBody");
 
-            if (!tbody) return;
-
-            if (!rows || !rows.length) {
-                tbody.innerHTML = `
-          <tr>
-            <td colspan="6" style="text-align:center; padding: var(--spacing-6); color: var(--gray-400);">
-              Nenhum registro encontrado para esta semana.
-            </td>
-          </tr>
-        `;
+            if (!data || data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="empty-state-inline">Nenhum registro na semana</td></tr>';
                 return;
             }
 
-            tbody.innerHTML = rows.map(item => `
-        <tr>
-          <td>${item.data ?? "--/--/----"}</td>
-          <td>${item.entrada ?? "--:--"}</td>
-          <td>${item.saidaAlmoco ?? "--:--"}</td>
-          <td>${item.retornoAlmoco ?? "--:--"}</td>
-          <td>${item.saida ?? "--:--"}</td>
-          <td>${item.total ?? "--:--"}</td>
-        </tr>
-      `).join("");
+            tbody.innerHTML = data.map(function (item) {
+                return `
+                    <tr>
+                        <td>${item.data || ""}</td>
+                        <td>${item.entrada || "--:--"}</td>
+                        <td>${item.saidaAlmoco || "--:--"}</td>
+                        <td>${item.retornoAlmoco || "--:--"}</td>
+                        <td>${item.saida || "--:--"}</td>
+                        <td>${item.total || "--:--"}</td>
+                    </tr>
+                `;
+            }).join("");
         } catch (e) {
             console.error(e);
-            Toast.error("Erro ao carregar histórico da semana.");
+            Toast.error("Erro ao carregar histórico.");
         }
     }
 
     async function registrarPonto() {
         try {
-            const resp = await fetch("/api/my-timesheet/punch", {
+            const resp = await fetch("/api/my-timesheet/register", {
                 method: "POST",
                 credentials: "same-origin"
             });
 
-            const data = await resp.json();
+            const data = await resp.json().catch(() => ({}));
 
             if (!resp.ok) {
-                Toast.error(data.error || "Não foi possível registrar o ponto.");
+                Toast.error(data.error || data.message || "Erro ao registrar ponto.");
                 return;
             }
 
-            Toast.success((traduzirTipo(data.tipoRegistrado) || "Ponto") + " registrado com sucesso.");
+            Toast.success(data.message || "Ponto registrado com sucesso.");
             await carregarResumo();
-            await carregarSemana();
+            await carregarHistoricoSemana();
         } catch (e) {
             console.error(e);
-            Toast.error("Erro ao registrar o ponto.");
-        }
-    }
-
-    function atualizarBotoes(proximaAcao, statusAtual) {
-        const btnEntrada = document.getElementById("btnEntrada");
-        const btnSaida = document.getElementById("btnSaida");
-
-        if (!btnEntrada || !btnSaida) return;
-
-        btnEntrada.disabled = true;
-        btnSaida.disabled = true;
-
-        btnEntrada.textContent = "▶ Registrar Entrada";
-        btnSaida.textContent = "⏹ Registrar Saída";
-
-        if (statusAtual === "FINALIZADO") {
-            return;
-        }
-
-        if (proximaAcao === "ENTRADA") {
-            btnEntrada.disabled = false;
-            btnEntrada.textContent = "▶ Registrar Entrada";
-            return;
-        }
-
-        if (proximaAcao === "SAIDA_ALMOCO") {
-            btnSaida.disabled = false;
-            btnSaida.textContent = "⏸ Iniciar Intervalo";
-            return;
-        }
-
-        if (proximaAcao === "RETORNO_ALMOCO") {
-            btnEntrada.disabled = false;
-            btnEntrada.textContent = "↩ Voltar do Intervalo";
-            return;
-        }
-
-        if (proximaAcao === "SAIDA") {
-            btnSaida.disabled = false;
-            btnSaida.textContent = "⏹ Fechar Expediente";
-        }
-    }
-
-    function renderTimeline(marcacoes) {
-        const timeline = document.getElementById("todayTimeline");
-        if (!timeline) return;
-
-        if (!marcacoes || !marcacoes.length) {
-            timeline.innerHTML = `
-        <div class="timeline-empty">
-          <img src="/assets/hourglass.png" alt="">
-          <p>Nenhum registro hoje.<br>Bata seu ponto acima para começar.</p>
-        </div>
-      `;
-            return;
-        }
-
-        timeline.innerHTML = marcacoes.map(m => {
-            const tipoCss = (m.tipo === "ENTRADA" || m.tipo === "RETORNO_ALMOCO") ? "entrada" : "saida";
-            const label = traduzirTipo(m.tipo);
-            const hora = formatHora(m.dataHora);
-
-            return `
-        <div class="timeline-item ${tipoCss}">
-          <strong>${hora}</strong>
-          <p style="color: var(--gray-500); font-size: var(--font-size-sm);">${label}</p>
-        </div>
-      `;
-        }).join("");
-    }
-
-    function formatHora(dataHora) {
-        if (!dataHora) return "--:--";
-        const date = new Date(dataHora);
-        if (isNaN(date.getTime())) return "--:--";
-
-        return date.toLocaleTimeString("pt-BR", {
-            hour: "2-digit",
-            minute: "2-digit"
-        });
-    }
-
-    function traduzirTipo(tipo) {
-        switch (tipo) {
-            case "ENTRADA":
-                return "Entrada";
-            case "SAIDA_ALMOCO":
-                return "Saída para almoço";
-            case "RETORNO_ALMOCO":
-                return "Retorno do almoço";
-            case "SAIDA":
-                return "Saída";
-            default:
-                return tipo || "";
+            Toast.error("Erro ao registrar ponto.");
         }
     }
 </script>
+
 </body>
 </html>

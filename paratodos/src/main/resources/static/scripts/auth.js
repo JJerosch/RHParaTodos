@@ -14,14 +14,22 @@ const ROLE_DISPLAY = {
 };
 
 function normalizeRole(role) {
-  return String(role || "").toUpperCase().trim();
+  let r = String(role || "").toUpperCase().trim();
+
+  if (r.startsWith("ROLE_")) {
+    r = r.substring(5);
+  } else if (r.startsWith("ROLE")) {
+    r = r.substring(4);
+  }
+
+  return r;
 }
 
 function parseRolesAttr(value) {
   return String(value || "")
-    .split(",")
-    .map((s) => normalizeRole(s))
-    .filter(Boolean);
+      .split(",")
+      .map((s) => normalizeRole(s))
+      .filter(Boolean);
 }
 
 const Auth = {
@@ -42,7 +50,7 @@ const Auth = {
   getProfileDisplayName(user) {
     const u = user || this.getCurrentUser();
     if (!u) return "";
-    return ROLE_DISPLAY[normalizeRole(u.role)] || u.role || "—";
+    return ROLE_DISPLAY[normalizeRole(u.role)] || normalizeRole(u.role) || "—";
   },
 
   // ---- Proteção de páginas ----
@@ -71,14 +79,11 @@ const Auth = {
 
   // ---- Logout ----
   logout() {
-    // Chama o endpoint de logout do Spring Security (limpa o cookie)
     const form = document.createElement("form");
     form.method = "POST";
     form.action = "/logout";
 
-    // CSRF token (Spring Security exige)
     const csrfMeta = document.querySelector('meta[name="_csrf"]');
-    const csrfHeaderMeta = document.querySelector('meta[name="_csrf_header"]');
     if (csrfMeta) {
       const input = document.createElement("input");
       input.type = "hidden";
@@ -101,7 +106,6 @@ const Auth = {
       el.style.display = allowed.includes(role) ? "" : "none";
     });
 
-    // Oculta seções do sidebar sem itens visíveis
     root.querySelectorAll(".sidebar-nav .nav-section").forEach((section) => {
       let el = section.nextElementSibling;
       let hasVisible = false;
@@ -117,7 +121,6 @@ const Auth = {
   },
 
   // ---- Visibilidade de ações por role (data-action-roles="...") ----
-  // Usado para esconder botões como "Excluir" de quem não tem permissão
   applyActionVisibility(root = document) {
     const role = this.getCurrentRole();
     if (!role) return;
@@ -125,30 +128,29 @@ const Auth = {
     root.querySelectorAll("[data-action-roles]").forEach((el) => {
       const allowed = parseRolesAttr(el.getAttribute("data-action-roles"));
       if (!allowed.includes(role)) {
-        el.remove(); // Remove do DOM, não só esconde
+        el.remove();
       }
     });
   },
 
-  // ---- Redirecionamento após login (usado pelo backend, mantido para compatibilidade) ----
+  // ---- Redirecionamento após login ----
   redirectAfterLogin(user) {
     const role = normalizeRole(user?.role) || this.getCurrentRole();
     return role === "EMPLOYEE" ? "/meu-ponto" : "/dashboard";
   },
 
-  // ---- Compatibilidade legada (não utiliza mais localStorage) ----
-  getToken() { return null; }, // JWT está no HttpOnly cookie, inacessível via JS
-  hasPermission() { return true; }, // Permissões agora são por role
+  // ---- Compatibilidade legada ----
+  getToken() { return null; },
+  hasPermission() { return true; },
 };
 
 // Utilitário de requisições autenticadas
-// O cookie é enviado automaticamente pelo browser
 const ApiClient = {
   async request(endpoint, options = {}) {
     try {
       const response = await fetch(`/api/v1${endpoint}`, {
         ...options,
-        credentials: "same-origin", // envia o cookie JWT
+        credentials: "same-origin",
         headers: {
           "Content-Type": "application/json",
           ...options.headers,
@@ -169,8 +171,8 @@ const ApiClient = {
   },
 
   get(endpoint)         { return this.request(endpoint, { method: "GET" }); },
-  post(endpoint, body)  { return this.request(endpoint, { method: "POST",   body: JSON.stringify(body) }); },
-  put(endpoint, body)   { return this.request(endpoint, { method: "PUT",    body: JSON.stringify(body) }); },
+  post(endpoint, body)  { return this.request(endpoint, { method: "POST", body: JSON.stringify(body) }); },
+  put(endpoint, body)   { return this.request(endpoint, { method: "PUT", body: JSON.stringify(body) }); },
   delete(endpoint)      { return this.request(endpoint, { method: "DELETE" }); },
 };
 

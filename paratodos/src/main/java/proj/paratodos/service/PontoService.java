@@ -2,13 +2,31 @@ package proj.paratodos.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import proj.paratodos.domain.*;
-import proj.paratodos.dto.*;
-import proj.paratodos.repository.*;
+import proj.paratodos.domain.Funcionario;
+import proj.paratodos.domain.PontoApuracaoDiaria;
+import proj.paratodos.domain.PontoJornada;
+import proj.paratodos.domain.PontoMarcacao;
+import proj.paratodos.domain.Usuario;
+import proj.paratodos.dto.MeuPontoResumoResponse;
+import proj.paratodos.dto.PontoMarcacaoResponse;
+import proj.paratodos.dto.PontoSemanaItemResponse;
+import proj.paratodos.dto.RegistrarPontoResponse;
+import proj.paratodos.dto.TimesheetAdminResponse;
+import proj.paratodos.dto.TimesheetAdminRowResponse;
+import proj.paratodos.dto.TimesheetAdminSummaryResponse;
+import proj.paratodos.repository.FuncionarioRepository;
+import proj.paratodos.repository.PontoApuracaoDiariaRepository;
+import proj.paratodos.repository.PontoJornadaRepository;
+import proj.paratodos.repository.PontoMarcacaoRepository;
+import proj.paratodos.repository.UsuarioRepository;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.time.*;
+import java.time.DayOfWeek;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -25,19 +43,22 @@ public class PontoService {
     private final PontoMarcacaoRepository pontoMarcacaoRepository;
     private final PontoApuracaoDiariaRepository pontoApuracaoDiariaRepository;
     private final PontoJornadaRepository pontoJornadaRepository;
+    private final PontoCalendarioService pontoCalendarioService;
 
     public PontoService(
             FuncionarioRepository funcionarioRepository,
             UsuarioRepository usuarioRepository,
             PontoMarcacaoRepository pontoMarcacaoRepository,
             PontoApuracaoDiariaRepository pontoApuracaoDiariaRepository,
-            PontoJornadaRepository pontoJornadaRepository
+            PontoJornadaRepository pontoJornadaRepository,
+            PontoCalendarioService pontoCalendarioService
     ) {
         this.funcionarioRepository = funcionarioRepository;
         this.usuarioRepository = usuarioRepository;
         this.pontoMarcacaoRepository = pontoMarcacaoRepository;
         this.pontoApuracaoDiariaRepository = pontoApuracaoDiariaRepository;
         this.pontoJornadaRepository = pontoJornadaRepository;
+        this.pontoCalendarioService = pontoCalendarioService;
     }
 
     @Transactional
@@ -47,8 +68,12 @@ public class PontoService {
                 .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado."));
 
         LocalDate hoje = LocalDate.now();
-        List<PontoMarcacao> hojeMarcacoes = buscarMarcacoesDia(funcionario.getId(), hoje);
 
+        if (!isDiaUtil(hoje)) {
+            throw new IllegalArgumentException("Registro de ponto indisponível para hoje.");
+        }
+
+        List<PontoMarcacao> hojeMarcacoes = buscarMarcacoesDia(funcionario.getId(), hoje);
         String proximoTipo = determinarProximoTipoParaRegistro(hojeMarcacoes);
 
         PontoMarcacao marcacao = new PontoMarcacao();
@@ -80,6 +105,7 @@ public class PontoService {
     public MeuPontoResumoResponse getResumoMeuPonto(Long usuarioId) {
         Funcionario funcionario = getFuncionarioLogado(usuarioId);
         LocalDate hoje = LocalDate.now();
+        String tipoDia = pontoCalendarioService.obterTipoDia(hoje);
 
         List<PontoMarcacao> hojeMarcacoes = buscarMarcacoesDia(funcionario.getId(), hoje);
         List<PontoMarcacaoResponse> marcacoesHoje = hojeMarcacoes.stream()
@@ -87,8 +113,16 @@ public class PontoService {
                 .map(PontoMarcacaoResponse::fromEntity)
                 .toList();
 
-        String statusAtual = calcularStatusAtual(hojeMarcacoes);
-        String proximaAcao = determinarProximoTipo(hojeMarcacoes);
+        String statusAtual;
+        String proximaAcao;
+
+        if (isDiaUtil(hoje)) {
+            statusAtual = calcularStatusAtual(hojeMarcacoes);
+            proximaAcao = determinarProximoTipo(hojeMarcacoes);
+        } else {
+            statusAtual = "INDISPONIVEL";
+            proximaAcao = "FECHADO";
+        }
 
         BigDecimal horasHoje = pontoApuracaoDiariaRepository
                 .findByFuncionarioIdAndData(funcionario.getId(), hoje)
@@ -110,19 +144,48 @@ public class PontoService {
                 formatHoras(horasSemana),
                 formatHoras(horasMes),
                 formatHorasSigned(bancoHoras),
-                marcacoesHoje
+                marcacoesHoje,
+                tipoDia
         );
     }
 
     @Transactional(readOnly = true)
     public List<PontoSemanaItemResponse> getHistoricoSemana(Long usuarioId) {
         Funcionario funcionario = getFuncionarioLogado(usuarioId);
-        LocalDate hoje = LocalDate.now();
-        LocalDate inicioSemana = hoje.with(DayOfWeek.MONDAY);
+
+        LocalDate inicioSemana = LocalDate.now().with(DayOfWeek.MONDAY);
+        LocalDate fimSemana = inicioSemana.plusDays(4);
 
         List<PontoSemanaItemResponse> itens = new ArrayList<>();
 
-        for (LocalDate data = hoje; !data.isBefore(inicioSemana); data = data.minusDays(1)) {
+        for (LocalDate data = inicioSemana; !data.isAfter(fimSemana); data = data.plusDays(1)) {
+
+            String aviso = null;
+
+            if ("FERIAS".equalsIgnoreCase(funcionario.getStatus())) {
+                aviso = "FÉRIAS";
+            } else {
+                String tipoDia = pontoCalendarioService.obterTipoDia(data);
+
+                if ("RECESSO".equalsIgnoreCase(tipoDia)) {
+                    aviso = "RECESSO";
+                } else if ("FERIADO".equalsIgnoreCase(tipoDia)) {
+                    aviso = "FERIADO";
+                }
+            }
+
+            if (aviso != null) {
+                itens.add(new PontoSemanaItemResponse(
+                        data.format(DATA_BR),
+                        aviso,
+                        aviso,
+                        aviso,
+                        aviso,
+                        aviso
+                ));
+                continue;
+            }
+
             List<PontoMarcacao> marcacoes = buscarMarcacoesDia(funcionario.getId(), data);
             PontoApuracaoDiaria apuracao = pontoApuracaoDiariaRepository
                     .findByFuncionarioIdAndData(funcionario.getId(), data)
@@ -152,6 +215,10 @@ public class PontoService {
                 data.atStartOfDay(),
                 data.atTime(LocalTime.MAX)
         );
+    }
+
+    private boolean isDiaUtil(LocalDate data) {
+        return "DIA_UTIL".equals(pontoCalendarioService.obterTipoDia(data));
     }
 
     private String determinarProximoTipo(List<PontoMarcacao> marcacoes) {
@@ -193,10 +260,18 @@ public class PontoService {
         BigDecimal horasExtras = BigDecimal.ZERO;
         BigDecimal horasFaltantes = BigDecimal.ZERO;
 
-        if (horasTrabalhadas.compareTo(cargaDiaria) > 0) {
-            horasExtras = horasTrabalhadas.subtract(cargaDiaria);
+        String tipoDia = pontoCalendarioService.obterTipoDia(data);
+        boolean diaUtil = "DIA_UTIL".equals(tipoDia);
+
+        if (diaUtil) {
+            if (horasTrabalhadas.compareTo(cargaDiaria) > 0) {
+                horasExtras = horasTrabalhadas.subtract(cargaDiaria);
+            } else {
+                horasFaltantes = cargaDiaria.subtract(horasTrabalhadas);
+            }
         } else {
-            horasFaltantes = cargaDiaria.subtract(horasTrabalhadas);
+            horasExtras = BigDecimal.ZERO;
+            horasFaltantes = BigDecimal.ZERO;
         }
 
         boolean fechado = marcacoes.size() >= 4;
