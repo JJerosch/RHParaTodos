@@ -383,32 +383,15 @@
 
       let dadosHtml = '';
       if (sol.dadosAntes || sol.dadosDepois) {
-        const isAlteracao = sol.tipo === 'ALTERACAO_FUNCIONARIO';
-        const modifiedHtml = isAlteracao ? formatModifiedFields(sol.dadosAntes, sol.dadosDepois) : null;
+        const modifiedHtml = formatModifiedFields(sol.dadosAntes, sol.dadosDepois);
 
-        if (isAlteracao && modifiedHtml) {
+        if (modifiedHtml) {
+          const sectionTitle = sol.tipo === 'ALTERACAO_FUNCIONARIO' ? 'Campos Modificados' : 'Dados da Solicitação';
           dadosHtml = `
             <div style="margin-top: var(--spacing-4); background: var(--gray-100); border-radius: var(--radius-md); padding: var(--spacing-4);">
-              <h4 style="font-size: var(--font-size-sm); color: var(--gray-600); text-transform: uppercase; margin-bottom: var(--spacing-3); padding-bottom: var(--spacing-2); border-bottom: 1px solid var(--gray-200);">Campos Modificados</h4>
+              <h4 style="font-size: var(--font-size-sm); color: var(--gray-600); text-transform: uppercase; margin-bottom: var(--spacing-3); padding-bottom: var(--spacing-2); border-bottom: 1px solid var(--gray-200);">${sectionTitle}</h4>
               ${modifiedHtml}
             </div>`;
-        } else if (sol.dadosAntes || sol.dadosDepois) {
-          dadosHtml = '<div class="detail-grid" style="margin-top: var(--spacing-4);">';
-          if (sol.dadosAntes) {
-            dadosHtml += `
-              <div class="detail-section">
-                <h4>Dados Anteriores</h4>
-                <div class="json-preview">${formatJsonPreview(sol.dadosAntes)}</div>
-              </div>`;
-          }
-          if (sol.dadosDepois) {
-            dadosHtml += `
-              <div class="detail-section">
-                <h4>Dados Propostos</h4>
-                <div class="json-preview">${formatJsonPreview(sol.dadosDepois)}</div>
-              </div>`;
-          }
-          dadosHtml += '</div>';
         }
       }
 

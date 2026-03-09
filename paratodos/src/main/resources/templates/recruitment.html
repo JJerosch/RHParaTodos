@@ -114,7 +114,7 @@
           <input type="hidden" name="id">
           <div class="form-row form-row-2">
             <div class="form-group"><label class="form-label">Título da Vaga *</label><input type="text" class="form-input" name="titulo" required></div>
-            <div class="form-group"><label class="form-label">Departamento</label><select class="form-select" name="departamentoId" id="jobDeptSelect"><option value="">Selecione</option></select></div>
+            <div class="form-group"><label class="form-label">Departamento</label><select class="form-select" name="departamentoId" id="jobDeptSelect" onchange="onDeptChange()"><option value="">Selecione</option></select></div>
           </div>
           <div class="form-row form-row-2">
             <div class="form-group"><label class="form-label">Cargo</label><select class="form-select" name="cargoId" id="jobCargoSelect"><option value="">Selecione</option></select></div>
@@ -155,7 +155,7 @@
           </div>
           <div class="form-row form-row-2">
             <div class="form-group"><label class="form-label">Telefone</label><input type="text" class="form-input" name="telefone" data-mask="phone"></div>
-            <div class="form-group"><label class="form-label">CPF</label><input type="text" class="form-input" name="cpf" data-mask="cpf"></div>
+            <div class="form-group"><label class="form-label">CPF *</label><input type="text" class="form-input" name="cpf" data-mask="cpf" required></div>
           </div>
           <div class="form-row form-row-2">
             <div class="form-group"><label class="form-label">Cidade</label><input type="text" class="form-input" name="cidade"></div>
@@ -239,6 +239,7 @@
     const VAPI = '/api/recruitment';
     let vagas = [];
     let candidaturas = [];
+    let departmentsData = []; // from /api/positions/by-department
     const role = window.__CURRENT_USER__.role;
     const isChefe = role === 'RH_CHEFE' || role === 'ADMIN';
 
@@ -268,15 +269,35 @@
 
     async function loadDropdowns() {
       try {
-        const [depts, cargos] = await Promise.all([
-          api('/api/employees/departamentos'),
-          api('/api/employees/cargos')
-        ]);
+        departmentsData = await api('/api/positions/by-department') || [];
         const jobDept = document.getElementById("jobDeptSelect");
-        const jobCargo = document.getElementById("jobCargoSelect");
-        (depts || []).forEach(d => { jobDept.innerHTML += '<option value="' + d.id + '">' + d.nome + '</option>'; });
-        (cargos || []).forEach(c => { jobCargo.innerHTML += '<option value="' + c.id + '">' + c.titulo + '</option>'; });
+        jobDept.innerHTML = '<option value="">Selecione</option>';
+        departmentsData.forEach(d => {
+          jobDept.innerHTML += '<option value="' + d.id + '">' + d.nome + '</option>';
+        });
+        // Cargo select starts empty, populated when department is chosen
+        document.getElementById("jobCargoSelect").innerHTML = '<option value="">Selecione o departamento primeiro</option>';
       } catch (e) { console.error('Erro dropdowns:', e); }
+    }
+
+    function onDeptChange() {
+      const deptId = Number(document.getElementById("jobDeptSelect").value);
+      const cargoSelect = document.getElementById("jobCargoSelect");
+      cargoSelect.innerHTML = '<option value="">Selecione</option>';
+      if (!deptId) return;
+
+      const dept = departmentsData.find(d => d.id === deptId);
+      if (!dept || !dept.cargos) return;
+
+      // Filtra apenas cargos vagos (sem ocupantes)
+      const vagos = dept.cargos.filter(c => c.ocupantes === 0);
+      if (vagos.length === 0) {
+        cargoSelect.innerHTML = '<option value="">Nenhum cargo vago neste departamento</option>';
+        return;
+      }
+      vagos.forEach(c => {
+        cargoSelect.innerHTML += '<option value="' + c.id + '">' + c.titulo + '</option>';
+      });
     }
 
     async function loadStats() {
@@ -366,11 +387,14 @@
             <span class="kanban-count">${cards.length}</span>
           </div>
           <div class="kanban-cards">
-            ${cards.map(c => `<div class="candidate-card" onclick="moveCandidatura(${c.id}, '${s.key}')">
+            ${cards.map(c => {
+              const isLocked = s.key === 'CONTRATADO' || s.key === 'REJEITADO';
+              return `<div class="candidate-card" ${isLocked ? 'style="cursor: default; opacity: 0.8;"' : 'onclick="moveCandidatura(' + c.id + ', \'' + s.key + '\')"'}>
               <div class="candidate-name">${c.candidatoNome}</div>
               <div class="candidate-position">${c.candidatoEmail || ''}</div>
               <div class="candidate-meta"><span>${c.candidatoTelefone || ''}</span></div>
-            </div>`).join('')}
+            </div>`;
+            }).join('')}
           </div>
         </div>`;
       }).join('');
@@ -412,10 +436,11 @@
         });
         Toast.success('Candidato movido para ' + (etapaLabels[novaEtapa] || novaEtapa));
         if (novaEtapa === 'CONTRATADO') {
-          Toast.success('Funcionário criado! Solicitação de contratação gerada automaticamente no sistema de Promoções.');
+          Toast.success('Funcionário criado! Senha: 6 primeiros dígitos do CPF + @Gruporp');
         }
         Modal.close('moveModal');
         loadCandidaturas();
+        loadVagas();
         loadStats();
       } catch (e) { Toast.error(e.message || 'Erro ao mover candidato'); }
     }

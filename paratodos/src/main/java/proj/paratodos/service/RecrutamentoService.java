@@ -211,13 +211,27 @@ public class RecrutamentoService {
             throw new IllegalArgumentException("Candidatura nao encontrada: " + candidaturaId);
         }
 
+        // Impedir movimentação a partir de CONTRATADO
+        if ("CONTRATADO".equals(c.getEtapa())) {
+            throw new IllegalArgumentException("Candidato já foi contratado e não pode ser movido");
+        }
+
         c.setEtapa(novaEtapa);
         if (observacoes != null) c.setObservacoes(observacoes);
         if (motivoRejeicao != null) c.setMotivoRejeicao(motivoRejeicao);
 
-        // Se contratado, cria funcionario sem departamento e gera solicitacao de contratacao
+        // Se contratado, cria funcionario e fecha vaga se necessário
         if ("CONTRATADO".equals(novaEtapa)) {
             createFuncionarioFromCandidato(c, userId);
+
+            // Verifica se todas as posições da vaga foram preenchidas
+            Vaga vaga = c.getVaga();
+            long contratados = candidaturaRepository.countContratadosByVagaId(vaga.getId()) + 1; // +1 pois ainda não foi salvo
+            if (contratados >= vaga.getQuantidade()) {
+                vaga.setStatus("ENCERRADA");
+                vaga.setEncerradaEm(LocalDateTime.now());
+                vagaRepository.save(vaga);
+            }
         }
 
         c = candidaturaRepository.save(c);
@@ -228,16 +242,30 @@ public class RecrutamentoService {
         Candidato cand = candidatura.getCandidato();
         Vaga vaga = candidatura.getVaga();
 
+        String cpf = cand.getCpf();
+        if (cpf == null || cpf.isBlank()) {
+            throw new IllegalArgumentException("CPF do candidato é obrigatório para contratação");
+        }
+
+        // Verifica se já existe funcionário com este CPF
+        if (funcionarioRepository.existsByCpf(cpf)) {
+            throw new IllegalArgumentException("Já existe um funcionário cadastrado com o CPF " + cpf);
+        }
+
         // Gera matricula unica
         String matricula = "NEW-" + System.currentTimeMillis() % 100000;
 
         // Gera email corporativo: primeiro_nome.ultimo_nome@gruporp.com
         String emailCorp = gerarEmailCorporativo(cand.getNomeCompleto());
 
+        // Senha automática: 6 primeiros dígitos do CPF + @Gruporp
+        String cpfDigits = cpf.replaceAll("\\D", "");
+        String senhaAutomatica = cpfDigits.substring(0, Math.min(6, cpfDigits.length())) + "@Gruporp";
+
         // Cria o Usuario com credenciais automáticas
         Usuario usuario = new Usuario();
         usuario.setEmail(emailCorp);
-        usuario.setSenhaHash(passwordEncoder.encode("Bem-vindo##1409"));
+        usuario.setSenhaHash(passwordEncoder.encode(senhaAutomatica));
         usuario.setAtivo(true);
         usuario.setAutenticacao2fa(false);
         usuario.setTentativasLogin(0);
@@ -249,21 +277,25 @@ public class RecrutamentoService {
         f.setEmailPessoal(cand.getEmail());
         f.setEmailCorporativo(emailCorp);
         f.setTelefone(cand.getTelefone());
-        f.setCpf(cand.getCpf() != null && !cand.getCpf().isBlank() ? cand.getCpf() : "PEND-" + System.currentTimeMillis() % 100000);
+        f.setCpf(cpf);
         f.setMatricula(matricula);
         f.setDataNascimento(cand.getDataNascimento() != null ? cand.getDataNascimento() : LocalDate.of(2000, 1, 1));
         f.setDataAdmissao(LocalDate.now());
         f.setStatus("ATIVO");
-        f.setTipoContrato(vaga.getTipoContrato());
+        f.setTipoContrato(vaga.getTipoContrato() != null ? vaga.getTipoContrato() : "CLT");
         f.setSalarioAtual(cand.getPretensaoSalarial());
         f.setCidade(cand.getCidade());
         f.setEstado(cand.getEstado());
         f.setUsuario(usuario);
 
         // Atribui cargo e departamento da vaga diretamente
-        f.setDepartamento(vaga.getDepartamento());
-        f.setCargo(vaga.getCargo());
-        f.setCargoDesde(LocalDate.now());
+        if (vaga.getDepartamento() != null) {
+            f.setDepartamento(vaga.getDepartamento());
+        }
+        if (vaga.getCargo() != null) {
+            f.setCargo(vaga.getCargo());
+            f.setCargoDesde(LocalDate.now());
+        }
 
         funcionarioRepository.save(f);
     }
