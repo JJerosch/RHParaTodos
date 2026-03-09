@@ -149,6 +149,21 @@ public class RecrutamentoService {
         return VagaResponse.fromEntity(v);
     }
 
+    @Transactional
+    public VagaResponse cancelVaga(Long id) {
+        Vaga v = vagaRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Vaga nao encontrada: " + id));
+
+        if ("ENCERRADA".equals(v.getStatus())) {
+            throw new IllegalArgumentException("Vaga já encerrada não pode ser cancelada");
+        }
+
+        v.setStatus("CANCELADA");
+        v.setEncerradaEm(LocalDateTime.now());
+        v = vagaRepository.save(v);
+        return VagaResponse.fromEntity(v);
+    }
+
     // ── Candidatos ──
 
     @Transactional
@@ -220,13 +235,17 @@ public class RecrutamentoService {
         if (observacoes != null) c.setObservacoes(observacoes);
         if (motivoRejeicao != null) c.setMotivoRejeicao(motivoRejeicao);
 
+        // Salva a candidatura primeiro para garantir que o status é persistido
+        c = candidaturaRepository.save(c);
+        candidaturaRepository.flush();
+
         // Se contratado, cria funcionario e fecha vaga se necessário
         if ("CONTRATADO".equals(novaEtapa)) {
             createFuncionarioFromCandidato(c, userId);
 
-            // Verifica se todas as posições da vaga foram preenchidas
-            Vaga vaga = c.getVaga();
-            long contratados = candidaturaRepository.countContratadosByVagaId(vaga.getId()) + 1; // +1 pois ainda não foi salvo
+            // Recarrega a vaga com detalhes para garantir cargo e departamento carregados
+            Vaga vaga = vagaRepository.findByIdWithDetails(c.getVaga().getId());
+            long contratados = candidaturaRepository.countContratadosByVagaId(vaga.getId());
             if (contratados >= vaga.getQuantidade()) {
                 vaga.setStatus("ENCERRADA");
                 vaga.setEncerradaEm(LocalDateTime.now());
@@ -234,13 +253,13 @@ public class RecrutamentoService {
             }
         }
 
-        c = candidaturaRepository.save(c);
         return CandidaturaResponse.fromEntity(c);
     }
 
     private void createFuncionarioFromCandidato(Candidatura candidatura, Long userId) {
         Candidato cand = candidatura.getCandidato();
-        Vaga vaga = candidatura.getVaga();
+        // Recarrega a vaga com JOIN FETCH para garantir que cargo e departamento estão carregados
+        Vaga vaga = vagaRepository.findByIdWithDetails(candidatura.getVaga().getId());
 
         String cpf = cand.getCpf();
         if (cpf == null || cpf.isBlank()) {
