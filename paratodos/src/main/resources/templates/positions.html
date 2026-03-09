@@ -113,6 +113,89 @@
     </div>
   </div>
 
+  <!-- Modal: Solicitar Abertura de Vaga -->
+  <div class="modal" id="vagaModal">
+    <div class="modal-dialog modal-md">
+      <div class="modal-header">
+        <h3 class="modal-title">Solicitar Abertura de Vaga</h3>
+        <button class="modal-close" onclick="Modal.close('vagaModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p id="vagaMsg" style="text-align: center; margin-bottom: var(--spacing-4);"></p>
+        <div class="form-row form-row-2">
+          <div class="form-group">
+            <label class="form-label">T&#237;tulo da Vaga *</label>
+            <input type="text" class="form-input" id="vagaTitulo" placeholder="T&#237;tulo da vaga" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Quantidade *</label>
+            <input type="number" class="form-input" id="vagaQuantidade" value="1" min="1">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Descri&#231;&#227;o</label>
+          <textarea class="form-input" id="vagaDescricao" rows="2" placeholder="Descri&#231;&#227;o da vaga..."></textarea>
+        </div>
+        <div class="form-row form-row-2">
+          <div class="form-group">
+            <label class="form-label">Prioridade</label>
+            <select class="form-select" id="vagaPrioridade">
+              <option value="BAIXA">Baixa</option>
+              <option value="MEDIA" selected>M&#233;dia</option>
+              <option value="ALTA">Alta</option>
+              <option value="URGENTE">Urgente</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Tipo de Contrato</label>
+            <select class="form-select" id="vagaTipoContrato">
+              <option value="CLT" selected>CLT</option>
+              <option value="PJ">PJ</option>
+              <option value="ESTAGIO">Est&#225;gio</option>
+              <option value="TEMPORARIO">Tempor&#225;rio</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row form-row-2">
+          <div class="form-group">
+            <label class="form-label">Modelo de Trabalho</label>
+            <select class="form-select" id="vagaModeloTrabalho">
+              <option value="PRESENCIAL" selected>Presencial</option>
+              <option value="HIBRIDO">H&#237;brido</option>
+              <option value="REMOTO">Remoto</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Local de Trabalho</label>
+            <input type="text" class="form-input" id="vagaLocalTrabalho" placeholder="Cidade / Escrit&#243;rio">
+          </div>
+        </div>
+        <div class="form-row form-row-2">
+          <div class="form-group">
+            <label class="form-label">Sal&#225;rio M&#237;nimo</label>
+            <input type="text" class="form-input" id="vagaSalarioMin" data-mask="currency">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Sal&#225;rio M&#225;ximo</label>
+            <input type="text" class="form-input" id="vagaSalarioMax" data-mask="currency">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Requisitos</label>
+          <textarea class="form-input" id="vagaRequisitos" rows="2" placeholder="Requisitos da vaga..."></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Motivo *</label>
+          <textarea class="form-input" id="vagaMotivo" rows="2" placeholder="Informe o motivo da solicita&#231;&#227;o..." required></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="Modal.close('vagaModal')">Cancelar</button>
+        <button class="btn btn-primary" style="background: var(--success-green); color: white;" onclick="confirmVaga()">Enviar Solicita&#231;&#227;o</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Modal: Solicitar Promoção -->
   <div class="modal" id="promoModal">
     <div class="modal-dialog modal-md">
@@ -422,7 +505,7 @@
             } else {
               actionsHtml =
                 '<div class="vaga-actions">' +
-                  '<button class="act-btn btn-vaga" onclick="event.stopPropagation(); requestAction(' + cargo.id + ', \'' + esc(cargo.titulo) + '\', \'ABERTURA_VAGA\', \'abertura de vaga\')">+ Solicitar Abertura de Vaga</button>' +
+                  '<button class="act-btn btn-vaga" onclick="event.stopPropagation(); openVagaModal(' + cargo.id + ', \'' + esc(cargo.titulo) + '\', ' + dept.id + ')">+ Solicitar Abertura de Vaga</button>' +
                 '</div>';
             }
           }
@@ -616,6 +699,73 @@
       // Override referenciaTipo for this action
       actionRefTipo = 'FUNCIONARIO';
       Modal.open('actionModal');
+    }
+
+    /* ── Abertura de Vaga Modal ── */
+    var vagaCargoId = null;
+    var vagaDeptId = null;
+
+    function openVagaModal(cargoId, cargoTitulo, deptId) {
+      vagaCargoId = cargoId;
+      vagaDeptId = deptId;
+      document.getElementById("vagaMsg").innerHTML = 'Abrir vaga para o cargo <strong>' + cargoTitulo + '</strong>';
+      document.getElementById("vagaTitulo").value = cargoTitulo;
+      document.getElementById("vagaDescricao").value = '';
+      document.getElementById("vagaQuantidade").value = '1';
+      document.getElementById("vagaPrioridade").value = 'MEDIA';
+      document.getElementById("vagaTipoContrato").value = 'CLT';
+      document.getElementById("vagaModeloTrabalho").value = 'PRESENCIAL';
+      document.getElementById("vagaLocalTrabalho").value = '';
+      document.getElementById("vagaSalarioMin").value = '';
+      document.getElementById("vagaSalarioMax").value = '';
+      document.getElementById("vagaRequisitos").value = '';
+      document.getElementById("vagaMotivo").value = '';
+      Modal.open('vagaModal');
+      Mask.initAll();
+    }
+
+    function parseCurrency(val) {
+      if (!val) return null;
+      return parseFloat(String(val).replace(/[^\d,]/g, '').replace(',', '.')) || null;
+    }
+
+    async function confirmVaga() {
+      var titulo = document.getElementById("vagaTitulo").value.trim();
+      var motivo = document.getElementById("vagaMotivo").value.trim();
+      if (!titulo) { Toast.error('Informe o t\u00edtulo da vaga'); return; }
+      if (!motivo) { Toast.error('Informe o motivo'); return; }
+
+      var dadosDepois = {
+        titulo: titulo,
+        descricao: document.getElementById("vagaDescricao").value.trim() || null,
+        quantidade: parseInt(document.getElementById("vagaQuantidade").value) || 1,
+        prioridade: document.getElementById("vagaPrioridade").value,
+        tipoContrato: document.getElementById("vagaTipoContrato").value,
+        modeloTrabalho: document.getElementById("vagaModeloTrabalho").value,
+        localTrabalho: document.getElementById("vagaLocalTrabalho").value.trim() || null,
+        salarioMin: parseCurrency(document.getElementById("vagaSalarioMin").value),
+        salarioMax: parseCurrency(document.getElementById("vagaSalarioMax").value),
+        requisitos: document.getElementById("vagaRequisitos").value.trim() || null,
+        cargoId: vagaCargoId,
+        departamentoId: vagaDeptId
+      };
+
+      try {
+        await api('/api/solicitacoes', {
+          method: 'POST',
+          body: JSON.stringify({
+            tipo: 'ABERTURA_VAGA',
+            referenciaTipo: 'CARGO',
+            referenciaId: vagaCargoId,
+            motivo: motivo,
+            dadosDepois: JSON.stringify(dadosDepois)
+          })
+        });
+        Toast.success('Solicita\u00e7\u00e3o de abertura de vaga criada! Aguarde aprova\u00e7\u00e3o.');
+        Modal.close('vagaModal');
+      } catch (e) {
+        Toast.error(e.message || 'Erro ao criar solicita\u00e7\u00e3o');
+      }
     }
 
     /* ── Promo\u00e7\u00e3o Modal ── */
