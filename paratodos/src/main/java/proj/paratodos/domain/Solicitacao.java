@@ -3,6 +3,8 @@ package proj.paratodos.domain;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
 
@@ -45,9 +47,11 @@ public class Solicitacao {
     @Column(columnDefinition = "text")
     private String observacao;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "dados_antes", columnDefinition = "jsonb")
     private String dadosAntes;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "dados_depois", columnDefinition = "jsonb")
     private String dadosDepois;
 
