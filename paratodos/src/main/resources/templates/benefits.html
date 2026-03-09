@@ -165,16 +165,6 @@
   <script>
     const API = '/api/benefits';
 
-    // Mock data (fallback)
-    const mockBenefits = [
-      { id: 1, nome: "Vale Refeição", descricao: "Cartão para refeições diárias", valorPadrao: 800, natureza: "PROVENTO", possuiDescontoFolha: false, incideFerias: true, incideDecimo: true, beneficiarios: 235, ativo: true },
-      { id: 2, nome: "Vale Transporte", descricao: "Auxílio para deslocamento", valorPadrao: 300, natureza: "DESCONTO", possuiDescontoFolha: true, incideFerias: false, incideDecimo: false, beneficiarios: 180, ativo: true },
-      { id: 3, nome: "Plano de Saúde", descricao: "Assistência médica completa", valorPadrao: 650, natureza: "DESCONTO", possuiDescontoFolha: true, incideFerias: false, incideDecimo: false, beneficiarios: 248, ativo: true },
-      { id: 4, nome: "Plano Odontológico", descricao: "Cobertura odontológica", valorPadrao: 80, natureza: "DESCONTO", possuiDescontoFolha: true, incideFerias: false, incideDecimo: false, beneficiarios: 220, ativo: true },
-      { id: 5, nome: "Seguro de Vida", descricao: "Proteção para família", valorPadrao: 50, natureza: "INFORMATIVO", possuiDescontoFolha: false, incideFerias: false, incideDecimo: false, beneficiarios: 248, ativo: true },
-      { id: 6, nome: "Gympass", descricao: "Acesso a academias parceiras", valorPadrao: 100, natureza: "DESCONTO", possuiDescontoFolha: true, incideFerias: false, incideDecimo: false, beneficiarios: 85, ativo: true }
-    ];
-
     let benefits = [];
     let allCargos = [];
     let currentId = null;
@@ -212,20 +202,10 @@
         const cargosSelect = document.getElementById("cargosSelect");
         cargosSelect.innerHTML = allCargos.map(c => '<option value="' + c.id + '">' + c.titulo + '</option>').join('');
       } catch (e) {
-        console.log('Usando dados mock:', e.message);
-        benefits = mockBenefits;
-        updateStatsLocal();
+        console.error('Erro ao carregar benefícios:', e.message);
+        benefits = [];
       }
       render();
-    }
-
-    function updateStatsLocal() {
-      document.getElementById("statTipos").textContent = benefits.length;
-      const totalBenef = benefits.reduce((s, b) => s + (b.beneficiarios || 0), 0);
-      const custoMensal = benefits.reduce((s, b) => s + (b.valorPadrao || 0) * (b.beneficiarios || 0), 0);
-      document.getElementById("statBeneficiarios").textContent = totalBenef;
-      document.getElementById("statCusto").textContent = formatCurrency(custoMensal);
-      document.getElementById("statCustoFunc").textContent = totalBenef > 0 ? formatCurrency(custoMensal / totalBenef) : 'R$ 0';
     }
 
     function onNaturezaChange() {
@@ -260,7 +240,7 @@
           <p class="benefit-desc">${b.descricao || 'Sem descrição'}</p>
           ${cargosHtml}
           <div class="benefit-stats">
-            <span><strong>${b.beneficiarios || 0}</strong> beneficiários</span>
+            <span><strong>${(b.cargos && b.cargos.length) || 0}</strong> cargo(s) vinculado(s)</span>
             <span><strong>${formatCurrency(b.valorPadrao)}</strong>/mês</span>
           </div>
         </div>

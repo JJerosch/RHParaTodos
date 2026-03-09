@@ -113,6 +113,41 @@
     </div>
   </div>
 
+  <!-- Modal: Solicitar Promoção -->
+  <div class="modal" id="promoModal">
+    <div class="modal-dialog modal-md">
+      <div class="modal-header">
+        <h3 class="modal-title">Solicitar Promo&#231;&#227;o</h3>
+        <button class="modal-close" onclick="Modal.close('promoModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p id="promoMsg" style="text-align: center; margin-bottom: var(--spacing-4);"></p>
+        <div class="form-row form-row-2">
+          <div class="form-group">
+            <label class="form-label">Novo Departamento *</label>
+            <select class="form-select" id="promoDeptSelect" onchange="filterPromoCargos()">
+              <option value="">Selecione</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Novo Cargo *</label>
+            <select class="form-select" id="promoCargoSelect">
+              <option value="">Selecione o departamento primeiro</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Motivo *</label>
+          <textarea class="form-input" id="promoMotivo" rows="2" placeholder="Informe o motivo da promo&#231;&#227;o..." required></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="Modal.close('promoModal')">Cancelar</button>
+        <button class="btn btn-primary" onclick="confirmPromotion()">Enviar Solicita&#231;&#227;o</button>
+      </div>
+    </div>
+  </div>
+
   <style>
     /* ── Accordion ── */
     .accordion-item {
@@ -364,15 +399,25 @@
             subText = 'Cargo sem ocupante';
           }
 
+          var beneficiosHtml = '';
+          if (cargo.beneficios && cargo.beneficios.length > 0) {
+            beneficiosHtml = '<div style="margin-top:4px;display:flex;gap:4px;flex-wrap:wrap;">' +
+              cargo.beneficios.map(function(nome) {
+                return '<span style="display:inline-block;background:#e8f0fe;color:#1a73e8;font-size:11px;padding:1px 8px;border-radius:10px;">' + esc(nome) + '</span>';
+              }).join('') + '</div>';
+          }
+
           var actionsHtml = '';
           if (canWrite && cargo.id) {
             if (filled) {
+              var funcId = cargo.funcionarios[0].id;
+              var funcNome = esc(cargo.funcionarios[0].nome);
               actionsHtml =
                 '<div class="vaga-actions">' +
                   '<button class="act-btn" onclick="event.stopPropagation(); openEditModal(' + cargo.id + ')">&#9998; Solicitar Altera\u00e7\u00e3o</button>' +
                   '<button class="act-btn btn-danger" onclick="event.stopPropagation(); requestAction(' + cargo.id + ', \'' + esc(cargo.titulo) + '\', \'EXCLUSAO_CARGO\', \'exclus\u00e3o\')">&#128465; Solicitar Exclus\u00e3o</button>' +
-                  '<button class="act-btn btn-danger" onclick="event.stopPropagation(); requestAction(' + cargo.id + ', \'' + esc(cargo.titulo) + '\', \'DESATIVACAO_CARGO\', \'desativa\u00e7\u00e3o\')">&#10005; Solicitar Demiss\u00e3o</button>' +
-                  '<button class="act-btn btn-promo" onclick="event.stopPropagation(); requestAction(' + cargo.id + ', \'' + esc(cargo.titulo) + '\', \'PROMOCAO\', \'promo\u00e7\u00e3o\')">&#9733; Promo\u00e7\u00e3o</button>' +
+                  '<button class="act-btn btn-danger" onclick="event.stopPropagation(); requestDemissao(' + funcId + ', \'' + funcNome + '\', ' + cargo.id + ')">&#10005; Solicitar Demiss\u00e3o</button>' +
+                  '<button class="act-btn btn-promo" onclick="event.stopPropagation(); openPromoModal(' + cargo.id + ')">&#9733; Promo\u00e7\u00e3o</button>' +
                 '</div>';
             } else {
               actionsHtml =
@@ -387,6 +432,7 @@
               '<div class="vaga-info">' +
                 '<div class="vaga-titulo">Vaga: ' + esc(cargo.titulo) + '</div>' +
                 '<div class="vaga-sub">' + subText + '</div>' +
+                beneficiosHtml +
               '</div>' +
               '<div class="vaga-status">' + statusBadge + '</div>' +
               actionsHtml +
@@ -503,10 +549,12 @@
     /* ── Acoes genericas sobre cargo ── */
     var actionTargetId = null;
     var actionType = null;
+    var actionRefTipo = null;
 
     function requestAction(cargoId, cargoTitulo, tipo, descricaoAcao) {
       actionTargetId = cargoId;
       actionType = tipo;
+      actionRefTipo = null;
       document.getElementById("actionTitle").textContent = 'Solicitar ' + descricaoAcao.charAt(0).toUpperCase() + descricaoAcao.slice(1);
       document.getElementById("actionMsg").innerHTML = 'Deseja solicitar a <strong>' + descricaoAcao + '</strong> do cargo <strong>' + cargoTitulo + '</strong>?';
       document.getElementById("actionMotivo").value = '';
@@ -540,15 +588,136 @@
           method: 'POST',
           body: JSON.stringify({
             tipo: actionType,
-            referenciaTipo: actionType === 'ABERTURA_VAGA' ? 'VAGA' : 'CARGO',
+            referenciaTipo: actionRefTipo || (actionType === 'ABERTURA_VAGA' ? 'VAGA' : 'CARGO'),
             referenciaId: actionTargetId,
             motivo: motivo
           })
         });
-        Toast.success('Solicitação criada! Aguarde aprovação.');
+        Toast.success('Solicita\u00e7\u00e3o criada! Aguarde aprova\u00e7\u00e3o.');
         Modal.close('actionModal');
       } catch (e) {
-        Toast.error(e.message || 'Erro ao criar solicitação');
+        Toast.error(e.message || 'Erro ao criar solicita\u00e7\u00e3o');
+      }
+    }
+
+    /* ── Demiss\u00e3o ── */
+    function requestDemissao(funcId, funcNome, cargoId) {
+      actionTargetId = funcId;
+      actionType = 'DESATIVACAO_FUNCIONARIO';
+      document.getElementById("actionTitle").textContent = 'Solicitar Demiss\u00e3o';
+      document.getElementById("actionMsg").innerHTML = 'Deseja solicitar a <strong>demiss\u00e3o</strong> de <strong>' + funcNome + '</strong>?';
+      document.getElementById("actionMotivo").value = '';
+
+      var btn = document.getElementById("actionConfirmBtn");
+      btn.style.background = 'var(--error-red)';
+      btn.style.color = 'white';
+      btn.className = 'btn';
+
+      // Override referenciaTipo for this action
+      actionRefTipo = 'FUNCIONARIO';
+      Modal.open('actionModal');
+    }
+
+    /* ── Promo\u00e7\u00e3o Modal ── */
+    var promoCargoId = null;
+
+    function findCargoInData(cargoId) {
+      for (var i = 0; i < allData.length; i++) {
+        for (var j = 0; j < allData[i].cargos.length; j++) {
+          if (allData[i].cargos[j].id === cargoId) {
+            return { cargo: allData[i].cargos[j], departamento: allData[i] };
+          }
+        }
+      }
+      return null;
+    }
+
+    function openPromoModal(cargoId) {
+      promoCargoId = cargoId;
+      var info = findCargoInData(cargoId);
+      if (!info) { Toast.error('Cargo n\u00e3o encontrado'); return; }
+
+      var funcNomes = info.cargo.funcionarios.map(function(f) { return esc(f.nome); }).join(', ');
+      document.getElementById("promoMsg").innerHTML =
+        'Promover <strong>' + funcNomes + '</strong> do cargo <strong>' + esc(info.cargo.titulo) + '</strong> (' + esc(info.departamento.nome) + ')';
+
+      // Popular dropdowns
+      var deptSelect = document.getElementById("promoDeptSelect");
+      deptSelect.innerHTML = '<option value="">Selecione</option>';
+      departamentos.forEach(function(d) {
+        deptSelect.innerHTML += '<option value="' + d.id + '">' + esc(d.nome) + '</option>';
+      });
+
+      document.getElementById("promoCargoSelect").innerHTML = '<option value="">Selecione o departamento primeiro</option>';
+      document.getElementById("promoMotivo").value = '';
+      Modal.open('promoModal');
+    }
+
+    async function filterPromoCargos() {
+      var deptId = document.getElementById("promoDeptSelect").value;
+      var cargoSelect = document.getElementById("promoCargoSelect");
+      if (!deptId) {
+        cargoSelect.innerHTML = '<option value="">Selecione o departamento primeiro</option>';
+        return;
+      }
+      try {
+        var cargos = await api(API + '?departamentoId=' + deptId);
+        cargoSelect.innerHTML = '<option value="">Selecione</option>';
+        (cargos || []).forEach(function(c) {
+          cargoSelect.innerHTML += '<option value="' + c.id + '">' + esc(c.titulo) + '</option>';
+        });
+      } catch (e) {
+        cargoSelect.innerHTML = '<option value="">Erro ao carregar</option>';
+      }
+    }
+
+    async function confirmPromotion() {
+      var deptId = document.getElementById("promoDeptSelect").value;
+      var cargoNovoId = document.getElementById("promoCargoSelect").value;
+      var motivo = document.getElementById("promoMotivo").value.trim();
+
+      if (!deptId || !cargoNovoId) {
+        Toast.error('Selecione o novo departamento e cargo');
+        return;
+      }
+      if (!motivo) {
+        Toast.error('Informe o motivo');
+        document.getElementById("promoMotivo").focus();
+        return;
+      }
+
+      var info = findCargoInData(promoCargoId);
+      var funcId = info && info.cargo.funcionarios.length > 0 ? info.cargo.funcionarios[0].id : null;
+
+      var dadosAntes = {
+        cargoId: promoCargoId,
+        cargoTitulo: info ? info.cargo.titulo : null,
+        departamentoId: info ? info.departamento.id : null,
+        departamentoNome: info ? info.departamento.nome : null
+      };
+
+      var dadosDepois = {
+        cargoNovoId: Number(cargoNovoId),
+        departamentoNovoId: Number(deptId),
+        funcionarioId: funcId
+      };
+
+      try {
+        await api('/api/solicitacoes', {
+          method: 'POST',
+          body: JSON.stringify({
+            tipo: 'PROMOCAO',
+            referenciaTipo: 'FUNCIONARIO',
+            referenciaId: funcId,
+            motivo: motivo,
+            dadosAntes: JSON.stringify(dadosAntes),
+            dadosDepois: JSON.stringify(dadosDepois)
+          })
+        });
+        Toast.success('Solicita\u00e7\u00e3o de promo\u00e7\u00e3o criada! Aguarde aprova\u00e7\u00e3o.');
+        Modal.close('promoModal');
+      } catch (e) {
+        Toast.error(e.message || 'Erro ao solicitar promo\u00e7\u00e3o');
       }
     }
   </script>

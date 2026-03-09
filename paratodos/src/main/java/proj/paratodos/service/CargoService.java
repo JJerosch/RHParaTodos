@@ -22,6 +22,7 @@ public class CargoService {
         this.departamentoRepository = departamentoRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<CargoResponse> search(String search, Long departamentoId, String nivel) {
         String searchParam = (search != null && !search.isBlank()) ? search.trim() : null;
         String nivelParam = (nivel != null && !nivel.isBlank()) ? nivel.trim() : null;
@@ -31,6 +32,7 @@ public class CargoService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public CargoResponse findById(Long id) {
         Cargo c = cargoRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Cargo nao encontrado: " + id));
@@ -56,8 +58,14 @@ public class CargoService {
 
     @Transactional
     public void delete(Long id) {
-        if (!cargoRepository.existsById(id)) {
-            throw new IllegalArgumentException("Cargo nao encontrado: " + id);
+        Cargo c = cargoRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Cargo nao encontrado: " + id));
+        long funcionariosAtivos = cargoRepository.countFuncionariosByCargoId(id);
+        if (funcionariosAtivos > 0) {
+            throw new IllegalArgumentException(
+                "Nao e possivel excluir o cargo '" + c.getTitulo() +
+                "'. Existem " + funcionariosAtivos + " funcionario(s) vinculado(s). " +
+                "Demita ou transfira o funcionario antes de excluir.");
         }
         cargoRepository.deleteById(id);
     }

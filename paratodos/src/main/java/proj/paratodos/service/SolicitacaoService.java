@@ -197,10 +197,11 @@ public class SolicitacaoService {
             case CRIACAO_CARGO -> executarCriacaoCargo(s);
             case EDICAO_DEPARTAMENTO -> executarEdicaoDepartamento(s);
             case EDICAO_CARGO -> executarEdicaoCargo(s);
+            case PROMOCAO -> executarPromocao(s);
+            case EXCLUSAO_CARGO -> executarExclusaoCargo(s);
             // Tipos que não possuem execução automática por enquanto
-            case EXCLUSAO_FUNCIONARIO, EXCLUSAO_DEPARTAMENTO, EXCLUSAO_CARGO,
-                 ABERTURA_VAGA, PROMOCAO, TRANSFERENCIA, REAJUSTE_SALARIAL -> {
-                // Será implementado em fases futuras
+            case EXCLUSAO_FUNCIONARIO, EXCLUSAO_DEPARTAMENTO,
+                 ABERTURA_VAGA, TRANSFERENCIA, REAJUSTE_SALARIAL -> {
             }
         }
     }
@@ -209,7 +210,12 @@ public class SolicitacaoService {
         if (s.getReferenciaId() == null) return;
         Funcionario f = funcionarioRepository.findById(s.getReferenciaId()).orElse(null);
         if (f != null) {
-            f.setStatus("DESLIGADO");
+            f.setStatus("INATIVO");
+            f.setDataDesligamento(java.time.LocalDate.now());
+            // Remove o vínculo com o cargo (torna o cargo "Vago")
+            f.setCargo(null);
+            f.setCargoDesde(null);
+            f.setDepartamento(null);
             funcionarioRepository.save(f);
         }
     }
@@ -360,6 +366,66 @@ public class SolicitacaoService {
         } catch (Exception e) {
             throw new RuntimeException("Erro ao editar cargo: " + e.getMessage(), e);
         }
+    }
+
+    private void executarPromocao(Solicitacao s) {
+        if (s.getDadosDepois() == null) return;
+        try {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> dados = objectMapper.readValue(s.getDadosDepois(), Map.class);
+
+            Long funcionarioId = s.getReferenciaId();
+            if (funcionarioId == null && dados.containsKey("funcionarioId") && dados.get("funcionarioId") != null) {
+                funcionarioId = ((Number) dados.get("funcionarioId")).longValue();
+            }
+            if (funcionarioId == null) return;
+
+            Funcionario f = funcionarioRepository.findById(funcionarioId).orElse(null);
+            if (f == null) return;
+
+            // Move o funcionário para o novo cargo/departamento
+            if (dados.containsKey("cargoNovoId") && dados.get("cargoNovoId") != null) {
+                Long novoCargoId = ((Number) dados.get("cargoNovoId")).longValue();
+                Cargo novoCargo = cargoRepository.findById(novoCargoId).orElse(null);
+                if (novoCargo != null) {
+                    f.setCargo(novoCargo);
+                    f.setCargoDesde(java.time.LocalDate.now());
+                }
+            }
+
+            if (dados.containsKey("departamentoNovoId") && dados.get("departamentoNovoId") != null) {
+                Long novoDeptId = ((Number) dados.get("departamentoNovoId")).longValue();
+                Departamento novoDept = departamentoRepository.findById(novoDeptId).orElse(null);
+                if (novoDept != null) {
+                    f.setDepartamento(novoDept);
+                }
+            }
+
+            if (dados.containsKey("salarioNovo") && dados.get("salarioNovo") != null) {
+                f.setSalarioAtual(new java.math.BigDecimal(dados.get("salarioNovo").toString()));
+            }
+
+            funcionarioRepository.save(f);
+        } catch (Exception e) {
+            throw new RuntimeException("Erro ao executar promoção: " + e.getMessage(), e);
+        }
+    }
+
+    private void executarExclusaoCargo(Solicitacao s) {
+        if (s.getReferenciaId() == null) return;
+        Cargo c = cargoRepository.findById(s.getReferenciaId()).orElse(null);
+        if (c == null) return;
+
+        // Impedir exclusão de cargos com funcionários ativos
+        long funcionariosAtivos = cargoRepository.countFuncionariosByCargoId(c.getId());
+        if (funcionariosAtivos > 0) {
+            throw new IllegalArgumentException(
+                "Não é possível excluir o cargo '" + c.getTitulo() +
+                "'. Existem " + funcionariosAtivos + " funcionário(s) vinculado(s). " +
+                "Demita ou transfira o funcionário antes de excluir.");
+        }
+
+        cargoRepository.delete(c);
     }
 
     // ── Resolução de descrição da referência ──────────────────────
