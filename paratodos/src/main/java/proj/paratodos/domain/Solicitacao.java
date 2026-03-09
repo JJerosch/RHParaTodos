@@ -16,43 +16,58 @@ public class Solicitacao {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 20)
-    private String tipo; // EDICAO, DESATIVACAO, EXCLUSAO
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 50)
+    private TipoSolicitacao tipo;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "funcionario_id", nullable = false)
-    private Funcionario funcionario;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private StatusSolicitacao status = StatusSolicitacao.PENDENTE;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "referencia_tipo", length = 50)
+    private ReferenciaTipo referenciaTipo;
+
+    @Column(name = "referencia_id")
+    private Long referenciaId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "solicitante_id", nullable = false)
     private Usuario solicitante;
 
-    @Column(name = "dados_json", columnDefinition = "text")
-    private String dadosJson;
-
-    @Column(nullable = false, columnDefinition = "text")
-    private String motivo;
-
-    @Column(length = 20)
-    private String status = "PENDENTE";
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "aprovador_id")
     private Usuario aprovador;
 
-    @Column(name = "data_solicitacao")
-    private LocalDateTime dataSolicitacao;
+    @Column(nullable = false, columnDefinition = "text")
+    private String motivo;
 
-    @Column(name = "data_decisao")
-    private LocalDateTime dataDecisao;
+    @Column(columnDefinition = "text")
+    private String observacao;
 
-    @Column(name = "observacao_aprovador", columnDefinition = "text")
-    private String observacaoAprovador;
+    @Column(name = "dados_antes", columnDefinition = "jsonb")
+    private String dadosAntes;
+
+    @Column(name = "dados_depois", columnDefinition = "jsonb")
+    private String dadosDepois;
+
+    @Column(name = "criado_em", updatable = false)
+    private LocalDateTime criadoEm;
+
+    @Column(name = "atualizado_em")
+    private LocalDateTime atualizadoEm;
+
+    @Column(name = "decidido_em")
+    private LocalDateTime decididoEm;
 
     @PrePersist
     void prePersist() {
-        if (dataSolicitacao == null) {
-            dataSolicitacao = LocalDateTime.now();
-        }
+        criadoEm = LocalDateTime.now();
+        atualizadoEm = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    void preUpdate() {
+        atualizadoEm = LocalDateTime.now();
     }
 }

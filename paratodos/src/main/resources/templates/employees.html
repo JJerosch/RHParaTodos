@@ -428,8 +428,11 @@
         </form>
       </div>
       <div class="modal-footer">
+        <div class="form-group" id="solicitacaoMotivoGroup" style="display: none; flex: 1; margin: 0; margin-right: var(--spacing-4);">
+          <input type="text" class="form-input" id="solicitacaoMotivo" placeholder="Motivo da alteração *" style="margin: 0;">
+        </div>
         <button type="button" class="btn btn-secondary" onclick="Modal.close('employeeModal')">Cancelar</button>
-        <button type="button" class="btn btn-primary" onclick="save()">Salvar</button>
+        <button type="button" class="btn btn-primary" id="saveBtn" onclick="save()">Salvar</button>
       </div>
     </div>
   </div>
@@ -444,28 +447,52 @@
       <div class="modal-body" id="viewContent"></div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" onclick="Modal.close('viewModal')">Fechar</button>
-        <button type="button" class="btn btn-primary" data-action-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE" onclick="Modal.close('viewModal'); edit(currentId)">Editar</button>
+        <button type="button" class="btn btn-primary" data-action-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE" onclick="Modal.close('viewModal'); edit(currentId)">Solicitar Alteração</button>
       </div>
     </div>
   </div>
 
-  <!-- Modal: Solicitação (motivo) -->
-  <div class="modal" id="solicitacaoModal">
+  <!-- Modal: Solicitar Exclusão -->
+  <div class="modal" id="deleteModal">
     <div class="modal-dialog modal-sm">
       <div class="modal-header">
-        <h3 class="modal-title" id="solicitacaoTitle">Nova Solicitação</h3>
-        <button class="modal-close" onclick="Modal.close('solicitacaoModal')">&times;</button>
+        <h3 class="modal-title">Solicitar Exclusão Permanente</h3>
+        <button class="modal-close" onclick="Modal.close('deleteModal')">&times;</button>
       </div>
       <div class="modal-body">
-        <p id="solicitacaoDesc" style="margin-bottom: var(--spacing-4); color: var(--gray-600);"></p>
-        <div class="form-group">
-          <label class="form-label">Motivo da solicitação *</label>
-          <textarea class="form-input" id="solicitacaoMotivo" rows="3" placeholder="Descreva o motivo..." required></textarea>
+        <p style="text-align: center; margin: var(--spacing-4) 0;">
+          Deseja solicitar a <strong style="color: var(--error-red);">exclusão permanente</strong> de <strong id="deleteEmpName"></strong>?
+        </p>
+        <p style="text-align: center; font-size: var(--font-size-sm); color: var(--gray-500);">A solicitação será enviada para aprovação.</p>
+        <div class="form-group" style="margin-top: var(--spacing-4);">
+          <label class="form-label">Motivo *</label>
+          <textarea class="form-input" id="deleteMotivo" rows="2" placeholder="Informe o motivo da exclusão..." required></textarea>
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" onclick="Modal.close('solicitacaoModal')">Cancelar</button>
-        <button type="button" class="btn btn-primary" onclick="submitSolicitacao()">Enviar Solicitação</button>
+        <button class="btn btn-secondary" onclick="Modal.close('deleteModal')">Cancelar</button>
+        <button class="btn" style="background: var(--error-red); color: white;" onclick="confirmDelete()">Enviar Solicitação</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Solicitar Ativação/Desativação -->
+  <div class="modal" id="toggleModal">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-header">
+        <h3 class="modal-title" id="toggleTitle">Solicitar Desativação</h3>
+        <button class="modal-close" onclick="Modal.close('toggleModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="text-align: center; margin: var(--spacing-4) 0;" id="toggleMsg"></p>
+        <div class="form-group" style="margin-top: var(--spacing-4);">
+          <label class="form-label">Motivo *</label>
+          <textarea class="form-input" id="toggleMotivo" rows="2" placeholder="Informe o motivo..." required></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="Modal.close('toggleModal')">Cancelar</button>
+        <button class="btn btn-primary" id="toggleConfirmBtn" onclick="confirmToggle()">Enviar Solicitação</button>
       </div>
     </div>
   </div>
@@ -615,7 +642,11 @@
       if (pageData.length === 0) {
         tbody.innerHTML = '<tr><td colspan="11"><div class="empty-state"><div class="empty-state-icon"><img src="/assets/id-card-lanyard (1).png" alt="vazio"></div><h3 class="empty-state-title">Nenhum funcionário encontrado</h3><p class="empty-state-text">Tente ajustar os filtros ou adicione um novo funcionário.</p></div></td></tr>';
       } else {
-        tbody.innerHTML = pageData.map(emp => `
+        tbody.innerHTML = pageData.map(emp => {
+          const isAtivo = emp.status === 'ATIVO' || emp.status === 'FERIAS';
+          const toggleIcon = isAtivo ? '/assets/door-open.png' : '/assets/check (1).png';
+          const toggleAlt = isAtivo ? 'desativar' : 'ativar';
+          return `
           <tr>
             <td>
               <div class="cell-avatar">
@@ -634,14 +665,14 @@
             <td><span class="badge ${statusBadge[emp.status] || 'badge-info'}">${statusLabels[emp.status] || emp.status}</span></td>
             <td>
               <div class="cell-actions">
-                <button class="btn-icon view" onclick="view(${emp.id})"><img src="/assets/eye.png" alt="ver"></button>
-                ${canWrite ? '<button class="btn-icon edit" onclick="edit(' + emp.id + ')" title="Editar"><img src="/assets/pencil (1).png" alt="editar"></button>' : ''}
-                ${canWrite && emp.status === 'ATIVO' ? '<button class="btn-icon" onclick="requestDeactivation(' + emp.id + ')" title="Desativar" style="color: var(--warning-orange);"><img src="/assets/door-open.png" alt="desativar"></button>' : ''}
-                ${canWrite ? '<button class="btn-icon delete" onclick="requestDeletion(' + emp.id + ')" title="Excluir"><img src="/assets/trash-2 (1).png" alt="excluir"></button>' : ''}
+                <button class="btn-icon view" onclick="view(${emp.id})" title="Ver detalhes"><img src="/assets/eye.png" alt="ver"></button>
+                ${canWrite ? '<button class="btn-icon edit" onclick="edit(' + emp.id + ')" title="Solicitar alteração"><img src="/assets/pencil (1).png" alt="solicitar alteração"></button>' : ''}
+                ${canWrite ? '<button class="btn-icon" onclick="toggleStatus(' + emp.id + ')" title="' + (isAtivo ? 'Solicitar desativação' : 'Solicitar ativação') + '"><img src="' + toggleIcon + '" alt="' + toggleAlt + '" style="width:16px;height:16px;"></button>' : ''}
+                ${canWrite ? '<button class="btn-icon delete" onclick="remove(' + emp.id + ')" title="Solicitar exclusão permanente"><img src="/assets/trash-2 (1).png" alt="solicitar exclusão"></button>' : ''}
               </div>
             </td>
-          </tr>
-        `).join('');
+          </tr>`;
+        }).join('');
       }
       renderPagination();
       updateTableInfo();
@@ -697,24 +728,34 @@
       loadPage();
     }
 
+    // ── Snapshot dos dados atuais para solicitação ──
+    let currentSnapshot = null;
+
     // ── Modal: Abrir para criar/editar ──
     async function openModal(id = null) {
       currentId = id;
+      currentSnapshot = null;
       document.getElementById("employeeForm").reset();
       document.querySelectorAll('.tab-btn').forEach((btn, i) => btn.classList.toggle('active', i === 0));
       document.querySelectorAll('.tab-content').forEach((c, i) => c.classList.toggle('active', i === 0));
 
       const createFields = document.getElementById("professionalFieldsCreate");
       const editFields = document.getElementById("professionalFieldsEdit");
+      const motivoGroup = document.getElementById("solicitacaoMotivoGroup");
+      const saveBtn = document.getElementById("saveBtn");
 
       if (id) {
-        document.getElementById("modalTitle").textContent = "Editar Funcionário";
+        document.getElementById("modalTitle").textContent = "Solicitar Alteração de Funcionário";
         // Edição: esconde campos de cargo/dept/salário, mostra info read-only
         createFields.style.display = 'none';
         editFields.style.display = 'block';
+        motivoGroup.style.display = 'block';
+        saveBtn.textContent = 'Criar Solicitação';
+        document.getElementById("solicitacaoMotivo").value = '';
         try {
           const emp = await api('/api/employees/' + id);
           if (emp) {
+            currentSnapshot = emp;
             Form.populate('employeeForm', emp);
             document.getElementById("editDeptName").textContent = emp.departamentoNome || 'Sem departamento';
             document.getElementById("editCargoName").textContent = emp.cargoTitulo || 'Sem cargo';
@@ -726,6 +767,8 @@
         // Criação: mostra campos de cargo/dept/salário editáveis
         createFields.style.display = 'block';
         editFields.style.display = 'none';
+        motivoGroup.style.display = 'none';
+        saveBtn.textContent = 'Salvar';
       }
       Modal.open('employeeModal');
       Mask.initAll();
@@ -784,10 +827,7 @@
       Modal.open('viewModal');
     }
 
-    // ── Estado da solicitação ──
-    let pendingSolicitacao = { tipo: null, funcionarioId: null, dadosJson: null };
-
-    // ── Salvar (criar = direto, editar = cria solicitação) ──
+    // ── Salvar (criar direto OU criar solicitação de alteração) ──
     async function save() {
       const form = document.getElementById("employeeForm");
       if (!form.checkValidity()) { form.reportValidity(); return; }
@@ -807,68 +847,134 @@
 
       try {
         if (currentId) {
-          // Edição: cria solicitação ao invés de editar diretamente
-          Modal.close('employeeModal');
-          pendingSolicitacao = { tipo: 'EDICAO', funcionarioId: currentId, dadosJson: JSON.stringify(formData) };
-          const emp = pageData.find(e => e.id === currentId);
-          document.getElementById("solicitacaoTitle").textContent = "Solicitar Edição";
-          document.getElementById("solicitacaoDesc").textContent = 'Edição do funcionário ' + (emp ? emp.nomeCompleto : '#' + currentId) + '. Um administrador precisará aprovar as alterações.';
-          document.getElementById("solicitacaoMotivo").value = '';
-          Modal.open('solicitacaoModal');
+          // ── EDIÇÃO: criar solicitação de alteração ──
+          const motivo = document.getElementById("solicitacaoMotivo").value.trim();
+          if (!motivo) {
+            Toast.error('Informe o motivo da alteração');
+            document.getElementById("solicitacaoMotivo").focus();
+            return;
+          }
+
+          // Monta os dados que mudaram
+          const dadosDepois = {};
+          const editableFields = ['nomeCompleto', 'emailPessoal', 'emailCorporativo', 'telefone', 'celular',
+            'cep', 'logradouro', 'numero', 'complemento', 'bairro', 'cidade', 'estado',
+            'banco', 'agencia', 'conta', 'tipoConta', 'pix', 'tipoContrato', 'status'];
+          editableFields.forEach(field => {
+            if (formData[field] !== undefined && formData[field] !== (currentSnapshot[field] || '')) {
+              dadosDepois[field] = formData[field];
+            }
+          });
+
+          if (Object.keys(dadosDepois).length === 0) {
+            Toast.error('Nenhuma alteração detectada');
+            return;
+          }
+
+          const dadosAntes = {};
+          Object.keys(dadosDepois).forEach(k => { dadosAntes[k] = currentSnapshot[k] || null; });
+
+          await api('/api/solicitacoes', {
+            method: 'POST',
+            body: JSON.stringify({
+              tipo: 'ALTERACAO_FUNCIONARIO',
+              referenciaTipo: 'FUNCIONARIO',
+              referenciaId: currentId,
+              motivo: motivo,
+              dadosAntes: JSON.stringify(dadosAntes),
+              dadosDepois: JSON.stringify(dadosDepois)
+            })
+          });
+          Toast.success('Solicitação de alteração criada! Aguarde aprovação.');
+
         } else {
-          // Criação: executa diretamente (não precisa de aprovação)
+          // ── CRIAÇÃO: salva direto ──
           await api('/api/employees', { method: 'POST', body: JSON.stringify(formData) });
           Toast.success('Funcionário cadastrado!');
-          Modal.close('employeeModal');
-          await Promise.all([loadStats(), loadPage()]);
         }
       } catch (e) {
-        Toast.error(e.message || 'Erro ao salvar funcionário');
-      }
-    }
-
-    // ── Solicitar desativação ──
-    function requestDeactivation(id) {
-      const emp = pageData.find(e => e.id === id);
-      if (!emp) return;
-      pendingSolicitacao = { tipo: 'DESATIVACAO', funcionarioId: id, dadosJson: null };
-      document.getElementById("solicitacaoTitle").textContent = "Solicitar Desativação";
-      document.getElementById("solicitacaoDesc").textContent = 'Desativar o funcionário ' + emp.nomeCompleto + '. O status será alterado para "Desligado" após aprovação de um administrador.';
-      document.getElementById("solicitacaoMotivo").value = '';
-      Modal.open('solicitacaoModal');
-    }
-
-    // ── Solicitar exclusão permanente ──
-    function requestDeletion(id) {
-      const emp = pageData.find(e => e.id === id);
-      if (!emp) return;
-      pendingSolicitacao = { tipo: 'EXCLUSAO', funcionarioId: id, dadosJson: null };
-      document.getElementById("solicitacaoTitle").textContent = "Solicitar Exclusão Permanente";
-      document.getElementById("solicitacaoDesc").innerHTML = 'Excluir permanentemente o funcionário <strong>' + emp.nomeCompleto + '</strong>. Esta ação é irreversível e precisa de aprovação de um administrador.';
-      document.getElementById("solicitacaoMotivo").value = '';
-      Modal.open('solicitacaoModal');
-    }
-
-    // ── Enviar solicitação para a API ──
-    async function submitSolicitacao() {
-      const motivo = document.getElementById("solicitacaoMotivo").value.trim();
-      if (!motivo) {
-        Toast.error('Informe o motivo da solicitação');
+        Toast.error(e.message || 'Erro ao processar');
         return;
       }
 
+      Modal.close('employeeModal');
+      await Promise.all([loadStats(), loadPage()]);
+    }
+
+    // ── Solicitar exclusão permanente ──
+    let deleteTargetId = null;
+
+    function remove(id) {
+      const emp = pageData.find(e => e.id === id);
+      if (!emp) return;
+      deleteTargetId = id;
+      document.getElementById("deleteEmpName").textContent = emp.nomeCompleto;
+      document.getElementById("deleteMotivo").value = '';
+      Modal.open('deleteModal');
+    }
+
+    async function confirmDelete() {
+      const motivo = document.getElementById("deleteMotivo").value.trim();
+      if (!motivo) {
+        Toast.error('Informe o motivo da exclusão');
+        document.getElementById("deleteMotivo").focus();
+        return;
+      }
       try {
         await api('/api/solicitacoes', {
           method: 'POST',
           body: JSON.stringify({
-            tipo: pendingSolicitacao.tipo,
-            funcionarioId: pendingSolicitacao.funcionarioId,
-            motivo: motivo,
-            dadosJson: pendingSolicitacao.dadosJson
+            tipo: 'EXCLUSAO_FUNCIONARIO',
+            referenciaTipo: 'FUNCIONARIO',
+            referenciaId: deleteTargetId,
+            motivo: motivo
           })
         });
-        Toast.success('Solicitação enviada! Aguarde aprovação de um administrador.');
-        Modal.close('solicitacaoModal');
+        Toast.success('Solicitação de exclusão criada! Aguarde aprovação.');
+        Modal.close('deleteModal');
+      } catch (e) {
+        Toast.error(e.message || 'Erro ao criar solicitação');
+      }
+    }
+
+    // ── Solicitar ativação/desativação ──
+    let toggleTargetId = null;
+    let toggleAction = null;
+
+    function toggleStatus(id) {
+      const emp = pageData.find(e => e.id === id);
+      if (!emp) return;
+      toggleTargetId = id;
+      const isAtivo = emp.status === 'ATIVO' || emp.status === 'FERIAS';
+      toggleAction = isAtivo ? 'DESATIVACAO_FUNCIONARIO' : 'ATIVACAO_FUNCIONARIO';
+
+      document.getElementById("toggleTitle").textContent = isAtivo ? 'Solicitar Desativação' : 'Solicitar Ativação';
+      document.getElementById("toggleMsg").innerHTML = isAtivo
+        ? 'Deseja solicitar a <strong style="color: var(--warning-orange);">desativação</strong> de <strong>' + emp.nomeCompleto + '</strong>?'
+        : 'Deseja solicitar a <strong style="color: var(--success-green);">ativação</strong> de <strong>' + emp.nomeCompleto + '</strong>?';
+      document.getElementById("toggleMotivo").value = '';
+      Modal.open('toggleModal');
+    }
+
+    async function confirmToggle() {
+      const motivo = document.getElementById("toggleMotivo").value.trim();
+      if (!motivo) {
+        Toast.error('Informe o motivo');
+        document.getElementById("toggleMotivo").focus();
+        return;
+      }
+      try {
+        await api('/api/solicitacoes', {
+          method: 'POST',
+          body: JSON.stringify({
+            tipo: toggleAction,
+            referenciaTipo: 'FUNCIONARIO',
+            referenciaId: toggleTargetId,
+            motivo: motivo
+          })
+        });
+        Toast.success('Solicitação criada! Aguarde aprovação.');
+        Modal.close('toggleModal');
       } catch (e) {
         Toast.error(e.message || 'Erro ao criar solicitação');
       }

@@ -79,7 +79,7 @@ public class SecurityConfig {
                         .requestMatchers("/promotions/**", "/api/promotions/**")
                             .hasAnyRole("ADMIN", "RH_CHEFE", "RH_ASSISTENTE")
 
-                        // Solicitações: criação por RH, aprovação por ADMIN
+                        // Solicitações: RH cria, chefes aprovam (controle fino no service)
                         .requestMatchers("/solicitacoes/**", "/api/solicitacoes/**")
                             .hasAnyRole("ADMIN", "RH_CHEFE", "RH_ASSISTENTE")
 

@@ -20,10 +20,10 @@
       <div class="page-header">
         <div>
           <h2 class="page-title">Cargos por Departamento</h2>
-          <p class="page-subtitle">Clique em um departamento para ver seus cargos e funcionários</p>
+          <p class="page-subtitle">Estrutura organizacional com cargos, salários e ocupação</p>
         </div>
         <div class="page-actions" data-action-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE">
-          <button class="btn btn-primary" onclick="openModal()">+ Novo Cargo</button>
+          <button class="btn btn-primary" onclick="openCreateModal()">+ Solicitar Novo Cargo</button>
         </div>
       </div>
 
@@ -33,11 +33,11 @@
     </div>
   </div>
 
-  <!-- Modal: Novo/Editar Cargo -->
+  <!-- Modal: Solicitar Criação/Edição de Cargo -->
   <div class="modal" id="modal">
     <div class="modal-dialog modal-md">
       <div class="modal-header">
-        <h3 class="modal-title" id="modalTitle">Novo Cargo</h3>
+        <h3 class="modal-title" id="modalTitle">Solicitar Novo Cargo</h3>
         <button class="modal-close" onclick="Modal.close('modal')">&times;</button>
       </div>
       <div class="modal-body">
@@ -80,13 +80,35 @@
             <textarea class="form-input" name="descricao" rows="3"></textarea>
           </div>
           <div class="form-group">
-            <label class="checkbox-label"><input type="checkbox" name="ativo" checked><span>Cargo Ativo</span></label>
+            <label class="form-label">Motivo *</label>
+            <input type="text" class="form-input" name="motivo" required placeholder="Justificativa da solicitação">
           </div>
         </form>
       </div>
       <div class="modal-footer">
         <button class="btn btn-secondary" onclick="Modal.close('modal')">Cancelar</button>
-        <button class="btn btn-primary" onclick="save()">Salvar</button>
+        <button class="btn btn-primary" onclick="save()">Criar Solicitação</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Solicitar Ação sobre Cargo -->
+  <div class="modal" id="actionModal">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-header">
+        <h3 class="modal-title" id="actionTitle">Solicitar Ação</h3>
+        <button class="modal-close" onclick="Modal.close('actionModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="text-align: center; margin: var(--spacing-4) 0;" id="actionMsg"></p>
+        <div class="form-group" style="margin-top: var(--spacing-4);">
+          <label class="form-label">Motivo *</label>
+          <textarea class="form-input" id="actionMotivo" rows="2" placeholder="Informe o motivo..." required></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="Modal.close('actionModal')">Cancelar</button>
+        <button class="btn btn-primary" id="actionConfirmBtn" onclick="confirmAction()">Enviar Solicitação</button>
       </div>
     </div>
   </div>
@@ -138,23 +160,59 @@
       padding: 0 var(--spacing-5) var(--spacing-5);
     }
     .accordion-item.open .accordion-body { display: block; }
-    .cargo-section { margin-bottom: var(--spacing-4); }
-    .cargo-section:last-child { margin-bottom: 0; }
-    .cargo-title {
+
+    .cargo-card {
+      background: var(--gray-50);
+      border-radius: var(--radius-md);
+      padding: var(--spacing-4);
+      margin-bottom: var(--spacing-3);
+      border: 1px solid var(--gray-100);
+    }
+    .cargo-card:last-child { margin-bottom: 0; }
+    .cargo-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: var(--spacing-3);
+    }
+    .cargo-card-title {
       font-weight: 600;
       color: var(--primary-dark);
       font-size: var(--font-size-base);
-      margin-bottom: var(--spacing-2);
-      padding-bottom: var(--spacing-2);
-      border-bottom: 1px solid var(--gray-100);
     }
+    .cargo-card-meta {
+      display: flex;
+      gap: var(--spacing-4);
+      flex-wrap: wrap;
+      font-size: var(--font-size-sm);
+      color: var(--gray-600);
+      margin-bottom: var(--spacing-3);
+    }
+    .cargo-card-meta span { display: flex; align-items: center; gap: var(--spacing-1); }
+    .cargo-card-actions {
+      display: flex;
+      gap: var(--spacing-2);
+      flex-wrap: wrap;
+    }
+    .cargo-card-actions button {
+      padding: 0.25rem 0.6rem;
+      font-size: var(--font-size-xs);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--gray-300);
+      background: white;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .cargo-card-actions button:hover { border-color: var(--primary-dark); color: var(--primary-dark); }
+    .cargo-card-actions .btn-danger-outline:hover { border-color: var(--error-red); color: var(--error-red); }
+
     .func-row {
       display: grid;
       grid-template-columns: 1fr 120px 100px;
       gap: var(--spacing-2);
       padding: var(--spacing-2) 0;
       font-size: var(--font-size-sm);
-      border-bottom: 1px solid var(--gray-50);
+      border-bottom: 1px solid var(--gray-100);
       align-items: center;
     }
     .func-row:last-child { border-bottom: none; }
@@ -170,6 +228,7 @@
     @media (max-width: 768px) {
       .func-row { grid-template-columns: 1fr; gap: 0; }
       .func-salary, .func-date { text-align: left; font-size: var(--font-size-xs); }
+      .cargo-card-meta { flex-direction: column; gap: var(--spacing-1); }
     }
   </style>
 
@@ -179,6 +238,20 @@
     let departamentos = [];
     let allData = [];
     let currentId = null;
+    let editingCargo = null; // snapshot para edição
+
+    const userRole = window.__CURRENT_USER__.role;
+    const canWrite = ['ADMIN', 'RH_CHEFE', 'RH_ASSISTENTE'].includes(userRole);
+    const nivelLabels = { JUNIOR: 'Júnior', PLENO: 'Pleno', SENIOR: 'Sênior', GESTAO: 'Gestão' };
+
+    async function api(url, opts = {}) {
+      const res = await fetch(url, { credentials: 'same-origin', headers: { 'Content-Type': 'application/json', ...opts.headers }, ...opts });
+      if (res.status === 401) { window.location.href = '/login'; return; }
+      if (res.status === 204) return null;
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(body.error || 'Erro na requisição');
+      return body;
+    }
 
     document.addEventListener("DOMContentLoaded", () => {
       if (!Auth.requireAuth()) return;
@@ -245,10 +318,38 @@
               `).join('')
             : '<div class="cargo-empty">Nenhum funcionário neste cargo</div>';
 
+          const salarioRange = (cargo.salarioMinimo || cargo.salarioMaximo)
+            ? formatCurrency(cargo.salarioMinimo) + ' - ' + formatCurrency(cargo.salarioMaximo)
+            : 'Não definido';
+
+          const statusBadge = cargo.ativo !== false
+            ? '<span class="badge badge-success">Ativo</span>'
+            : '<span class="badge badge-danger">Inativo</span>';
+
+          const actionsHtml = canWrite && cargo.id ? `
+            <div class="cargo-card-actions">
+              <button onclick="event.stopPropagation(); openEditModal(${cargo.id}, '${dept.nome}')">Editar</button>
+              <button onclick="event.stopPropagation(); requestAction(${cargo.id}, '${cargo.titulo}', '${cargo.ativo !== false ? 'DESATIVACAO_CARGO' : 'EDICAO_CARGO'}', '${cargo.ativo !== false ? 'desativação' : 'reativação'}')">${cargo.ativo !== false ? 'Desativar' : 'Reativar'}</button>
+              <button class="btn-danger-outline" onclick="event.stopPropagation(); requestAction(${cargo.id}, '${cargo.titulo}', 'EXCLUSAO_CARGO', 'exclusão permanente')">Excluir</button>
+              <button style="border-color: var(--success-green); color: var(--success-green);" onclick="event.stopPropagation(); requestAction(${cargo.id}, '${cargo.titulo}', 'ABERTURA_VAGA', 'abertura de vaga')">Abrir Vaga</button>
+            </div>
+          ` : '';
+
           return `
-            <div class="cargo-section">
-              <div class="cargo-title">${cargo.titulo} <span style="font-weight: 400; color: var(--gray-400);">(${cargo.funcionarios.length})</span></div>
+            <div class="cargo-card">
+              <div class="cargo-card-header">
+                <div>
+                  <span class="cargo-card-title">${cargo.titulo}</span>
+                  ${statusBadge}
+                </div>
+              </div>
+              <div class="cargo-card-meta">
+                <span><strong>Nível:</strong> ${nivelLabels[cargo.nivel] || cargo.nivel || '-'}</span>
+                <span><strong>Faixa:</strong> ${salarioRange}</span>
+                <span><strong>Ocupantes:</strong> ${cargo.funcionarios.length}</span>
+              </div>
               ${funcsHtml}
+              ${actionsHtml}
             </div>
           `;
         }).join('');
@@ -260,7 +361,7 @@
                 <span class="accordion-arrow">&#9654;</span>
                 <span class="accordion-dept-name">${dept.nome}</span>
               </div>
-              <span class="accordion-count">${dept.totalFuncionarios} funcionário(s)</span>
+              <span class="accordion-count">${dept.cargos.length} cargo(s) &bull; ${dept.totalFuncionarios} funcionário(s)</span>
             </div>
             <div class="accordion-body">
               ${dept.cargos.length > 0 ? cargosHtml : '<div class="cargo-empty">Nenhum cargo cadastrado neste departamento</div>'}
@@ -274,12 +375,31 @@
       document.getElementById('acc-' + index).classList.toggle('open');
     }
 
-    function openModal(id = null) {
-      currentId = id;
+    // ── Criar novo cargo (via solicitação) ──
+    function openCreateModal() {
+      currentId = null;
+      editingCargo = null;
       document.getElementById("form").reset();
-      document.getElementById("modalTitle").textContent = id ? "Editar Cargo" : "Novo Cargo";
+      document.getElementById("modalTitle").textContent = "Solicitar Novo Cargo";
       Modal.open('modal');
       Mask.initAll();
+    }
+
+    // ── Editar cargo (via solicitação) ──
+    async function openEditModal(cargoId, deptNome) {
+      try {
+        const cargo = await api(API + '/' + cargoId);
+        if (!cargo) return;
+        currentId = cargoId;
+        editingCargo = cargo;
+        document.getElementById("form").reset();
+        document.getElementById("modalTitle").textContent = "Solicitar Edição de Cargo";
+        Form.populate('form', cargo);
+        Modal.open('modal');
+        Mask.initAll();
+      } catch (e) {
+        Toast.error('Erro ao carregar cargo');
+      }
     }
 
     async function save() {
@@ -288,31 +408,108 @@
         Toast.error('Preencha os campos obrigatórios');
         return;
       }
+      if (!formData.motivo) {
+        Toast.error('Informe o motivo da solicitação');
+        return;
+      }
 
-      const body = {
+      const dadosDepois = {
         titulo: formData.titulo,
         descricao: formData.descricao || null,
         nivel: formData.nivel || null,
         departamentoId: Number(formData.departamentoId),
         salarioMinimo: formData.salarioMinimo ? parseFloat(String(formData.salarioMinimo).replace(/[^\d,]/g, '').replace(',', '.')) : null,
-        salarioMaximo: formData.salarioMaximo ? parseFloat(String(formData.salarioMaximo).replace(/[^\d,]/g, '').replace(',', '.')) : null,
-        ativo: formData.ativo !== undefined ? !!formData.ativo : true
+        salarioMaximo: formData.salarioMaximo ? parseFloat(String(formData.salarioMaximo).replace(/[^\d,]/g, '').replace(',', '.')) : null
       };
 
-      try {
-        let res;
-        if (currentId) {
-          res = await fetch(API + '/' + currentId, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify(body) });
-        } else {
-          res = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify(body) });
+      let tipo, dadosAntes = null, referenciaId = null;
+
+      if (currentId) {
+        tipo = 'EDICAO_CARGO';
+        referenciaId = currentId;
+        if (editingCargo) {
+          dadosAntes = {
+            titulo: editingCargo.titulo,
+            descricao: editingCargo.descricao,
+            nivel: editingCargo.nivel,
+            departamentoId: editingCargo.departamentoId,
+            salarioMinimo: editingCargo.salarioMinimo,
+            salarioMaximo: editingCargo.salarioMaximo
+          };
         }
-        if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err.error || 'Erro ao salvar'); }
-        Toast.success(currentId ? 'Cargo atualizado!' : 'Cargo criado!');
+      } else {
+        tipo = 'CRIACAO_CARGO';
+      }
+
+      try {
+        await api('/api/solicitacoes', {
+          method: 'POST',
+          body: JSON.stringify({
+            tipo: tipo,
+            referenciaTipo: 'CARGO',
+            referenciaId: referenciaId,
+            motivo: formData.motivo,
+            dadosAntes: dadosAntes ? JSON.stringify(dadosAntes) : null,
+            dadosDepois: JSON.stringify(dadosDepois)
+          })
+        });
+        Toast.success('Solicitação criada! Aguarde aprovação.');
         Modal.close('modal');
-        loadData();
       } catch (e) {
-        console.error(e);
-        Toast.error(e.message || 'Erro ao salvar cargo');
+        Toast.error(e.message || 'Erro ao criar solicitação');
+      }
+    }
+
+    // ── Ações genéricas sobre cargo (desativar, excluir, abrir vaga) ──
+    let actionTargetId = null;
+    let actionType = null;
+
+    function requestAction(cargoId, cargoTitulo, tipo, descricaoAcao) {
+      actionTargetId = cargoId;
+      actionType = tipo;
+      document.getElementById("actionTitle").textContent = 'Solicitar ' + descricaoAcao.charAt(0).toUpperCase() + descricaoAcao.slice(1);
+      document.getElementById("actionMsg").innerHTML = 'Deseja solicitar a <strong>' + descricaoAcao + '</strong> do cargo <strong>' + cargoTitulo + '</strong>?';
+      document.getElementById("actionMotivo").value = '';
+
+      const btn = document.getElementById("actionConfirmBtn");
+      if (tipo === 'EXCLUSAO_CARGO') {
+        btn.style.background = 'var(--error-red)';
+        btn.style.color = 'white';
+        btn.className = 'btn';
+      } else if (tipo === 'ABERTURA_VAGA') {
+        btn.style.background = 'var(--success-green)';
+        btn.style.color = 'white';
+        btn.className = 'btn';
+      } else {
+        btn.style.background = '';
+        btn.style.color = '';
+        btn.className = 'btn btn-primary';
+      }
+
+      Modal.open('actionModal');
+    }
+
+    async function confirmAction() {
+      const motivo = document.getElementById("actionMotivo").value.trim();
+      if (!motivo) {
+        Toast.error('Informe o motivo');
+        document.getElementById("actionMotivo").focus();
+        return;
+      }
+      try {
+        await api('/api/solicitacoes', {
+          method: 'POST',
+          body: JSON.stringify({
+            tipo: actionType,
+            referenciaTipo: actionType === 'ABERTURA_VAGA' ? 'VAGA' : 'CARGO',
+            referenciaId: actionTargetId,
+            motivo: motivo
+          })
+        });
+        Toast.success('Solicitação criada! Aguarde aprovação.');
+        Modal.close('actionModal');
+      } catch (e) {
+        Toast.error(e.message || 'Erro ao criar solicitação');
       }
     }
   </script>

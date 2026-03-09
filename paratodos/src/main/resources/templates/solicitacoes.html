@@ -17,81 +17,91 @@
     <header th:replace="~{fragments/topbar :: topbar('Solicitações')}"></header>
 
     <div class="content-area">
-      <!-- Stats -->
-      <div class="stats-row">
-        <div class="stat-box">
-          <div class="stat-box-value" id="statTotal">0</div>
-          <div class="stat-box-label">Total</div>
+      <!-- Stats Cards -->
+      <div class="stats-row" id="statsRow">
+        <div class="stat-card">
+          <div class="stat-value" id="statTotal">-</div>
+          <div class="stat-label">Total</div>
         </div>
-        <div class="stat-box">
-          <div class="stat-box-value" style="color: var(--warning-orange);" id="statPendentes">0</div>
-          <div class="stat-box-label">Pendentes</div>
+        <div class="stat-card stat-warning">
+          <div class="stat-value" id="statPendentes">-</div>
+          <div class="stat-label">Pendentes</div>
         </div>
-        <div class="stat-box">
-          <div class="stat-box-value" style="color: var(--success-green);" id="statAprovadas">0</div>
-          <div class="stat-box-label">Aprovadas</div>
+        <div class="stat-card stat-success">
+          <div class="stat-value" id="statAprovadas">-</div>
+          <div class="stat-label">Aprovadas</div>
         </div>
-        <div class="stat-box">
-          <div class="stat-box-value" style="color: var(--error-red);" id="statRejeitadas">0</div>
-          <div class="stat-box-label">Rejeitadas</div>
+        <div class="stat-card stat-danger">
+          <div class="stat-value" id="statRejeitadas">-</div>
+          <div class="stat-label">Rejeitadas</div>
         </div>
       </div>
 
       <div class="page-header">
         <div>
-          <h2 class="page-title">Solicitações</h2>
-          <p class="page-subtitle">Aprove ou recuse solicitações de promoções e ações sobre funcionários</p>
+          <h2 class="page-title">Central de Solicitações</h2>
+          <p class="page-subtitle">Gerencie todas as solicitações do sistema — aprovação, rejeição e acompanhamento</p>
         </div>
-        <div class="filter-group" style="display: flex; align-items: center; gap: var(--spacing-2);">
-          <label>Filtrar:</label>
-          <select id="filterStatus" onchange="loadAll()">
-            <option value="">Todas</option>
+      </div>
+
+      <!-- Filters -->
+      <div class="filters-bar">
+        <div class="filter-group">
+          <label>Status:</label>
+          <select id="filterStatus" onchange="loadData()">
+            <option value="">Todos</option>
             <option value="PENDENTE" selected>Pendentes</option>
             <option value="APROVADA">Aprovadas</option>
             <option value="REJEITADA">Rejeitadas</option>
+            <option value="CANCELADA">Canceladas</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>Tipo:</label>
+          <select id="filterTipo" onchange="loadData()">
+            <option value="">Todos</option>
+            <optgroup label="Funcionário">
+              <option value="ALTERACAO_FUNCIONARIO">Alteração</option>
+              <option value="ATIVACAO_FUNCIONARIO">Ativação</option>
+              <option value="DESATIVACAO_FUNCIONARIO">Desativação</option>
+              <option value="EXCLUSAO_FUNCIONARIO">Exclusão</option>
+            </optgroup>
+            <optgroup label="Departamento">
+              <option value="CRIACAO_DEPARTAMENTO">Criação</option>
+              <option value="EDICAO_DEPARTAMENTO">Edição</option>
+              <option value="DESATIVACAO_DEPARTAMENTO">Desativação</option>
+              <option value="EXCLUSAO_DEPARTAMENTO">Exclusão</option>
+            </optgroup>
+            <optgroup label="Cargo">
+              <option value="CRIACAO_CARGO">Criação</option>
+              <option value="EDICAO_CARGO">Edição</option>
+              <option value="DESATIVACAO_CARGO">Desativação</option>
+              <option value="EXCLUSAO_CARGO">Exclusão</option>
+            </optgroup>
+            <optgroup label="Outros">
+              <option value="ABERTURA_VAGA">Abertura de Vaga</option>
+              <option value="PROMOCAO">Promoção</option>
+              <option value="TRANSFERENCIA">Transferência</option>
+              <option value="REAJUSTE_SALARIAL">Reajuste Salarial</option>
+            </optgroup>
           </select>
         </div>
       </div>
 
-      <!-- Tabs -->
-      <div style="display: flex; gap: var(--spacing-2); margin-bottom: var(--spacing-4);">
-        <button class="btn btn-primary tab-switch active" onclick="switchTab('promocoes')" id="tabPromocoes">Promoções / Transferências</button>
-        <button class="btn btn-secondary tab-switch" onclick="switchTab('funcionarios')" id="tabFuncionarios">Ações sobre Funcionários</button>
-      </div>
-
-      <!-- Tabela Promoções -->
-      <div class="table-container" id="tblPromocoes">
+      <!-- Table -->
+      <div class="table-container">
         <table class="data-table">
           <thead>
             <tr>
-              <th>Funcionário</th>
               <th>Tipo</th>
+              <th>Referência</th>
               <th>Solicitante</th>
               <th>Data</th>
               <th>Status</th>
               <th>Ação</th>
             </tr>
           </thead>
-          <tbody id="tbodyPromocoes">
-            <tr><td colspan="6" style="text-align:center; padding: 2rem; color: var(--gray-400);">Carregando...</td></tr>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Tabela Funcionários -->
-      <div class="table-container" id="tblFuncionarios" style="display: none;">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Funcionário</th>
-              <th>Tipo</th>
-              <th>Solicitante</th>
-              <th>Data</th>
-              <th>Status</th>
-              <th>Ação</th>
-            </tr>
-          </thead>
-          <tbody id="tbodyFuncionarios">
+          <tbody id="tableBody">
             <tr><td colspan="6" style="text-align:center; padding: 2rem; color: var(--gray-400);">Carregando...</td></tr>
           </tbody>
         </table>
@@ -120,7 +130,11 @@
       </div>
       <div class="modal-body">
         <p style="text-align: center; margin: var(--spacing-4) 0;">Tem certeza que deseja <strong style="color: var(--success-green);">aprovar</strong> esta solicitação?</p>
-        <p style="text-align: center; font-size: var(--font-size-sm); color: var(--gray-500);" id="approveWarning">Esta ação será executada imediatamente após a aprovação.</p>
+        <p style="text-align: center; font-size: var(--font-size-sm); color: var(--gray-500);">A ação correspondente será executada automaticamente ao aprovar.</p>
+        <div class="form-group" style="margin-top: var(--spacing-4);">
+          <label class="form-label">Observação (opcional)</label>
+          <textarea class="form-input" id="approveObs" rows="2" placeholder="Observação de aprovação..."></textarea>
+        </div>
       </div>
       <div class="modal-footer">
         <button class="btn btn-secondary" onclick="Modal.close('confirmApproveModal')">Voltar</button>
@@ -137,20 +151,63 @@
         <button class="modal-close" onclick="Modal.close('confirmRejectModal')">&times;</button>
       </div>
       <div class="modal-body">
-        <p style="text-align: center; margin: var(--spacing-4) 0;">Tem certeza que deseja <strong style="color: var(--error-red);">recusar</strong> esta solicitação?</p>
+        <p style="text-align: center; margin: var(--spacing-4) 0;">Tem certeza que deseja <strong style="color: var(--error-red);">rejeitar</strong> esta solicitação?</p>
         <div class="form-group" style="margin-top: var(--spacing-4);">
-          <label class="form-label">Observação (opcional)</label>
+          <label class="form-label">Motivo da rejeição (opcional)</label>
           <textarea class="form-input" id="rejectObs" rows="2" placeholder="Motivo da rejeição..."></textarea>
         </div>
       </div>
       <div class="modal-footer">
         <button class="btn btn-secondary" onclick="Modal.close('confirmRejectModal')">Voltar</button>
-        <button class="btn" style="background: var(--error-red); color: white;" onclick="confirmAction('reject')">Sim, Recusar</button>
+        <button class="btn" style="background: var(--error-red); color: white;" onclick="confirmAction('reject')">Sim, Rejeitar</button>
       </div>
     </div>
   </div>
 
   <style>
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: var(--spacing-4);
+      margin-bottom: var(--spacing-6);
+    }
+    .stat-card {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-5);
+      text-align: center;
+      border: 1px solid var(--gray-200);
+    }
+    .stat-value {
+      font-size: var(--font-size-2xl);
+      font-weight: 700;
+      color: var(--gray-800);
+    }
+    .stat-label {
+      font-size: var(--font-size-sm);
+      color: var(--gray-500);
+      margin-top: var(--spacing-1);
+    }
+    .stat-warning .stat-value { color: var(--warning-yellow); }
+    .stat-success .stat-value { color: var(--success-green); }
+    .stat-danger .stat-value { color: var(--error-red); }
+
+    .detail-full p { margin: var(--spacing-2) 0; font-size: var(--font-size-sm); }
+    .detail-full strong { color: var(--gray-600); }
+
+    .json-preview {
+      background: var(--gray-100);
+      border-radius: var(--radius-md);
+      padding: var(--spacing-3);
+      font-family: monospace;
+      font-size: var(--font-size-xs);
+      max-height: 200px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+      margin-top: var(--spacing-2);
+    }
+
     .detail-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -161,11 +218,10 @@
       color: var(--gray-500);
       text-transform: uppercase;
       margin-bottom: var(--spacing-3);
+      padding-bottom: var(--spacing-2);
+      border-bottom: 1px solid var(--gray-200);
     }
-    .detail-section p { margin: var(--spacing-1) 0; }
-    .tab-switch { border-radius: var(--radius-md); font-size: var(--font-size-sm); padding: var(--spacing-2) var(--spacing-4); }
-    .tab-switch.active { background: var(--primary); color: white; }
-    .tab-switch:not(.active) { background: var(--gray-100); color: var(--gray-600); }
+
     @media (max-width: 768px) {
       .detail-grid { grid-template-columns: 1fr; }
     }
@@ -173,12 +229,8 @@
 
   <div th:replace="~{fragments/scripts :: common}"></div>
   <script>
-    let promocoes = [];
-    let solicitacoesFuncionario = [];
+    let solicitacoes = [];
     let currentSolId = null;
-    let currentSolType = null; // 'promocao' ou 'funcionario'
-    let activeTab = 'promocoes';
-    const isAdmin = window.__CURRENT_USER__.role === 'ADMIN';
 
     async function api(url, opts = {}) {
       const res = await fetch(url, { credentials: 'same-origin', headers: { 'Content-Type': 'application/json', ...opts.headers }, ...opts });
@@ -195,219 +247,190 @@
       initSidebar();
       Auth.applyRoleVisibility(document);
       Auth.applyActionVisibility(document);
-      loadAll();
+      loadStats();
+      loadData();
     });
 
-    function switchTab(tab) {
-      activeTab = tab;
-      document.getElementById('tblPromocoes').style.display = tab === 'promocoes' ? '' : 'none';
-      document.getElementById('tblFuncionarios').style.display = tab === 'funcionarios' ? '' : 'none';
-      document.getElementById('tabPromocoes').className = 'btn tab-switch ' + (tab === 'promocoes' ? 'active' : '');
-      document.getElementById('tabFuncionarios').className = 'btn tab-switch ' + (tab === 'funcionarios' ? 'active' : '');
+    async function loadStats() {
+      try {
+        const stats = await api('/api/solicitacoes/stats');
+        if (!stats) return;
+        document.getElementById('statTotal').textContent = stats.total;
+        document.getElementById('statPendentes').textContent = stats.pendentes;
+        document.getElementById('statAprovadas').textContent = stats.aprovadas;
+        document.getElementById('statRejeitadas').textContent = stats.rejeitadas;
+      } catch (e) {
+        console.error('Erro ao carregar stats:', e);
+      }
     }
 
-    async function loadAll() {
+    async function loadData() {
       const status = document.getElementById("filterStatus").value;
+      const tipo = document.getElementById("filterTipo").value;
       try {
-        const [promoData, funcData, promoStats, funcStats] = await Promise.all([
-          api(status ? '/api/promotions?status=' + status : '/api/promotions'),
-          api(status ? '/api/solicitacoes?status=' + status : '/api/solicitacoes'),
-          api('/api/promotions/stats'),
-          api('/api/solicitacoes/stats')
-        ]);
-        promocoes = promoData || [];
-        solicitacoesFuncionario = funcData || [];
+        let url = '/api/solicitacoes';
+        const params = [];
+        if (status) params.push('status=' + status);
+        if (tipo) params.push('tipo=' + tipo);
+        if (params.length > 0) url += '?' + params.join('&');
 
-        // Stats combinados
-        const totalP = (promoStats ? promoStats.pendentes : 0);
-        const totalF = (funcStats ? funcStats.pendentes : 0);
-        document.getElementById("statTotal").textContent = (promoStats ? promoStats.total : 0) + (funcStats ? funcStats.total : 0);
-        document.getElementById("statPendentes").textContent = totalP + totalF;
-        document.getElementById("statAprovadas").textContent = (promoStats ? promoStats.aprovadas : 0) + (funcStats ? funcStats.aprovadas : 0);
-        document.getElementById("statRejeitadas").textContent = (promoStats ? promoStats.rejeitadas : 0) + (funcStats ? funcStats.rejeitadas : 0);
+        solicitacoes = await api(url) || [];
       } catch (e) {
         console.error('Erro ao carregar solicitações:', e);
-        promocoes = [];
-        solicitacoesFuncionario = [];
+        solicitacoes = [];
       }
-      renderPromocoes();
-      renderFuncionarios();
+      render();
     }
 
-    const tipoLabelsPromo = { PROMOCAO: 'Promoção', TRANSFERENCIA: 'Transferência', REAJUSTE: 'Reajuste', CONTRATACAO: 'Contratação' };
-    const tipoLabelsFunc = { EDICAO: 'Edição', DESATIVACAO: 'Desativação', EXCLUSAO: 'Exclusão' };
-    const tipoBadgeFunc = { EDICAO: 'badge-info', DESATIVACAO: 'badge-warning', EXCLUSAO: 'badge-danger' };
-    const statusLabels = { PENDENTE: 'Pendente', APROVADA: 'Aprovada', REJEITADA: 'Rejeitada' };
-    const statusBadge = { PENDENTE: 'badge-warning', APROVADA: 'badge-success', REJEITADA: 'badge-danger' };
+    const statusBadge = {
+      PENDENTE: 'badge-warning',
+      APROVADA: 'badge-success',
+      REJEITADA: 'badge-danger',
+      CANCELADA: 'badge-secondary'
+    };
+    const statusLabels = {
+      PENDENTE: 'Pendente',
+      APROVADA: 'Aprovada',
+      REJEITADA: 'Rejeitada',
+      CANCELADA: 'Cancelada'
+    };
 
     function formatDate(d) {
       if (!d) return '-';
       return new Date(d).toLocaleDateString('pt-BR');
     }
 
-    function formatCurrency(v) {
-      if (v == null) return '-';
-      return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
+    function formatDateTime(d) {
+      if (!d) return '-';
+      const dt = new Date(d);
+      return dt.toLocaleDateString('pt-BR') + ' ' + dt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
     }
 
-    function renderPromocoes() {
-      const tbody = document.getElementById("tbodyPromocoes");
-      if (promocoes.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><h3 class="empty-state-title">Nenhuma solicitação de promoção encontrada</h3></div></td></tr>';
+    function render() {
+      const tbody = document.getElementById("tableBody");
+      if (solicitacoes.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><h3 class="empty-state-title">Nenhuma solicitação encontrada</h3><p class="empty-state-text">Altere os filtros ou aguarde novas solicitações.</p></div></td></tr>';
         return;
       }
-      tbody.innerHTML = promocoes.map(s => `
-        <tr style="cursor: pointer;" onclick="openPromoDetail(${s.id})">
-          <td><strong>${s.funcionarioNome || '-'}</strong></td>
-          <td>${tipoLabelsPromo[s.tipo] || s.tipo}</td>
+      tbody.innerHTML = solicitacoes.map(s => `
+        <tr style="cursor: pointer;" onclick="openDetail(${s.id})">
+          <td><strong>${s.tipoLabel || s.tipo}</strong></td>
+          <td>${s.referenciaDescricao || (s.referenciaTipo ? s.referenciaTipo + ' #' + s.referenciaId : '-')}</td>
           <td>${s.solicitanteEmail || '-'}</td>
-          <td>${formatDate(s.dataSolicitacao)}</td>
-          <td><span class="badge ${statusBadge[s.status]}">${statusLabels[s.status]}</span></td>
-          <td><button class="btn btn-secondary" style="padding: 0.3rem 0.8rem; font-size: 0.8rem;">Ver detalhes</button></td>
+          <td>${formatDate(s.criadoEm)}</td>
+          <td><span class="badge ${statusBadge[s.status] || ''}">${statusLabels[s.status] || s.status}</span></td>
+          <td><button class="btn btn-secondary" style="padding: 0.3rem 0.8rem; font-size: 0.8rem;">Ver</button></td>
         </tr>
       `).join('');
     }
 
-    function renderFuncionarios() {
-      const tbody = document.getElementById("tbodyFuncionarios");
-      if (solicitacoesFuncionario.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><h3 class="empty-state-title">Nenhuma solicitação de ação encontrada</h3></div></td></tr>';
-        return;
+    function formatJsonPreview(jsonStr) {
+      if (!jsonStr) return null;
+      try {
+        const obj = JSON.parse(jsonStr);
+        return JSON.stringify(obj, null, 2);
+      } catch {
+        return jsonStr;
       }
-      tbody.innerHTML = solicitacoesFuncionario.map(s => `
-        <tr style="cursor: pointer;" onclick="openFuncDetail(${s.id})">
-          <td><strong>${s.funcionarioNome || '-'}</strong><br><small style="color: var(--gray-500);">${s.funcionarioMatricula || ''}</small></td>
-          <td><span class="badge ${tipoBadgeFunc[s.tipo] || 'badge-info'}">${tipoLabelsFunc[s.tipo] || s.tipo}</span></td>
-          <td>${s.solicitanteEmail || '-'}</td>
-          <td>${formatDate(s.dataSolicitacao)}</td>
-          <td><span class="badge ${statusBadge[s.status]}">${statusLabels[s.status]}</span></td>
-          <td><button class="btn btn-secondary" style="padding: 0.3rem 0.8rem; font-size: 0.8rem;">Ver detalhes</button></td>
-        </tr>
-      `).join('');
     }
 
-    // ── Detalhes: Promoção ──
-    async function openPromoDetail(id) {
+    async function openDetail(id) {
       currentSolId = id;
-      currentSolType = 'promocao';
       let sol;
-      try { sol = await api('/api/promotions/' + id); } catch (e) { Toast.error('Erro ao carregar detalhes'); return; }
+      try {
+        sol = await api('/api/solicitacoes/' + id);
+      } catch (e) {
+        Toast.error('Erro ao carregar detalhes');
+        return;
+      }
       if (!sol) return;
 
-      document.getElementById("detailContent").innerHTML = `
+      const content = document.getElementById("detailContent");
+
+      let dadosHtml = '';
+      if (sol.dadosAntes || sol.dadosDepois) {
+        dadosHtml = '<div class="detail-grid" style="margin-top: var(--spacing-4);">';
+        if (sol.dadosAntes) {
+          dadosHtml += `
+            <div class="detail-section">
+              <h4>Dados Anteriores</h4>
+              <div class="json-preview">${formatJsonPreview(sol.dadosAntes)}</div>
+            </div>`;
+        }
+        if (sol.dadosDepois) {
+          dadosHtml += `
+            <div class="detail-section">
+              <h4>Dados Propostos</h4>
+              <div class="json-preview">${formatJsonPreview(sol.dadosDepois)}</div>
+            </div>`;
+        }
+        dadosHtml += '</div>';
+      }
+
+      content.innerHTML = `
         <div style="margin-bottom: var(--spacing-4);">
-          <h3 style="margin: 0;">${sol.funcionarioNome}</h3>
-          <span class="badge ${statusBadge[sol.status]}" style="margin-top: var(--spacing-2);">${statusLabels[sol.status]}</span>
-          <span style="margin-left: var(--spacing-2); font-size: var(--font-size-sm); color: var(--gray-500);">${tipoLabelsPromo[sol.tipo] || sol.tipo}</span>
+          <h3 style="margin: 0 0 var(--spacing-2) 0;">${sol.tipoLabel || sol.tipo}</h3>
+          <span class="badge ${statusBadge[sol.status]}">${statusLabels[sol.status] || sol.status}</span>
+          ${sol.referenciaDescricao ? '<span style="margin-left: var(--spacing-2); font-size: var(--font-size-sm); color: var(--gray-600);">' + sol.referenciaDescricao + '</span>' : ''}
         </div>
-        <div class="detail-grid">
-          <div class="detail-section">
-            <h4>Situação Atual</h4>
-            <p><strong>Cargo:</strong> ${sol.cargoAtualTitulo || '-'}</p>
-            <p><strong>Departamento:</strong> ${sol.departamentoAtualNome || '-'}</p>
-            <p><strong>Salário:</strong> ${formatCurrency(sol.salarioAtual)}</p>
-          </div>
-          <div class="detail-section">
-            <h4>Proposta</h4>
-            <p><strong>Cargo:</strong> ${sol.cargoNovoTitulo || 'Manter atual'}</p>
-            <p><strong>Departamento:</strong> ${sol.departamentoNovoNome || 'Manter atual'}</p>
-            <p><strong>Salário:</strong> ${sol.salarioNovo ? formatCurrency(sol.salarioNovo) : 'Manter atual'}</p>
-          </div>
-        </div>
-        <div style="margin-top: var(--spacing-4); padding-top: var(--spacing-4); border-top: 1px solid var(--gray-200);">
+
+        <div class="detail-full">
           <p><strong>Motivo:</strong> ${sol.motivo || '-'}</p>
           <p><strong>Solicitante:</strong> ${sol.solicitanteEmail || '-'}</p>
-          <p><strong>Data:</strong> ${formatDate(sol.dataSolicitacao)}</p>
-          ${sol.aprovadorEmail ? '<p><strong>Aprovador:</strong> ' + sol.aprovadorEmail + '</p>' : ''}
-          ${sol.observacaoAprovador ? '<p><strong>Observação:</strong> ' + sol.observacaoAprovador + '</p>' : ''}
+          <p><strong>Criado em:</strong> ${formatDateTime(sol.criadoEm)}</p>
+          ${sol.aprovadorEmail ? '<p><strong>Decidido por:</strong> ' + sol.aprovadorEmail + '</p>' : ''}
+          ${sol.decididoEm ? '<p><strong>Decidido em:</strong> ' + formatDateTime(sol.decididoEm) + '</p>' : ''}
+          ${sol.observacao ? '<p><strong>Observação:</strong> ' + sol.observacao + '</p>' : ''}
         </div>
+
+        ${dadosHtml}
       `;
-      showDetailFooter(sol.status);
-      document.getElementById("approveWarning").textContent = 'Esta ação alterará o cargo, departamento e/ou salário do funcionário.';
-      Modal.open('detailModal');
-    }
 
-    // ── Detalhes: Ação sobre Funcionário ──
-    async function openFuncDetail(id) {
-      currentSolId = id;
-      currentSolType = 'funcionario';
-      let sol;
-      try { sol = await api('/api/solicitacoes/' + id); } catch (e) { Toast.error('Erro ao carregar detalhes'); return; }
-      if (!sol) return;
-
-      const warningByType = {
-        DESATIVACAO: 'O funcionário será desligado (status alterado para DESLIGADO).',
-        EXCLUSAO: 'O funcionário será excluído permanentemente. Esta ação é irreversível!',
-        EDICAO: 'Os dados do funcionário serão atualizados conforme proposto.'
-      };
-
-      let detailHtml = `
-        <div style="margin-bottom: var(--spacing-4);">
-          <h3 style="margin: 0;">${sol.funcionarioNome}</h3>
-          <span class="badge ${statusBadge[sol.status]}" style="margin-top: var(--spacing-2);">${statusLabels[sol.status]}</span>
-          <span class="badge ${tipoBadgeFunc[sol.tipo] || 'badge-info'}" style="margin-left: var(--spacing-2);">${tipoLabelsFunc[sol.tipo] || sol.tipo}</span>
-        </div>`;
-
-      if (sol.tipo === 'EDICAO' && sol.dadosJson) {
-        try {
-          const dados = JSON.parse(sol.dadosJson);
-          detailHtml += '<div class="detail-section" style="margin-bottom: var(--spacing-4);"><h4>Dados Propostos</h4>';
-          const fieldLabels = {
-            nomeCompleto: 'Nome', emailPessoal: 'Email Pessoal', emailCorporativo: 'Email Corp.',
-            telefone: 'Telefone', celular: 'Celular', cidade: 'Cidade', estado: 'Estado',
-            tipoContrato: 'Contrato', status: 'Status', banco: 'Banco', agencia: 'Agência',
-            conta: 'Conta', pix: 'PIX'
-          };
-          for (const [key, label] of Object.entries(fieldLabels)) {
-            if (dados[key] !== undefined) {
-              detailHtml += '<p><strong>' + label + ':</strong> ' + (dados[key] || '-') + '</p>';
-            }
-          }
-          detailHtml += '</div>';
-        } catch (e) { /* ignore parse error */ }
-      }
-
-      detailHtml += `
-        <div style="padding-top: var(--spacing-4); border-top: 1px solid var(--gray-200);">
-          <p><strong>Motivo:</strong> ${sol.motivo || '-'}</p>
-          <p><strong>Solicitante:</strong> ${sol.solicitanteEmail || '-'}</p>
-          <p><strong>Data:</strong> ${formatDate(sol.dataSolicitacao)}</p>
-          ${sol.aprovadorEmail ? '<p><strong>Aprovador:</strong> ' + sol.aprovadorEmail + '</p>' : ''}
-          ${sol.observacaoAprovador ? '<p><strong>Observação:</strong> ' + sol.observacaoAprovador + '</p>' : ''}
-        </div>`;
-
-      document.getElementById("detailContent").innerHTML = detailHtml;
-      showDetailFooter(sol.status);
-      document.getElementById("approveWarning").textContent = warningByType[sol.tipo] || 'Esta ação será executada imediatamente.';
-      Modal.open('detailModal');
-    }
-
-    function showDetailFooter(status) {
       const footer = document.getElementById("detailFooter");
-      if (status === 'PENDENTE' && isAdmin) {
+      const role = window.__CURRENT_USER__.role;
+      const canApprove = (role === 'ADMIN' || role === 'RH_CHEFE');
+
+      if (sol.status === 'PENDENTE' && canApprove) {
         footer.innerHTML = `
           <button class="btn btn-secondary" onclick="Modal.close('detailModal')">Fechar</button>
-          <button class="btn" style="background: var(--error-red); color: white;" onclick="openRejectConfirm()">Recusar</button>
+          <button class="btn" style="background: var(--error-red); color: white;" onclick="openRejectConfirm()">Rejeitar</button>
           <button class="btn btn-primary" onclick="openApproveConfirm()">Aprovar</button>
+        `;
+      } else if (sol.status === 'PENDENTE') {
+        footer.innerHTML = `
+          <button class="btn btn-secondary" onclick="Modal.close('detailModal')">Fechar</button>
+          <span style="font-size: var(--font-size-sm); color: var(--gray-500);">Aguardando aprovação</span>
         `;
       } else {
         footer.innerHTML = '<button class="btn btn-secondary" onclick="Modal.close(\'detailModal\')">Fechar</button>';
       }
+
+      Modal.open('detailModal');
     }
 
-    function openApproveConfirm() { Modal.open('confirmApproveModal'); }
-    function openRejectConfirm() { document.getElementById("rejectObs").value = ''; Modal.open('confirmRejectModal'); }
+    function openApproveConfirm() {
+      document.getElementById("approveObs").value = '';
+      Modal.open('confirmApproveModal');
+    }
+
+    function openRejectConfirm() {
+      document.getElementById("rejectObs").value = '';
+      Modal.open('confirmRejectModal');
+    }
 
     async function confirmAction(action) {
-      const baseUrl = currentSolType === 'promocao' ? '/api/promotions/' : '/api/solicitacoes/';
       try {
         if (action === 'approve') {
-          await api(baseUrl + currentSolId + '/approve', { method: 'PUT', body: JSON.stringify({}) });
-          Toast.success('Solicitação aprovada!');
+          const obs = document.getElementById("approveObs").value;
+          await api('/api/solicitacoes/' + currentSolId + '/approve', {
+            method: 'PUT',
+            body: JSON.stringify({ observacao: obs || null })
+          });
+          Toast.success('Solicitação aprovada com sucesso!');
           Modal.close('confirmApproveModal');
         } else {
           const obs = document.getElementById("rejectObs").value;
-          await api(baseUrl + currentSolId + '/reject', {
+          await api('/api/solicitacoes/' + currentSolId + '/reject', {
             method: 'PUT',
             body: JSON.stringify({ observacao: obs || null })
           });
@@ -415,7 +438,8 @@
           Modal.close('confirmRejectModal');
         }
         Modal.close('detailModal');
-        loadAll();
+        loadStats();
+        loadData();
       } catch (e) {
         Toast.error(e.message || 'Erro ao processar solicitação');
       }
