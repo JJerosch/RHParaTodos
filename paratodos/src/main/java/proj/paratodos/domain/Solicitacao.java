@@ -51,10 +51,10 @@ public class Solicitacao {
     @Column(name = "dados_depois", columnDefinition = "jsonb")
     private String dadosDepois;
 
-    @Column(name = "criado_em", updatable = false)
+    @Column(name = "criado_em", nullable = false, updatable = false)
     private LocalDateTime criadoEm;
 
-    @Column(name = "atualizado_em")
+    @Column(name = "atualizado_em", nullable = false)
     private LocalDateTime atualizadoEm;
 
     @Column(name = "decidido_em")
