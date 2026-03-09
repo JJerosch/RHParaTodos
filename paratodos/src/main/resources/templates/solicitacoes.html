@@ -324,6 +324,23 @@
       `).join('');
     }
 
+    const fieldLabels = {
+      nomeCompleto: 'Nome Completo', emailPessoal: 'Email Pessoal', emailCorporativo: 'Email Corporativo',
+      telefone: 'Telefone', celular: 'Celular', cep: 'CEP', logradouro: 'Logradouro', numero: 'Número',
+      complemento: 'Complemento', bairro: 'Bairro', cidade: 'Cidade', estado: 'Estado',
+      cpf: 'CPF', rg: 'RG', dataNascimento: 'Data de Nascimento', genero: 'Gênero',
+      estadoCivil: 'Estado Civil', banco: 'Banco', agencia: 'Agência', conta: 'Conta',
+      tipoConta: 'Tipo de Conta', pix: 'PIX', tipoContrato: 'Tipo de Contrato',
+      salarioAtual: 'Salário', salarioNovo: 'Novo Salário',
+      nome: 'Nome', descricao: 'Descrição', titulo: 'Título', nivel: 'Nível',
+      departamentoId: 'Departamento', salarioMinimo: 'Salário Mínimo', salarioMaximo: 'Salário Máximo',
+      headcountLimite: 'Limite de Headcount', cargoNovoId: 'Novo Cargo', departamentoNovoId: 'Novo Departamento',
+      funcionarioId: 'Funcionário', quantidade: 'Quantidade', prioridade: 'Prioridade',
+      salarioMin: 'Salário Mínimo', salarioMax: 'Salário Máximo', modeloTrabalho: 'Modelo de Trabalho',
+      localTrabalho: 'Local de Trabalho', requisitos: 'Requisitos', cargoId: 'Cargo',
+      motivo: 'Motivo'
+    };
+
     function formatJsonPreview(jsonStr) {
       if (!jsonStr) return null;
       try {
@@ -331,6 +348,23 @@
         return JSON.stringify(obj, null, 2);
       } catch {
         return jsonStr;
+      }
+    }
+
+    function formatModifiedFields(dadosAntes, dadosDepois) {
+      if (!dadosDepois) return null;
+      try {
+        const depois = JSON.parse(dadosDepois);
+        const antes = dadosAntes ? JSON.parse(dadosAntes) : {};
+        const keys = Object.keys(depois);
+        if (keys.length === 0) return null;
+        const items = keys.map(k => {
+          const label = fieldLabels[k] || k;
+          return '<li>' + label + '</li>';
+        });
+        return '<ul style="margin: 0; padding-left: var(--spacing-4); list-style: disc;">' + items.join('') + '</ul>';
+      } catch {
+        return null;
       }
     }
 
@@ -349,22 +383,33 @@
 
       let dadosHtml = '';
       if (sol.dadosAntes || sol.dadosDepois) {
-        dadosHtml = '<div class="detail-grid" style="margin-top: var(--spacing-4);">';
-        if (sol.dadosAntes) {
-          dadosHtml += `
-            <div class="detail-section">
-              <h4>Dados Anteriores</h4>
-              <div class="json-preview">${formatJsonPreview(sol.dadosAntes)}</div>
+        const isAlteracao = sol.tipo === 'ALTERACAO_FUNCIONARIO';
+        const modifiedHtml = isAlteracao ? formatModifiedFields(sol.dadosAntes, sol.dadosDepois) : null;
+
+        if (isAlteracao && modifiedHtml) {
+          dadosHtml = `
+            <div style="margin-top: var(--spacing-4); background: var(--gray-100); border-radius: var(--radius-md); padding: var(--spacing-4);">
+              <h4 style="font-size: var(--font-size-sm); color: var(--gray-600); text-transform: uppercase; margin-bottom: var(--spacing-3); padding-bottom: var(--spacing-2); border-bottom: 1px solid var(--gray-200);">Campos Modificados</h4>
+              ${modifiedHtml}
             </div>`;
+        } else if (sol.dadosAntes || sol.dadosDepois) {
+          dadosHtml = '<div class="detail-grid" style="margin-top: var(--spacing-4);">';
+          if (sol.dadosAntes) {
+            dadosHtml += `
+              <div class="detail-section">
+                <h4>Dados Anteriores</h4>
+                <div class="json-preview">${formatJsonPreview(sol.dadosAntes)}</div>
+              </div>`;
+          }
+          if (sol.dadosDepois) {
+            dadosHtml += `
+              <div class="detail-section">
+                <h4>Dados Propostos</h4>
+                <div class="json-preview">${formatJsonPreview(sol.dadosDepois)}</div>
+              </div>`;
+          }
+          dadosHtml += '</div>';
         }
-        if (sol.dadosDepois) {
-          dadosHtml += `
-            <div class="detail-section">
-              <h4>Dados Propostos</h4>
-              <div class="json-preview">${formatJsonPreview(sol.dadosDepois)}</div>
-            </div>`;
-        }
-        dadosHtml += '</div>';
       }
 
       content.innerHTML = `

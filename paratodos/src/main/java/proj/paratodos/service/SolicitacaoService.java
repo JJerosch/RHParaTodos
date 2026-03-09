@@ -20,6 +20,7 @@ public class SolicitacaoService {
     private final FuncionarioRepository funcionarioRepository;
     private final CargoRepository cargoRepository;
     private final DepartamentoRepository departamentoRepository;
+    private final VagaRepository vagaRepository;
     private final ObjectMapper objectMapper;
 
     public SolicitacaoService(SolicitacaoRepository solicitacaoRepository,
@@ -27,12 +28,14 @@ public class SolicitacaoService {
                               FuncionarioRepository funcionarioRepository,
                               CargoRepository cargoRepository,
                               DepartamentoRepository departamentoRepository,
+                              VagaRepository vagaRepository,
                               ObjectMapper objectMapper) {
         this.solicitacaoRepository = solicitacaoRepository;
         this.usuarioRepository = usuarioRepository;
         this.funcionarioRepository = funcionarioRepository;
         this.cargoRepository = cargoRepository;
         this.departamentoRepository = departamentoRepository;
+        this.vagaRepository = vagaRepository;
         this.objectMapper = objectMapper;
     }
 
@@ -199,9 +202,11 @@ public class SolicitacaoService {
             case EDICAO_CARGO -> executarEdicaoCargo(s);
             case PROMOCAO -> executarPromocao(s);
             case EXCLUSAO_CARGO -> executarExclusaoCargo(s);
+            case EXCLUSAO_FUNCIONARIO -> executarExclusaoFuncionario(s);
+            case EXCLUSAO_DEPARTAMENTO -> executarExclusaoDepartamento(s);
+            case ABERTURA_VAGA -> executarAberturaVaga(s);
             // Tipos que não possuem execução automática por enquanto
-            case EXCLUSAO_FUNCIONARIO, EXCLUSAO_DEPARTAMENTO,
-                 ABERTURA_VAGA, TRANSFERENCIA, REAJUSTE_SALARIAL -> {
+            case TRANSFERENCIA, REAJUSTE_SALARIAL -> {
             }
         }
     }
@@ -426,6 +431,79 @@ public class SolicitacaoService {
         }
 
         cargoRepository.delete(c);
+    }
+
+    private void executarExclusaoFuncionario(Solicitacao s) {
+        if (s.getReferenciaId() == null) return;
+        Funcionario f = funcionarioRepository.findById(s.getReferenciaId()).orElse(null);
+        if (f != null) {
+            // Desvincula o usuário associado
+            if (f.getUsuario() != null) {
+                Usuario u = f.getUsuario();
+                u.setAtivo(false);
+                usuarioRepository.save(u);
+            }
+            funcionarioRepository.delete(f);
+        }
+    }
+
+    private void executarExclusaoDepartamento(Solicitacao s) {
+        if (s.getReferenciaId() == null) return;
+        Departamento d = departamentoRepository.findById(s.getReferenciaId()).orElse(null);
+        if (d == null) return;
+
+        long funcionariosAtivos = departamentoRepository.countFuncionariosByDepartamentoId(d.getId());
+        if (funcionariosAtivos > 0) {
+            throw new IllegalArgumentException(
+                "Não é possível excluir o departamento '" + d.getNome() +
+                "'. Existem " + funcionariosAtivos + " funcionário(s) vinculado(s).");
+        }
+        departamentoRepository.delete(d);
+    }
+
+    private void executarAberturaVaga(Solicitacao s) {
+        if (s.getDadosDepois() == null) return;
+        try {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> dados = objectMapper.readValue(s.getDadosDepois(), Map.class);
+
+            Vaga v = new Vaga();
+            v.setTitulo((String) dados.get("titulo"));
+            v.setDescricao((String) dados.get("descricao"));
+            v.setQuantidade(dados.containsKey("quantidade") && dados.get("quantidade") != null
+                    ? ((Number) dados.get("quantidade")).intValue() : 1);
+            v.setPrioridade(dados.containsKey("prioridade") ? (String) dados.get("prioridade") : "MEDIA");
+            v.setTipoContrato(dados.containsKey("tipoContrato") ? (String) dados.get("tipoContrato") : "CLT");
+            v.setLocalTrabalho((String) dados.get("localTrabalho"));
+            v.setModeloTrabalho(dados.containsKey("modeloTrabalho") ? (String) dados.get("modeloTrabalho") : "PRESENCIAL");
+            v.setRequisitos((String) dados.get("requisitos"));
+            v.setStatus("ABERTA");
+            v.setPublicadaEm(LocalDateTime.now());
+
+            if (dados.containsKey("salarioMin") && dados.get("salarioMin") != null) {
+                v.setSalarioMin(new java.math.BigDecimal(dados.get("salarioMin").toString()));
+            }
+            if (dados.containsKey("salarioMax") && dados.get("salarioMax") != null) {
+                v.setSalarioMax(new java.math.BigDecimal(dados.get("salarioMax").toString()));
+            }
+            if (dados.containsKey("departamentoId") && dados.get("departamentoId") != null) {
+                Long depId = ((Number) dados.get("departamentoId")).longValue();
+                departamentoRepository.findById(depId).ifPresent(v::setDepartamento);
+            }
+            if (dados.containsKey("cargoId") && dados.get("cargoId") != null) {
+                Long cargoId = ((Number) dados.get("cargoId")).longValue();
+                cargoRepository.findById(cargoId).ifPresent(v::setCargo);
+            }
+
+            // Set the user who requested it as the creator
+            v.setCriadoPor(s.getSolicitante());
+
+            v = vagaRepository.save(v);
+            s.setReferenciaId(v.getId());
+            s.setReferenciaTipo(ReferenciaTipo.VAGA);
+        } catch (Exception e) {
+            throw new RuntimeException("Erro ao criar vaga: " + e.getMessage(), e);
+        }
     }
 
     // ── Resolução de descrição da referência ──────────────────────
