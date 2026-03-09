@@ -1,11 +1,13 @@
 package proj.paratodos.service;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import proj.paratodos.domain.*;
 import proj.paratodos.dto.*;
 import proj.paratodos.repository.*;
 
+import java.text.Normalizer;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -21,6 +23,7 @@ public class RecrutamentoService {
     private final UsuarioRepository usuarioRepository;
     private final FuncionarioRepository funcionarioRepository;
     private final PromocaoRepository promocaoRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public RecrutamentoService(VagaRepository vagaRepository,
                                CandidatoRepository candidatoRepository,
@@ -29,7 +32,8 @@ public class RecrutamentoService {
                                CargoRepository cargoRepository,
                                UsuarioRepository usuarioRepository,
                                FuncionarioRepository funcionarioRepository,
-                               PromocaoRepository promocaoRepository) {
+                               PromocaoRepository promocaoRepository,
+                               PasswordEncoder passwordEncoder) {
         this.vagaRepository = vagaRepository;
         this.candidatoRepository = candidatoRepository;
         this.candidaturaRepository = candidaturaRepository;
@@ -38,6 +42,7 @@ public class RecrutamentoService {
         this.usuarioRepository = usuarioRepository;
         this.funcionarioRepository = funcionarioRepository;
         this.promocaoRepository = promocaoRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     // ── Vagas ──
@@ -226,9 +231,23 @@ public class RecrutamentoService {
         // Gera matricula unica
         String matricula = "NEW-" + System.currentTimeMillis() % 100000;
 
+        // Gera email corporativo: primeiro_nome.ultimo_nome@gruporp.com
+        String emailCorp = gerarEmailCorporativo(cand.getNomeCompleto());
+
+        // Cria o Usuario com credenciais automáticas
+        Usuario usuario = new Usuario();
+        usuario.setEmail(emailCorp);
+        usuario.setSenhaHash(passwordEncoder.encode("Bem-vindo##1409"));
+        usuario.setAtivo(true);
+        usuario.setAutenticacao2fa(false);
+        usuario.setTentativasLogin(0);
+        usuario.setRole("EMPLOYEE");
+        usuario = usuarioRepository.save(usuario);
+
         Funcionario f = new Funcionario();
         f.setNomeCompleto(cand.getNomeCompleto());
         f.setEmailPessoal(cand.getEmail());
+        f.setEmailCorporativo(emailCorp);
         f.setTelefone(cand.getTelefone());
         f.setCpf(cand.getCpf() != null ? cand.getCpf() : "");
         f.setMatricula(matricula);
@@ -239,6 +258,7 @@ public class RecrutamentoService {
         f.setSalarioAtual(cand.getPretensaoSalarial());
         f.setCidade(cand.getCidade());
         f.setEstado(cand.getEstado());
+        f.setUsuario(usuario);
 
         // Atribui cargo e departamento da vaga diretamente
         f.setDepartamento(vaga.getDepartamento());
@@ -246,6 +266,30 @@ public class RecrutamentoService {
         f.setCargoDesde(LocalDate.now());
 
         funcionarioRepository.save(f);
+    }
+
+    private String gerarEmailCorporativo(String nomeCompleto) {
+        if (nomeCompleto == null || nomeCompleto.isBlank()) return "novo.usuario@gruporp.com";
+
+        // Remove acentos
+        String normalized = Normalizer.normalize(nomeCompleto.trim(), Normalizer.Form.NFD)
+                .replaceAll("[\\p{InCombiningDiacriticalMarks}]", "")
+                .toLowerCase();
+
+        String[] partes = normalized.split("\\s+");
+        String primeiro = partes[0];
+        String ultimo = partes.length > 1 ? partes[partes.length - 1] : primeiro;
+
+        String baseEmail = primeiro + "." + ultimo + "@gruporp.com";
+
+        // Verifica unicidade, adiciona sufixo se necessário
+        String email = baseEmail;
+        int suffix = 1;
+        while (usuarioRepository.findByEmailIgnoreCase(email).isPresent()) {
+            email = primeiro + "." + ultimo + suffix + "@gruporp.com";
+            suffix++;
+        }
+        return email;
     }
 
     public RecrutamentoStatsResponse getStats() {

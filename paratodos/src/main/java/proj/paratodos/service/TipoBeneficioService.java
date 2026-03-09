@@ -27,12 +27,14 @@ public class TipoBeneficioService {
         this.cargoRepository = cargoRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<TipoBeneficioResponse> findAll() {
         return tipoBeneficioRepository.findAllByOrderByNomeAsc().stream()
                 .map(this::toResponse)
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public TipoBeneficioResponse findById(Long id) {
         TipoBeneficio t = tipoBeneficioRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Tipo de beneficio nao encontrado: " + id));

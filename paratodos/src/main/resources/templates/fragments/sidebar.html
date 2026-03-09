@@ -47,12 +47,6 @@
             <span class="nav-icon"><img th:src="@{/assets/scroll.png}" alt="" width="20" height="20"></span>
             <span class="nav-text">Cargos</span>
         </a>
-        <a th:href="@{/promotions}" class="nav-item"
-           th:classappend="${activePage == 'promotions'} ? ' active'"
-           data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE">
-            <span class="nav-icon"><img th:src="@{/assets/scroll.png}" alt="" width="20" height="20"></span>
-            <span class="nav-text">Promoções</span>
-        </a>
         <a th:href="@{/solicitacoes}" class="nav-item"
            th:classappend="${activePage == 'solicitacoes'} ? ' active'"
            data-roles="ADMIN,RH_CHEFE">
