@@ -1,5 +1,6 @@
 package proj.paratodos.service;
 
+import jakarta.persistence.EntityManager;
 import tools.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +23,7 @@ public class SolicitacaoService {
     private final DepartamentoRepository departamentoRepository;
     private final VagaRepository vagaRepository;
     private final ObjectMapper objectMapper;
+    private final EntityManager entityManager;
 
     public SolicitacaoService(SolicitacaoRepository solicitacaoRepository,
                               UsuarioRepository usuarioRepository,
@@ -29,7 +31,8 @@ public class SolicitacaoService {
                               CargoRepository cargoRepository,
                               DepartamentoRepository departamentoRepository,
                               VagaRepository vagaRepository,
-                              ObjectMapper objectMapper) {
+                              ObjectMapper objectMapper,
+                              EntityManager entityManager) {
         this.solicitacaoRepository = solicitacaoRepository;
         this.usuarioRepository = usuarioRepository;
         this.funcionarioRepository = funcionarioRepository;
@@ -37,6 +40,7 @@ public class SolicitacaoService {
         this.departamentoRepository = departamentoRepository;
         this.vagaRepository = vagaRepository;
         this.objectMapper = objectMapper;
+        this.entityManager = entityManager;
     }
 
     // ── Listagem ──────────────────────────────────────────────────
@@ -435,33 +439,41 @@ public class SolicitacaoService {
 
     private void executarExclusaoFuncionario(Solicitacao s) {
         if (s.getReferenciaId() == null) return;
-        Funcionario f = funcionarioRepository.findById(s.getReferenciaId()).orElse(null);
+        Long funcId = s.getReferenciaId();
+
+        Funcionario f = funcionarioRepository.findById(funcId).orElse(null);
         if (f == null) return;
 
-        // Remove referências de gestor em outros funcionários
-        List<Funcionario> todos = funcionarioRepository.findAll();
-        for (Funcionario sub : todos) {
-            if (sub.getGestor() != null && sub.getGestor().getId().equals(f.getId())) {
-                sub.setGestor(null);
-                funcionarioRepository.save(sub);
-            }
+        Long usuarioId = f.getUsuario() != null ? f.getUsuario().getId() : null;
+
+        // Remove todas as referências FK usando queries nativas
+        entityManager.createNativeQuery("UPDATE funcionarios SET gestor_id = NULL WHERE gestor_id = :fid")
+                .setParameter("fid", funcId).executeUpdate();
+        entityManager.createNativeQuery("DELETE FROM promocoes WHERE funcionario_id = :fid")
+                .setParameter("fid", funcId).executeUpdate();
+        entityManager.createNativeQuery("DELETE FROM ponto_marcacoes WHERE funcionario_id = :fid")
+                .setParameter("fid", funcId).executeUpdate();
+        entityManager.createNativeQuery("DELETE FROM ponto_apuracao_diaria WHERE funcionario_id = :fid")
+                .setParameter("fid", funcId).executeUpdate();
+        entityManager.createNativeQuery("DELETE FROM funcionarios_beneficios WHERE funcionario_id = :fid")
+                .setParameter("fid", funcId).executeUpdate();
+
+        entityManager.flush();
+        entityManager.clear();
+
+        // Recarrega e deleta
+        f = funcionarioRepository.findById(funcId).orElse(null);
+        if (f != null) {
+            funcionarioRepository.delete(f);
+            funcionarioRepository.flush();
         }
 
-        // Desvincula o usuário associado
-        Usuario u = f.getUsuario();
-        f.setUsuario(null);
-        f.setGestor(null);
-        f.setCargo(null);
-        f.setDepartamento(null);
-        funcionarioRepository.save(f);
-        funcionarioRepository.flush();
-
-        funcionarioRepository.delete(f);
-        funcionarioRepository.flush();
-
-        if (u != null) {
-            u.setAtivo(false);
-            usuarioRepository.save(u);
+        // Desativa o usuário associado
+        if (usuarioId != null) {
+            usuarioRepository.findById(usuarioId).ifPresent(u -> {
+                u.setAtivo(false);
+                usuarioRepository.save(u);
+            });
         }
     }
 
