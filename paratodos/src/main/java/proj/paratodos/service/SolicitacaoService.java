@@ -436,14 +436,32 @@ public class SolicitacaoService {
     private void executarExclusaoFuncionario(Solicitacao s) {
         if (s.getReferenciaId() == null) return;
         Funcionario f = funcionarioRepository.findById(s.getReferenciaId()).orElse(null);
-        if (f != null) {
-            // Desvincula o usuário associado
-            if (f.getUsuario() != null) {
-                Usuario u = f.getUsuario();
-                u.setAtivo(false);
-                usuarioRepository.save(u);
+        if (f == null) return;
+
+        // Remove referências de gestor em outros funcionários
+        List<Funcionario> todos = funcionarioRepository.findAll();
+        for (Funcionario sub : todos) {
+            if (sub.getGestor() != null && sub.getGestor().getId().equals(f.getId())) {
+                sub.setGestor(null);
+                funcionarioRepository.save(sub);
             }
-            funcionarioRepository.delete(f);
+        }
+
+        // Desvincula o usuário associado
+        Usuario u = f.getUsuario();
+        f.setUsuario(null);
+        f.setGestor(null);
+        f.setCargo(null);
+        f.setDepartamento(null);
+        funcionarioRepository.save(f);
+        funcionarioRepository.flush();
+
+        funcionarioRepository.delete(f);
+        funcionarioRepository.flush();
+
+        if (u != null) {
+            u.setAtivo(false);
+            usuarioRepository.save(u);
         }
     }
 
