@@ -2,23 +2,29 @@ package proj.paratodos.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import proj.paratodos.domain.Cargo;
 import proj.paratodos.domain.TipoBeneficio;
 import proj.paratodos.dto.BeneficioStatsResponse;
 import proj.paratodos.dto.TipoBeneficioRequest;
 import proj.paratodos.dto.TipoBeneficioResponse;
+import proj.paratodos.repository.CargoRepository;
 import proj.paratodos.repository.TipoBeneficioRepository;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.HashSet;
 import java.util.List;
 
 @Service
 public class TipoBeneficioService {
 
     private final TipoBeneficioRepository tipoBeneficioRepository;
+    private final CargoRepository cargoRepository;
 
-    public TipoBeneficioService(TipoBeneficioRepository tipoBeneficioRepository) {
+    public TipoBeneficioService(TipoBeneficioRepository tipoBeneficioRepository,
+                                 CargoRepository cargoRepository) {
         this.tipoBeneficioRepository = tipoBeneficioRepository;
+        this.cargoRepository = cargoRepository;
     }
 
     public List<TipoBeneficioResponse> findAll() {
@@ -95,6 +101,14 @@ public class TipoBeneficioService {
         t.setNatureza(req.natureza());
         t.setIncideFerias(req.incideFerias() != null ? req.incideFerias() : false);
         t.setIncideDecimo(req.incideDecimo() != null ? req.incideDecimo() : false);
+
+        // Vincular cargos
+        if (req.cargoIds() != null) {
+            List<Cargo> cargos = cargoRepository.findAllById(req.cargoIds());
+            t.setCargos(new HashSet<>(cargos));
+        } else {
+            t.setCargos(new HashSet<>());
+        }
     }
 
     private TipoBeneficioResponse toResponse(TipoBeneficio t) {

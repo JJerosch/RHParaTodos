@@ -326,12 +326,20 @@
             ? '<span class="badge badge-success">Ativo</span>'
             : '<span class="badge badge-danger">Inativo</span>';
 
+          const hasOccupants = cargo.funcionarios.length > 0;
+          const beneficiosHtml = (cargo.beneficios && cargo.beneficios.length > 0)
+            ? '<div style="margin-top:var(--spacing-2);display:flex;gap:var(--spacing-1);flex-wrap:wrap;">' + cargo.beneficios.map(b => '<span class="badge badge-info" style="font-size:var(--font-size-xs);">' + b + '</span>').join('') + '</div>'
+            : '';
           const actionsHtml = canWrite && cargo.id ? `
             <div class="cargo-card-actions">
-              <button onclick="event.stopPropagation(); openEditModal(${cargo.id}, '${dept.nome}')">Editar</button>
-              <button onclick="event.stopPropagation(); requestAction(${cargo.id}, '${cargo.titulo}', '${cargo.ativo !== false ? 'DESATIVACAO_CARGO' : 'EDICAO_CARGO'}', '${cargo.ativo !== false ? 'desativação' : 'reativação'}')">${cargo.ativo !== false ? 'Desativar' : 'Reativar'}</button>
-              <button class="btn-danger-outline" onclick="event.stopPropagation(); requestAction(${cargo.id}, '${cargo.titulo}', 'EXCLUSAO_CARGO', 'exclusão permanente')">Excluir</button>
-              <button style="border-color: var(--success-green); color: var(--success-green);" onclick="event.stopPropagation(); requestAction(${cargo.id}, '${cargo.titulo}', 'ABERTURA_VAGA', 'abertura de vaga')">Abrir Vaga</button>
+              ${hasOccupants ? `
+                <button onclick="event.stopPropagation(); openEditModal(${cargo.id}, '${dept.nome}')">Alterar</button>
+                <button class="btn-danger-outline" onclick="event.stopPropagation(); requestAction(${cargo.id}, '${cargo.titulo}', 'EXCLUSAO_CARGO', 'exclusão permanente')">Excluir</button>
+              ` : `
+                <button onclick="event.stopPropagation(); openEditModal(${cargo.id}, '${dept.nome}')">Editar</button>
+                <button style="border-color: var(--success-green); color: var(--success-green);" onclick="event.stopPropagation(); requestAction(${cargo.id}, '${cargo.titulo}', 'ABERTURA_VAGA', 'abertura de vaga')">Abrir Vaga</button>
+                <button class="btn-danger-outline" onclick="event.stopPropagation(); requestAction(${cargo.id}, '${cargo.titulo}', 'EXCLUSAO_CARGO', 'exclusão permanente')">Excluir</button>
+              `}
             </div>
           ` : '';
 
@@ -349,6 +357,7 @@
                 <span><strong>Ocupantes:</strong> ${cargo.funcionarios.length}</span>
               </div>
               ${funcsHtml}
+              ${beneficiosHtml}
               ${actionsHtml}
             </div>
           `;

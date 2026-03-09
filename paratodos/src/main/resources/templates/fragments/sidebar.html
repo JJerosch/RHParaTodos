@@ -68,18 +68,6 @@
             <span class="nav-icon"><img th:src="@{/assets/search.png}" alt="" width="20" height="20"></span>
             <span class="nav-text">Recrutamento</span>
         </a>
-        <a th:href="@{/training}" class="nav-item"
-           th:classappend="${activePage == 'training'} ? ' active'"
-           data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE">
-            <span class="nav-icon"><img th:src="@{/assets/graduation-cap.png}" alt="" width="20" height="20"></span>
-            <span class="nav-text">Treinamentos</span>
-        </a>
-        <a th:href="@{/performance}" class="nav-item"
-           th:classappend="${activePage == 'performance'} ? ' active'"
-           data-roles="ADMIN,RH_CHEFE">
-            <span class="nav-icon"><img th:src="@{/assets/scan-heart (1).png}" alt="" width="20" height="20"></span>
-            <span class="nav-text">Avaliações</span>
-        </a>
 
         <!-- Departamento Pessoal -->
         <div class="nav-section" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE,DP_CHEFE,DP_ASSISTENTE">Departamento Pessoal</div>

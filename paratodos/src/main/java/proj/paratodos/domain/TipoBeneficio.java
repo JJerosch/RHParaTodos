@@ -6,6 +6,8 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -42,6 +44,14 @@ public class TipoBeneficio {
 
     @Column(name = "incide_decimo")
     private Boolean incideDecimo = false;
+
+    @ManyToMany
+    @JoinTable(
+            name = "cargos_beneficios",
+            joinColumns = @JoinColumn(name = "tipo_beneficio_id"),
+            inverseJoinColumns = @JoinColumn(name = "cargo_id")
+    )
+    private Set<Cargo> cargos = new HashSet<>();
 
     @PrePersist
     void prePersist() {

@@ -18,7 +18,9 @@ import java.util.Map;
 
 import proj.paratodos.domain.Departamento;
 import proj.paratodos.domain.Funcionario;
+import proj.paratodos.domain.TipoBeneficio;
 import proj.paratodos.repository.FuncionarioRepository;
+import proj.paratodos.repository.TipoBeneficioRepository;
 
 @RestController
 @RequestMapping("/api/positions")
@@ -27,13 +29,16 @@ public class CargoController {
     private final CargoService cargoService;
     private final DepartamentoRepository departamentoRepository;
     private final FuncionarioRepository funcionarioRepository;
+    private final TipoBeneficioRepository tipoBeneficioRepository;
 
     public CargoController(CargoService cargoService,
                            DepartamentoRepository departamentoRepository,
-                           FuncionarioRepository funcionarioRepository) {
+                           FuncionarioRepository funcionarioRepository,
+                           TipoBeneficioRepository tipoBeneficioRepository) {
         this.cargoService = cargoService;
         this.departamentoRepository = departamentoRepository;
         this.funcionarioRepository = funcionarioRepository;
+        this.tipoBeneficioRepository = tipoBeneficioRepository;
     }
 
     /** GET /api/positions?search=&departamentoId=&nivel= */
@@ -127,6 +132,10 @@ public class CargoController {
                     cargoData.put("salarioMaximo", meta.salarioMaximo());
                     cargoData.put("ativo", meta.ativo());
                     cargoData.put("ocupantes", meta.ocupantes());
+                    // Benefícios vinculados ao cargo
+                    List<String> beneficioNomes = tipoBeneficioRepository.findByCargoId(meta.id())
+                            .stream().map(TipoBeneficio::getNome).toList();
+                    cargoData.put("beneficios", beneficioNomes);
                 }
                 cargosList.add(cargoData);
             }
