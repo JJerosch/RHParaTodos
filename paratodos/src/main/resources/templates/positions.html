@@ -19,8 +19,8 @@
     <div class="content-area">
       <div class="page-header">
         <div>
-          <h2 class="page-title">Cargos por Departamento</h2>
-          <p class="page-subtitle">Estrutura organizacional com cargos, salários e ocupação</p>
+          <h2 class="page-title">Quadro de Lota&#231;&#227;o</h2>
+          <p class="page-subtitle">Estrutura organizacional com vagas, status e a&#231;&#245;es</p>
         </div>
         <div class="page-actions" data-action-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE">
           <button class="btn btn-primary" onclick="openCreateModal()">+ Solicitar Novo Cargo</button>
@@ -33,7 +33,7 @@
     </div>
   </div>
 
-  <!-- Modal: Solicitar Criação/Edição de Cargo -->
+  <!-- Modal: Solicitar Criacao/Edicao de Cargo -->
   <div class="modal" id="modal">
     <div class="modal-dialog modal-md">
       <div class="modal-header">
@@ -45,7 +45,7 @@
           <input type="hidden" name="id">
           <div class="form-row form-row-2">
             <div class="form-group">
-              <label class="form-label">Título do Cargo *</label>
+              <label class="form-label">T&#237;tulo do Cargo *</label>
               <input type="text" class="form-input" name="titulo" required>
             </div>
             <div class="form-group">
@@ -57,26 +57,26 @@
           </div>
           <div class="form-row form-row-3">
             <div class="form-group">
-              <label class="form-label">Nível</label>
+              <label class="form-label">N&#237;vel</label>
               <select class="form-select" name="nivel">
                 <option value="">Selecione</option>
                 <option value="JUNIOR">Junior</option>
                 <option value="PLENO">Pleno</option>
                 <option value="SENIOR">Senior</option>
-                <option value="GESTAO">Gestão</option>
+                <option value="GESTAO">Gest&#227;o</option>
               </select>
             </div>
             <div class="form-group">
-              <label class="form-label">Salário Mínimo</label>
+              <label class="form-label">Sal&#225;rio M&#237;nimo</label>
               <input type="text" class="form-input" name="salarioMinimo" data-mask="currency">
             </div>
             <div class="form-group">
-              <label class="form-label">Salário Máximo</label>
+              <label class="form-label">Sal&#225;rio M&#225;ximo</label>
               <input type="text" class="form-input" name="salarioMaximo" data-mask="currency">
             </div>
           </div>
           <div class="form-group">
-            <label class="form-label">Descrição</label>
+            <label class="form-label">Descri&#231;&#227;o</label>
             <textarea class="form-input" name="descricao" rows="3"></textarea>
           </div>
           <div class="form-group">
@@ -87,16 +87,16 @@
       </div>
       <div class="modal-footer">
         <button class="btn btn-secondary" onclick="Modal.close('modal')">Cancelar</button>
-        <button class="btn btn-primary" onclick="save()">Criar Solicitação</button>
+        <button class="btn btn-primary" onclick="save()">Criar Solicita&#231;&#227;o</button>
       </div>
     </div>
   </div>
 
-  <!-- Modal: Solicitar Ação sobre Cargo -->
+  <!-- Modal: Solicitar Acao sobre Cargo -->
   <div class="modal" id="actionModal">
     <div class="modal-dialog modal-sm">
       <div class="modal-header">
-        <h3 class="modal-title" id="actionTitle">Solicitar Ação</h3>
+        <h3 class="modal-title" id="actionTitle">Solicitar A&#231;&#227;o</h3>
         <button class="modal-close" onclick="Modal.close('actionModal')">&times;</button>
       </div>
       <div class="modal-body">
@@ -108,12 +108,13 @@
       </div>
       <div class="modal-footer">
         <button class="btn btn-secondary" onclick="Modal.close('actionModal')">Cancelar</button>
-        <button class="btn btn-primary" id="actionConfirmBtn" onclick="confirmAction()">Enviar Solicitação</button>
+        <button class="btn btn-primary" id="actionConfirmBtn" onclick="confirmAction()">Enviar Solicita&#231;&#227;o</button>
       </div>
     </div>
   </div>
 
   <style>
+    /* ── Accordion ── */
     .accordion-item {
       background: white;
       border-radius: var(--radius-lg);
@@ -138,9 +139,10 @@
       gap: var(--spacing-3);
     }
     .accordion-arrow {
-      transition: transform 0.2s;
-      font-size: 12px;
-      color: var(--gray-400);
+      transition: transform 0.25s;
+      font-size: 14px;
+      color: var(--gray-500);
+      display: inline-flex;
     }
     .accordion-item.open .accordion-arrow { transform: rotate(90deg); }
     .accordion-dept-name {
@@ -151,84 +153,113 @@
     .accordion-count {
       font-size: var(--font-size-sm);
       color: var(--gray-500);
-      background: var(--gray-100);
-      padding: var(--spacing-1) var(--spacing-3);
-      border-radius: var(--radius-full);
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-2);
     }
+    .accordion-count-icon { font-size: 16px; }
     .accordion-body {
       display: none;
       padding: 0 var(--spacing-5) var(--spacing-5);
     }
     .accordion-item.open .accordion-body { display: block; }
 
-    .cargo-card {
-      background: var(--gray-50);
-      border-radius: var(--radius-md);
-      padding: var(--spacing-4);
-      margin-bottom: var(--spacing-3);
-      border: 1px solid var(--gray-100);
-    }
-    .cargo-card:last-child { margin-bottom: 0; }
-    .cargo-card-header {
+    /* ── Cargo card (vaga style) ── */
+    .vaga-card {
       display: flex;
+      align-items: center;
       justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: var(--spacing-3);
-    }
-    .cargo-card-title {
-      font-weight: 600;
-      color: var(--primary-dark);
-      font-size: var(--font-size-base);
-    }
-    .cargo-card-meta {
-      display: flex;
       gap: var(--spacing-4);
-      flex-wrap: wrap;
-      font-size: var(--font-size-sm);
-      color: var(--gray-600);
+      padding: var(--spacing-4) var(--spacing-5);
+      border-left: 3px solid var(--gray-300);
+      background: var(--gray-50);
+      border-radius: 0 var(--radius-md) var(--radius-md) 0;
       margin-bottom: var(--spacing-3);
     }
-    .cargo-card-meta span { display: flex; align-items: center; gap: var(--spacing-1); }
-    .cargo-card-actions {
+    .vaga-card:last-child { margin-bottom: 0; }
+    .vaga-card.preenchido { border-left-color: var(--success-green); }
+    .vaga-card.vago { border-left-color: var(--gray-400); }
+
+    .vaga-info { flex: 1; min-width: 0; }
+    .vaga-titulo {
+      font-weight: 600;
+      font-size: var(--font-size-base);
+      color: var(--gray-800);
+      margin-bottom: 2px;
+    }
+    .vaga-sub {
+      font-size: var(--font-size-sm);
+      color: var(--gray-500);
+    }
+
+    .vaga-status { flex-shrink: 0; }
+    .badge-preenchido {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: #e6f4ea;
+      color: #1a7f37;
+      font-size: var(--font-size-xs);
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: var(--radius-full);
+    }
+    .badge-vago {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--gray-100);
+      color: var(--gray-600);
+      font-size: var(--font-size-xs);
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: var(--radius-full);
+    }
+
+    .vaga-actions {
       display: flex;
       gap: var(--spacing-2);
       flex-wrap: wrap;
+      flex-shrink: 0;
     }
-    .cargo-card-actions button {
-      padding: 0.25rem 0.6rem;
+    .vaga-actions .act-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 5px 12px;
       font-size: var(--font-size-xs);
+      font-weight: 500;
       border-radius: var(--radius-sm);
       border: 1px solid var(--gray-300);
       background: white;
+      color: var(--gray-700);
       cursor: pointer;
       transition: all 0.15s;
+      white-space: nowrap;
     }
-    .cargo-card-actions button:hover { border-color: var(--primary-dark); color: var(--primary-dark); }
-    .cargo-card-actions .btn-danger-outline:hover { border-color: var(--error-red); color: var(--error-red); }
+    .vaga-actions .act-btn:hover { border-color: var(--primary-dark); color: var(--primary-dark); }
+    .vaga-actions .act-btn.btn-vaga {
+      border-color: var(--success-green);
+      color: var(--success-green);
+      background: #f0faf3;
+    }
+    .vaga-actions .act-btn.btn-vaga:hover { background: #e0f5e7; }
+    .vaga-actions .act-btn.btn-danger { border-color: var(--error-red); color: var(--error-red); }
+    .vaga-actions .act-btn.btn-danger:hover { background: #fef2f2; }
+    .vaga-actions .act-btn.btn-promo { border-color: #6366f1; color: #6366f1; }
+    .vaga-actions .act-btn.btn-promo:hover { background: #f0f0ff; }
 
-    .func-row {
-      display: grid;
-      grid-template-columns: 1fr 120px 100px;
-      gap: var(--spacing-2);
-      padding: var(--spacing-2) 0;
-      font-size: var(--font-size-sm);
-      border-bottom: 1px solid var(--gray-100);
-      align-items: center;
-    }
-    .func-row:last-child { border-bottom: none; }
-    .func-name { color: var(--gray-800); font-weight: 500; }
-    .func-salary { color: var(--gray-600); text-align: right; }
-    .func-date { color: var(--gray-500); text-align: right; }
     .cargo-empty {
       font-size: var(--font-size-sm);
       color: var(--gray-400);
       font-style: italic;
-      padding: var(--spacing-2) 0;
+      padding: var(--spacing-3) var(--spacing-5);
+      text-align: center;
     }
-    @media (max-width: 768px) {
-      .func-row { grid-template-columns: 1fr; gap: 0; }
-      .func-salary, .func-date { text-align: left; font-size: var(--font-size-xs); }
-      .cargo-card-meta { flex-direction: column; gap: var(--spacing-1); }
+
+    @media (max-width: 900px) {
+      .vaga-card { flex-direction: column; align-items: flex-start; }
+      .vaga-actions { width: 100%; justify-content: flex-start; margin-top: var(--spacing-2); }
     }
   </style>
 
@@ -238,11 +269,10 @@
     let departamentos = [];
     let allData = [];
     let currentId = null;
-    let editingCargo = null; // snapshot para edição
+    let editingCargo = null;
 
     const userRole = window.__CURRENT_USER__.role;
     const canWrite = ['ADMIN', 'RH_CHEFE', 'RH_ASSISTENTE'].includes(userRole);
-    const nivelLabels = { JUNIOR: 'Júnior', PLENO: 'Pleno', SENIOR: 'Sênior', GESTAO: 'Gestão' };
 
     async function api(url, opts = {}) {
       const res = await fetch(url, { credentials: 'same-origin', headers: { 'Content-Type': 'application/json', ...opts.headers }, ...opts });
@@ -266,12 +296,11 @@
     async function loadData() {
       try {
         const [byDeptRes, deptRes] = await Promise.all([
-          fetch(API + '/by-department', { credentials: 'same-origin' }),
-          fetch(API + '/departamentos', { credentials: 'same-origin' })
+          api(API + '/by-department'),
+          api(API + '/departamentos')
         ]);
-        if (!byDeptRes.ok) throw new Error('API indisponível');
-        allData = await byDeptRes.json();
-        departamentos = await deptRes.json();
+        allData = byDeptRes || [];
+        departamentos = deptRes || [];
       } catch (e) {
         console.error('Erro ao carregar dados:', e);
         allData = [];
@@ -282,10 +311,13 @@
     }
 
     function populateDeptDropdown() {
-      const formSelect = document.getElementById("formDeptSelect");
-      formSelect.innerHTML = '<option value="">Selecione</option>';
-      departamentos.forEach(d => {
-        formSelect.innerHTML += '<option value="' + d.id + '">' + d.nome + '</option>';
+      const sel = document.getElementById("formDeptSelect");
+      sel.innerHTML = '<option value="">Selecione</option>';
+      departamentos.forEach(function(d) {
+        var opt = document.createElement('option');
+        opt.value = d.id;
+        opt.textContent = d.nome;
+        sel.appendChild(opt);
       });
     }
 
@@ -299,84 +331,83 @@
       return new Date(d + 'T00:00:00').toLocaleDateString('pt-BR');
     }
 
+    function esc(s) {
+      var d = document.createElement('div');
+      d.textContent = s || '';
+      return d.innerHTML;
+    }
+
     function render() {
-      const container = document.getElementById("accordionContainer");
+      var container = document.getElementById("accordionContainer");
       if (allData.length === 0) {
         container.innerHTML = '<div class="empty-state"><h3 class="empty-state-title">Nenhum departamento encontrado</h3></div>';
         return;
       }
 
-      container.innerHTML = allData.map((dept, i) => {
-        const cargosHtml = dept.cargos.map(cargo => {
-          const funcsHtml = cargo.funcionarios.length > 0
-            ? cargo.funcionarios.map(f => `
-                <div class="func-row">
-                  <span class="func-name">${f.nome}</span>
-                  <span class="func-salary">${formatCurrency(f.salario)}</span>
-                  <span class="func-date">${formatDate(f.dataAdmissao)}</span>
-                </div>
-              `).join('')
-            : '<div class="cargo-empty">Nenhum funcionário neste cargo</div>';
+      container.innerHTML = allData.map(function(dept, i) {
+        var totalCargos = dept.cargos.length;
+        var preenchidos = dept.cargos.filter(function(c) { return c.funcionarios && c.funcionarios.length > 0; }).length;
 
-          const salarioRange = (cargo.salarioMinimo || cargo.salarioMaximo)
-            ? formatCurrency(cargo.salarioMinimo) + ' - ' + formatCurrency(cargo.salarioMaximo)
-            : 'Não definido';
+        var cargosHtml = dept.cargos.map(function(cargo) {
+          var filled = cargo.funcionarios && cargo.funcionarios.length > 0;
+          var cardClass = filled ? 'preenchido' : 'vago';
 
-          const statusBadge = cargo.ativo !== false
-            ? '<span class="badge badge-success">Ativo</span>'
-            : '<span class="badge badge-danger">Inativo</span>';
+          var statusBadge = filled
+            ? '<span class="badge-preenchido">&#9632; Preenchido</span>'
+            : '<span class="badge-vago">&#9632; Vago</span>';
 
-          const hasOccupants = cargo.funcionarios.length > 0;
-          const beneficiosHtml = (cargo.beneficios && cargo.beneficios.length > 0)
-            ? '<div style="margin-top:var(--spacing-2);display:flex;gap:var(--spacing-1);flex-wrap:wrap;">' + cargo.beneficios.map(b => '<span class="badge badge-info" style="font-size:var(--font-size-xs);">' + b + '</span>').join('') + '</div>'
-            : '';
-          const actionsHtml = canWrite && cargo.id ? `
-            <div class="cargo-card-actions">
-              ${hasOccupants ? `
-                <button onclick="event.stopPropagation(); openEditModal(${cargo.id}, '${dept.nome}')">Alterar</button>
-                <button class="btn-danger-outline" onclick="event.stopPropagation(); requestAction(${cargo.id}, '${cargo.titulo}', 'EXCLUSAO_CARGO', 'exclusão permanente')">Excluir</button>
-              ` : `
-                <button onclick="event.stopPropagation(); openEditModal(${cargo.id}, '${dept.nome}')">Editar</button>
-                <button style="border-color: var(--success-green); color: var(--success-green);" onclick="event.stopPropagation(); requestAction(${cargo.id}, '${cargo.titulo}', 'ABERTURA_VAGA', 'abertura de vaga')">Abrir Vaga</button>
-                <button class="btn-danger-outline" onclick="event.stopPropagation(); requestAction(${cargo.id}, '${cargo.titulo}', 'EXCLUSAO_CARGO', 'exclusão permanente')">Excluir</button>
-              `}
-            </div>
-          ` : '';
+          var subText = '';
+          if (filled) {
+            var nomes = cargo.funcionarios.map(function(f) { return esc(f.nome); });
+            subText = 'Titular: ' + nomes.join(', ');
+          } else {
+            subText = 'Cargo sem ocupante';
+          }
 
-          return `
-            <div class="cargo-card">
-              <div class="cargo-card-header">
-                <div>
-                  <span class="cargo-card-title">${cargo.titulo}</span>
-                  ${statusBadge}
-                </div>
-              </div>
-              <div class="cargo-card-meta">
-                <span><strong>Nível:</strong> ${nivelLabels[cargo.nivel] || cargo.nivel || '-'}</span>
-                <span><strong>Faixa:</strong> ${salarioRange}</span>
-                <span><strong>Ocupantes:</strong> ${cargo.funcionarios.length}</span>
-              </div>
-              ${funcsHtml}
-              ${beneficiosHtml}
-              ${actionsHtml}
-            </div>
-          `;
+          var actionsHtml = '';
+          if (canWrite && cargo.id) {
+            if (filled) {
+              actionsHtml =
+                '<div class="vaga-actions">' +
+                  '<button class="act-btn" onclick="event.stopPropagation(); openEditModal(' + cargo.id + ')">&#9998; Solicitar Altera\u00e7\u00e3o</button>' +
+                  '<button class="act-btn btn-danger" onclick="event.stopPropagation(); requestAction(' + cargo.id + ', \'' + esc(cargo.titulo) + '\', \'EXCLUSAO_CARGO\', \'exclus\u00e3o\')">&#128465; Solicitar Exclus\u00e3o</button>' +
+                  '<button class="act-btn btn-danger" onclick="event.stopPropagation(); requestAction(' + cargo.id + ', \'' + esc(cargo.titulo) + '\', \'DESATIVACAO_CARGO\', \'desativa\u00e7\u00e3o\')">&#10005; Solicitar Demiss\u00e3o</button>' +
+                  '<button class="act-btn btn-promo" onclick="event.stopPropagation(); requestAction(' + cargo.id + ', \'' + esc(cargo.titulo) + '\', \'PROMOCAO\', \'promo\u00e7\u00e3o\')">&#9733; Promo\u00e7\u00e3o</button>' +
+                '</div>';
+            } else {
+              actionsHtml =
+                '<div class="vaga-actions">' +
+                  '<button class="act-btn btn-vaga" onclick="event.stopPropagation(); requestAction(' + cargo.id + ', \'' + esc(cargo.titulo) + '\', \'ABERTURA_VAGA\', \'abertura de vaga\')">+ Solicitar Abertura de Vaga</button>' +
+                '</div>';
+            }
+          }
+
+          return (
+            '<div class="vaga-card ' + cardClass + '">' +
+              '<div class="vaga-info">' +
+                '<div class="vaga-titulo">Vaga: ' + esc(cargo.titulo) + '</div>' +
+                '<div class="vaga-sub">' + subText + '</div>' +
+              '</div>' +
+              '<div class="vaga-status">' + statusBadge + '</div>' +
+              actionsHtml +
+            '</div>'
+          );
         }).join('');
 
-        return `
-          <div class="accordion-item" id="acc-${i}">
-            <div class="accordion-header" onclick="toggleAccordion(${i})">
-              <div class="accordion-header-left">
-                <span class="accordion-arrow">&#9654;</span>
-                <span class="accordion-dept-name">${dept.nome}</span>
-              </div>
-              <span class="accordion-count">${dept.cargos.length} cargo(s) &bull; ${dept.totalFuncionarios} funcionário(s)</span>
-            </div>
-            <div class="accordion-body">
-              ${dept.cargos.length > 0 ? cargosHtml : '<div class="cargo-empty">Nenhum cargo cadastrado neste departamento</div>'}
-            </div>
-          </div>
-        `;
+        return (
+          '<div class="accordion-item' + (i === 0 ? ' open' : '') + '" id="acc-' + i + '">' +
+            '<div class="accordion-header" onclick="toggleAccordion(' + i + ')">' +
+              '<div class="accordion-header-left">' +
+                '<span class="accordion-arrow">&#9654;</span>' +
+                '<span class="accordion-dept-name">' + esc(dept.nome) + '</span>' +
+              '</div>' +
+              '<span class="accordion-count"><span class="accordion-count-icon">&#128196;</span> ' + preenchidos + '/' + totalCargos + ' Vagas</span>' +
+            '</div>' +
+            '<div class="accordion-body">' +
+              (totalCargos > 0 ? cargosHtml : '<div class="cargo-empty">Nenhum cargo cadastrado neste departamento</div>') +
+            '</div>' +
+          '</div>'
+        );
       }).join('');
     }
 
@@ -384,7 +415,7 @@
       document.getElementById('acc-' + index).classList.toggle('open');
     }
 
-    // ── Criar novo cargo (via solicitação) ──
+    /* ── Criar novo cargo (via solicitacao) ── */
     function openCreateModal() {
       currentId = null;
       editingCargo = null;
@@ -394,15 +425,15 @@
       Mask.initAll();
     }
 
-    // ── Editar cargo (via solicitação) ──
-    async function openEditModal(cargoId, deptNome) {
+    /* ── Editar cargo (via solicitacao) ── */
+    async function openEditModal(cargoId) {
       try {
-        const cargo = await api(API + '/' + cargoId);
+        var cargo = await api(API + '/' + cargoId);
         if (!cargo) return;
         currentId = cargoId;
         editingCargo = cargo;
         document.getElementById("form").reset();
-        document.getElementById("modalTitle").textContent = "Solicitar Edição de Cargo";
+        document.getElementById("modalTitle").textContent = "Solicitar Edi\u00e7\u00e3o de Cargo";
         Form.populate('form', cargo);
         Modal.open('modal');
         Mask.initAll();
@@ -412,7 +443,7 @@
     }
 
     async function save() {
-      const formData = Form.serialize('form');
+      var formData = Form.serialize('form');
       if (!formData.titulo || !formData.departamentoId) {
         Toast.error('Preencha os campos obrigatórios');
         return;
@@ -422,7 +453,7 @@
         return;
       }
 
-      const dadosDepois = {
+      var dadosDepois = {
         titulo: formData.titulo,
         descricao: formData.descricao || null,
         nivel: formData.nivel || null,
@@ -431,7 +462,7 @@
         salarioMaximo: formData.salarioMaximo ? parseFloat(String(formData.salarioMaximo).replace(/[^\d,]/g, '').replace(',', '.')) : null
       };
 
-      let tipo, dadosAntes = null, referenciaId = null;
+      var tipo, dadosAntes = null, referenciaId = null;
 
       if (currentId) {
         tipo = 'EDICAO_CARGO';
@@ -469,9 +500,9 @@
       }
     }
 
-    // ── Ações genéricas sobre cargo (desativar, excluir, abrir vaga) ──
-    let actionTargetId = null;
-    let actionType = null;
+    /* ── Acoes genericas sobre cargo ── */
+    var actionTargetId = null;
+    var actionType = null;
 
     function requestAction(cargoId, cargoTitulo, tipo, descricaoAcao) {
       actionTargetId = cargoId;
@@ -480,8 +511,11 @@
       document.getElementById("actionMsg").innerHTML = 'Deseja solicitar a <strong>' + descricaoAcao + '</strong> do cargo <strong>' + cargoTitulo + '</strong>?';
       document.getElementById("actionMotivo").value = '';
 
-      const btn = document.getElementById("actionConfirmBtn");
-      if (tipo === 'EXCLUSAO_CARGO') {
+      var btn = document.getElementById("actionConfirmBtn");
+      btn.style.background = '';
+      btn.style.color = '';
+      btn.className = 'btn btn-primary';
+      if (tipo === 'EXCLUSAO_CARGO' || tipo === 'DESATIVACAO_CARGO') {
         btn.style.background = 'var(--error-red)';
         btn.style.color = 'white';
         btn.className = 'btn';
@@ -489,17 +523,13 @@
         btn.style.background = 'var(--success-green)';
         btn.style.color = 'white';
         btn.className = 'btn';
-      } else {
-        btn.style.background = '';
-        btn.style.color = '';
-        btn.className = 'btn btn-primary';
       }
 
       Modal.open('actionModal');
     }
 
     async function confirmAction() {
-      const motivo = document.getElementById("actionMotivo").value.trim();
+      var motivo = document.getElementById("actionMotivo").value.trim();
       if (!motivo) {
         Toast.error('Informe o motivo');
         document.getElementById("actionMotivo").focus();
