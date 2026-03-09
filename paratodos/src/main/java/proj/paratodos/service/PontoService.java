@@ -44,6 +44,7 @@ public class PontoService {
     private final PontoApuracaoDiariaRepository pontoApuracaoDiariaRepository;
     private final PontoJornadaRepository pontoJornadaRepository;
     private final PontoCalendarioService pontoCalendarioService;
+    private final PontoOcorrenciaService pontoOcorrenciaService;
 
     public PontoService(
             FuncionarioRepository funcionarioRepository,
@@ -51,7 +52,8 @@ public class PontoService {
             PontoMarcacaoRepository pontoMarcacaoRepository,
             PontoApuracaoDiariaRepository pontoApuracaoDiariaRepository,
             PontoJornadaRepository pontoJornadaRepository,
-            PontoCalendarioService pontoCalendarioService
+            PontoCalendarioService pontoCalendarioService,
+            PontoOcorrenciaService pontoOcorrenciaService
     ) {
         this.funcionarioRepository = funcionarioRepository;
         this.usuarioRepository = usuarioRepository;
@@ -59,6 +61,7 @@ public class PontoService {
         this.pontoApuracaoDiariaRepository = pontoApuracaoDiariaRepository;
         this.pontoJornadaRepository = pontoJornadaRepository;
         this.pontoCalendarioService = pontoCalendarioService;
+        this.pontoOcorrenciaService = pontoOcorrenciaService;
     }
 
     @Transactional
@@ -68,6 +71,12 @@ public class PontoService {
                 .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado."));
 
         LocalDate hoje = LocalDate.now();
+
+        if (pontoOcorrenciaService.bloqueiaMarcacao(funcionario.getId(), hoje)) {
+            throw new IllegalArgumentException(
+                    pontoOcorrenciaService.mensagemBloqueio(funcionario.getId(), hoje)
+            );
+        }
 
         if (!isDiaUtil(hoje)) {
             throw new IllegalArgumentException("Registro de ponto indisponível para hoje.");
@@ -105,7 +114,10 @@ public class PontoService {
     public MeuPontoResumoResponse getResumoMeuPonto(Long usuarioId) {
         Funcionario funcionario = getFuncionarioLogado(usuarioId);
         LocalDate hoje = LocalDate.now();
-        String tipoDia = pontoCalendarioService.obterTipoDia(hoje);
+
+        String tipoCalendario = pontoCalendarioService.obterTipoDia(hoje);
+        String tipoOcorrencia = pontoOcorrenciaService.obterTipoOcorrencia(funcionario.getId(), hoje);
+        String tipoDia = tipoOcorrencia != null ? tipoOcorrencia : tipoCalendario;
 
         List<PontoMarcacao> hojeMarcacoes = buscarMarcacoesDia(funcionario.getId(), hoje);
         List<PontoMarcacaoResponse> marcacoesHoje = hojeMarcacoes.stream()
@@ -116,7 +128,10 @@ public class PontoService {
         String statusAtual;
         String proximaAcao;
 
-        if (isDiaUtil(hoje)) {
+        if (tipoOcorrencia != null) {
+            statusAtual = "INDISPONIVEL";
+            proximaAcao = "FECHADO";
+        } else if (isDiaUtil(hoje)) {
             statusAtual = calcularStatusAtual(hojeMarcacoes);
             proximaAcao = determinarProximoTipo(hojeMarcacoes);
         } else {
@@ -159,14 +174,13 @@ public class PontoService {
         List<PontoSemanaItemResponse> itens = new ArrayList<>();
 
         for (LocalDate data = inicioSemana; !data.isAfter(fimSemana); data = data.plusDays(1)) {
-
             String aviso = null;
 
-            if ("FERIAS".equalsIgnoreCase(funcionario.getStatus())) {
-                aviso = "FÉRIAS";
+            String tipoOcorrencia = pontoOcorrenciaService.obterTipoOcorrencia(funcionario.getId(), data);
+            if (tipoOcorrencia != null) {
+                aviso = traduzirTipoDia(tipoOcorrencia);
             } else {
                 String tipoDia = pontoCalendarioService.obterTipoDia(data);
-
                 if ("RECESSO".equalsIgnoreCase(tipoDia)) {
                     aviso = "RECESSO";
                 } else if ("FERIADO".equalsIgnoreCase(tipoDia)) {
@@ -263,7 +277,13 @@ public class PontoService {
         String tipoDia = pontoCalendarioService.obterTipoDia(data);
         boolean diaUtil = "DIA_UTIL".equals(tipoDia);
 
-        if (diaUtil) {
+        boolean possuiOcorrenciaAbonada = pontoOcorrenciaService.abonaDia(funcionario.getId(), data);
+
+        if (possuiOcorrenciaAbonada) {
+            horasTrabalhadas = BigDecimal.ZERO;
+            horasExtras = BigDecimal.ZERO;
+            horasFaltantes = BigDecimal.ZERO;
+        } else if (diaUtil) {
             if (horasTrabalhadas.compareTo(cargaDiaria) > 0) {
                 horasExtras = horasTrabalhadas.subtract(cargaDiaria);
             } else {
@@ -274,7 +294,7 @@ public class PontoService {
             horasFaltantes = BigDecimal.ZERO;
         }
 
-        boolean fechado = marcacoes.size() >= 4;
+        boolean fechado = possuiOcorrenciaAbonada || marcacoes.size() >= 4;
 
         PontoApuracaoDiaria apuracao = pontoApuracaoDiariaRepository
                 .findByFuncionarioIdAndData(funcionario.getId(), data)
@@ -419,6 +439,8 @@ public class PontoService {
                 apuracao.getData()
         );
 
+        String status = montarStatusAdmin(apuracao);
+
         return new TimesheetAdminRowResponse(
                 apuracao.getFuncionario().getId(),
                 apuracao.getFuncionario().getNomeCompleto(),
@@ -430,14 +452,40 @@ public class PontoService {
                 formatHoras(apuracao.getHorasTrabalhadas()),
                 formatHoras(apuracao.getHorasExtras()),
                 formatHoras(apuracao.getHorasFaltantes()),
-                montarStatusAdmin(apuracao)
+                status
         );
     }
 
     private String montarStatusAdmin(PontoApuracaoDiaria apuracao) {
+        Long funcionarioId = apuracao.getFuncionario().getId();
+        LocalDate data = apuracao.getData();
+
+        String tipoOcorrencia = pontoOcorrenciaService.obterTipoOcorrencia(funcionarioId, data);
+        if (tipoOcorrencia != null) {
+            return tipoOcorrencia;
+        }
+
+        String tipoDia = pontoCalendarioService.obterTipoDia(data);
+        if ("FERIADO".equalsIgnoreCase(tipoDia)) {
+            return "FERIADO";
+        }
+        if ("RECESSO".equalsIgnoreCase(tipoDia)) {
+            return "RECESSO";
+        }
+
         if (Boolean.TRUE.equals(apuracao.getFechado())) {
             return "FINALIZADO";
         }
         return "EM_ANDAMENTO";
+    }
+
+    private String traduzirTipoDia(String tipo) {
+        return switch (tipo) {
+            case "FERIAS" -> "FÉRIAS";
+            case "ATESTADO" -> "ATESTADO";
+            case "LICENCA" -> "LICENÇA";
+            case "FALTA_JUSTIFICADA" -> "FALTA JUSTIFICADA";
+            default -> tipo;
+        };
     }
 }

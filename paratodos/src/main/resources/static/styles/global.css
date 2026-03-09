@@ -285,3 +285,59 @@ body {
     padding: var(--spacing-2);
   }
 }
+
+/* largura da barra */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+/* trilho da barra */
+::-webkit-scrollbar-track {
+  background: #243647;
+}
+
+/* parte que move */
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(
+          180deg,
+          #4a6fa5,
+          #2d5c8f
+  );
+  border-radius: 10px;
+  border: 2px solid #243647;
+}
+
+/* efeito ao passar mouse */
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(
+          180deg,
+          #5f8bcf,
+          #356da8
+  );
+}
+
+/* cantos da barra */
+::-webkit-scrollbar-corner {
+  background: #243647;
+}
+/* ============================= */
+/* SCROLL DA SIDEBAR             */
+/* ============================= */
+
+.sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background: rgba(90, 140, 200, 0.35);
+  border-radius: 8px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+  background: rgba(120, 170, 230, 0.65);
+}

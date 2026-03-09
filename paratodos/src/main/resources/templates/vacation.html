@@ -1,120 +1,488 @@
 <!DOCTYPE html>
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
-
-<head th:replace="~{fragments/head :: head('Férias')}"><title>Férias</title></head>
-
+<head th:replace="~{fragments/head :: head('Férias')}">
+  <title>Férias</title>
+</head>
 <body>
-  <script th:inline="javascript">
-    window.__CURRENT_USER__ = {
-      email: /*[[${currentUser.email}]]*/ 'usuario@local',
-      role:  /*[[${currentUser.role}]]*/ 'EMPLOYEE'
-    };
-  </script>
 
-  <aside th:replace="~{fragments/sidebar :: admin('vacation')}"></aside>
+<script th:inline="javascript">
+  window.__CURRENT_USER__ = {
+    email: /*[[${currentUser.email}]]*/ 'usuario@local',
+    role:  /*[[${currentUser.role}]]*/ 'ADMIN'
+  };
+</script>
 
-  <div class="main-content">
-    <header th:replace="~{fragments/topbar :: topbar('Gestão de Férias')}"></header>
+<aside th:replace="~{fragments/sidebar :: admin('vacation')}"></aside>
 
-    <div class="content-area">
-      <div class="stats-row">
-        <div class="stat-box"><div class="stat-box-icon" style="background: rgba(39, 174, 96, 0.1); color: var(--success-green);"><img th:src="@{/assets/check (1).png}" alt="icone_ferias_aprovadas"></div><div class="stat-box-value" id="statAprovadas">8</div><div class="stat-box-label">Férias Aprovadas</div></div>
-        <div class="stat-box"><div class="stat-box-icon" style="background: rgba(243, 156, 18, 0.1); color: var(--warning-orange);"><img th:src="@{/assets/hourglass.png}" alt="icone_pendentes"></div><div class="stat-box-value" id="statPendentes">5</div><div class="stat-box-label">Pendentes</div></div>
-        <div class="stat-box"><div class="stat-box-icon" style="background: rgba(44, 62, 80, 0.1); color: var(--primary-dark);"><img th:src="@{/assets/tree-palm (1).png}" alt="icone_em_ferias"></div><div class="stat-box-value" id="statEmFerias">3</div><div class="stat-box-label">Em Férias Agora</div></div>
-        <div class="stat-box"><div class="stat-box-icon" style="background: rgba(231, 76, 60, 0.1); color: var(--error-red);"><img th:src="@{/assets/triangle-alert.png}" alt="icone_ferias_vencidas"></div><div class="stat-box-value" id="statVencidas">12</div><div class="stat-box-label">Férias Vencidas</div></div>
+<div class="main-content">
+  <header th:replace="~{fragments/topbar :: topbar('Férias')}"></header>
+
+  <div class="content-area">
+    <div class="page-header-custom">
+      <div>
+        <h1 class="page-title">Férias</h1>
+        <p class="page-subtitle">Solicite férias ativas para funcionários disponíveis.</p>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value" id="statTotal">0</div>
+        <div class="stat-label">Funcionários ativos</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="statEmFerias">0</div>
+        <div class="stat-label">Em férias agora</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="statDisponiveis">0</div>
+        <div class="stat-label">Disponíveis</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <input
+                  type="text"
+                  id="searchInput"
+                  class="form-input"
+                  placeholder="Buscar por nome ou matrícula"
+          />
+        </div>
+        <div class="toolbar-right">
+          <select id="statusFilter" class="form-input">
+            <option value="">Todos</option>
+            <option value="DISPONIVEL">Disponíveis</option>
+            <option value="EM_FERIAS">Em férias</option>
+          </select>
+        </div>
       </div>
 
-      <div class="page-header">
-        <div><h2 class="page-title">Solicitações de Férias</h2><p class="page-subtitle">Gerencie as solicitações e programações de férias</p></div>
-        <div class="page-actions"><button class="btn btn-primary" onclick="openModal()"><img th:src="@{/assets/plus.png}" alt="icone_nova_solicitacao"> Nova Solicitação</button></div>
-      </div>
-
-      <div class="tabs" data-tab-content="tabsContent">
-        <button class="tab-btn active" data-tab="solicitacoes">Solicitações</button>
-        <button class="tab-btn" data-tab="programadas">Programadas</button>
-        <button class="tab-btn" data-tab="vencidas">Férias Vencidas</button>
-      </div>
-
-      <div id="tabsContent">
-        <div class="tab-content active" data-tab-content="solicitacoes">
-          <div class="table-container"><table class="data-table"><thead><tr><th>Funcionário</th><th>Período</th><th class="hide-mobile">Dias</th><th class="hide-mobile">Solicitado em</th><th>Status</th><th>Ações</th></tr></thead><tbody id="solicitacoesBody"></tbody></table></div>
-        </div>
-        <div class="tab-content" data-tab-content="programadas">
-          <div class="table-container"><table class="data-table"><thead><tr><th>Funcionário</th><th>Início</th><th>Fim</th><th class="hide-mobile">Dias</th><th>Status</th></tr></thead><tbody id="programadasBody"></tbody></table></div>
-        </div>
-        <div class="tab-content" data-tab-content="vencidas">
-          <div class="table-container"><table class="data-table"><thead><tr><th>Funcionário</th><th>Período Aquisitivo</th><th>Dias Disponíveis</th><th>Vencimento</th><th>Ações</th></tr></thead><tbody id="vencidasBody"></tbody></table></div>
-        </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+          <tr>
+            <th>Matrícula</th>
+            <th>Funcionário</th>
+            <th>Cargo</th>
+            <th>Departamento</th>
+            <th>Status</th>
+            <th>Período atual</th>
+            <th>Ação</th>
+          </tr>
+          </thead>
+          <tbody id="vacationBody">
+          <tr>
+            <td colspan="7" class="empty-cell">Carregando...</td>
+          </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
+</div>
 
-  <div class="modal" id="modal">
-    <div class="modal-dialog modal-md">
-      <div class="modal-header"><h3 class="modal-title">Nova Solicitação de Férias</h3><button class="modal-close" onclick="Modal.close('modal')">&times;</button></div>
-      <div class="modal-body">
-        <form id="form">
-          <div class="form-group"><label class="form-label">Funcionário *</label><select class="form-select" name="funcionario_id" required><option value="">Selecione</option><option value="1">João Silva Santos</option><option value="2">Maria Oliveira Costa</option><option value="3">Pedro Henrique Almeida</option><option value="4">Ana Paula Ferreira</option></select></div>
-          <div class="form-row form-row-2"><div class="form-group"><label class="form-label">Data Início *</label><input type="date" class="form-input" name="data_inicio" required></div><div class="form-group"><label class="form-label">Data Fim *</label><input type="date" class="form-input" name="data_fim" required></div></div>
-          <div class="form-row form-row-2"><div class="form-group"><label class="form-label">Dias de Férias</label><input type="number" class="form-input" name="dias" value="30" min="5" max="30"></div><div class="form-group"><label class="form-label">Abono Pecuniário</label><select class="form-select" name="abono"><option value="false">Não</option><option value="true">Sim (vender 10 dias)</option></select></div></div>
-          <div class="form-group"><label class="form-label">Observações</label><textarea class="form-input" name="observacoes" rows="2"></textarea></div>
-        </form>
+<div class="modal-backdrop" id="vacationModal" style="display:none;">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3>Solicitar férias</h3>
+      <button type="button" class="btn-icon" onclick="fecharModal()">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Funcionário</label>
+        <input type="text" id="modalFuncionarioNome" class="form-input" disabled />
       </div>
-      <div class="modal-footer"><button class="btn btn-secondary" onclick="Modal.close('modal')">Cancelar</button><button class="btn btn-primary" onclick="save()">Solicitar</button></div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Data início</label>
+          <input type="date" id="modalDataInicio" class="form-input" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Data fim</label>
+          <input type="date" id="modalDataFim" class="form-input" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Observação</label>
+        <textarea id="modalObservacao" class="form-input" rows="4" placeholder="Opcional"></textarea>
+      </div>
+
+      <div class="modal-note">
+        Nesta versão simples, as férias precisam incluir a data de hoje.
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" onclick="fecharModal()">Cancelar</button>
+      <button type="button" class="btn btn-primary" onclick="salvarFerias()">Salvar</button>
     </div>
   </div>
+</div>
 
-  <div th:replace="~{fragments/scripts :: common}"></div>
-  <script>
-    var solicitacoes = [
-      { id: 1, nome: "João Silva Santos", inicio: "2026-02-01", fim: "2026-02-28", dias: 28, solicitado: "2026-01-05", status: "PENDENTE" },
-      { id: 2, nome: "Maria Oliveira Costa", inicio: "2026-03-15", fim: "2026-04-05", dias: 20, solicitado: "2026-01-08", status: "APROVADO" },
-      { id: 3, nome: "Pedro Henrique Almeida", inicio: "2026-02-10", fim: "2026-02-20", dias: 10, solicitado: "2026-01-10", status: "PENDENTE" },
-      { id: 4, nome: "Carlos Eduardo Lima", inicio: "2026-04-01", fim: "2026-04-30", dias: 30, solicitado: "2026-01-12", status: "PENDENTE" },
-      { id: 5, nome: "Fernanda Gomes", inicio: "2026-05-05", fim: "2026-05-25", dias: 20, solicitado: "2026-01-11", status: "APROVADO" }
-    ];
-    var programadas = [
-      { id: 1, nome: "Ana Paula Ferreira", inicio: "2026-01-15", fim: "2026-02-10", dias: 26, status: "EM_FERIAS" },
-      { id: 2, nome: "Roberto Martins", inicio: "2026-01-20", fim: "2026-02-05", dias: 16, status: "EM_FERIAS" },
-      { id: 3, nome: "Juliana Ribeiro", inicio: "2026-01-25", fim: "2026-02-08", dias: 14, status: "EM_FERIAS" },
-      { id: 4, nome: "Maria Oliveira Costa", inicio: "2026-03-15", fim: "2026-04-05", dias: 20, status: "AGENDADO" }
-    ];
-    var vencidas = [
-      { id: 1, nome: "Lucas Nunes", periodo: "2024/2025", dias: 30, vencimento: "2026-01-15" },
-      { id: 2, nome: "Camila Dias", periodo: "2024/2025", dias: 30, vencimento: "2026-01-20" },
-      { id: 3, nome: "Marcos Silva", periodo: "2024/2025", dias: 20, vencimento: "2026-01-25" }
-    ];
+<style>
+  .page-header-custom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+  }
 
-    document.addEventListener("DOMContentLoaded", function () {
-      if (!Auth.requireAuth()) return;
-      initUserMenu(); initSidebar();
-      Auth.applyRoleVisibility(document); Auth.applyActionVisibility(document);
-      Tabs.init(); render();
-    });
+  .page-title {
+    margin: 0 0 6px 0;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--primary-dark);
+  }
 
-    function render() {
-      document.getElementById("solicitacoesBody").innerHTML = solicitacoes.map(function(s) {
-        var acoes = s.status === 'PENDENTE' ? '<button class="btn-icon" onclick="approve(' + s.id + ')" title="Aprovar" style="color: var(--success-green);"><img src="/assets/check (1).png" alt="icone_aprovar"></button><button class="btn-icon" onclick="reject(' + s.id + ')" title="Rejeitar" style="color: var(--error-red);"><img src="/assets/x.png" alt="icone_rejeitar"></button>' : '<button class="btn-icon view" onclick="viewDetails(' + s.id + ')"><img src="/assets/eye.png" alt="icone_ver_detalhes"></button>';
-        return '<tr><td><div class="cell-avatar"><div class="avatar">' + s.nome.split(' ').map(function(n){return n[0];}).slice(0,2).join('') + '</div><span>' + s.nome + '</span></div></td><td>' + formatDate(s.inicio) + ' a ' + formatDate(s.fim) + '</td><td class="hide-mobile">' + s.dias + ' dias</td><td class="hide-mobile">' + formatDate(s.solicitado) + '</td><td><span class="badge ' + (s.status==='APROVADO'?'badge-success':'badge-warning') + '">' + (s.status==='APROVADO'?'Aprovado':'Pendente') + '</span></td><td><div class="cell-actions">' + acoes + '</div></td></tr>';
-      }).join('');
+  .page-subtitle {
+    margin: 0;
+    color: var(--gray-500);
+  }
 
-      document.getElementById("programadasBody").innerHTML = programadas.map(function(p) {
-        return '<tr><td><div class="cell-avatar"><div class="avatar">' + p.nome.split(' ').map(function(n){return n[0];}).slice(0,2).join('') + '</div><span>' + p.nome + '</span></div></td><td>' + formatDate(p.inicio) + '</td><td>' + formatDate(p.fim) + '</td><td class="hide-mobile">' + p.dias + ' dias</td><td><span class="badge ' + (p.status==='EM_FERIAS'?'badge-info':'badge-success') + '">' + (p.status==='EM_FERIAS'?'Em Férias':'Agendado') + '</span></td></tr>';
-      }).join('');
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
 
-      document.getElementById("vencidasBody").innerHTML = vencidas.map(function(v) {
-        return '<tr><td><div class="cell-avatar"><div class="avatar">' + v.nome.split(' ').map(function(n){return n[0];}).slice(0,2).join('') + '</div><span>' + v.nome + '</span></div></td><td>' + v.periodo + '</td><td>' + v.dias + ' dias</td><td><span class="badge badge-danger">' + formatDate(v.vencimento) + '</span></td><td><button class="btn btn-primary btn-sm" onclick="scheduleVacation(' + v.id + ')">Agendar</button></td></tr>';
-      }).join('');
+  .stat-card {
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    text-align: center;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .stat-value {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--primary-dark);
+  }
+
+  .stat-label {
+    margin-top: 6px;
+    color: var(--gray-500);
+    font-size: 14px;
+  }
+
+  .toolbar {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+
+  .toolbar-left,
+  .toolbar-right {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .toolbar-left {
+    flex: 1;
+    min-width: 260px;
+  }
+
+  .table-wrap {
+    overflow-x: auto;
+  }
+
+  .empty-cell {
+    text-align: center;
+    color: var(--gray-400);
+    padding: 24px;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .badge-success {
+    background: rgba(46, 204, 113, 0.12);
+    color: #1d7f47;
+  }
+
+  .badge-secondary {
+    background: rgba(52, 73, 94, 0.12);
+    color: #415a77;
+  }
+
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    padding: 20px;
+  }
+
+  .modal-card {
+    background: #fff;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 560px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.18);
+    overflow: hidden;
+  }
+
+  .modal-header,
+  .modal-footer {
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--gray-100);
+  }
+
+  .modal-footer {
+    border-bottom: none;
+    border-top: 1px solid var(--gray-100);
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+  }
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .modal-header h3 {
+    margin: 0;
+  }
+
+  .modal-body {
+    padding: 20px;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .modal-note {
+    margin-top: 12px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: var(--gray-50);
+    color: var(--gray-600);
+    font-size: 13px;
+  }
+
+  .btn-action {
+    min-width: 150px;
+  }
+
+  @media (max-width: 768px) {
+    .stats-grid {
+      grid-template-columns: 1fr;
     }
 
-    function openModal() { document.getElementById("form").reset(); Modal.open('modal'); }
-    function save() { Toast.success('Solicitação enviada com sucesso!'); Modal.close('modal'); }
-    function approve(id) { Confirm.show('Aprovar esta solicitação de férias?', function() { Toast.success('Férias aprovadas!'); }); }
-    function reject(id) { Confirm.show('Rejeitar esta solicitação de férias?', function() { Toast.warning('Férias rejeitadas'); }); }
-    function viewDetails(id) { Toast.info('Detalhes da solicitação'); }
-    function scheduleVacation(id) { openModal(); }
-    function formatDate(d) { return new Date(d + 'T00:00:00').toLocaleDateString('pt-BR'); }
-  </script>
-</body>
+    .form-row {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
 
+<div th:replace="~{fragments/scripts :: common}"></div>
+
+<script>
+  let rowsFerias = [];
+  let funcionarioSelecionadoId = null;
+
+  document.addEventListener("DOMContentLoaded", async function () {
+    if (!Auth.requireAuth()) return;
+
+    initUserMenu();
+    initSidebar();
+    Auth.applyRoleVisibility(document);
+    Auth.applyActionVisibility(document);
+
+    document.getElementById("searchInput").addEventListener("input", renderTabela);
+    document.getElementById("statusFilter").addEventListener("change", renderTabela);
+
+    await carregarPagina();
+  });
+
+  async function carregarPagina() {
+    try {
+      const resp = await fetch("/api/admin/ferias/funcionarios", {
+        credentials: "same-origin"
+      });
+
+      const data = await resp.json();
+
+      if (!resp.ok) {
+        Toast.error(data.error || "Erro ao carregar férias.");
+        return;
+      }
+
+      document.getElementById("statTotal").textContent = data.summary.totalFuncionarios ?? 0;
+      document.getElementById("statEmFerias").textContent = data.summary.emFerias ?? 0;
+      document.getElementById("statDisponiveis").textContent = data.summary.disponiveis ?? 0;
+
+      rowsFerias = data.rows || [];
+      renderTabela();
+    } catch (e) {
+      console.error(e);
+      Toast.error("Erro ao carregar férias.");
+    }
+  }
+
+  function renderTabela() {
+    const tbody = document.getElementById("vacationBody");
+    const busca = (document.getElementById("searchInput").value || "").trim().toLowerCase();
+    const status = document.getElementById("statusFilter").value || "";
+
+    let filtrados = rowsFerias.filter(row => {
+      const matchBusca =
+              !busca ||
+              (row.nomeCompleto || "").toLowerCase().includes(busca) ||
+              (row.matricula || "").toLowerCase().includes(busca);
+
+      const matchStatus = !status || row.statusFerias === status;
+      return matchBusca && matchStatus;
+    });
+
+    if (!filtrados.length) {
+      tbody.innerHTML = `
+                <tr>
+                    <td colspan="7" class="empty-cell">Nenhum funcionário encontrado.</td>
+                </tr>
+            `;
+      return;
+    }
+
+    tbody.innerHTML = filtrados.map(row => `
+            <tr>
+                <td>${row.matricula || "-"}</td>
+                <td>${row.nomeCompleto || "-"}</td>
+                <td>${row.cargo || "-"}</td>
+                <td>${row.departamento || "-"}</td>
+                <td>${renderStatus(row)}</td>
+                <td>${renderPeriodo(row)}</td>
+                <td>${renderAcao(row)}</td>
+            </tr>
+        `).join("");
+  }
+
+  function renderStatus(row) {
+    if (row.statusFerias === "EM_FERIAS") {
+      return `<span class="badge badge-secondary">Em férias</span>`;
+    }
+    return `<span class="badge badge-success">Disponível</span>`;
+  }
+
+  function renderPeriodo(row) {
+    if (row.statusFerias !== "EM_FERIAS") {
+      return "-";
+    }
+    return `${formatDate(row.dataInicioFerias)} até ${formatDate(row.dataFimFerias)}`;
+  }
+
+  function renderAcao(row) {
+    if (row.statusFerias === "EM_FERIAS") {
+      return `<button class="btn btn-secondary btn-action" disabled>Em férias</button>`;
+    }
+
+    const nomeEscapado = (row.nomeCompleto || "").replace(/'/g, "\\'");
+    return `
+            <button
+                class="btn btn-primary btn-action"
+                type="button"
+                onclick="abrirModal(${row.funcionarioId}, '${nomeEscapado}')"
+            >
+                Solicitar férias
+            </button>
+        `;
+  }
+
+  function abrirModal(funcionarioId, nome) {
+    funcionarioSelecionadoId = funcionarioId;
+
+    const hoje = new Date().toISOString().slice(0, 10);
+
+    document.getElementById("modalFuncionarioNome").value = nome || "";
+    document.getElementById("modalDataInicio").value = hoje;
+    document.getElementById("modalDataFim").value = hoje;
+    document.getElementById("modalObservacao").value = "";
+    document.getElementById("vacationModal").style.display = "flex";
+  }
+
+  function fecharModal() {
+    funcionarioSelecionadoId = null;
+    document.getElementById("vacationModal").style.display = "none";
+  }
+
+  async function salvarFerias() {
+    if (!funcionarioSelecionadoId) {
+      Toast.error("Funcionário não selecionado.");
+      return;
+    }
+
+    const dataInicio = document.getElementById("modalDataInicio").value;
+    const dataFim = document.getElementById("modalDataFim").value;
+    const observacao = document.getElementById("modalObservacao").value;
+
+    if (!dataInicio || !dataFim) {
+      Toast.error("Informe a data inicial e final.");
+      return;
+    }
+
+    try {
+      const resp = await fetch("/api/admin/ferias", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          funcionarioId: funcionarioSelecionadoId,
+          dataInicio,
+          dataFim,
+          observacao
+        })
+      });
+
+      const data = await resp.json().catch(() => ({}));
+
+      if (!resp.ok) {
+        Toast.error(data.error || "Erro ao salvar férias.");
+        return;
+      }
+
+      Toast.success(data.message || "Férias registradas com sucesso.");
+      fecharModal();
+      await carregarPagina();
+    } catch (e) {
+      console.error(e);
+      Toast.error("Erro ao salvar férias.");
+    }
+  }
+
+  function formatDate(value) {
+    if (!value) return "-";
+    const parts = value.split("-");
+    if (parts.length !== 3) return value;
+    return `${parts[2]}/${parts[1]}/${parts[0]}`;
+  }
+</script>
+
+</body>
 </html>

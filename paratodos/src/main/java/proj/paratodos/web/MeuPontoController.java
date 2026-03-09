@@ -33,7 +33,7 @@ public class MeuPontoController {
         return pontoService.getHistoricoSemana(user.getId());
     }
 
-    @PostMapping("/punch")
+    @PostMapping({"/punch", "/register"})
     public RegistrarPontoResponse punch(
             @AuthenticationPrincipal UserPrincipal user,
             HttpServletRequest request

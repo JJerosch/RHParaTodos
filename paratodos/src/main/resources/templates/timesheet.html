@@ -240,17 +240,27 @@
       </tr>
     `).join("");
   }
+
   function limparFiltros() {
     document.getElementById("nomeFuncionario").value = "";
     preencherDatasPadrao();
     carregarTimesheet();
   }
-  
+
   function renderStatus(status) {
-    if (status === "FINALIZADO") {
-      return `<span class="badge badge-success">Finalizado</span>`;
-    }
-    return `<span class="badge badge-warning">Em andamento</span>`;
+    const mapa = {
+      FINALIZADO: ['badge badge-success', 'Finalizado'],
+      EM_ANDAMENTO: ['badge badge-warning', 'Em andamento'],
+      FERIADO: ['badge badge-secondary', 'Feriado'],
+      RECESSO: ['badge badge-secondary', 'Recesso'],
+      FERIAS: ['badge badge-secondary', 'Férias'],
+      ATESTADO: ['badge badge-secondary', 'Atestado'],
+      LICENCA: ['badge badge-secondary', 'Licença'],
+      FALTA_JUSTIFICADA: ['badge badge-secondary', 'Falta justificada']
+    };
+
+    const item = mapa[status] || ['badge badge-warning', status || 'Em andamento'];
+    return `<span class="${item[0]}">${item[1]}</span>`;
   }
 </script>
 </body>

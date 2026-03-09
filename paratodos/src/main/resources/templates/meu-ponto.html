@@ -355,17 +355,18 @@
         aviso.style.display = "none";
         aviso.textContent = "";
 
-        if (tipoDia === "FERIADO") {
-            aviso.style.display = "block";
-            aviso.textContent = "Hoje é feriado. O registro de ponto está indisponível.";
-            btnEntrada.disabled = true;
-            btnSaida.disabled = true;
-            return;
-        }
+        const mensagensBloqueio = {
+            FERIADO: "Hoje é feriado. O registro de ponto está indisponível.",
+            RECESSO: "Hoje é recesso. O registro de ponto está indisponível.",
+            FERIAS: "Você está em férias neste período. O registro de ponto está indisponível.",
+            ATESTADO: "Há um atestado cadastrado para hoje. O registro de ponto está indisponível.",
+            LICENCA: "Você está em licença neste período. O registro de ponto está indisponível.",
+            FALTA_JUSTIFICADA: "Há uma falta justificada cadastrada para hoje. O registro de ponto está indisponível."
+        };
 
-        if (tipoDia === "RECESSO") {
+        if (mensagensBloqueio[tipoDia]) {
             aviso.style.display = "block";
-            aviso.textContent = "Hoje é recesso. O registro de ponto está indisponível.";
+            aviso.textContent = mensagensBloqueio[tipoDia];
             btnEntrada.disabled = true;
             btnSaida.disabled = true;
             return;
@@ -378,7 +379,11 @@
             btnSaida.disabled = true;
             btnEntrada.textContent = "Registrar Entrada";
             btnSaida.textContent = "Registrar Saída";
-        } else if (proximaAcao === "SAIDA_ALMOCO" || proximaAcao === "RETORNO_ALMOCO" || proximaAcao === "SAIDA") {
+        } else if (
+            proximaAcao === "SAIDA_ALMOCO" ||
+            proximaAcao === "RETORNO_ALMOCO" ||
+            proximaAcao === "SAIDA"
+        ) {
             btnEntrada.disabled = true;
             btnSaida.disabled = false;
             btnSaida.textContent = traduzirAcao(proximaAcao);
@@ -397,6 +402,16 @@
         return acao || "Registrar Saída";
     }
 
+    function formatarHoraDataHora(dataHora) {
+        if (!dataHora) return "--:--";
+        const data = new Date(dataHora);
+        if (Number.isNaN(data.getTime())) return "--:--";
+        return data.toLocaleTimeString("pt-BR", {
+            hour: "2-digit",
+            minute: "2-digit"
+        });
+    }
+
     function renderRegistrosHoje(marcacoes) {
         const container = document.getElementById("registrosHoje");
 
@@ -409,7 +424,7 @@
             return `
                 <div class="registro-item">
                     <span class="registro-tipo">${formatarTipo(m.tipo)}</span>
-                    <span class="registro-hora">${m.hora || "--:--"}</span>
+                    <span class="registro-hora">${formatarHoraDataHora(m.dataHora)}</span>
                 </div>
             `;
         }).join("");

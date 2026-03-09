@@ -74,4 +74,13 @@ public interface FuncionarioRepository extends JpaRepository<Funcionario, Long>,
         ORDER BY f.cargo.titulo ASC, f.nomeCompleto ASC
     """)
     List<Funcionario> findAtivosByDepartamentoId(@Param("departamentoId") Long departamentoId);
+
+    @Query("""
+        SELECT f FROM Funcionario f
+        LEFT JOIN FETCH f.cargo
+        LEFT JOIN FETCH f.departamento
+        WHERE f.status = 'ATIVO'
+        ORDER BY f.nomeCompleto ASC
+    """)
+    List<Funcionario> findAtivosParaFerias();
 }
