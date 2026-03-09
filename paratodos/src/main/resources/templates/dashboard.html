@@ -261,8 +261,8 @@
         // Contratações recentes
         renderRecentHires(data.contratacaoRecentes);
 
-        // Pendências
-        renderPending(data.promocoesPendentes);
+        // Pendências (agora via solicitações)
+        renderPending(data.solicitacoesPendentes, data.pendenciasPorTipo);
 
         // Aniversariantes
         renderBirthdays(data.aniversariantes);
@@ -298,34 +298,24 @@
       `).join('');
     }
 
-    function renderPending(promocoesPendentes) {
+    function renderPending(totalPendentes, pendenciasPorTipo) {
       const container = document.getElementById('pendingList');
       const badge = document.getElementById('pendingBadge');
-      let items = [];
 
-      if (promocoesPendentes > 0) {
-        items.push({
-          title: 'Solicitações de Promoção/Alteração',
-          detail: promocoesPendentes + ' solicitação(ões) pendente(s)',
-          link: '/solicitacoes',
-          roles: 'ADMIN,RH_CHEFE'
-        });
-      }
-
-      if (items.length === 0) {
+      if (!pendenciasPorTipo || pendenciasPorTipo.length === 0) {
         badge.textContent = '0 itens';
         container.innerHTML = '<div class="empty-state-inline">Nenhuma pendência no momento</div>';
         return;
       }
 
-      badge.textContent = items.length + ' ite' + (items.length === 1 ? 'm' : 'ns');
-      container.innerHTML = items.map(item => `
-        <div class="pending-item" data-roles="${item.roles}">
+      badge.textContent = totalPendentes + ' pendente' + (totalPendentes === 1 ? '' : 's');
+      container.innerHTML = pendenciasPorTipo.map(item => `
+        <div class="pending-item" data-roles="ADMIN,RH_CHEFE">
           <div class="pending-info">
-            <strong>${item.title}</strong>
-            <small>${item.detail}</small>
+            <strong>${item.titulo}</strong>
+            <small>${item.count} solicitação(ões) pendente(s)</small>
           </div>
-          <a href="${item.link}" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.875rem;">Revisar</a>
+          <a href="/solicitacoes" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.875rem;">Revisar</a>
         </div>
       `).join('');
 

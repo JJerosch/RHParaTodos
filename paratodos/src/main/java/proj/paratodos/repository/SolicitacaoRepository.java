@@ -51,4 +51,12 @@ public interface SolicitacaoRepository extends JpaRepository<Solicitacao, Long> 
     long countByStatus(StatusSolicitacao status);
 
     long countByTipo(TipoSolicitacao tipo);
+
+    long countByStatusAndTipo(StatusSolicitacao status, TipoSolicitacao tipo);
+
+    @Query("SELECT s FROM Solicitacao s " +
+           "LEFT JOIN FETCH s.solicitante " +
+           "WHERE s.status = :status " +
+           "ORDER BY s.criadoEm DESC")
+    List<Solicitacao> findByStatusOrderByCriadoEmDesc(@Param("status") StatusSolicitacao status);
 }
