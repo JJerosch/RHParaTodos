@@ -345,6 +345,7 @@
             <h3 class="job-title">${j.titulo}</h3>
             <div class="cell-actions">
               ${j.status === 'RASCUNHO' && isChefe ? '<button class="btn-icon" onclick="approveVaga(' + j.id + ')" title="Aprovar"><img src="/assets/check (1).png" alt="aprovar" width="16" height="16"></button>' : ''}
+              ${(j.status !== 'ENCERRADA' && j.status !== 'CANCELADA') ? '<button class="btn-icon" onclick="cancelVaga(' + j.id + ', \'' + j.titulo.replace(/'/g, "\\'") + '\')" title="Cancelar" style="color: var(--error-red);">&#10005;</button>' : ''}
               <button class="btn-icon edit" onclick="editJob(${j.id})"><img src="/assets/pencil (1).png" alt="editar"></button>
             </div>
           </div>
@@ -506,6 +507,16 @@
         loadVagas();
         loadStats();
       } catch (e) { Toast.error(e.message || 'Erro ao aprovar vaga'); }
+    }
+
+    async function cancelVaga(id, titulo) {
+      if (!confirm('Tem certeza que deseja cancelar a vaga "' + titulo + '"?')) return;
+      try {
+        await api(VAPI + '/vagas/' + id + '/cancel', { method: 'PUT' });
+        Toast.success('Vaga cancelada!');
+        loadVagas();
+        loadStats();
+      } catch (e) { Toast.error(e.message || 'Erro ao cancelar vaga'); }
     }
 
     function openCandidateModal() {

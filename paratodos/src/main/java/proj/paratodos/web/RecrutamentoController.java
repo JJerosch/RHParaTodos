@@ -54,6 +54,11 @@ public class RecrutamentoController {
         return recrutamentoService.approveVaga(id);
     }
 
+    @PutMapping("/vagas/{id}/cancel")
+    public VagaResponse cancelVaga(@PathVariable Long id) {
+        return recrutamentoService.cancelVaga(id);
+    }
+
     // ── Candidatos ──
 
     @GetMapping("/candidatos")
