@@ -21,4 +21,7 @@ public interface TipoBeneficioRepository extends JpaRepository<TipoBeneficio, Lo
 
     @Query("SELECT COALESCE(SUM(fb.valor), 0) FROM FuncionarioBeneficio fb WHERE fb.ativo = true")
     java.math.BigDecimal sumCustoMensal();
+
+    @Query("SELECT t FROM TipoBeneficio t JOIN t.cargos c WHERE c.id = :cargoId AND t.ativo = true")
+    List<TipoBeneficio> findByCargoId(@Param("cargoId") Long cargoId);
 }

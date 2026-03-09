@@ -92,6 +92,12 @@
             <div class="form-group"><label class="checkbox-label"><input type="checkbox" name="incideFerias"><span>Incide em Férias</span></label></div>
             <div class="form-group"><label class="checkbox-label"><input type="checkbox" name="incideDecimo"><span>Incide em 13º Salário</span></label></div>
           </div>
+          <div class="form-group">
+            <label class="form-label">Cargos Vinculados</label>
+            <select class="form-select" id="cargosSelect" multiple style="height: 100px;">
+            </select>
+            <small style="color: var(--gray-400);">Segure Ctrl para selecionar múltiplos</small>
+          </div>
           <div class="form-group"><label class="checkbox-label"><input type="checkbox" name="ativo"
                 checked><span>Benefício Ativo</span></label></div>
         </form>
@@ -170,6 +176,7 @@
     ];
 
     let benefits = [];
+    let allCargos = [];
     let currentId = null;
 
     const naturezaLabels = { PROVENTO: 'Provento', DESCONTO: 'Desconto', INFORMATIVO: 'Informativo' };
@@ -187,17 +194,23 @@
 
     async function loadData() {
       try {
-        const [listRes, statsRes] = await Promise.all([
+        const [listRes, statsRes, cargosRes] = await Promise.all([
           fetch(API, { credentials: 'same-origin' }),
-          fetch(API + '/stats', { credentials: 'same-origin' })
+          fetch(API + '/stats', { credentials: 'same-origin' }),
+          fetch('/api/employees/cargos', { credentials: 'same-origin' })
         ]);
         if (!listRes.ok) throw new Error('API indisponível');
         benefits = await listRes.json();
+        allCargos = await cargosRes.json().catch(() => []);
         const stats = await statsRes.json();
         document.getElementById("statTipos").textContent = stats.tipos;
         document.getElementById("statBeneficiarios").textContent = stats.beneficiarios;
         document.getElementById("statCusto").textContent = formatCurrency(stats.custoMensal);
         document.getElementById("statCustoFunc").textContent = formatCurrency(stats.custoPorFuncionario);
+
+        // Preencher dropdown de cargos
+        const cargosSelect = document.getElementById("cargosSelect");
+        cargosSelect.innerHTML = allCargos.map(c => '<option value="' + c.id + '">' + c.titulo + '</option>').join('');
       } catch (e) {
         console.log('Usando dados mock:', e.message);
         benefits = mockBenefits;
@@ -228,7 +241,13 @@
     }
 
     function render() {
-      document.getElementById("benefitsGrid").innerHTML = benefits.map(b => `
+      document.getElementById("benefitsGrid").innerHTML = benefits.map(b => {
+        const cargosHtml = (b.cargos && b.cargos.length > 0)
+          ? '<div style="margin-top:var(--spacing-2);display:flex;gap:var(--spacing-1);flex-wrap:wrap;">' +
+            b.cargos.map(c => '<span class="badge badge-info" style="font-size:var(--font-size-xs);">' + c.titulo + '</span>').join('') +
+            '</div>'
+          : '<div style="margin-top:var(--spacing-2);font-size:var(--font-size-xs);color:var(--gray-400);">Nenhum cargo vinculado</div>';
+        return `
         <div class="benefit-card">
           <div class="benefit-header">
             <span class="badge ${naturezaBadge[b.natureza] || 'badge-info'}">${naturezaLabels[b.natureza] || b.natureza}</span>
@@ -239,21 +258,36 @@
           </div>
           <h3 class="benefit-name">${b.nome}</h3>
           <p class="benefit-desc">${b.descricao || 'Sem descrição'}</p>
+          ${cargosHtml}
           <div class="benefit-stats">
             <span><strong>${b.beneficiarios || 0}</strong> beneficiários</span>
             <span><strong>${formatCurrency(b.valorPadrao)}</strong>/mês</span>
           </div>
         </div>
-      `).join('');
+      `}).join('');
     }
 
     function openModal(id = null) {
       currentId = id;
       document.getElementById("form").reset();
       document.getElementById("modalTitle").textContent = id ? "Editar Benefício" : "Novo Benefício";
+
+      // Reset cargo selection
+      const cargosSelect = document.getElementById("cargosSelect");
+      Array.from(cargosSelect.options).forEach(o => o.selected = false);
+
       if (id) {
         const item = benefits.find(b => b.id === id);
-        if (item) Form.populate('form', item);
+        if (item) {
+          Form.populate('form', item);
+          // Marcar cargos vinculados
+          if (item.cargos) {
+            const ids = item.cargos.map(c => String(c.id));
+            Array.from(cargosSelect.options).forEach(o => {
+              o.selected = ids.includes(o.value);
+            });
+          }
+        }
       }
       onNaturezaChange();
       Modal.open('modal');
@@ -267,6 +301,10 @@
       if (!formData.nome) { Toast.error('Nome é obrigatório'); return; }
       if (!formData.natureza) { Toast.error('Natureza é obrigatória'); return; }
 
+      // Coletar cargos selecionados
+      const cargosSelect = document.getElementById("cargosSelect");
+      const cargoIds = Array.from(cargosSelect.selectedOptions).map(o => Number(o.value));
+
       const body = {
         nome: formData.nome,
         descricao: formData.descricao || null,
@@ -275,7 +313,8 @@
         possuiDescontoFolha: formData.possuiDescontoFolha === 'true' || formData.possuiDescontoFolha === true,
         incideFerias: !!formData.incideFerias,
         incideDecimo: !!formData.incideDecimo,
-        ativo: formData.ativo !== undefined ? !!formData.ativo : true
+        ativo: formData.ativo !== undefined ? !!formData.ativo : true,
+        cargoIds: cargoIds
       };
 
       try {
