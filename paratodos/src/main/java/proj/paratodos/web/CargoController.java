@@ -3,6 +3,7 @@ package proj.paratodos.web;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import proj.paratodos.dto.CargoRequest;
 import proj.paratodos.dto.CargoResponse;
@@ -16,9 +17,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import proj.paratodos.domain.Cargo;
 import proj.paratodos.domain.Departamento;
 import proj.paratodos.domain.Funcionario;
 import proj.paratodos.domain.TipoBeneficio;
+import proj.paratodos.repository.CargoRepository;
 import proj.paratodos.repository.FuncionarioRepository;
 import proj.paratodos.repository.TipoBeneficioRepository;
 
@@ -27,15 +30,18 @@ import proj.paratodos.repository.TipoBeneficioRepository;
 public class CargoController {
 
     private final CargoService cargoService;
+    private final CargoRepository cargoRepository;
     private final DepartamentoRepository departamentoRepository;
     private final FuncionarioRepository funcionarioRepository;
     private final TipoBeneficioRepository tipoBeneficioRepository;
 
     public CargoController(CargoService cargoService,
+                           CargoRepository cargoRepository,
                            DepartamentoRepository departamentoRepository,
                            FuncionarioRepository funcionarioRepository,
                            TipoBeneficioRepository tipoBeneficioRepository) {
         this.cargoService = cargoService;
+        this.cargoRepository = cargoRepository;
         this.departamentoRepository = departamentoRepository;
         this.funcionarioRepository = funcionarioRepository;
         this.tipoBeneficioRepository = tipoBeneficioRepository;
@@ -86,57 +92,61 @@ public class CargoController {
 
     /** GET /api/positions/by-department - departamentos com cargos e funcionários */
     @GetMapping("/by-department")
+    @Transactional(readOnly = true)
     public List<Map<String, Object>> listByDepartment() {
         List<Departamento> departamentos = departamentoRepository.findByAtivoTrueOrderByNomeAsc();
         List<Map<String, Object>> result = new ArrayList<>();
 
         for (Departamento dept : departamentos) {
-            List<Funcionario> funcionarios = funcionarioRepository.findAtivosByDepartamentoId(dept.getId());
+            // Buscar cargos deste departamento diretamente
+            List<Cargo> cargos = cargoRepository.findByDepartamentoIdAndAtivoTrueOrderByTituloAsc(dept.getId());
 
-            // Agrupar por cargo
-            Map<String, List<Map<String, Object>>> cargoMap = new LinkedHashMap<>();
-            for (Funcionario f : funcionarios) {
-                String cargoKey = f.getCargo() != null ? f.getCargo().getTitulo() : "Sem cargo";
-                cargoMap.computeIfAbsent(cargoKey, k -> new ArrayList<>());
-
-                Map<String, Object> funcData = new LinkedHashMap<>();
-                funcData.put("id", f.getId());
-                funcData.put("nome", f.getNomeCompleto());
-                funcData.put("salario", f.getSalarioAtual());
-                funcData.put("dataAdmissao", f.getDataAdmissao() != null ? f.getDataAdmissao().toString() : null);
-                cargoMap.get(cargoKey).add(funcData);
+            // Buscar funcionários ativos do departamento
+            List<Funcionario> funcionarios;
+            try {
+                funcionarios = funcionarioRepository.findAtivosByDepartamentoId(dept.getId());
+            } catch (Exception e) {
+                funcionarios = List.of();
             }
 
-            // Também incluir cargos sem funcionários e adicionar metadados do cargo
-            var cargos = cargoService.search(null, dept.getId(), null);
-            // Mapear cargo título -> CargoResponse para metadata
-            Map<String, proj.paratodos.dto.CargoResponse> cargoMeta = new LinkedHashMap<>();
-            for (var cargo : cargos) {
-                cargoMeta.put(cargo.titulo(), cargo);
-                if (!cargoMap.containsKey(cargo.titulo())) {
-                    cargoMap.put(cargo.titulo(), new ArrayList<>());
+            // Mapear funcionários por cargo id
+            Map<Long, List<Map<String, Object>>> funcPorCargo = new LinkedHashMap<>();
+            for (Funcionario f : funcionarios) {
+                Long cargoId = f.getCargo() != null ? f.getCargo().getId() : null;
+                if (cargoId != null) {
+                    funcPorCargo.computeIfAbsent(cargoId, k -> new ArrayList<>());
+                    Map<String, Object> funcData = new LinkedHashMap<>();
+                    funcData.put("id", f.getId());
+                    funcData.put("nome", f.getNomeCompleto());
+                    funcData.put("salario", f.getSalarioAtual());
+                    funcData.put("dataAdmissao", f.getDataAdmissao() != null ? f.getDataAdmissao().toString() : null);
+                    funcPorCargo.get(cargoId).add(funcData);
                 }
             }
 
             List<Map<String, Object>> cargosList = new ArrayList<>();
-            for (var entry : cargoMap.entrySet()) {
+            for (Cargo cargo : cargos) {
                 Map<String, Object> cargoData = new LinkedHashMap<>();
-                cargoData.put("titulo", entry.getKey());
-                cargoData.put("funcionarios", entry.getValue());
-                // Adicionar metadados do cargo
-                var meta = cargoMeta.get(entry.getKey());
-                if (meta != null) {
-                    cargoData.put("id", meta.id());
-                    cargoData.put("nivel", meta.nivel());
-                    cargoData.put("salarioMinimo", meta.salarioMinimo());
-                    cargoData.put("salarioMaximo", meta.salarioMaximo());
-                    cargoData.put("ativo", meta.ativo());
-                    cargoData.put("ocupantes", meta.ocupantes());
-                    // Benefícios vinculados ao cargo
-                    List<String> beneficioNomes = tipoBeneficioRepository.findByCargoId(meta.id())
+                cargoData.put("id", cargo.getId());
+                cargoData.put("titulo", cargo.getTitulo());
+                cargoData.put("nivel", cargo.getNivel());
+                cargoData.put("salarioMinimo", cargo.getSalarioMinimo());
+                cargoData.put("salarioMaximo", cargo.getSalarioMaximo());
+                cargoData.put("ativo", cargo.getAtivo());
+
+                List<Map<String, Object>> funcs = funcPorCargo.getOrDefault(cargo.getId(), List.of());
+                cargoData.put("funcionarios", funcs);
+                cargoData.put("ocupantes", funcs.size());
+
+                // Benefícios vinculados ao cargo
+                try {
+                    List<String> beneficioNomes = tipoBeneficioRepository.findByCargoId(cargo.getId())
                             .stream().map(TipoBeneficio::getNome).toList();
                     cargoData.put("beneficios", beneficioNomes);
+                } catch (Exception e) {
+                    cargoData.put("beneficios", List.of());
                 }
+
                 cargosList.add(cargoData);
             }
 
