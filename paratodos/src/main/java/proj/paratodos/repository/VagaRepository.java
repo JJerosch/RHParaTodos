@@ -9,17 +9,19 @@ import java.util.List;
 
 public interface VagaRepository extends JpaRepository<Vaga, Long> {
 
-    @Query("SELECT v FROM Vaga v " +
+    @Query("SELECT DISTINCT v FROM Vaga v " +
            "LEFT JOIN FETCH v.departamento " +
            "LEFT JOIN FETCH v.cargo " +
            "LEFT JOIN FETCH v.criadoPor " +
+           "LEFT JOIN FETCH v.beneficios " +
            "ORDER BY v.criadoEm DESC")
     List<Vaga> findAllWithDetails();
 
-    @Query("SELECT v FROM Vaga v " +
+    @Query("SELECT DISTINCT v FROM Vaga v " +
            "LEFT JOIN FETCH v.departamento " +
            "LEFT JOIN FETCH v.cargo " +
            "LEFT JOIN FETCH v.criadoPor " +
+           "LEFT JOIN FETCH v.beneficios " +
            "WHERE v.status = :status " +
            "ORDER BY v.criadoEm DESC")
     List<Vaga> findByStatusWithDetails(@Param("status") String status);
@@ -28,6 +30,7 @@ public interface VagaRepository extends JpaRepository<Vaga, Long> {
            "LEFT JOIN FETCH v.departamento " +
            "LEFT JOIN FETCH v.cargo " +
            "LEFT JOIN FETCH v.criadoPor " +
+           "LEFT JOIN FETCH v.beneficios " +
            "WHERE v.id = :id")
     Vaga findByIdWithDetails(@Param("id") Long id);
 
