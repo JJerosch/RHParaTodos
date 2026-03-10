@@ -100,20 +100,6 @@
             <span class="nav-icon"><img th:src="@{/assets/hourglass.png}" alt="" width="20" height="20"></span>
             <span class="nav-text">Meu Perfil</span>
         </a>
-        <!-- Administração -->
-        <div class="nav-section" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE,DP_CHEFE">Administração</div>
-        <a th:href="@{/reports}" class="nav-item"
-           th:classappend="${activePage == 'reports'} ? ' active'"
-           data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE,DP_CHEFE">
-            <span class="nav-icon"><img th:src="@{/assets/file-text.png}" alt="" width="20" height="20"></span>
-            <span class="nav-text">Relatórios</span>
-        </a>
-        <a th:href="@{/settings}" class="nav-item"
-           th:classappend="${activePage == 'settings'} ? ' active'"
-           data-roles="ADMIN">
-            <span class="nav-icon"><img th:src="@{/assets/shield (1).png}" alt="" width="20" height="20"></span>
-            <span class="nav-text">Configurações</span>
-        </a>
     </nav>
 </aside>
 
@@ -132,10 +118,11 @@
             <span class="nav-icon"><img th:src="@{/assets/hourglass.png}" alt="" width="20" height="20"></span>
             <span class="nav-text">Ponto</span>
         </a>
-        <a th:href="@{/payslips}" class="nav-item"
-           th:classappend="${activePage == 'payslips'} ? ' active'">
-            <span class="nav-icon"><img th:src="@{/assets/banknote (1).png}" alt="" width="20" height="20"></span>
-            <span class="nav-text">Holerites</span>
+        <a th:href="@{/meu-perfil}" class="nav-item"
+           th:classappend="${activePage == 'meu-perfil'} ? ' active'"
+           data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE,DP_CHEFE,DP_ASSISTENTE,EMPLOYEE">
+            <span class="nav-icon"><img th:src="@{/assets/hourglass.png}" alt="" width="20" height="20"></span>
+            <span class="nav-text">Meu Perfil</span>
         </a>
     </nav>
 </aside>

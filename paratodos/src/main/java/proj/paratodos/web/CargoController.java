@@ -24,6 +24,8 @@ import proj.paratodos.domain.TipoBeneficio;
 import proj.paratodos.repository.CargoRepository;
 import proj.paratodos.repository.FuncionarioRepository;
 import proj.paratodos.repository.TipoBeneficioRepository;
+import proj.paratodos.repository.VagaRepository;
+import proj.paratodos.repository.CandidaturaRepository;
 
 @RestController
 @RequestMapping("/api/positions")
@@ -34,17 +36,23 @@ public class CargoController {
     private final DepartamentoRepository departamentoRepository;
     private final FuncionarioRepository funcionarioRepository;
     private final TipoBeneficioRepository tipoBeneficioRepository;
+    private final VagaRepository vagaRepository;
+    private final CandidaturaRepository candidaturaRepository;
 
     public CargoController(CargoService cargoService,
                            CargoRepository cargoRepository,
                            DepartamentoRepository departamentoRepository,
                            FuncionarioRepository funcionarioRepository,
-                           TipoBeneficioRepository tipoBeneficioRepository) {
+                           TipoBeneficioRepository tipoBeneficioRepository,
+                           VagaRepository vagaRepository,
+                           CandidaturaRepository candidaturaRepository) {
         this.cargoService = cargoService;
         this.cargoRepository = cargoRepository;
         this.departamentoRepository = departamentoRepository;
         this.funcionarioRepository = funcionarioRepository;
         this.tipoBeneficioRepository = tipoBeneficioRepository;
+        this.vagaRepository = vagaRepository;
+        this.candidaturaRepository = candidaturaRepository;
     }
 
     /** GET /api/positions?search=&departamentoId=&nivel= */
@@ -156,6 +164,35 @@ public class CargoController {
             deptData.put("totalFuncionarios", funcionarios.size());
             deptData.put("cargos", cargosList);
             result.add(deptData);
+        }
+        return result;
+    }
+
+    /** GET /api/positions/available - cargos com vagas abertas e slots disponíveis */
+    @GetMapping("/available")
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> listAvailableByDepartment(@RequestParam(required = false) Long departamentoId) {
+        List<Cargo> cargos = departamentoId == null
+                ? cargoRepository.findByAtivoTrueOrderByTituloAsc()
+                : cargoRepository.findByDepartamentoIdAndAtivoTrueOrderByTituloAsc(departamentoId);
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (Cargo cargo : cargos) {
+            long totalRemaining = 0;
+            List<proj.paratodos.domain.Vaga> vagas = vagaRepository.findActiveByCargoId(cargo.getId());
+            for (proj.paratodos.domain.Vaga vaga : vagas) {
+                long contratados = candidaturaRepository.countContratadosByVagaId(vaga.getId());
+                long remaining = vaga.getQuantidade() - contratados;
+                if (remaining > 0) totalRemaining += remaining;
+            }
+            if (totalRemaining > 0) {
+                Map<String, Object> cargoData = new LinkedHashMap<>();
+                cargoData.put("id", cargo.getId());
+                cargoData.put("titulo", cargo.getTitulo());
+                cargoData.put("nivel", cargo.getNivel());
+                cargoData.put("departamentoId", cargo.getDepartamento() != null ? cargo.getDepartamento().getId() : null);
+                cargoData.put("remainingSlots", totalRemaining);
+                result.add(cargoData);
+            }
         }
         return result;
     }

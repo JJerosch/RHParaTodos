@@ -322,12 +322,7 @@
                         <option value="">Selecione</option>
                       </select>
                     </div>
-                    <div class="form-group">
-                      <label class="form-label">Cargo *</label>
-                      <select class="form-select" name="cargoId" id="formCargoSelect">
-                        <option value="">Selecione</option>
-                      </select>
-                    </div>
+                    <!-- Cargo removed from employee modal: assignments handled via Promoções -->
                   </div>
                   <div class="form-group">
                     <label class="form-label">Salário</label>
@@ -343,12 +338,7 @@
                         <option value="">Selecione</option>
                       </select>
                     </div>
-                    <div class="form-group">
-                      <label class="form-label">Cargo</label>
-                      <select class="form-select" name="editCargoId" id="editCargoSelect">
-                        <option value="">Selecione</option>
-                      </select>
-                    </div>
+                    <!-- Cargo editing removed from modal; use Promoções page to change cargo -->
                   </div>
                   <div class="form-group">
                     <label class="form-label">Salário</label>
@@ -522,6 +512,7 @@
 
     let departamentos = [];
     let cargos = [];
+    let availableCargos = [];
 
     const userRole = window.__CURRENT_USER__.role;
     const isDP = userRole === 'DP_CHEFE' || userRole === 'DP_ASSISTENTE';
@@ -559,27 +550,31 @@
 
     // ── Dropdowns (da API real) ──
     async function loadDropdowns() {
-      const [depts, cgs, gestores] = await Promise.all([
+      const [depts, cgsAll, gestores] = await Promise.all([
         api('/api/employees/departamentos'),
         api('/api/employees/cargos'),
         api('/api/employees/gestores')
       ]);
 
       departamentos = depts || [];
-      cargos = cgs || [];
+      cargos = cgsAll || [];
+      try {
+        const cgsAvailable = await api('/api/positions/available');
+        availableCargos = cgsAvailable || [];
+      } catch (e) {
+        // Fallback: use all cargos if endpoint not available
+        availableCargos = cargos || [];
+      }
 
       const filterDept = document.getElementById("filterDepartment");
       const formDept   = document.getElementById("formDeptSelect");
-      const formCargo  = document.getElementById("formCargoSelect");
       const formGestor = document.getElementById("formGestorSelect");
 
       departamentos.forEach(d => {
         filterDept.innerHTML += '<option value="' + d.id + '">' + d.nome + '</option>';
         formDept.innerHTML   += '<option value="' + d.id + '">' + d.nome + '</option>';
       });
-      cargos.forEach(c => {
-        formCargo.innerHTML += '<option value="' + c.id + '">' + c.titulo + '</option>';
-      });
+      // Cargo options removed from employee modal — handled in Promoções.
       (gestores || []).forEach(g => {
         formGestor.innerHTML += '<option value="' + g.id + '">' + g.nome + '</option>';
       });
@@ -771,15 +766,11 @@
             Form.populate('employeeForm', emp);
             // Populate edit dropdowns for dept/cargo/salary
             const editDept = document.getElementById("editDeptSelect");
-            const editCargo = document.getElementById("editCargoSelect");
             editDept.innerHTML = '<option value="">Selecione</option>';
             departamentos.forEach(d => {
               editDept.innerHTML += '<option value="' + d.id + '"' + (emp.departamentoId === d.id ? ' selected' : '') + '>' + d.nome + '</option>';
             });
-            editCargo.innerHTML = '<option value="">Selecione</option>';
-            cargos.forEach(c => {
-              editCargo.innerHTML += '<option value="' + c.id + '"' + (emp.cargoId === c.id ? ' selected' : '') + '>' + c.titulo + '</option>';
-            });
+            // Cargo editing removed from modal; changes should be requested via Promoções page.
             document.getElementById("editSalarioInput").value = emp.salarioAtual ? formatCurrency(emp.salarioAtual).replace('R$\u00a0', '').replace('R$ ', '') : '';
           }
         } catch (e) { Toast.error('Erro ao carregar funcionário'); return; }
@@ -889,7 +880,7 @@
 
           // Professional fields from edit section
           const editDeptId = document.getElementById("editDeptSelect").value;
-          const editCargoId = document.getElementById("editCargoSelect").value;
+          const editCargoEl = document.getElementById("editCargoSelect"); const editCargoId = editCargoEl ? editCargoEl.value : null;
           const editSalarioRaw = document.getElementById("editSalarioInput").value;
           const editSalario = editSalarioRaw ? parseFloat(String(editSalarioRaw).replace(/[^\d,]/g, '').replace(',', '.')) : null;
 
@@ -910,6 +901,13 @@
 
           const dadosAntes = {};
           Object.keys(dadosDepois).forEach(k => { dadosAntes[k] = currentSnapshot[k] || null; });
+
+          // Client-side: verificar se cargo solicitado possui vagas disponíveis
+          if (dadosDepois.cargoId) {
+            const available = await api('/api/positions/available');
+            const ok = (available || []).some(a => a.id === Number(dadosDepois.cargoId));
+            if (!ok) { Toast.error('Cargo selecionado não possui vagas disponíveis'); return; }
+          }
 
           await api('/api/solicitacoes', {
             method: 'POST',

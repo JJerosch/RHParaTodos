@@ -37,6 +37,15 @@
         </div>
       </div>
 
+      <!-- Lista de vagas disponíveis -->
+      <div class="positions-bar">
+        <label style="font-weight:600; margin-right:0.5rem;">Vagas disponíveis:</label>
+        <div id="positionsList" style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:1rem;">
+          <div style="color:var(--gray-500)">Carregando vagas...</div>
+        </div>
+        <small style="color:var(--gray-500); display:block; margin-bottom:1rem;">Selecione uma vaga para que, ao clicar em 'Promover' em um funcionário, ela seja predefinida no formulário.</small>
+      </div>
+
       <!-- Lista de funcionários -->
       <div class="table-container">
         <table class="data-table">
@@ -45,12 +54,11 @@
               <th>Funcionário</th>
               <th>Cargo</th>
               <th>Departamento</th>
-              <th class="hide-mobile">Admissão</th>
               <th>Ação</th>
             </tr>
           </thead>
           <tbody id="tableBody">
-            <tr><td colspan="5" style="text-align:center; padding: 2rem; color: var(--gray-400);">Carregando...</td></tr>
+            <tr><td colspan="4" style="text-align:center; padding: 2rem; color: var(--gray-400);">Carregando...</td></tr>
           </tbody>
         </table>
       </div>
@@ -68,6 +76,7 @@
         <div id="funcInfo" style="background: var(--gray-50); border-radius: var(--radius-md); padding: var(--spacing-4); margin-bottom: var(--spacing-4);"></div>
         <form id="promotionForm">
           <input type="hidden" name="funcionarioId" id="funcIdInput">
+          <input type="hidden" name="cargoNovoId" id="cargoNovoInput">
           <div class="form-group">
             <label class="form-label">Tipo *</label>
             <select class="form-select" name="tipo" required>
@@ -80,12 +89,6 @@
             <div class="form-group">
               <label class="form-label">Novo Departamento</label>
               <select class="form-select" name="departamentoNovoId" id="deptSelect">
-                <option value="">Manter atual</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Novo Cargo</label>
-              <select class="form-select" name="cargoNovoId" id="cargoSelect">
                 <option value="">Manter atual</option>
               </select>
             </div>
@@ -135,17 +138,15 @@
 
     async function loadData() {
       try {
-        const [funcsRes, deptsRes, cargosRes] = await Promise.all([
+        const [funcsRes, deptsRes] = await Promise.all([
           fetch('/api/employees?size=10000&status=ATIVO&sort=nomeCompleto,asc', { credentials: 'same-origin' }),
-          api('/api/employees/departamentos'),
-          api('/api/employees/cargos')
+          api('/api/employees/departamentos')
         ]);
 
         const page = await funcsRes.json();
         // Filtrar apenas funcionários com cargo e departamento
         allFuncionarios = (page.content || []).filter(f => f.cargoId && f.departamentoId);
         departamentos = deptsRes || [];
-        cargos = cargosRes || [];
 
         // Preencher dropdowns do filtro
         const filterDept = document.getElementById("filterDept");
@@ -158,10 +159,22 @@
         departamentos.forEach(d => {
           deptSelect.innerHTML += '<option value="' + d.id + '">' + d.nome + '</option>';
         });
-        const cargoSelect = document.getElementById("cargoSelect");
-        cargos.forEach(c => {
-          cargoSelect.innerHTML += '<option value="' + c.id + '">' + c.titulo + '</option>';
-        });
+
+        // Carregar vagas disponíveis e renderizar na página principal
+        const positionsList = document.getElementById('positionsList');
+        let avail = [];
+        try {
+          avail = await api('/api/positions/available');
+        } catch (e) {
+          avail = await api('/api/employees/cargos').catch(() => []);
+        }
+        window.availablePositions = avail || [];
+        window.selectedPositionId = null;
+        if ((avail || []).length === 0) {
+          positionsList.innerHTML = '<div style="color:var(--gray-500)">Nenhuma vaga disponível encontrada</div>';
+        } else {
+          positionsList.innerHTML = (avail || []).map(p => '<button type="button" class="position-pill" data-id="' + p.id + '" onclick="selectPosition(' + p.id + ')" style="padding:0.35rem 0.6rem;border-radius:0.5rem;border:1px solid var(--gray-200);background:#fff;cursor:pointer">' + p.titulo + (p.remainingSlots ? ' (' + p.remainingSlots + ')' : '') + '</button>').join('');
+        }
 
       } catch (e) {
         console.error('Erro ao carregar dados:', e);
@@ -192,7 +205,7 @@
     function render() {
       const tbody = document.getElementById("tableBody");
       if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5"><div class="empty-state"><h3 class="empty-state-title">Nenhum funcionário encontrado</h3><p class="empty-state-text">Apenas funcionários com cargo e departamento atribuídos aparecem aqui.</p></div></td></tr>';
+        tbody.innerHTML = '<tr><td colspan="4"><div class="empty-state"><h3 class="empty-state-title">Nenhum funcionário encontrado</h3><p class="empty-state-text">Apenas funcionários com cargo e departamento atribuídos aparecem aqui.</p></div></td></tr>';
         return;
       }
       tbody.innerHTML = filtered.map(f => `
@@ -205,7 +218,6 @@
           </td>
           <td>${f.cargoTitulo || '-'}</td>
           <td>${f.departamentoNome || '-'}</td>
-          <td class="hide-mobile">${formatDate(f.dataAdmissao)}</td>
           <td>
             <button class="btn btn-primary" style="padding: 0.4rem 1rem; font-size: 0.85rem;" onclick="openPromoteModal(${f.id})">Promover</button>
           </td>
@@ -213,20 +225,48 @@
       `).join('');
     }
 
+    function selectPosition(id) {
+      window.selectedPositionId = id;
+      const buttons = document.querySelectorAll('#positionsList .position-pill');
+      buttons.forEach(b => {
+        if (String(b.dataset.id) === String(id)) {
+          b.classList.add('selected');
+          b.style.background = 'var(--primary-600)';
+          b.style.color = '#fff';
+        } else {
+          b.classList.remove('selected');
+          b.style.background = '';
+          b.style.color = '';
+        }
+      });
+    }
+
     function openPromoteModal(funcId) {
       const func = allFuncionarios.find(f => f.id === funcId);
       if (!func) return;
-
-      document.getElementById("promotionForm").reset();
+n      document.getElementById("promotionForm").reset();
       document.getElementById("funcIdInput").value = funcId;
+      const selectedId = window.selectedPositionId;
+      let selectedPosHtml = '';
+      if (selectedId && window.availablePositions) {
+        const pos = (window.availablePositions || []).find(p => p.id === selectedId);
+        if (pos) {
+          document.getElementById('cargoNovoInput').value = selectedId;
+          selectedPosHtml = '<p style="margin: var(--spacing-1) 0 0; color: var(--gray-700);"><strong>Novo Cargo: </strong>' + (pos.titulo || '') + (pos.remainingSlots ? ' (' + pos.remainingSlots + ')' : '') + '</p>';
+        } else {
+          document.getElementById('cargoNovoInput').value = '';
+        }
+      } else {
+        document.getElementById('cargoNovoInput').value = '';
+      }
+
       document.getElementById("funcInfo").innerHTML = `
         <p style="margin: 0;"><strong>${func.nomeCompleto}</strong></p>
         <p style="margin: var(--spacing-1) 0 0; color: var(--gray-500); font-size: var(--font-size-sm);">
           ${func.cargoTitulo || '-'} - ${func.departamentoNome || '-'}
         </p>
-      `;
-
-      Modal.open('promotionModal');
+        ` + selectedPosHtml;
+n      Modal.open('promotionModal');
       Mask.initAll();
     }
 

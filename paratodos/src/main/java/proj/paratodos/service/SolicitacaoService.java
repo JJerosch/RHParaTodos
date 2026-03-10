@@ -22,6 +22,7 @@ public class SolicitacaoService {
     private final CargoRepository cargoRepository;
     private final DepartamentoRepository departamentoRepository;
     private final VagaRepository vagaRepository;
+    private final CandidaturaRepository candidaturaRepository;
     private final ObjectMapper objectMapper;
     private final EntityManager entityManager;
 
@@ -31,6 +32,7 @@ public class SolicitacaoService {
                               CargoRepository cargoRepository,
                               DepartamentoRepository departamentoRepository,
                               VagaRepository vagaRepository,
+                              CandidaturaRepository candidaturaRepository,
                               ObjectMapper objectMapper,
                               EntityManager entityManager) {
         this.solicitacaoRepository = solicitacaoRepository;
@@ -39,6 +41,7 @@ public class SolicitacaoService {
         this.cargoRepository = cargoRepository;
         this.departamentoRepository = departamentoRepository;
         this.vagaRepository = vagaRepository;
+        this.candidaturaRepository = candidaturaRepository;
         this.objectMapper = objectMapper;
         this.entityManager = entityManager;
     }
@@ -113,6 +116,33 @@ public class SolicitacaoService {
         s.setReferenciaId(request.referenciaId());
         s.setDadosAntes(request.dadosAntes());
         s.setDadosDepois(request.dadosDepois());
+
+        // Validação: se a solicitação envolve mudança de cargo (promoção/transferência/alteração), verificar vagas disponíveis
+        if ((s.getTipo() == TipoSolicitacao.ALTERACAO_FUNCIONARIO || s.getTipo() == TipoSolicitacao.PROMOCAO || s.getTipo() == TipoSolicitacao.TRANSFERENCIA)
+                && request.dadosDepois() != null && !request.dadosDepois().isBlank()) {
+            try {
+                @SuppressWarnings("unchecked")
+                java.util.Map<String, Object> dados = objectMapper.readValue(request.dadosDepois(), java.util.Map.class);
+                Object cargoObj = dados.get("cargoId") != null ? dados.get("cargoId") : dados.get("cargoNovoId");
+                if (cargoObj != null) {
+                    Long cargoId = cargoObj instanceof Number n ? n.longValue() : Long.valueOf(cargoObj.toString());
+                    long totalRemaining = 0;
+                    java.util.List<proj.paratodos.domain.Vaga> vagas = vagaRepository.findActiveByCargoId(cargoId);
+                    for (proj.paratodos.domain.Vaga vaga : vagas) {
+                        long contratados = candidaturaRepository.countContratadosByVagaId(vaga.getId());
+                        long remaining = vaga.getQuantidade() - contratados;
+                        if (remaining > 0) totalRemaining += remaining;
+                    }
+                    if (totalRemaining <= 0) {
+                        throw new IllegalArgumentException("Não há vagas disponíveis para o cargo selecionado");
+                    }
+                }
+            } catch (IllegalArgumentException e) {
+                throw e;
+            } catch (Exception ex) {
+                throw new RuntimeException("Erro ao validar solicitação: " + ex.getMessage(), ex);
+            }
+        }
 
         s = solicitacaoRepository.save(s);
         return SolicitacaoResponse.fromEntity(s, resolveDescricao(s));

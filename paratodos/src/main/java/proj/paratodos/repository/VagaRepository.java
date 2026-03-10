@@ -38,4 +38,7 @@ public interface VagaRepository extends JpaRepository<Vaga, Long> {
 
     @Query("SELECT COUNT(v) FROM Vaga v WHERE v.departamento.id = :deptId AND v.status IN ('ABERTA','EM_ANDAMENTO')")
     long countActiveByDepartamentoId(@Param("deptId") Long deptId);
+
+    @Query("SELECT v FROM Vaga v WHERE v.cargo.id = :cargoId AND v.status IN ('ABERTA','EM_ANDAMENTO')")
+    List<Vaga> findActiveByCargoId(@Param("cargoId") Long cargoId);
 }
