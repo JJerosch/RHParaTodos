@@ -1,9 +1,11 @@
 package proj.paratodos.dto;
 
+import proj.paratodos.domain.TipoBeneficio;
 import proj.paratodos.domain.Vaga;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 public record VagaResponse(
         Long id,
@@ -27,10 +29,19 @@ public record VagaResponse(
         Long criadoPorId,
         String criadoPorEmail,
         LocalDateTime criadoEm,
-        LocalDateTime atualizadoEm
+        LocalDateTime atualizadoEm,
+        List<BeneficioInfo> beneficios
 ) {
 
+    public record BeneficioInfo(Long id, String nome) {}
+
     public static VagaResponse fromEntity(Vaga v) {
+        List<BeneficioInfo> beneficioList = v.getBeneficios() != null
+                ? v.getBeneficios().stream()
+                    .map(b -> new BeneficioInfo(b.getId(), b.getNome()))
+                    .toList()
+                : List.of();
+
         return new VagaResponse(
                 v.getId(),
                 v.getTitulo(),
@@ -53,7 +64,8 @@ public record VagaResponse(
                 v.getCriadoPor() != null ? v.getCriadoPor().getId() : null,
                 v.getCriadoPor() != null ? v.getCriadoPor().getEmail() : null,
                 v.getCriadoEm(),
-                v.getAtualizadoEm()
+                v.getAtualizadoEm(),
+                beneficioList
         );
     }
 }

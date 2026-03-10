@@ -6,6 +6,8 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -73,6 +75,14 @@ public class Vaga {
 
     @Column(name = "atualizado_em")
     private LocalDateTime atualizadoEm;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "vagas_beneficios",
+            joinColumns = @JoinColumn(name = "vaga_id"),
+            inverseJoinColumns = @JoinColumn(name = "tipo_beneficio_id")
+    )
+    private Set<TipoBeneficio> beneficios = new HashSet<>();
 
     @PrePersist
     void prePersist() {

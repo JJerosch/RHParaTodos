@@ -4,6 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 public record VagaRequest(
 
@@ -33,5 +34,7 @@ public record VagaRequest(
 
         String requisitos,
 
-        String status
+        String status,
+
+        List<Long> beneficioIds
 ) {}

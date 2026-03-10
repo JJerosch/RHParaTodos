@@ -129,8 +129,13 @@
             <div class="form-group"><label class="form-label">Salário Mínimo</label><input type="text" class="form-input" name="salarioMin" data-mask="currency"></div>
             <div class="form-group"><label class="form-label">Salário Máximo</label><input type="text" class="form-input" name="salarioMax" data-mask="currency"></div>
           </div>
+          <div class="form-group"><label class="form-label">Local de Trabalho</label><input type="text" class="form-input" name="localTrabalho" placeholder="Cidade / Escritório"></div>
           <div class="form-group"><label class="form-label">Descrição</label><textarea class="form-input" name="descricao" rows="3"></textarea></div>
           <div class="form-group"><label class="form-label">Requisitos</label><textarea class="form-input" name="requisitos" rows="3"></textarea></div>
+          <div class="form-group">
+            <label class="form-label">Benefícios</label>
+            <div id="beneficiosCheckboxes" style="display:flex;flex-wrap:wrap;gap:8px 16px;padding:8px 0;"></div>
+          </div>
         </form>
       </div>
       <div class="modal-footer">
@@ -239,12 +244,15 @@
     const VAPI = '/api/recruitment';
     let vagas = [];
     let candidaturas = [];
-    let departmentsData = []; // from /api/positions/by-department
+    let departmentsData = [];
+    let allBeneficios = [];
     const role = window.__CURRENT_USER__.role;
     const isChefe = role === 'RH_CHEFE' || role === 'ADMIN';
 
     const statusLabels = { RASCUNHO: 'Rascunho', ABERTA: 'Aberta', EM_ANDAMENTO: 'Em Andamento', PAUSADA: 'Pausada', ENCERRADA: 'Encerrada', CANCELADA: 'Cancelada' };
     const statusBadge = { RASCUNHO: 'badge-info', ABERTA: 'badge-success', EM_ANDAMENTO: 'badge-warning', PAUSADA: 'badge-warning', ENCERRADA: 'badge-danger', CANCELADA: 'badge-danger' };
+    const prioridadeLabels = { BAIXA: 'Baixa', MEDIA: 'Média', ALTA: 'Alta', URGENTE: 'Urgente' };
+    const contratoLabels = { CLT: 'CLT', PJ: 'PJ', ESTAGIO: 'Estágio', TEMPORARIO: 'Temporário' };
     const modeloLabels = { PRESENCIAL: 'Presencial', HIBRIDO: 'Híbrido', REMOTO: 'Remoto' };
     const etapaLabels = { TRIAGEM: 'Triagem', ENTREVISTA_RH: 'Entrevista RH', TESTE_TECNICO: 'Teste Técnico', ENTREVISTA_GESTOR: 'Entrevista Gestor', PROPOSTA: 'Proposta', CONTRATADO: 'Contratado', REJEITADO: 'Rejeitado', DESISTIU: 'Desistiu' };
 
@@ -264,8 +272,28 @@
       Auth.applyRoleVisibility(document);
       Auth.applyActionVisibility(document);
       Mask.initAll();
-      await Promise.all([loadDropdowns(), loadVagas(), loadStats()]);
+      await Promise.all([loadDropdowns(), loadBeneficios(), loadVagas(), loadStats()]);
     });
+
+    async function loadBeneficios() {
+      try {
+        allBeneficios = await api('/api/benefits') || [];
+      } catch (e) { console.error('Erro beneficios:', e); allBeneficios = []; }
+    }
+
+    function renderBeneficiosCheckboxes(selectedIds) {
+      const container = document.getElementById("beneficiosCheckboxes");
+      if (allBeneficios.length === 0) {
+        container.innerHTML = '<span style="color:var(--gray-400);font-size:var(--font-size-sm);">Nenhum benefício cadastrado</span>';
+        return;
+      }
+      const ids = selectedIds || [];
+      container.innerHTML = allBeneficios.filter(b => b.ativo !== false).map(b =>
+        '<label style="display:flex;align-items:center;gap:4px;font-size:var(--font-size-sm);cursor:pointer;">' +
+          '<input type="checkbox" name="beneficioIds" value="' + b.id + '"' + (ids.includes(b.id) ? ' checked' : '') + '> ' + b.nome +
+        '</label>'
+      ).join('');
+    }
 
     async function loadDropdowns() {
       try {
@@ -275,12 +303,11 @@
         departmentsData.forEach(d => {
           jobDept.innerHTML += '<option value="' + d.id + '">' + d.nome + '</option>';
         });
-        // Cargo select starts empty, populated when department is chosen
         document.getElementById("jobCargoSelect").innerHTML = '<option value="">Selecione o departamento primeiro</option>';
       } catch (e) { console.error('Erro dropdowns:', e); }
     }
 
-    function onDeptChange() {
+    function onDeptChange(selectedCargoId) {
       const deptId = Number(document.getElementById("jobDeptSelect").value);
       const cargoSelect = document.getElementById("jobCargoSelect");
       cargoSelect.innerHTML = '<option value="">Selecione</option>';
@@ -289,14 +316,9 @@
       const dept = departmentsData.find(d => d.id === deptId);
       if (!dept || !dept.cargos) return;
 
-      // Filtra apenas cargos vagos (sem ocupantes)
-      const vagos = dept.cargos.filter(c => c.ocupantes === 0);
-      if (vagos.length === 0) {
-        cargoSelect.innerHTML = '<option value="">Nenhum cargo vago neste departamento</option>';
-        return;
-      }
-      vagos.forEach(c => {
-        cargoSelect.innerHTML += '<option value="' + c.id + '">' + c.titulo + '</option>';
+      dept.cargos.forEach(c => {
+        const opt = '<option value="' + c.id + '"' + (selectedCargoId && c.id === selectedCargoId ? ' selected' : '') + '>' + c.titulo + '</option>';
+        cargoSelect.innerHTML += opt;
       });
     }
 
@@ -339,7 +361,11 @@
         grid.innerHTML = '<div class="empty-state"><h3 class="empty-state-title">Nenhuma vaga cadastrada</h3></div>';
         return;
       }
-      grid.innerHTML = vagas.map(j => `
+      grid.innerHTML = vagas.map(j => {
+        const beneficiosTags = (j.beneficios || []).map(b =>
+          '<span style="background:var(--gray-100);padding:2px 8px;border-radius:10px;font-size:var(--font-size-xs);">' + b.nome + '</span>'
+        ).join('');
+        return `
         <div class="job-card">
           <div class="job-header">
             <h3 class="job-title">${j.titulo}</h3>
@@ -351,13 +377,22 @@
           </div>
           <div class="job-meta">
             <span>${j.departamentoNome || '-'}</span>
+            ${j.cargoTitulo ? '<span>' + j.cargoTitulo + '</span>' : ''}
             <span>${modeloLabels[j.modeloTrabalho] || j.modeloTrabalho}</span>
             <span>${j.quantidade} vaga(s)</span>
           </div>
-          <span class="badge ${statusBadge[j.status] || 'badge-info'}">${statusLabels[j.status] || j.status}</span>
-          ${j.salarioMin || j.salarioMax ? '<p style="margin-top: var(--spacing-2); font-size: var(--font-size-sm); color: var(--gray-500);">' + formatCurrency(j.salarioMin) + ' - ' + formatCurrency(j.salarioMax) + '</p>' : ''}
-        </div>
-      `).join('');
+          <div style="display:flex;gap:var(--spacing-2);align-items:center;flex-wrap:wrap;margin-bottom:var(--spacing-2);">
+            <span class="badge ${statusBadge[j.status] || 'badge-info'}">${statusLabels[j.status] || j.status}</span>
+            <span class="badge badge-info">${prioridadeLabels[j.prioridade] || j.prioridade}</span>
+            <span class="badge badge-info">${contratoLabels[j.tipoContrato] || j.tipoContrato || 'CLT'}</span>
+          </div>
+          ${j.salarioMin || j.salarioMax ? '<p style="font-size: var(--font-size-sm); color: var(--gray-500);">' + formatCurrency(j.salarioMin) + ' - ' + formatCurrency(j.salarioMax) + '</p>' : ''}
+          ${j.localTrabalho ? '<p style="font-size:var(--font-size-sm);color:var(--gray-500);margin-top:2px;">Local: ' + j.localTrabalho + '</p>' : ''}
+          ${j.descricao ? '<p style="font-size:var(--font-size-sm);color:var(--gray-600);margin-top:var(--spacing-2);">' + j.descricao.substring(0, 120) + (j.descricao.length > 120 ? '...' : '') + '</p>' : ''}
+          ${j.requisitos ? '<p style="font-size:var(--font-size-xs);color:var(--gray-400);margin-top:var(--spacing-1);"><strong>Requisitos:</strong> ' + j.requisitos.substring(0, 100) + (j.requisitos.length > 100 ? '...' : '') + '</p>' : ''}
+          ${beneficiosTags ? '<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:var(--spacing-2);">' + beneficiosTags + '</div>' : ''}
+        </div>`;
+      }).join('');
     }
 
     async function loadCandidaturas() {
@@ -455,10 +490,22 @@
     function openJobModal(id = null) {
       document.getElementById('jobForm').reset();
       document.getElementById("jobModalTitle").textContent = id ? 'Editar Vaga' : 'Nova Vaga';
+      document.getElementById("jobCargoSelect").innerHTML = '<option value="">Selecione o departamento primeiro</option>';
+
+      let selectedBeneficioIds = [];
       if (id) {
         const v = vagas.find(j => j.id === id);
-        if (v) Form.populate('jobForm', v);
+        if (v) {
+          Form.populate('jobForm', v);
+          // Set the department and trigger cargo loading with selected cargo
+          if (v.departamentoId) {
+            document.getElementById("jobDeptSelect").value = v.departamentoId;
+            onDeptChange(v.cargoId);
+          }
+          selectedBeneficioIds = (v.beneficios || []).map(b => b.id);
+        }
       }
+      renderBeneficiosCheckboxes(selectedBeneficioIds);
       Modal.open('jobModal');
       Mask.initAll();
     }
@@ -470,6 +517,10 @@
       if (!form.checkValidity()) { form.reportValidity(); return; }
       const fd = Form.serialize('jobForm');
 
+      // Collect checked benefício IDs
+      const beneficioIds = Array.from(document.querySelectorAll('#beneficiosCheckboxes input[name="beneficioIds"]:checked'))
+        .map(cb => Number(cb.value));
+
       const body = {
         titulo: fd.titulo,
         descricao: fd.descricao || null,
@@ -480,9 +531,11 @@
         salarioMin: fd.salarioMin ? parseFloat(String(fd.salarioMin).replace(/[^\d,]/g, '').replace(',', '.')) : null,
         salarioMax: fd.salarioMax ? parseFloat(String(fd.salarioMax).replace(/[^\d,]/g, '').replace(',', '.')) : null,
         tipoContrato: fd.tipoContrato || 'CLT',
+        localTrabalho: fd.localTrabalho || null,
         modeloTrabalho: fd.modeloTrabalho || 'PRESENCIAL',
         requisitos: fd.requisitos || null,
-        status: 'RASCUNHO'
+        status: 'RASCUNHO',
+        beneficioIds: beneficioIds
       };
 
       try {

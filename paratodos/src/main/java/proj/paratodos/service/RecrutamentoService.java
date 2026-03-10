@@ -10,6 +10,7 @@ import proj.paratodos.repository.*;
 import java.text.Normalizer;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 
 @Service
@@ -23,6 +24,7 @@ public class RecrutamentoService {
     private final UsuarioRepository usuarioRepository;
     private final FuncionarioRepository funcionarioRepository;
     private final PromocaoRepository promocaoRepository;
+    private final TipoBeneficioRepository tipoBeneficioRepository;
     private final PasswordEncoder passwordEncoder;
 
     public RecrutamentoService(VagaRepository vagaRepository,
@@ -33,6 +35,7 @@ public class RecrutamentoService {
                                UsuarioRepository usuarioRepository,
                                FuncionarioRepository funcionarioRepository,
                                PromocaoRepository promocaoRepository,
+                               TipoBeneficioRepository tipoBeneficioRepository,
                                PasswordEncoder passwordEncoder) {
         this.vagaRepository = vagaRepository;
         this.candidatoRepository = candidatoRepository;
@@ -42,6 +45,7 @@ public class RecrutamentoService {
         this.usuarioRepository = usuarioRepository;
         this.funcionarioRepository = funcionarioRepository;
         this.promocaoRepository = promocaoRepository;
+        this.tipoBeneficioRepository = tipoBeneficioRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -92,14 +96,20 @@ public class RecrutamentoService {
         Usuario criador = usuarioRepository.findById(criadoPorId).orElse(null);
         v.setCriadoPor(criador);
 
+        if (request.beneficioIds() != null && !request.beneficioIds().isEmpty()) {
+            v.setBeneficios(new HashSet<>(tipoBeneficioRepository.findAllById(request.beneficioIds())));
+        }
+
         v = vagaRepository.save(v);
         return VagaResponse.fromEntity(v);
     }
 
     @Transactional
     public VagaResponse updateVaga(Long id, VagaRequest request) {
-        Vaga v = vagaRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Vaga nao encontrada: " + id));
+        Vaga v = vagaRepository.findByIdWithDetails(id);
+        if (v == null) {
+            throw new IllegalArgumentException("Vaga nao encontrada: " + id);
+        }
 
         v.setTitulo(request.titulo());
         v.setDescricao(request.descricao());
@@ -128,6 +138,10 @@ public class RecrutamentoService {
         }
         if (request.cargoId() != null) {
             v.setCargo(cargoRepository.findById(request.cargoId()).orElse(null));
+        }
+
+        if (request.beneficioIds() != null) {
+            v.setBeneficios(new HashSet<>(tipoBeneficioRepository.findAllById(request.beneficioIds())));
         }
 
         v = vagaRepository.save(v);
