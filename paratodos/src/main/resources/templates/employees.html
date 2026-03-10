@@ -334,13 +334,25 @@
                     <input type="text" class="form-input" name="salarioAtual" data-mask="currency">
                   </div>
                 </div>
-                <!-- Info somente leitura quando editando -->
+                <!-- Campos de cargo/departamento/salário na edição -->
                 <div id="professionalFieldsEdit" style="display: none;">
-                  <div style="background: var(--gray-100); border-radius: var(--radius-md); padding: var(--spacing-4); margin-bottom: var(--spacing-4);">
-                    <p style="margin: 0 0 var(--spacing-2); color: var(--gray-500); font-size: var(--font-size-sm);">Cargo, departamento e salário são gerenciados pelo sistema de Promoções.</p>
-                    <p style="margin: 0;"><strong>Departamento:</strong> <span id="editDeptName">-</span></p>
-                    <p style="margin: var(--spacing-1) 0;"><strong>Cargo:</strong> <span id="editCargoName">-</span></p>
-                    <p style="margin: var(--spacing-1) 0;"><strong>Salário:</strong> <span id="editSalario">-</span></p>
+                  <div class="form-row form-row-2">
+                    <div class="form-group">
+                      <label class="form-label">Departamento</label>
+                      <select class="form-select" name="editDepartamentoId" id="editDeptSelect">
+                        <option value="">Selecione</option>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Cargo</label>
+                      <select class="form-select" name="editCargoId" id="editCargoSelect">
+                        <option value="">Selecione</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Salário</label>
+                    <input type="text" class="form-input" name="editSalarioAtual" id="editSalarioInput" data-mask="currency">
                   </div>
                 </div>
                 <div class="form-row form-row-2">
@@ -757,9 +769,18 @@
           if (emp) {
             currentSnapshot = emp;
             Form.populate('employeeForm', emp);
-            document.getElementById("editDeptName").textContent = emp.departamentoNome || 'Sem departamento';
-            document.getElementById("editCargoName").textContent = emp.cargoTitulo || 'Sem cargo';
-            document.getElementById("editSalario").textContent = formatCurrency(emp.salarioAtual);
+            // Populate edit dropdowns for dept/cargo/salary
+            const editDept = document.getElementById("editDeptSelect");
+            const editCargo = document.getElementById("editCargoSelect");
+            editDept.innerHTML = '<option value="">Selecione</option>';
+            departamentos.forEach(d => {
+              editDept.innerHTML += '<option value="' + d.id + '"' + (emp.departamentoId === d.id ? ' selected' : '') + '>' + d.nome + '</option>';
+            });
+            editCargo.innerHTML = '<option value="">Selecione</option>';
+            cargos.forEach(c => {
+              editCargo.innerHTML += '<option value="' + c.id + '"' + (emp.cargoId === c.id ? ' selected' : '') + '>' + c.titulo + '</option>';
+            });
+            document.getElementById("editSalarioInput").value = emp.salarioAtual ? formatCurrency(emp.salarioAtual).replace('R$\u00a0', '').replace('R$ ', '') : '';
           }
         } catch (e) { Toast.error('Erro ao carregar funcionário'); return; }
       } else {
@@ -865,6 +886,22 @@
               dadosDepois[field] = formData[field];
             }
           });
+
+          // Professional fields from edit section
+          const editDeptId = document.getElementById("editDeptSelect").value;
+          const editCargoId = document.getElementById("editCargoSelect").value;
+          const editSalarioRaw = document.getElementById("editSalarioInput").value;
+          const editSalario = editSalarioRaw ? parseFloat(String(editSalarioRaw).replace(/[^\d,]/g, '').replace(',', '.')) : null;
+
+          if (editDeptId && Number(editDeptId) !== currentSnapshot.departamentoId) {
+            dadosDepois.departamentoId = Number(editDeptId);
+          }
+          if (editCargoId && Number(editCargoId) !== currentSnapshot.cargoId) {
+            dadosDepois.cargoId = Number(editCargoId);
+          }
+          if (editSalario !== null && editSalario !== currentSnapshot.salarioAtual) {
+            dadosDepois.salarioAtual = editSalario;
+          }
 
           if (Object.keys(dadosDepois).length === 0) {
             Toast.error('Nenhuma alteração detectada');
