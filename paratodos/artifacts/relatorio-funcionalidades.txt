@@ -1,0 +1,70 @@
+Relatorio de funcionalidades do sistema RH Para Todos
+
+Base tecnica
+- Backend Spring Boot com controllers REST em /api
+- Templates Thymeleaf para paginas web
+- Autenticacao com JWT em cookie e 2FA por email
+
+Resumo de funcionalidades
+1. Dashboard
+- KPIs de funcionarios, vagas e solicitacoes pendentes
+- Contratacoes recentes e aniversariantes do mes
+- Distribuicao de funcionarios por departamento
+
+2. Funcionarios
+- CRUD com validacoes de CPF, matricula e email corporativo
+- Pesquisa por nome, matricula e CPF
+- Filtros por departamento e status
+- Estatisticas de ativos, ferias e desligados no mes
+- Perfil do usuario com edicao de dados pessoais e troca de senha
+
+3. Departamentos
+- Cadastro, edicao e exclusao
+- Estatisticas e contagem de funcionarios e cargos
+
+4. Cargos
+- Cadastro e edicao com faixa salarial e nivel
+- Contagem de ocupantes
+- Listagem por departamento com funcionarios e beneficios vinculados
+- Consulta de cargos com vagas disponiveis
+
+5. Recrutamento
+- Gestao de vagas com status, aprovacao e cancelamento
+- Candidatos e candidaturas com etapas
+- Contratacao automatica gera usuario e funcionario
+
+6. Solicitacoes
+- Workflow de aprovacao: pendente, aprovada, rejeitada, cancelada
+- Tipos incluem funcionario, cargo, departamento e abertura de vaga
+- Execucao automatica de acoes ao aprovar
+
+7. Promocoes e movimentacoes
+- Solicitar, aprovar e rejeitar
+- Atualiza cargo, departamento e salario
+
+8. Beneficios
+- Tipos de beneficio e vinculo por cargo
+- Natureza (provento, desconto, informativo) e incidencias
+- Estatisticas de custo mensal e beneficiarios
+
+9. Ferias e ocorrencias
+- Registro de ferias ativas e periodos aquisitivos
+- Ocorrencias (ferias, atestado, licenca, falta justificada)
+- Bloqueio de marcacao de ponto quando aplicavel
+
+10. Ponto e timesheet
+- Registro de ponto com validacao de dia util e bloqueios
+- Calendario de ponto com feriados e recessos
+- Apuracao diaria de horas, extras e faltantes
+- Visao administrativa de timesheet
+
+11. Seguranca e acessos
+- Controle por perfis (ADMIN, RH, DP, EMPLOYEE)
+- JWT em cookie e 2FA com codigo por email
+- Autorizacao de rotas por modulo
+
+Paginas disponiveis
+- Dashboard, funcionarios, departamentos, cargos, recrutamento
+- Promocoes, solicitacoes, beneficios, ferias, ponto, relatorios
+- Treinamentos, desempenho, folha, configuracoes
+
