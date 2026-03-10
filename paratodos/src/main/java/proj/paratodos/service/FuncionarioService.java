@@ -53,7 +53,26 @@ public class FuncionarioService {
             }
 
             if (status != null && !status.isBlank()) {
-                predicates.add(cb.equal(root.get("status"), status.trim()));
+                String s = status.trim();
+                if ("FERIAS".equalsIgnoreCase(s)) {
+                    // Include funcionarios whose status is FERIAS or who have an active PontoOcorrencia of type FERIAS
+                    var sub = query.subquery(Long.class);
+                    var ocRoot = sub.from(proj.paratodos.domain.PontoOcorrencia.class);
+                    sub.select(ocRoot.get("funcionario").get("id"));
+                    var today = java.time.LocalDate.now();
+                    sub.where(
+                            cb.equal(ocRoot.get("tipo"), "FERIAS"),
+                            cb.lessThanOrEqualTo(ocRoot.get("dataInicio"), today),
+                            cb.greaterThanOrEqualTo(ocRoot.get("dataFim"), today),
+                            cb.equal(ocRoot.get("funcionario").get("id"), root.get("id"))
+                    );
+                    predicates.add(cb.or(
+                            cb.equal(root.get("status"), "FERIAS"),
+                            cb.exists(sub)
+                    ));
+                } else {
+                    predicates.add(cb.equal(root.get("status"), s));
+                }
             }
 
             return predicates.isEmpty() ? null : cb.and(predicates.toArray(new Predicate[0]));
