@@ -28,7 +28,6 @@
         </a>
 
         <!-- Departamentos (seção principal com subáreas) -->
-        <div class="nav-section" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE,DP_CHEFE,DP_ASSISTENTE">Departamentos</div>
         <a th:href="@{/departments}" class="nav-item"
            th:classappend="${activePage == 'departments'} ? ' active'"
            data-roles="ADMIN,RH_CHEFE">
@@ -55,7 +54,6 @@
         </a>
 
         <!-- Recursos Humanos -->
-        <div class="nav-section" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE">Recursos Humanos</div>
         <a th:href="@{/recruitment}" class="nav-item"
            th:classappend="${activePage == 'recruitment'} ? ' active'"
            data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE">
@@ -64,13 +62,6 @@
         </a>
 
         <!-- Departamento Pessoal -->
-        <div class="nav-section" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE,DP_CHEFE,DP_ASSISTENTE">Departamento Pessoal</div>
-        <a th:href="@{/payroll}" class="nav-item"
-           th:classappend="${activePage == 'payroll'} ? ' active'"
-           data-roles="ADMIN,DP_CHEFE,DP_ASSISTENTE">
-            <span class="nav-icon"><img th:src="@{/assets/banknote (1).png}" alt="" width="20" height="20"></span>
-            <span class="nav-text">Folha de Pagamento</span>
-        </a>
         <a th:href="@{/vacation}" class="nav-item"
            th:classappend="${activePage == 'vacation'} ? ' active'"
            data-roles="ADMIN,RH_CHEFE,DP_CHEFE,DP_ASSISTENTE">
@@ -103,13 +94,12 @@
             <span class="nav-icon"><img th:src="@{/assets/hourglass.png}" alt="" width="20" height="20"></span>
             <span class="nav-text">Meu Ponto</span>
         </a>
-        <a th:href="@{/meus-holerites}" class="nav-item"
-           th:classappend="${activePage == 'meus-holerites'} ? ' active'"
+        <a th:href="@{/meu-perfil}" class="nav-item"
+           th:classappend="${activePage == 'meu-perfil'} ? ' active'"
            data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE,DP_CHEFE,DP_ASSISTENTE,EMPLOYEE">
-            <span class="nav-icon"><img th:src="@{/assets/banknote (1).png}" alt="" width="20" height="20"></span>
-            <span class="nav-text">Meus Holerites</span>
+            <span class="nav-icon"><img th:src="@{/assets/hourglass.png}" alt="" width="20" height="20"></span>
+            <span class="nav-text">Meu Perfil</span>
         </a>
-
         <!-- Administração -->
         <div class="nav-section" data-roles="ADMIN,RH_CHEFE,RH_ASSISTENTE,DP_CHEFE">Administração</div>
         <a th:href="@{/reports}" class="nav-item"
