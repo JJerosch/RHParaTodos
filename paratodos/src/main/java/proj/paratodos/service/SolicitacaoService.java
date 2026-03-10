@@ -259,6 +259,23 @@ public class SolicitacaoService {
             if (dados.containsKey("bairro")) f.setBairro((String) dados.get("bairro"));
             if (dados.containsKey("cidade")) f.setCidade((String) dados.get("cidade"));
             if (dados.containsKey("estado")) f.setEstado((String) dados.get("estado"));
+            if (dados.containsKey("tipoContrato")) f.setTipoContrato((String) dados.get("tipoContrato"));
+            if (dados.containsKey("status")) f.setStatus((String) dados.get("status"));
+
+            if (dados.containsKey("departamentoId")) {
+                Long deptId = dados.get("departamentoId") instanceof Number n ? n.longValue() : null;
+                f.setDepartamento(deptId != null ? departamentoRepository.findById(deptId).orElse(null) : null);
+            }
+            if (dados.containsKey("cargoId")) {
+                Long cId = dados.get("cargoId") instanceof Number n ? n.longValue() : null;
+                f.setCargo(cId != null ? cargoRepository.findById(cId).orElse(null) : null);
+            }
+            if (dados.containsKey("salarioAtual")) {
+                Object sal = dados.get("salarioAtual");
+                if (sal instanceof Number n) {
+                    f.setSalarioAtual(java.math.BigDecimal.valueOf(n.doubleValue()));
+                }
+            }
 
             funcionarioRepository.save(f);
         } catch (Exception e) {
