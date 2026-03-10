@@ -111,6 +111,11 @@ public class RecrutamentoService {
             throw new IllegalArgumentException("Vaga nao encontrada: " + id);
         }
 
+        // Impedir edição de vagas já encerradas ou canceladas
+        if ("ENCERRADA".equals(v.getStatus()) || "CANCELADA".equals(v.getStatus())) {
+            throw new IllegalArgumentException("Vaga preenchida ou cancelada não pode ser editada");
+        }
+
         v.setTitulo(request.titulo());
         v.setDescricao(request.descricao());
         if (request.quantidade() != null) v.setQuantidade(request.quantidade());
@@ -213,6 +218,11 @@ public class RecrutamentoService {
                 .orElseThrow(() -> new IllegalArgumentException("Vaga nao encontrada: " + vagaId));
         Candidato candidato = candidatoRepository.findById(candidatoId)
                 .orElseThrow(() -> new IllegalArgumentException("Candidato nao encontrado: " + candidatoId));
+
+        // Não permitir candidaturas para vagas que não estejam abertas/ativas
+        if (vaga.getStatus() == null || (!"ABERTA".equals(vaga.getStatus()) && !"EM_ANDAMENTO".equals(vaga.getStatus()))) {
+            throw new IllegalArgumentException("Não é possível candidatar-se a vaga que não está aberta");
+        }
 
         if (candidaturaRepository.existsByVagaIdAndCandidatoId(vagaId, candidatoId)) {
             throw new IllegalArgumentException("Candidato ja inscrito nesta vaga");

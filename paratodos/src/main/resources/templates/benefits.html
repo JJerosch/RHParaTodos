@@ -36,12 +36,7 @@
           <div class="stat-box-value" id="statCusto">R$ 0</div>
           <div class="stat-box-label">Custo Mensal</div>
         </div>
-        <div class="stat-box">
-          <div class="stat-box-icon" style="background: rgba(231, 76, 60, 0.1);"><img
-              th:src="@{/assets/chart-column (1).png}" alt="icone_custo_funcionario"></div>
-          <div class="stat-box-value" id="statCustoFunc">R$ 0</div>
-          <div class="stat-box-label">Custo/Funcionário</div>
-        </div>
+  
       </div>
 
       <div class="page-header">
@@ -49,7 +44,12 @@
           <h2 class="page-title">Gestão de Benefícios</h2>
           <p class="page-subtitle">Configure e gerencie os benefícios oferecidos</p>
         </div>
-        <div class="page-actions"><button class="btn btn-primary" onclick="openModal()">+ Novo Benefício</button></div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <select id="benefitFilter" style="padding:6px;border-radius:6px;border:1px solid var(--gray-200);min-width:220px;"></select>
+          <button class="btn" onclick="filterBenefits()">Filtrar</button>
+          <button class="btn" onclick="(document.getElementById('benefitFilter').value='','filterBenefits()' )">Limpar</button>
+          <div class="page-actions"><button class="btn btn-primary" onclick="openModal()">+ Novo Benefício</button></div>
+        </div>
       </div>
 
       <div class="departments-grid" id="benefitsGrid"></div>
@@ -196,11 +196,16 @@
         document.getElementById("statTipos").textContent = stats.tipos;
         document.getElementById("statBeneficiarios").textContent = stats.beneficiarios;
         document.getElementById("statCusto").textContent = formatCurrency(stats.custoMensal);
-        document.getElementById("statCustoFunc").textContent = formatCurrency(stats.custoPorFuncionario);
 
         // Preencher dropdown de cargos
         const cargosSelect = document.getElementById("cargosSelect");
         cargosSelect.innerHTML = allCargos.map(c => '<option value="' + c.id + '">' + c.titulo + '</option>').join('');
+
+        // Preencher combobox de benefícios para filtro
+        const benefitSelect = document.getElementById('benefitFilter');
+        if (benefitSelect) {
+          benefitSelect.innerHTML = '<option value="">Todos</option>' + benefits.map(b => '<option value="' + b.id + '">' + b.nome + '</option>').join('');
+        }
       } catch (e) {
         console.error('Erro ao carregar benefícios:', e.message);
         benefits = [];
@@ -327,6 +332,31 @@
           Toast.error(e.message || 'Erro ao excluir benefício');
         }
       });
+    }
+
+    async function filterBenefits() {
+      const sel = document.getElementById('benefitFilter');
+      if (!sel) return;
+      const id = sel.value;
+      if (!id) {
+        // reset to global stats
+        try {
+          const statsRes = await fetch(API + '/stats', { credentials: 'same-origin' });
+          if (statsRes.ok) {
+            const stats = await statsRes.json();
+            document.getElementById("statBeneficiarios").textContent = stats.beneficiarios;
+            document.getElementById("statCusto").textContent = formatCurrency(stats.custoMensal);
+          }
+        } catch (e) { console.error(e); }
+        return;
+      }
+      const item = benefits.find(b => String(b.id) === String(id));
+      if (!item) return;
+      // Beneficiários = número de cargos vinculados ao benefício
+      const beneficiaries = (item.cargos && item.cargos.length) ? item.cargos.length : 0;
+      const monthlyCost = (item.valorPadrao ? Number(item.valorPadrao) : 0) * beneficiaries;
+      document.getElementById("statBeneficiarios").textContent = beneficiaries;
+      document.getElementById("statCusto").textContent = formatCurrency(monthlyCost);
     }
 
     function formatCurrency(val) { return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val || 0); }

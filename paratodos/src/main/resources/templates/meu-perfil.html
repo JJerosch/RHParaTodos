@@ -25,7 +25,6 @@
 
     <div class="content-area">
       <div class="container">
-        <!-- Profile Header -->
         <div class="profile-header">
           <div class="profile-avatar-section">
             <div class="profile-avatar-large" id="profileAvatarLarge">
@@ -48,7 +47,6 @@
           <button class="profile-tab active" data-tab="overview">Visao Geral</button>
           <button class="profile-tab" data-tab="edit">Editar Perfil</button>
           <button class="profile-tab" data-tab="security">Seguranca</button>
-          <button class="profile-tab" data-tab="activity">Atividade</button>
         </div>
 
         <!-- Tab: Visao Geral -->
@@ -301,109 +299,6 @@
                 <button type="submit" class="btn btn-primary">Alterar Senha</button>
               </div>
             </form>
-          </div>
-
-          <div style="height: 2rem;"></div>
-
-          <div class="edit-form">
-            <div class="form-section-title">Configuracoes de Seguranca</div>
-
-            <div class="security-item">
-              <div class="security-item-info">
-                <h4>Autenticacao de Dois Fatores</h4>
-                <p>Adicione uma camada extra de seguranca a sua conta</p>
-              </div>
-              <button class="btn btn-secondary" id="btn2FA">Ativar</button>
-            </div>
-
-            <div class="security-item">
-              <div class="security-item-info">
-                <h4>Sessoes Ativas</h4>
-                <p>Gerencie dispositivos conectados a sua conta</p>
-              </div>
-              <button class="btn btn-secondary" id="btnSessions">Ver Sessoes</button>
-            </div>
-
-            <div class="security-item">
-              <div class="security-item-info">
-                <h4>Historico de Login</h4>
-                <p>Visualize tentativas de acesso a sua conta</p>
-              </div>
-              <button class="btn btn-secondary" id="btnLoginHistory">Ver Historico</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Tab: Atividade -->
-        <div class="profile-tab-content" id="tab-activity">
-          <div class="edit-form">
-            <div class="form-section-title">Atividades Recentes</div>
-
-            <div class="activity-item">
-              <div class="activity-icon">
-                <img th:src="@{/assets/eye.png}" alt="" width="20" height="20">
-              </div>
-              <div class="activity-content">
-                <strong>Login realizado</strong>
-                <small>Acesso via navegador Chrome - Windows</small>
-              </div>
-              <div class="activity-time">Ha 2 horas</div>
-            </div>
-
-            <div class="activity-item">
-              <div class="activity-icon">
-                <img th:src="@{/assets/pencil (1).png}" alt="" width="20" height="20">
-              </div>
-              <div class="activity-content">
-                <strong>Perfil atualizado</strong>
-                <small>Informacoes pessoais foram modificadas</small>
-              </div>
-              <div class="activity-time">Ontem</div>
-            </div>
-
-            <div class="activity-item">
-              <div class="activity-icon">
-                <img th:src="@{/assets/shield (1).png}" alt="" width="20" height="20">
-              </div>
-              <div class="activity-content">
-                <strong>Senha alterada</strong>
-                <small>Senha foi modificada com sucesso</small>
-              </div>
-              <div class="activity-time">3 dias atras</div>
-            </div>
-
-            <div class="activity-item">
-              <div class="activity-icon">
-                <img th:src="@{/assets/users (1).png}" alt="" width="20" height="20">
-              </div>
-              <div class="activity-content">
-                <strong>Novo funcionario cadastrado</strong>
-                <small>Joao Silva adicionado ao departamento de TI</small>
-              </div>
-              <div class="activity-time">5 dias atras</div>
-            </div>
-
-            <div class="activity-item">
-              <div class="activity-icon">
-                <img th:src="@{/assets/chart-column (1).png}" alt="" width="20" height="20">
-              </div>
-              <div class="activity-content">
-                <strong>Relatorio gerado</strong>
-                <small>Relatorio de folha de pagamento - Janeiro 2026</small>
-              </div>
-              <div class="activity-time">1 semana atras</div>
-            </div>
-
-            <div class="activity-item">
-              <div class="activity-icon">
-                <img th:src="@{/assets/tree-palm (1).png}" alt="" width="20" height="20">
-              </div>
-              <div class="activity-content">
-                <strong>Ferias aprovadas</strong>
-                <small>Solicitacao de ferias para Maria Santos</small>
-              </div>
-              <div class="activity-time">2 semanas atras</div>
-            </div>
           </div>
         </div>
 

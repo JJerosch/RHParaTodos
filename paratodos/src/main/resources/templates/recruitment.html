@@ -75,7 +75,16 @@
             <h2 class="page-title">Vagas</h2>
             <p class="page-subtitle">Gerencie vagas com aprovação do Chefe de RH</p>
           </div>
-          <button class="btn btn-primary" onclick="openJobModal()">+ Nova Vaga</button>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <select id="vagaStatusSelect" onchange="onVagaBrowseChange()" style="padding:6px;border-radius:6px;border:1px solid var(--gray-200);min-width:220px;">
+              <option value="">Todas as vagas</option>
+              <option value="abertas">Abertas</option>
+              <option value="fechadas">Fechadas</option>
+              <option value="preenchidas">Preenchidas</option>
+            </select>
+            <input type="search" id="vagaSearch" placeholder="Pesquisar vagas..." oninput="renderJobs()" style="padding:6px;border-radius:6px;border:1px solid var(--gray-200);min-width:220px;">
+            <button class="btn btn-primary" onclick="openJobModal()">+ Nova Vaga</button>
+          </div>
         </div>
         <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: var(--spacing-4);" id="jobsGrid"></div>
       </div>
@@ -338,8 +347,9 @@
       try {
         vagas = await api(VAPI + '/vagas') || [];
       } catch (e) { console.error('Erro vagas:', e); vagas = []; }
-      renderJobs();
       populateVagaSelects();
+      populateBrowseSelect();
+      renderJobs();
     }
 
     function populateVagaSelects() {
@@ -353,15 +363,41 @@
       });
     }
 
+    function populateBrowseSelect() {
+      const sel = document.getElementById('vagaStatusSelect');
+      if (!sel) return;
+      sel.innerHTML = '<option value="">Todas as vagas</option><option value="abertas">Abertas</option><option value="fechadas">Fechadas</option><option value="preenchidas">Preenchidas</option>';
+    }
+
+    function onVagaBrowseChange() {
+      renderJobs();
+    }
+
     function formatCurrency(val) { return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val || 0); }
 
     function renderJobs() {
       const grid = document.getElementById("jobsGrid");
-      if (vagas.length === 0) {
+      if (!vagas || vagas.length === 0) {
         grid.innerHTML = '<div class="empty-state"><h3 class="empty-state-title">Nenhuma vaga cadastrada</h3></div>';
         return;
       }
-      grid.innerHTML = vagas.map(j => {
+      const statusSel = document.getElementById('vagaStatusSelect');
+      const statusVal = statusSel ? statusSel.value : '';
+      const searchVal = (document.getElementById('vagaSearch') ? document.getElementById('vagaSearch').value.trim().toLowerCase() : '');
+      let list = vagas.slice();
+      if (statusVal) {
+        if (statusVal === 'abertas') {
+          list = list.filter(v => v.status === 'ABERTA' || v.status === 'EM_ANDAMENTO');
+        } else if (statusVal === 'fechadas') {
+          list = list.filter(v => v.status === 'CANCELADA');
+        } else if (statusVal === 'preenchidas') {
+          list = list.filter(v => v.status === 'ENCERRADA');
+        }
+      }
+      if (searchVal) {
+        list = list.filter(j => j.titulo && j.titulo.toLowerCase().includes(searchVal));
+      }
+      grid.innerHTML = list.map(j => {
         const beneficiosTags = (j.beneficios || []).map(b =>
           '<span style="background:var(--gray-100);padding:2px 8px;border-radius:10px;font-size:var(--font-size-xs);">' + b.nome + '</span>'
         ).join('');
@@ -372,7 +408,7 @@
             <div class="cell-actions">
               ${j.status === 'RASCUNHO' && isChefe ? '<button class="btn-icon" onclick="approveVaga(' + j.id + ')" title="Aprovar"><img src="/assets/check (1).png" alt="aprovar" width="16" height="16"></button>' : ''}
               ${(j.status !== 'ENCERRADA' && j.status !== 'CANCELADA') ? '<button class="btn-icon" onclick="cancelVaga(' + j.id + ', \'' + j.titulo.replace(/'/g, "\\'") + '\')" title="Cancelar" style="color: var(--error-red);">&#10005;</button>' : ''}
-              <button class="btn-icon edit" onclick="editJob(${j.id})"><img src="/assets/pencil (1).png" alt="editar"></button>
+              ${(j.status !== 'ENCERRADA' && j.status !== 'CANCELADA') ? '<button class="btn-icon edit" onclick="editJob(' + j.id + ')"><img src="/assets/pencil (1).png" alt="editar"></button>' : ''}
             </div>
           </div>
           <div class="job-meta">
