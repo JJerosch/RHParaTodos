@@ -75,6 +75,25 @@ Acesse: **http://localhost:5500**
 
 ## 📱 Funcionalidades
 
+### Barra lateral (Menu)
+- ✅ Menu dinâmico com página ativa destacada
+- ✅ Itens visíveis por perfil/role (ADMIN, RH_CHEFE, RH_ASSISTENTE, DP_CHEFE, DP_ASSISTENTE, EMPLOYEE)
+- ✅ Links disponíveis (Admin)
+  - Dashboard
+  - Estrutura (Departamentos)
+  - Funcionários
+  - Cargos
+  - Solicitações
+  - Recrutamento
+  - Férias
+  - Benefícios
+  - Ponto
+  - Calendário do Ponto (exclusivo ADMIN)
+  - Minha Área: Meu Ponto, Meu Perfil
+- ✅ Links disponíveis (Employee)
+  - Ponto
+  - Meu Perfil
+
 ### Gestão de Pessoas
 - ✅ CRUD completo de funcionários
 - ✅ Gestão de departamentos
@@ -109,46 +128,3 @@ const AUTH_CONFIG = {
 ```
 
 Quando o backend não está disponível, o sistema funciona em modo simulado com dados mock.
-
-## 📦 Componentes JS Disponíveis
-
-### Toast (Notificações)
-```javascript
-Toast.success('Mensagem de sucesso');
-Toast.error('Mensagem de erro');
-Toast.warning('Mensagem de aviso');
-Toast.info('Mensagem informativa');
-```
-
-### Modal
-```javascript
-Modal.open('modalId');
-Modal.close('modalId');
-```
-
-### Confirmação
-```javascript
-Confirm.show('Tem certeza?', () => {
-  // Ação confirmada
-});
-```
-
-### Formatadores
-```javascript
-Format.currency(1000);      // R$ 1.000,00
-Format.date('2026-01-13');  // 13/01/2026
-Format.cpf('12345678900');  // 123.456.789-00
-Format.phone('11999998888'); // (11) 99999-8888
-```
-
-### Máscaras de Input
-```html
-<input type="text" data-mask="cpf">
-<input type="text" data-mask="phone">
-<input type="text" data-mask="cep">
-<input type="text" data-mask="currency">
-```
-
-## 📄 Licença
-
-MIT License
